@@ -64,6 +64,11 @@
     "title": "Không tìm thấy trang",
     "description": "Đường dẫn này không tồn tại hoặc đã được di chuyển."
   },
+  "routeError": {
+    "title": "Đã xảy ra lỗi",
+    "description": "Có lỗi không mong muốn khi hiển thị trang này. Hãy thử tải lại trang hoặc quay về Drive.",
+    "reload": "Tải lại trang"
+  },
   "health": {
     "label": "Trạng thái dịch vụ",
     "checking": "Đang kiểm tra…",

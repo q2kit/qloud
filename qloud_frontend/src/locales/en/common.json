@@ -64,6 +64,11 @@
     "title": "Page not found",
     "description": "This address does not exist or has moved."
   },
+  "routeError": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred while showing this page. Try reloading, or go back to Drive.",
+    "reload": "Reload page"
+  },
   "health": {
     "label": "Service status",
     "checking": "Checking…",
