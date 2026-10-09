@@ -136,7 +136,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
   - **Secret scan:** gitleaks trên các commit của PR.
   - **PR conventions** (workflow riêng `.github/workflows/pr.yml`, chạy lại cả khi sửa tiêu đề/body; `scripts/check_pr.py`): tiêu đề đúng định dạng và độ dài; có `[task-id]` thì body phải có `Closes #n`; tên branch đúng quy ước (trừ branch của Dependabot); cảnh báo nếu sửa code mà không sửa ROADMAP.
   - **CI OK:** job tổng hợp của `ci.yml`. *Required status checks* đã bật cho `master` (2026-10-10): **`CI OK`** và **`PR conventions`**, chế độ *strict* (PR phải chứa commit mới nhất của `master` mới merge được).
-- **Dependabot** (`.github/dependabot.yml`): mỗi tuần mở PR nâng phiên bản cho uv, npm, GitHub Actions và image Docker Compose, tiêu đề `chore(deps): ...`. Bản minor/patch được gộp; bản major là PR riêng và phải hỏi trước khi merge.
+- **Dependabot** (`.github/dependabot.yml`): mỗi tuần mở PR nâng phiên bản cho uv, npm, GitHub Actions và image Docker Compose, tiêu đề `chore(deps): Bump ...` (kiểm tra PR bỏ qua chữ hoa đầu subject và độ dài với PR của Dependabot). `@types/node` chỉ nâng trong cùng major với Node đang dùng. Bản minor/patch được gộp; bản major là PR riêng và phải hỏi trước khi merge.
 - **Git hooks** (`lefthook.yml`), cài bằng `lefthook install`:
   - `pre-commit`: ruff (BE), prettier + eslint (FE) trên file đã stage, tự sửa và stage lại; gitleaks trên phần đã stage.
   - `commit-msg`: Conventional Commits.

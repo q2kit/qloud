@@ -21,6 +21,10 @@ updates:
     directory: /qloud_frontend
     schedule:
       interval: weekly
+    ignore:
+      # Types must match the Node major we run (24, see package.json engines).
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
     cooldown:
       default-days: 3
     commit-message:
