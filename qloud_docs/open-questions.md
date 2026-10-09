@@ -8,7 +8,7 @@
 |---|---|---|---|
 | — | (Hiện không có câu hỏi mở) | | |
 
-## Việc chủ dự án cần chuẩn bị (không phải câu hỏi)
+## Việc cần chuẩn bị thủ công (không phải câu hỏi)
 - Tạo OAuth app trên Google Cloud Console và GitHub Developer Settings (agent sẽ hướng dẫn khi làm M1-03).
 - Thông tin SMTP cho production.
 - Bucket S3/R2 cùng access key cho production (khi làm M8).

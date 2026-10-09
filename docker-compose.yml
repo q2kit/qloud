@@ -1,5 +1,5 @@
 # Hạ tầng cho môi trường DEV. Backend và frontend chạy trực tiếp trên máy.
-# Chuẩn bị: cp .env.example .env  (điền LOCALSTACK_AUTH_TOKEN)
+# Chuẩn bị: cp -n .env.example .env  (điền LOCALSTACK_AUTH_TOKEN)
 # Chạy:     docker compose up -d --wait
 
 name: ${COMPOSE_PROJECT_NAME:-qloud}
