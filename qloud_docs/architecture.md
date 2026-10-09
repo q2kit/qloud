@@ -82,6 +82,14 @@ qloud_backend/
 View chỉ làm việc parse, gọi service rồi serialize. **Phân quyền** tập trung ở `sharing/permissions.py`;
 mọi selector của node đều phải đi qua đây.
 
+M1-01: `accounts.services` xử lý tạo user/Drive nguyên tử, đổi plan mặc định và khóa user;
+`accounts.selectors.get_limits()` cung cấp giới hạn hiện tại. `drive.Node` mới có nền folder gốc, được hoàn thiện ở M2-01.
+Auth backend `accounts.backends.AccountBackend` kế thừa ModelBackend và chặn user bị khóa, gồm session đang có.
+Allauth sẽ tích hợp cùng quy tắc này ở M1-02. Action Django admin dùng gettext, catalog `vi` và `en` nằm trong `accounts/locale`;
+commit cả `.po` và `.mo` để runtime/CI không phụ thuộc gettext CLI. Khi sửa bản dịch, chạy
+`cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run --frozen python manage.py compilemessages -l vi -l en --ignore .venv`
+(cần `msgfmt` trên máy dev).
+
 ### Frontend — `qloud_frontend/`
 | Mục đích | Thư viện |
 |---|---|

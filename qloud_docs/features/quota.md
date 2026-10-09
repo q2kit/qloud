@@ -1,7 +1,17 @@
 # Quota dung lượng (F-QUOTA)
 
-**Trạng thái:** Nháp · **Milestone:** M1 (model Plan), M2 (kiểm tra quota), M8 (giao diện) · **Màn hình:** S-14, thanh dung lượng ở sidebar
+**Trạng thái:** Đang làm (phần model M1 đã duyệt; phần M2/M8 chờ duyệt ở milestone tương ứng) · **Milestone:** M1 (model Plan), M2 (kiểm tra quota), M8 (giao diện) · **Màn hình:** S-14, thanh dung lượng ở sidebar
 Xem thêm [ADR-0005](../adr/0005-storage-plans.md)
+
+Phần User/Plan/quota M1 được [chủ repo duyệt](https://github.com/q2kit/qloud/issues/10#issuecomment-6088713465).
+M1-01 cung cấp `accounts.selectors.get_limits(user)` trả quota, kích thước file tối đa và chính sách giữ phiên bản/thùng rác.
+Hàm đọc lại user và plan trong một truy vấn, nên thay đổi của admin có hiệu lực ngay, kể cả quota override bằng 0.
+Chưa có API upload hay giao diện quota ở M1-01.
+
+Django admin đổi mặc định bằng action "Dùng gói này cho tài khoản đăng ký mới", chọn đúng một plan active.
+`set_default_plan()` và việc tạo user khóa các plan theo cùng thứ tự trong transaction, để đăng ký không quan sát trạng thái đổi gói dở dang.
+Không xóa plan mặc định hoặc plan đã được gán cho user; plan inactive vẫn giữ giới hạn cho user cũ.
+Đơn vị seed: 1 GB = 1.000.000.000 byte.
 
 ## User stories
 - Tôi muốn biết mình đã dùng bao nhiêu dung lượng và phần nào chiếm nhiều nhất.

@@ -1,6 +1,18 @@
 # Xác thực và tài khoản (F-AUTH)
 
-**Trạng thái:** Nháp · **Milestone:** M1 · **Màn hình:** S-01 đến S-04, S-13
+**Trạng thái:** Đang làm · **Milestone:** M1 · **Màn hình:** S-01 đến S-04, S-13
+
+Đặc tả M1 và kế hoạch M1-01 đã được [chủ repo duyệt](https://github.com/q2kit/qloud/issues/10#issuecomment-6088713465).
+
+M1-01 triển khai model User/Plan, tạo folder gốc và gán plan nguyên tử khi lưu user mới (qua manager hoặc `save()`),
+cùng Django admin và dịch vụ khóa/mở khóa. API đăng ký, lấy locale từ trình duyệt và allauth thuộc M1-02.
+Locale mặc định ở model là `vi`, theme mặc định là `system`; caller truyền locale đã xác định khi tạo user.
+Folder gốc lưu tên kỹ thuật `Drive`; tên hiển thị trên frontend lấy từ i18n.
+
+Khóa user qua `suspend_user(user, reason=...)` ghi thời điểm/lý do và xóa session chưa hết hạn của user đó.
+Backend xác thực chặn cả đăng nhập mới và sử dụng session của user đang khóa; mở khóa không khôi phục session đã xóa.
+Trong admin dùng action khóa/mở khóa; trường khóa chỉ đọc để mọi thao tác đi qua dịch vụ.
+Kiểm tra share link của owner bị khóa sẽ triển khai ở M5 khi có model ShareLink.
 
 ## User stories
 - Là khách, tôi muốn đăng ký bằng email và mật khẩu, để có Drive riêng.

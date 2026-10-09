@@ -1,0 +1,113 @@
+msgid ""
+msgstr ""
+"Language: vi\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Use this plan for new accounts"
+msgstr "Dùng gói này cho tài khoản đăng ký mới"
+
+msgid "Select exactly one active plan."
+msgstr "Chọn đúng một gói đang hoạt động."
+
+msgid "Suspend selected accounts"
+msgstr "Khóa các tài khoản đã chọn"
+
+msgid "Unsuspend selected accounts"
+msgstr "Mở khóa các tài khoản đã chọn"
+
+msgid "The selected plan is inactive."
+msgstr "Gói đã chọn ngừng hoạt động."
+
+msgid "The default signup plan must be active."
+msgstr "Gói mặc định cho đăng ký phải đang hoạt động."
+
+msgid "Code"
+msgstr "Mã gói"
+
+msgid "Name"
+msgstr "Tên"
+
+msgid "Storage quota (bytes)"
+msgstr "Dung lượng tối đa (byte)"
+
+msgid "Maximum file size (bytes)"
+msgstr "Kích thước file tối đa (byte)"
+
+msgid "Maximum old versions per file"
+msgstr "Số phiên bản cũ tối đa mỗi file"
+
+msgid "Version retention (days)"
+msgstr "Thời gian giữ phiên bản (ngày)"
+
+msgid "Trash retention (days)"
+msgstr "Thời gian giữ thùng rác (ngày)"
+
+msgid "Default for signup"
+msgstr "Mặc định cho đăng ký"
+
+msgid "Active"
+msgstr "Đang hoạt động"
+
+msgid "Plan"
+msgstr "Gói dung lượng"
+
+msgid "Plans"
+msgstr "Các gói dung lượng"
+
+msgid "Vietnamese"
+msgstr "Tiếng Việt"
+
+msgid "English"
+msgstr "Tiếng Anh"
+
+msgid "System"
+msgstr "Theo hệ thống"
+
+msgid "Light"
+msgstr "Sáng"
+
+msgid "Dark"
+msgstr "Tối"
+
+msgid "Display name"
+msgstr "Tên hiển thị"
+
+msgid "Staff"
+msgstr "Nhân viên"
+
+msgid "Avatar URL"
+msgstr "URL ảnh đại diện"
+
+msgid "Language"
+msgstr "Ngôn ngữ"
+
+msgid "Theme"
+msgstr "Giao diện"
+
+msgid "Quota override (bytes)"
+msgstr "Dung lượng riêng (byte)"
+
+msgid "Used storage (bytes)"
+msgstr "Đã dùng (byte)"
+
+msgid "Reserved storage (bytes)"
+msgstr "Đang giữ chỗ (byte)"
+
+msgid "Root folder"
+msgstr "Folder gốc"
+
+msgid "Suspended at"
+msgstr "Thời điểm khóa"
+
+msgid "Suspension reason"
+msgstr "Lý do khóa"
+
+msgid "User"
+msgstr "Người dùng"
+
+msgid "Users"
+msgstr "Người dùng"
+
+msgid "Accounts"
+msgstr "Tài khoản"

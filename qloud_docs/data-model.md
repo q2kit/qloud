@@ -2,6 +2,9 @@
 
 > Trạng thái: **Nháp**. Mọi bảng đều dùng khóa chính `id UUID` (UUIDv7, sắp xếp được theo thời gian), và có `created_at`, `updated_at`.
 
+Phần User/Plan và nền Node tạo folder gốc được duyệt trong [M1-01](https://github.com/q2kit/qloud/issues/10#issuecomment-6088713465).
+Các model/trường của milestone sau vẫn là thiết kế nháp.
+
 ## Sơ đồ quan hệ
 
 ```
@@ -30,7 +33,7 @@ User 1─────* UploadSession ────▶ Node (đích)
 | quota_override_bytes | bigint, null | admin đặt riêng cho từng người, ưu tiên hơn giá trị của plan |
 | used_bytes | bigint | tổng dung lượng các version của user, **kể cả trong thùng rác** |
 | reserved_bytes | bigint | dung lượng đang giữ chỗ cho các upload chưa xong |
-| root_folder_id | uuid → Node | folder gốc "Drive của tôi", tạo cùng lúc với user |
+| root_folder_id | uuid → Node, unique, null | folder gốc "Drive của tôi", tạo cùng lúc với user trong transaction; null tạm thời lúc tạo để giải quyết tham chiếu vòng User ↔ Node |
 
 Bảng tài khoản OAuth và email xác thực do django-allauth quản lý.
 
@@ -47,7 +50,7 @@ Gói dung lượng. Đây là cách làm cho giới hạn **thay đổi được
 | max_versions_per_file | int | số phiên bản cũ giữ lại tối đa |
 | version_retention_days | int, null | phiên bản cũ quá số ngày này thì bị dọn; null = không giới hạn theo thời gian |
 | trash_retention_days | int | mặc định 30 |
-| is_default_for_signup | bool | **đúng một** plan có giá trị true (partial unique index) |
+| is_default_for_signup | bool | partial unique index bảo đảm **tối đa một** plan true; seed và dịch vụ đổi mặc định duy trì đúng một plan active mặc định |
 | is_active | bool | plan ngừng hoạt động thì không gán thêm cho ai, user đang dùng vẫn giữ |
 
 - Giới hạn thực tế của một user: `quota_override_bytes ?? plan.quota_bytes`. Các giới hạn khác lấy từ plan.
@@ -58,8 +61,16 @@ Gói dung lượng. Đây là cách làm cho giới hạn **thay đổi được
   - `plus-2026` (admin gán thủ công): 50 GB, file tối đa 50 GB, các giới hạn khác như trên.
   Các con số này chỉnh được trong admin trước khi có user.
 - Admin quản lý plan qua Django admin.
+- `plan_id` không được null sau migration. Migration M1-01 seed plan rồi backfill plan/folder gốc cho user cũ trước khi đặt NOT NULL.
+  Foreign key dùng `PROTECT` để không xóa plan có user. Tạo user mới không có mặc định hoặc chọn plan inactive thì bị từ chối, không lưu user dở dang.
+- M1-01 có enum/constraint cho locale, theme và giới hạn không âm cho quota/counter.
 
 ### `drive_node`
+
+M1-01 chỉ có `owner`, `parent`, `kind`, `name` và trường nền UUID/timestamps, để tạo folder gốc.
+Mỗi owner có tối đa một node `parent = null`, node này phải là folder. M2-01 bổ sung các trường file/xóa mềm bên dưới,
+index danh sách và phân quyền; unique tên con hiện áp dụng mọi node, sẽ thêm điều kiện `trashed_at IS NULL` ở M2-01.
+
 | Cột | Kiểu | Ghi chú |
 |---|---|---|
 | id | uuid | |
