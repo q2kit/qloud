@@ -4,6 +4,18 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+msgid "No default signup plan is configured."
+msgstr "Chưa cấu hình gói mặc định cho đăng ký."
+
+msgid "The selected plan no longer exists."
+msgstr "Gói đã chọn không còn tồn tại."
+
+msgid "You cannot suspend your own account."
+msgstr "Không thể khóa tài khoản của chính bạn."
+
+msgid "At least one active superuser must remain."
+msgstr "Phải còn ít nhất một superuser hoạt động."
+
 msgid "Use this plan for new accounts"
 msgstr "Dùng gói này cho tài khoản đăng ký mới"
 

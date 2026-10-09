@@ -33,6 +33,7 @@ User 1─────* UploadSession ────▶ Node (đích)
 | quota_override_bytes | bigint, null | admin đặt riêng cho từng người, ưu tiên hơn giá trị của plan |
 | used_bytes | bigint | tổng dung lượng các version của user, **kể cả trong thùng rác** |
 | reserved_bytes | bigint | dung lượng đang giữ chỗ cho các upload chưa xong |
+| session_version | bigint, không âm | mặc định 0; tăng khi khóa user, tham gia hash session để session cũ không dùng lại được khi mở khóa; không sửa từ admin |
 | root_folder_id | uuid → Node, unique, null | folder gốc "Drive của tôi", tạo cùng lúc với user trong transaction; null tạm thời lúc tạo để giải quyết tham chiếu vòng User ↔ Node |
 
 Bảng tài khoản OAuth và email xác thực do django-allauth quản lý.
@@ -177,7 +178,7 @@ Báo cáo vi phạm từ trang link công khai (xem [sharing.md](features/sharin
 | resolution_note | text, null | |
 
 **Khóa user:** thêm vào `accounts_user` các cột `suspended_at timestamptz null` và `suspended_reason text null`.
-User bị khóa thì không đăng nhập được, mọi session bị hủy, và mọi share link của user ngừng hoạt động (kiểm tra lúc truy cập, không phải xóa link).
+User bị khóa thì không đăng nhập được, mọi session cũ bị vô hiệu hóa qua `session_version`, và mọi share link của user ngừng hoạt động (kiểm tra lúc truy cập, không phải xóa link).
 
 ## Quy tắc về dung lượng
 

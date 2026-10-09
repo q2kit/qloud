@@ -9,7 +9,8 @@ Hàm đọc lại user và plan trong một truy vấn, nên thay đổi của a
 Chưa có API upload hay giao diện quota ở M1-01.
 
 Django admin đổi mặc định bằng action "Dùng gói này cho tài khoản đăng ký mới", chọn đúng một plan active.
-`set_default_plan()` và việc tạo user khóa các plan theo cùng thứ tự trong transaction, để đăng ký không quan sát trạng thái đổi gói dở dang.
+Tạo user dùng PostgreSQL [`FOR SHARE`](https://www.postgresql.org/docs/18/explicit-locking.html#LOCKING-ROWS) trên đúng plan được gán: các lượt đăng ký không chặn nhau, nhưng thay đổi/xóa plan phải chờ transaction tạo user.
+`set_default_plan()` giữ `FOR UPDATE` theo thứ tự UUID để đổi mặc định nguyên tử; đăng ký đang chờ đổi mặc định đọc lại nếu snapshot cũ không còn trả plan mặc định.
 Không xóa plan mặc định hoặc plan đã được gán cho user; plan inactive vẫn giữ giới hạn cho user cũ.
 Đơn vị seed: 1 GB = 1.000.000.000 byte.
 

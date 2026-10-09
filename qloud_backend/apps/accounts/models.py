@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.db.models.functions import Lower
+from django.utils.crypto import salted_hmac
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import BaseModel
@@ -106,6 +107,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     )
     suspended_at = models.DateTimeField(_("Suspended at"), null=True, blank=True)
     suspended_reason = models.TextField(_("Suspension reason"), null=True, blank=True)  # noqa: DJ001
+    session_version = models.PositiveBigIntegerField(default=0, editable=False)
 
     USERNAME_FIELD = "email"
     EMAIL_FIELD = "email"
@@ -127,6 +129,14 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     def __str__(self) -> str:
         return self.email
 
+    def _get_session_auth_hash(self, secret: str | None = None) -> str:
+        return salted_hmac(
+            "apps.accounts.User.session_auth_hash",
+            f"{self.password}:{self.session_version}",
+            secret=secret,
+            algorithm="sha256",
+        ).hexdigest()
+
     def clean(self) -> None:
         super().clean()
         if self.plan_id and not self.plan.is_active:
@@ -143,4 +153,12 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
             save_new_user(self, *args, **kwargs)
             return
+        if kwargs.get("update_fields") is None:
+            # A stale profile save must not undo suspension or session revocation.
+            protected = {"session_version", "suspended_at", "suspended_reason"}
+            kwargs["update_fields"] = [
+                field.name
+                for field in self._meta.concrete_fields
+                if not field.primary_key and field.name not in protected
+            ]
         super().save(*args, **kwargs)

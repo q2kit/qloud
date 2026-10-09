@@ -1,4 +1,7 @@
+from unittest.mock import patch
+
 import pytest
+from django.db.models.query import QuerySet
 from django.urls import reverse
 
 from apps.accounts.models import Plan, User
@@ -65,6 +68,28 @@ def test_admin_default_plan_action(admin_client):
     assert Plan.objects.get(is_default_for_signup=True).pk == plus.pk
 
 
+def test_admin_handles_plan_deleted_between_selection_and_action(admin_client):
+    plus = Plan.objects.get(code="plus-2026")
+    original = QuerySet.get
+
+    def disappearing_plan(queryset, *args, **kwargs):
+        if queryset.model is Plan:
+            raise Plan.DoesNotExist
+        return original(queryset, *args, **kwargs)
+
+    with patch.object(QuerySet, "get", disappearing_plan):
+        response = admin_client.post(
+            reverse("admin:accounts_plan_changelist"),
+            {
+                "action": "make_default",
+                "_selected_action": [str(plus.pk)],
+            },
+            follow=True,
+        )
+    assert response.status_code == 200
+    assert Plan.objects.get(is_default_for_signup=True).code == "free-2026"
+
+
 @pytest.mark.parametrize("selection", ["multiple", "inactive"])
 def test_admin_rejects_invalid_default(admin_client, selection):
     plus = Plan.objects.get(code="plus-2026")
@@ -99,6 +124,46 @@ def test_admin_suspension_actions(admin_client):
         assert response.status_code == 302
         user.refresh_from_db()
         assert (user.suspended_at is not None) == suspended
+
+
+def test_admin_cannot_suspend_self_and_batch_is_atomic(admin_client):
+    admin = User.objects.get(email="admin@example.com")
+    other = User.objects.create_user("alice@example.com")
+    response = admin_client.post(
+        reverse("admin:accounts_user_changelist"),
+        {
+            "action": "suspend_accounts",
+            "_selected_action": [str(admin.pk), str(other.pk)],
+        },
+        follow=True,
+    )
+    assert response.status_code == 200
+    admin.refresh_from_db()
+    other.refresh_from_db()
+    assert admin.suspended_at is None
+    assert other.suspended_at is None
+    assert "Không thể khóa tài khoản của chính bạn." in response.content.decode()
+
+
+def test_staff_cannot_suspend_last_superuser(client):
+    from django.contrib.auth.models import Permission
+
+    admin = User.objects.create_superuser("admin@example.com")
+    staff = User.objects.create_user("staff@example.com", is_staff=True)
+    staff.user_permissions.add(Permission.objects.get(codename="change_user"))
+    client.force_login(staff)
+    response = client.post(
+        reverse("admin:accounts_user_changelist"),
+        {
+            "action": "suspend_accounts",
+            "_selected_action": [str(admin.pk)],
+        },
+        follow=True,
+    )
+    assert response.status_code == 200
+    admin.refresh_from_db()
+    assert admin.suspended_at is None
+    assert "Phải còn ít nhất một superuser hoạt động." in response.content.decode()
 
 
 def test_admin_can_change_user_plan_and_override(admin_client):

@@ -4,6 +4,18 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "No default signup plan is configured."
+msgstr "No default signup plan is configured."
+
+msgid "The selected plan no longer exists."
+msgstr "The selected plan no longer exists."
+
+msgid "You cannot suspend your own account."
+msgstr "You cannot suspend your own account."
+
+msgid "At least one active superuser must remain."
+msgstr "At least one active superuser must remain."
+
 msgid "Use this plan for new accounts"
 msgstr "Use this plan for new accounts"
 

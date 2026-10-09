@@ -1,11 +1,11 @@
 from django.contrib import admin
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
 from .models import Plan, User
-from .services import set_default_plan, suspend_user, unsuspend_user
+from .services import set_default_plan, suspend_users, unsuspend_user
 
 
 @admin.register(Plan)
@@ -23,7 +23,7 @@ class PlanAdmin(admin.ModelAdmin[Plan]):
             return
         try:
             set_default_plan(queryset.get())
-        except ValidationError:
+        except ValidationError, Plan.DoesNotExist:
             self.message_user(request, _("Select exactly one active plan."), level="error")
 
     def has_delete_permission(self, request: HttpRequest, obj: Plan | None = None) -> bool:
@@ -56,8 +56,16 @@ class UserAdmin(admin.ModelAdmin[User]):
 
     @admin.action(description=_("Suspend selected accounts"), permissions=["change"])
     def suspend_accounts(self, request: HttpRequest, queryset: QuerySet[User]) -> None:
-        for user in queryset:
-            suspend_user(user, reason="Suspended by administrator.")
+        if not isinstance(request.user, User):
+            raise PermissionDenied
+        try:
+            suspend_users(
+                queryset.values_list("pk", flat=True),
+                reason="Suspended by administrator.",
+                actor=request.user,
+            )
+        except ValidationError as error:
+            self.message_user(request, error.messages[0], level="error")
 
     @admin.action(description=_("Unsuspend selected accounts"), permissions=["change"])
     def unsuspend_accounts(self, request: HttpRequest, queryset: QuerySet[User]) -> None:

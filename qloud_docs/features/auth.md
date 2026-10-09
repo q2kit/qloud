@@ -9,9 +9,16 @@ cùng Django admin và dịch vụ khóa/mở khóa. API đăng ký, lấy local
 Locale mặc định ở model là `vi`, theme mặc định là `system`; caller truyền locale đã xác định khi tạo user.
 Folder gốc lưu tên kỹ thuật `Drive`; tên hiển thị trên frontend lấy từ i18n.
 
-Khóa user qua `suspend_user(user, reason=...)` ghi thời điểm/lý do và xóa session chưa hết hạn của user đó.
-Backend xác thực chặn cả đăng nhập mới và sử dụng session của user đang khóa; mở khóa không khôi phục session đã xóa.
+Khóa user qua `suspend_user(user, reason=...)` ghi thời điểm/lý do và tăng `session_version`.
+Hash xác thực session phụ thuộc mật khẩu và bộ đếm này, nên mọi session cũ mất hiệu lực, không cần quét bảng session.
+Session được xóa khi truy cập lần tiếp theo với hash cũ; cơ chế hoạt động với DB, cached_db và cache session engine.
+Backend xác thực chặn cả đăng nhập mới và sử dụng session của user đang khóa; mở khóa không giảm bộ đếm nên không phục hồi session cũ.
 Trong admin dùng action khóa/mở khóa; trường khóa chỉ đọc để mọi thao tác đi qua dịch vụ.
+Action từ chối toàn bộ lô nếu chứa chính admin đang thao tác hoặc khiến không còn superuser active/staff/chưa bị khóa.
+Các lượt khóa đồng thời khóa dòng superuser theo cùng thứ tự để bảo đảm vẫn còn người quản trị truy cập được admin.
+Việc đổi từ ModelBackend sang AccountBackend và hash session mới khiến session trước M1-01 phải đăng nhập lại; chưa có production.
+Lỗi thiếu plan/inactive có mã ổn định và thông báo gettext `vi`/`en`; `createsuperuser` chuyển lỗi thành CommandError.
+M1-02 phải chuyển các ValidationError provisioning thành lỗi đăng ký trong adapter/API allauth, thay vì để trả 500.
 Kiểm tra share link của owner bị khóa sẽ triển khai ở M5 khi có model ShareLink.
 
 ## User stories

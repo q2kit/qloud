@@ -1,12 +1,11 @@
 from unittest.mock import patch
 
 import pytest
-from django.contrib.auth import SESSION_KEY, authenticate, get_user
-from django.contrib.sessions.models import Session
+from django.contrib.auth import authenticate, get_user
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models.deletion import ProtectedError
-from django.test import RequestFactory
+from django.test import Client, RequestFactory
 from django.utils import timezone
 
 from apps.accounts.models import Plan, User
@@ -55,8 +54,9 @@ def test_provisioning_rolls_back_when_root_creation_fails():
 
 def test_signup_without_default_fails_without_partial_user():
     Plan.objects.update(is_default_for_signup=False)
-    with pytest.raises(ValidationError, match="No default"):
+    with pytest.raises(ValidationError) as error:
         User.objects.create_user("alice@example.com")
+    assert error.value.code == "no_default_plan"
     assert not User.objects.exists()
 
 
@@ -92,10 +92,12 @@ def test_inactive_plan_cannot_be_assigned_or_become_default():
     plus = Plan.objects.get(code="plus-2026")
     plus.is_active = False
     plus.save()
-    with pytest.raises(ValidationError, match="must be active"):
+    with pytest.raises(ValidationError) as error:
         set_default_plan(plus)
-    with pytest.raises(ValidationError, match="inactive"):
+    assert error.value.code == "inactive_plan"
+    with pytest.raises(ValidationError) as error:
         User.objects.create_user("alice@example.com", plan=plus)
+    assert error.value.code == "inactive_plan"
     assert Plan.objects.get(is_default_for_signup=True).code == "free-2026"
 
 
@@ -115,6 +117,7 @@ def test_explicit_plan_and_inactive_existing_plan():
         ("quota_override_bytes", -1),
         ("used_bytes", -1),
         ("reserved_bytes", -1),
+        ("session_version", -1),
         ("locale", "fr"),
         ("theme", "invalid"),
     ],
@@ -143,31 +146,66 @@ def test_root_constraints(fields):
         Node.objects.create(owner=user, name="Another root")
 
 
-def test_suspend_removes_only_target_sessions_and_blocks_authentication(client):
+@pytest.mark.parametrize("engine", ["db", "cached_db", "cache"])
+def test_suspend_revokes_sessions_after_unsuspension_without_scanning(
+    client, settings, engine, django_assert_num_queries
+):
+    settings.SESSION_ENGINE = f"django.contrib.sessions.backends.{engine}"
+    settings.CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
     user = User.objects.create_user("alice@example.com", "password-123")
     other = User.objects.create_user("bob@example.com", "password-123")
     assert authenticate(email=user.email, password="password-123") == user
     client.force_login(user)
-    key = client.session.session_key
-    other_session = client.session.__class__()
-    other_session[SESSION_KEY] = str(other.pk)
-    other_session.save()
-    suspend_user(user, reason="Abuse")
+    old_session = client.session
+    other_client = Client()
+    other_client.force_login(other)
+    # The query count is independent of the number of sessions in the system.
+    with django_assert_num_queries(4):
+        suspend_user(user, reason="Abuse")
     user.refresh_from_db()
     assert user.suspended_at is not None
     assert user.suspended_reason == "Abuse"
-    assert not Session.objects.filter(session_key=key).exists()
-    assert Session.objects.filter(session_key=other_session.session_key).exists()
+    assert user.session_version == 1
     assert authenticate(email=user.email, password="password-123") is None
-    request = RequestFactory().get("/")
-    request.session = other_session
-    assert get_user(request).is_anonymous
     unsuspend_user(user)
     user.refresh_from_db()
     assert user.suspended_at is None
     assert user.suspended_reason is None
     assert authenticate(email=user.email, password="password-123") == user
-    assert not Session.objects.filter(session_key=key).exists()
+    request = RequestFactory().get("/")
+    request.session = old_session
+    assert get_user(request).is_anonymous
+    request.session = other_client.session
+    assert get_user(request) == other
+
+
+def test_missing_default_plan_is_translated_and_createsuperuser_handles_it():
+    from django.core.management import call_command
+    from django.core.management.base import CommandError
+    from django.utils.translation import override
+
+    Plan.objects.update(is_default_for_signup=False)
+    with override("vi"), pytest.raises(CommandError, match="Chưa cấu hình"):
+        call_command("createsuperuser", email="admin@example.com", interactive=False)
+
+
+def test_deleted_default_candidate_reports_domain_error():
+    plan = Plan.objects.get(code="plus-2026")
+    Plan.objects.filter(pk=plan.pk).delete()
+    with pytest.raises(ValidationError) as error:
+        set_default_plan(plan)
+    assert error.value.code == "missing_plan"
+
+
+def test_stale_profile_save_cannot_undo_suspension_or_session_revocation():
+    user = User.objects.create_user("alice@example.com")
+    suspend_user(user, reason="Abuse")
+    user.display_name = "Alice"
+    user.save()
+    user.refresh_from_db()
+    assert user.session_version == 1
+    assert user.suspended_at is not None
+    assert user.suspended_reason == "Abuse"
 
 
 def test_suspended_backend_rejects_existing_session(client):
