@@ -23,6 +23,7 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**. Không sao chép bố cục
 ## Bố cục chính (desktop)
 
 ```
+
 ┌────────────┬──────────────────────────────────────────────┬──────────────┐
 │ Qloud      │  Drive của tôi › Dự án › Thiết kế    [⌘K] [+]│              │
 │            │──────────────────────────────────────────────│  Chi tiết    │
@@ -36,6 +37,20 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**. Không sao chép bố cục
 │ ⚙ Cài đặt  │                                │ Upload 2/5│ │              │
 └────────────┴────────────────────────────────┴───────────┴─┴──────────────┘
 ```
+
+### Application shell (M0-07)
+
+| Light | Dark |
+|---|---|
+| ![Application shell — light](assets/m0-07-light.png) | ![Application shell — dark](assets/m0-07-dark.png) |
+
+### Hành vi responsive của application shell
+
+- Từ breakpoint `lg`, sidebar rộng 256px cố định bên trái; trên màn hình nhỏ hơn, sidebar mở thành drawer có lớp nền che.
+- Header luôn nằm trên cùng, gồm tiêu đề/breadcrumb, tìm kiếm hoặc command palette, hành động tạo mới và nút bật panel chi tiết.
+- Panel chi tiết rộng 320px ở desktop lớn (`xl`); trên màn hình nhỏ hơn hiển thị dạng bottom sheet.
+- Phím `i` bật/tắt panel chi tiết khi focus không nằm trong ô nhập liệu.
+- Màn hình đăng nhập và các trang công khai dùng layout riêng, không hiển thị application shell.
 
 ## Danh sách màn hình
 

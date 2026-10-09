@@ -95,7 +95,7 @@ mọi selector của node đều phải đi qua đây.
 | Routing | React Router |
 | Dữ liệu từ server | TanStack Query; API client sinh từ OpenAPI (openapi-typescript + openapi-fetch) |
 | Trạng thái client | Zustand (hàng đợi upload, lựa chọn nhiều mục) |
-| UI | Tailwind CSS, shadcn/ui (Radix), lucide-react icons |
+| UI | Tailwind CSS, shadcn/ui (Radix), lucide-react icons; Radix Dialog 1.2.0 cho modal focus/keyboard (MIT) |
 | Form | react-hook-form + zod |
 | i18n | i18next + react-i18next |
 | Xem trước | pdf.js (PDF), thẻ `<video>` gốc của trình duyệt |

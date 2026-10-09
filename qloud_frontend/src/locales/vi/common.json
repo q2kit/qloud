@@ -4,13 +4,57 @@
   },
   "navigation": {
     "drive": "Drive",
+    "recent": "Gần đây",
+    "shared": "Được chia sẻ",
+    "trash": "Thùng rác",
+    "settings": "Cài đặt",
+    "main": "Điều hướng chính",
     "login": "Đăng nhập",
     "home": "Về Drive",
     "preferences": "Tùy chọn hiển thị"
   },
   "drive": {
     "title": "Drive",
-    "description": "Khung ứng dụng đã sẵn sàng. Nội dung file sẽ được xây dựng ở milestone tiếp theo."
+    "description": "Tất cả tệp và thư mục của bạn",
+    "view": {
+      "label": "Kiểu hiển thị",
+      "grid": "Dạng lưới",
+      "list": "Dạng danh sách"
+    },
+    "empty": {
+      "title": "Không gian của bạn đang trống",
+      "description": "Tải tệp lên hoặc tạo thư mục đầu tiên. Bạn cũng có thể kéo và thả tệp vào khu vực này."
+    },
+    "actions": {
+      "upload": "Tải tệp lên",
+      "newFolder": "Thư mục mới"
+    }
+  },
+  "shell": {
+    "openNavigation": "Mở điều hướng",
+    "closeNavigation": "Đóng điều hướng",
+    "openDetails": "Mở bảng chi tiết",
+    "closeDetails": "Đóng bảng chi tiết",
+    "navigationDescription": "Điều hướng tới các khu vực chính của Qloud.",
+    "breadcrumbRoot": "Drive của tôi",
+    "search": "Tìm kiếm và chạy lệnh",
+    "create": "Tạo mới"
+  },
+  "details": {
+    "title": "Chi tiết",
+    "emptyTitle": "Chưa chọn mục nào",
+    "emptyDescription": "Chọn một tệp hoặc thư mục để xem thông tin, phiên bản và quyền chia sẻ.",
+    "tabs": {
+      "info": "Thông tin",
+      "versions": "Phiên bản",
+      "sharing": "Chia sẻ"
+    }
+  },
+  "placeholder": {
+    "recent": "Nội dung Gần đây sẽ được triển khai trong M2-09.",
+    "shared": "Nội dung Được chia sẻ sẽ được triển khai trong M5-05.",
+    "trash": "Nội dung Thùng rác sẽ được triển khai trong M4-03.",
+    "settings": "Nội dung Cài đặt sẽ được triển khai trong M1-06."
   },
   "login": {
     "title": "Đăng nhập",
