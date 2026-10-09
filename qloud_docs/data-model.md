@@ -1,0 +1,176 @@
+# Data model
+
+> Trạng thái: **Nháp**. Mọi bảng đều dùng khóa chính `id UUID` (UUIDv7, sắp xếp được theo thời gian), và có `created_at`, `updated_at`.
+
+## Sơ đồ quan hệ
+
+```
+Plan 1─────* User
+User 1─────* Node (owner)
+Node 1─────* Node (parent → children)          # cây thư mục
+Node 1─────* FileVersion ─────1 Blob           # chỉ khi node là file
+Node ──current_version──▶ FileVersion
+Node 1─────* Share ─────* User (grantee)
+Node 1─────* ShareLink
+User 1─────* UploadSession ────▶ Node (đích) 
+```
+
+## Bảng
+
+### `accounts_user`
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| id | uuid | |
+| email | citext, unique | đăng nhập bằng email |
+| display_name | varchar(100) | |
+| avatar_url | text, null | |
+| locale | varchar(5) | `vi` hoặc `en` |
+| theme | varchar(10) | `system`, `light` hoặc `dark` |
+| plan_id | uuid → Plan | gói được gán khi đăng ký, là gói đang có `is_default_for_signup = true` tại thời điểm đó |
+| quota_override_bytes | bigint, null | admin đặt riêng cho từng người, ưu tiên hơn giá trị của plan |
+| used_bytes | bigint | tổng dung lượng các version của user, **kể cả trong thùng rác** |
+| reserved_bytes | bigint | dung lượng đang giữ chỗ cho các upload chưa xong |
+| root_folder_id | uuid → Node | folder gốc "Drive của tôi", tạo cùng lúc với user |
+
+Bảng tài khoản OAuth và email xác thực do django-allauth quản lý.
+
+### `accounts_plan`
+Gói dung lượng. Đây là cách làm cho giới hạn **thay đổi được mà không ảnh hưởng user cũ** (xem [ADR-0005](adr/0005-storage-plans.md)).
+
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| id | uuid | |
+| code | varchar(50), unique | ví dụ `free-2026`, `free-2027`, `pro` |
+| name | varchar(100) | tên hiển thị |
+| quota_bytes | bigint | |
+| max_file_size_bytes | bigint | |
+| max_versions_per_file | int | số phiên bản cũ giữ lại tối đa |
+| version_retention_days | int, null | phiên bản cũ quá số ngày này thì bị dọn; null = không giới hạn theo thời gian |
+| trash_retention_days | int | mặc định 30 |
+| is_default_for_signup | bool | **đúng một** plan có giá trị true (partial unique index) |
+| is_active | bool | plan ngừng hoạt động thì không gán thêm cho ai, user đang dùng vẫn giữ |
+
+- Giới hạn thực tế của một user: `quota_override_bytes ?? plan.quota_bytes`. Các giới hạn khác lấy từ plan.
+- **Plan coi như bất biến sau khi đã có người dùng.** Muốn đổi giới hạn cho user mới thì tạo plan mới và đặt nó làm mặc định.
+  Sửa trực tiếp một plan đang dùng sẽ ảnh hưởng tới mọi user của plan đó; chỉ làm vậy khi cố ý (ví dụ tặng thêm dung lượng cho mọi người).
+- Migration dữ liệu ban đầu tạo 2 plan:
+  - `free-2026` (**mặc định** cho đăng ký mở): 5 GB, file tối đa 5 GB, giữ 100 phiên bản trong 30 ngày, thùng rác 30 ngày.
+  - `friends-2026` (admin gán tay cho bạn bè): 50 GB, file tối đa 50 GB, các giới hạn khác như trên.
+  Các con số này chỉnh được trong admin trước khi có user.
+- Admin quản lý plan qua Django admin. Sau này khi thương mại hóa, gói trả phí cũng là một plan.
+
+### `drive_node`
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| id | uuid | |
+| owner_id | uuid → User | |
+| parent_id | uuid → Node, null | chỉ folder gốc có giá trị null |
+| kind | enum(`folder`,`file`) | |
+| name | varchar(255) | không chứa `/`; khác rỗng |
+| mime_type | varchar(255), null | chỉ dùng cho file |
+| size | bigint | dung lượng của current version (file); 0 với folder |
+| current_version_id | uuid → FileVersion, null | |
+| trashed_at | timestamptz, null | thời điểm xóa mềm |
+| trashed_root_id | uuid → Node, null | node mà người dùng đã bấm xóa (dùng để khôi phục theo nhóm) |
+| trashed_by_id | uuid → User, null | |
+| thumbnail_key | text, null | |
+
+**Ràng buộc và index:**
+- Unique `(parent_id, lower(name))` WHERE `trashed_at IS NULL` để tên không trùng trong cùng folder. Khi trùng thì BE tự thêm hậu tố ` (1)`, ` (2)`…
+- Index `(parent_id, kind, name)` cho việc liệt kê; index `(owner_id, trashed_at)`.
+- Index trigram GIN trên `name` (extension `pg_trgm`) cho tìm kiếm.
+- Thao tác di chuyển phải chặn trường hợp chuyển node vào chính cây con của nó (kiểm tra bằng recursive CTE).
+
+> Cách lưu cây: **adjacency list (`parent_id`) + recursive CTE**. Nếu đo thấy chậm thì chuyển sang `ltree` hoặc closure table và ghi lại bằng ADR.
+
+### `drive_blob`
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| id | uuid | |
+| storage_key | text, unique | ví dụ `blobs/{uuid}`. Không chứa tên file |
+| size | bigint | |
+| checksum_sha256 | char(64), null | |
+| etag | text | |
+
+### `drive_file_version`
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| id | uuid | |
+| node_id | uuid → Node | |
+| blob_id | uuid → Blob | |
+| version_number | int | tăng dần theo từng node, unique `(node_id, version_number)` |
+| size | bigint | |
+| mime_type | varchar(255) | |
+| uploaded_by_id | uuid → User | |
+| original_name | varchar(255) | tên file lúc upload |
+| keep_forever | bool | không bị chính sách giữ phiên bản tự động dọn |
+
+### `uploads_upload_session`
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| id | uuid | |
+| user_id | uuid → User | |
+| parent_id | uuid → Node | folder đích |
+| target_node_id | uuid → Node, null | có giá trị khi upload phiên bản mới cho file đã có |
+| filename | varchar(255) | |
+| size | bigint | |
+| mime_type | varchar(255) | |
+| fingerprint | varchar(128) | dùng để FE nhận ra lại file khi resume |
+| storage_key | text | |
+| s3_upload_id | text | |
+| part_size | int | |
+| status | enum(`active`,`completed`,`aborted`,`expired`) | |
+| expires_at | timestamptz | mặc định 7 ngày |
+
+Trạng thái của từng part **không lưu trong DB**: lấy từ S3 `ListParts` khi cần resume.
+
+### `sharing_share`
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| id | uuid | |
+| node_id | uuid → Node | |
+| grantee_id | uuid → User | |
+| role | enum(`viewer`,`editor`) | |
+| created_by_id | uuid → User | |
+Unique `(node_id, grantee_id)`.
+
+### `sharing_share_link`
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| id | uuid | |
+| node_id | uuid → Node | |
+| token | varchar(43), unique | sinh ngẫu nhiên, ít nhất 256 bit (`secrets.token_urlsafe(32)`) |
+| role | enum(`viewer`) | MVP chỉ có quyền xem |
+| expires_at | timestamptz, null | |
+| revoked_at | timestamptz, null | |
+| revoked_by_id | uuid → User, null | owner hoặc admin |
+| revoke_reason | varchar(30), null | `owner`, `moderation` |
+| created_by_id | uuid → User | |
+
+### `moderation_report`
+Báo cáo vi phạm từ trang link công khai (xem [sharing.md](features/sharing.md)).
+
+| Cột | Kiểu | Ghi chú |
+|---|---|---|
+| id | uuid | |
+| share_link_id | uuid → ShareLink | |
+| node_id | uuid → Node | node cụ thể bị báo cáo (có thể là node con trong folder được chia sẻ) |
+| reason | enum(`illegal`,`copyright`,`malware`,`abuse`,`other`) | |
+| message | text, null | tối đa 2000 ký tự |
+| reporter_email | citext, null | không bắt buộc |
+| reporter_user_id | uuid → User, null | có giá trị nếu người báo cáo đang đăng nhập |
+| reporter_ip_hash | char(64) | băm IP kèm salt, dùng để chống spam; không lưu IP gốc |
+| status | enum(`open`,`actioned`,`dismissed`) | |
+| resolved_by_id | uuid → User, null | |
+| resolved_at | timestamptz, null | |
+| resolution_note | text, null | |
+
+**Khóa user:** thêm vào `accounts_user` các cột `suspended_at timestamptz null` và `suspended_reason text null`.
+User bị khóa thì không đăng nhập được, mọi session bị hủy, và mọi share link của user ngừng hoạt động (kiểm tra lúc truy cập, không phải xóa link).
+
+## Quy tắc về dung lượng
+
+- `used_bytes` = tổng `size` của **mọi version** thuộc các node mà user sở hữu, gồm cả node trong thùng rác.
+- Upload vào folder của người khác (khi có quyền `editor`): dung lượng được tính cho **owner của folder đích**, và file mới thuộc về owner đó.
+  Giới hạn kích thước file cũng lấy theo plan của owner đó.
+- Mọi thay đổi `used_bytes` và `reserved_bytes` phải dùng `SELECT ... FOR UPDATE` trên dòng user, hoặc cập nhật nguyên tử bằng `F()` kèm điều kiện kiểm tra.
