@@ -49,7 +49,7 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**. Không sao chép bố cục
 - Từ breakpoint `lg`, sidebar rộng 256px cố định bên trái; trên màn hình nhỏ hơn, sidebar mở thành drawer có lớp nền che.
 - Header luôn nằm trên cùng, gồm tiêu đề/breadcrumb, tìm kiếm hoặc command palette, hành động tạo mới và nút bật panel chi tiết.
 - Panel chi tiết rộng 320px ở desktop lớn (`xl`); trên màn hình nhỏ hơn hiển thị dạng bottom sheet.
-- Phím `i` bật/tắt panel chi tiết khi focus không nằm trong ô nhập liệu.
+- Phím `i` bật/tắt panel chi tiết. Phím bị bỏ qua khi focus nằm trong ô nhập liệu, trong menu hoặc listbox (dùng chữ cái để nhảy tới mục), trong một hộp thoại khác (ví dụ drawer điều hướng), khi giữ phím (auto-repeat) hoặc khi sự kiện đã được xử lý. Trong bottom sheet chi tiết, `i` đóng sheet.
 - Màn hình đăng nhập và các trang công khai dùng layout riêng, không hiển thị application shell.
 
 ## Danh sách màn hình

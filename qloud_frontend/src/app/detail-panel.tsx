@@ -5,6 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { useMediaQuery } from '@/lib/use-media-query';
 
+/** Marks the mobile details sheet so shortcuts can tell it from other dialogs. */
+export const DETAIL_SHEET_SELECTOR = '[data-detail-sheet]';
+
 interface DetailPanelProps {
   isOpen: boolean;
   triggerRef: React.RefObject<HTMLButtonElement | null>;
@@ -37,6 +40,7 @@ export function DetailPanel({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-overlay" />
         <Dialog.Content
+          data-detail-sheet=""
           className="fixed inset-x-0 bottom-0 z-50 h-[min(68vh,32rem)] overflow-hidden rounded-t-2xl border-t border-border shadow-soft outline-none"
           onCloseAutoFocus={(event) => {
             event.preventDefault();

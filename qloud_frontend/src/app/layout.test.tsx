@@ -237,4 +237,83 @@ describe('details shortcut', () => {
       editor.remove();
     },
   );
+
+  it.each(['menu', 'menuitem', 'listbox'])(
+    'leaves i to typeahead inside role="%s"',
+    (role) => {
+      renderDrive();
+      const container = document.createElement('div');
+      container.setAttribute('role', role);
+      const item = document.createElement('span');
+      container.append(item);
+      document.body.append(container);
+
+      fireEvent.keyDown(item, { key: 'i' });
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      container.remove();
+    },
+  );
+
+  it('ignores auto-repeated and already handled key presses', () => {
+    renderDrive();
+    const handled = document.createElement('div');
+    handled.addEventListener('keydown', (event) => {
+      event.preventDefault();
+    });
+    document.body.append(handled);
+
+    fireEvent.keyDown(document.body, { key: 'i', repeat: true });
+    fireEvent.keyDown(handled, { key: 'i' });
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    handled.remove();
+  });
+
+  it('does not stack details on top of the navigation drawer', async () => {
+    const user = userEvent.setup();
+    renderDrive();
+    await user.click(
+      screen.getByRole('button', { name: /Mở điều hướng|Open navigation/ }),
+    );
+
+    await user.keyboard('i');
+
+    expect(
+      screen.getByRole('dialog', { name: /Điều hướng chính|Main navigation/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('dialog', { name: /Chi tiết|Details/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('closes the mobile details sheet from inside it', async () => {
+    const user = userEvent.setup();
+    renderDrive();
+    await user.keyboard('i');
+    const sheet = screen.getByRole('dialog', { name: /Chi tiết|Details/ });
+    expect(sheet).toContainElement(document.activeElement as HTMLElement);
+
+    await user.keyboard('i');
+
+    expect(
+      screen.queryByRole('dialog', { name: /Chi tiết|Details/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('toggles the desktop side panel', async () => {
+    setMediaQuery(DESKTOP_PANEL_QUERY, true);
+    const user = userEvent.setup();
+    renderDrive();
+
+    await user.keyboard('i');
+    expect(
+      screen.getByRole('complementary', { name: /Chi tiết|Details/ }),
+    ).toBeInTheDocument();
+
+    await user.keyboard('i');
+    expect(
+      screen.queryByRole('complementary', { name: /Chi tiết|Details/ }),
+    ).not.toBeInTheDocument();
+  });
 });
