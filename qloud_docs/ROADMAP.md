@@ -29,7 +29,7 @@
 | M0-04 | `docker-compose.yml` cho dev: Postgres, Redis, LocalStack (tự tạo bucket, cấu hình CORS), Mailpit; có `.env.example` | [#2](https://github.com/q2kit/qloud/issues/2) | ✅ |
 | M0-05 | Khung BE: Django + DRF + settings theo môi trường + Celery + health endpoint + ruff/mypy/pytest | [#3](https://github.com/q2kit/qloud/issues/3) | ✅ |
 | M0-06 | Khung FE: Vite + React + TS + Tailwind + shadcn + Router + Query + i18n + dark mode + Vitest | [#4](https://github.com/q2kit/qloud/issues/4) | ✅ |
-| M0-07 | Design tokens và các layout chính (sidebar, header, khung panel chi tiết) | [#5](https://github.com/q2kit/qloud/issues/5) | 🟦 |
+| M0-07 | Design tokens và các layout chính (sidebar, header, khung panel chi tiết) | [#5](https://github.com/q2kit/qloud/issues/5) | ✅ |
 | M0-08 | Sinh API client cho FE từ OpenAPI schema | [#6](https://github.com/q2kit/qloud/issues/6) | ⬜ |
 | M0-09 | GitHub Actions: lint, typecheck, test, build BE/FE; kiểm tra giấy phép; gitleaks; kiểm tra tiêu đề/body PR và cảnh báo thiếu cập nhật ROADMAP; sau đó bật required checks | [#7](https://github.com/q2kit/qloud/issues/7) | ✅ |
 | M0-10 | Khung Playwright E2E và đưa vào CI | [#8](https://github.com/q2kit/qloud/issues/8) | ⬜ |
