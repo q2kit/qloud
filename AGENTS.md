@@ -50,7 +50,7 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
    - Nếu có quyết định kiến trúc mới thì tạo ADR trong `qloud_docs/adr/`.
    - Nếu phát sinh câu hỏi chưa trả lời được thì ghi vào `open-questions.md`.
 8. **Mở PR.**
-   - `git push -u origin HEAD`, rồi `gh pr create --base master --title "[<task-id>] <tiêu đề>" --body-file <file>`.
+   - `git push -u origin HEAD`, rồi `gh pr create --base master --title "<type>(<scope>): <subject> [<task-id>]" --body-file <file>`.
    - Body PR theo [.github/pull_request_template.md](.github/pull_request_template.md), và **phải có `Closes #<n>`**.
    - Theo dõi CI bằng `gh pr checks --watch`. CI đỏ thì sửa cho tới khi xanh.
 9. **Review và merge.** **Chỉ chủ dự án được merge**, hoặc agent merge (`gh pr merge --squash --delete-branch`) khi chủ dự án nói rõ là đồng ý.
@@ -164,6 +164,6 @@ docker compose down          # dừng (giữ dữ liệu); thêm -v để xóa s
 ## 9. Git
 
 - `master` luôn ở trạng thái deploy được, và chỉ nhận thay đổi qua PR (squash merge). Mỗi task làm trên một branch riêng, đặt tên `feat/<task-id>-<short-name>`, `fix/...`, `docs/...` hoặc `chore/...`.
-- Commit theo [Conventional Commits](https://www.conventionalcommits.org/), ví dụ `feat(upload): add multipart upload session`.
+- **Commit message:** Conventional Commits, tiếng Anh, `<type>(<scope>): <subject>`, footer `Refs #<n>`. Chi tiết: [conventions.md › Commit message](qloud_docs/conventions.md#commit-message).
+- **PR:** tiêu đề `<type>(<scope>): <subject> [<task-id>]` (tiếng Anh — thành commit squash trên `master`); body tiếng Việt theo template, có `Closes #<n>`, cách kiểm tra *đã thực sự chạy*, và lưu ý cho reviewer. Chi tiết: [conventions.md › Pull Request](qloud_docs/conventions.md#pull-request).
 - Mỗi commit chứa thay đổi code cùng với thay đổi docs tương ứng.
-- Tiêu đề PR: `[<task-id>] <mô tả ngắn>`. Body viết bằng tiếng Việt và theo template.

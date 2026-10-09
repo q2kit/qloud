@@ -42,9 +42,59 @@
 - Endpoint danh sách phải có test kiểm tra số lượng query (`django_assert_max_num_queries`).
 
 ## Git và CI
-- Branch: `feat/<task-id>-<slug>`, `fix/...`, `docs/...`, `chore/...`.
-- Commit theo Conventional Commits: `feat(sharing): add public share links`.
-- PR theo `.github/pull_request_template.md`: task ID, `Closes #n`, thay đổi chính, cách test, ảnh chụp màn hình nếu có thay đổi UI.
+- Branch: `<type>/<task-id>-<slug>`, ví dụ `feat/M2-04-upload-session`, `fix/M2-04-quota-race`, `docs/commit-pr-rules` (việc không thuộc task nào thì bỏ task ID).
+
+### Commit message
+Theo [Conventional Commits](https://www.conventionalcommits.org/), **tiếng Anh**:
+
+```
+<type>(<scope>): <subject>
+
+<body — không bắt buộc>
+
+<footer>
+```
+
+- **type:** `feat` (tính năng), `fix` (sửa bug), `docs`, `test`, `refactor` (không đổi hành vi), `perf`, `chore` (cấu hình, repo, dev tooling), `ci`, `build` (Docker, dependency).
+- **scope** (bắt buộc), chọn đúng nơi thay đổi:
+  - BE: tên Django app — `accounts`, `drive`, `uploads`, `sharing`, `trash`, `search`, `storage`, `core`.
+  - FE: `fe` hoặc `fe-<feature>` — ví dụ `fe-upload`, `fe-ui`, `fe-i18n`.
+  - Khác: `api` (OpenAPI/client), `dev` (môi trường dev), `env`, `ci`, `deploy`, `deps`, `repo`, `docs`, `roadmap`, `adr`.
+- **subject:** câu mệnh lệnh ("add", không phải "added"/"adds"), viết thường chữ đầu, không có dấu chấm cuối, tối đa 72 ký tự cho cả dòng đầu.
+- **body:** giải thích *tại sao* và các điểm không hiển nhiên; xuống dòng ở 72 ký tự. Không liệt kê lại diff.
+- **footer:**
+  - `Refs #<n>` để liên kết issue. Không dùng `Closes` trong commit — việc đóng issue do PR làm.
+  - Thay đổi phá vỡ tương thích: `BREAKING CHANGE: <mô tả>` (và thêm `!` sau scope: `feat(api)!: ...`).
+  - Commit do AI agent tạo: dòng cuối là trailer `Co-Authored-By: <tên model> <noreply@anthropic.com>`.
+- Mỗi commit là **một thay đổi logic**, build/test vẫn chạy được. Không trộn format lại code với thay đổi logic.
+
+Ví dụ:
+```
+feat(uploads): reserve quota when creating an upload session
+
+Reservation happens under SELECT FOR UPDATE on the owner row so two
+concurrent sessions cannot both pass the quota check.
+
+Refs #20
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+```
+
+### Pull Request
+- **Tiêu đề:** cùng định dạng với commit, kèm task ID ở cuối: `<type>(<scope>): <subject> [<task-id>]`,
+  ví dụ `feat(uploads): add multipart upload session API [M2-04]`.
+  Vì merge kiểu squash, tiêu đề PR sẽ thành commit trên `master`, nên phải đúng Conventional Commits. Viết tiếng Anh.
+- **Body:** **tiếng Việt**, theo `.github/pull_request_template.md`. Bắt buộc:
+  - **Task:** task ID và `Closes #<n>` (mỗi issue một dòng `Closes`). PR không thuộc task nào thì ghi rõ lý do.
+  - **Thay đổi chính:** gạch đầu dòng, nói *cái gì* và *tại sao*, không dán diff.
+  - **Cách kiểm tra:** lệnh đã thực sự chạy và kết quả (ví dụ `pytest: 42 passed`). Không ghi là đã test nếu chưa chạy.
+    Điều gì chưa kiểm tra được thì ghi rõ.
+  - **Lưu ý cho reviewer:** migration mới, biến môi trường mới, dependency mới (kèm giấy phép), việc chủ dự án cần làm (tạo secret, cấu hình…), rủi ro.
+    Không có thì ghi "Không có".
+  - **Ảnh chụp màn hình** (light và dark) khi có thay đổi UI.
+  - **Checklist:** chỉ tick mục đã làm thật.
+  - PR do AI agent tạo: dòng cuối là `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
+- PR **nối tiếp** (stacked, base không phải `master`): ghi rõ ở đầu body là phụ thuộc PR nào. Sau khi PR kia merge thì rebase lên `master` và đổi base.
+- Một PR một task. PR quá 600 dòng thay đổi (không tính lockfile và code sinh tự động) thì cân nhắc chia nhỏ.
 - CI (GitHub Actions) chạy trên mỗi PR: lint, type check, test BE (Postgres, Redis, LocalStack dạng service; token lấy từ secret `LOCALSTACK_AUTH_TOKEN`), test FE, build FE, Playwright.
 - Merge vào `master` (squash) chỉ khi CI xanh và chủ dự án đã duyệt.
 - Thao tác GitHub (issue, PR, review, CI) dùng `gh` CLI. Quy trình chi tiết ở mục 3 của `AGENTS.md`.
