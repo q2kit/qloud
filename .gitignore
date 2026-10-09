@@ -1,0 +1,49 @@
+# --- Environment & secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+secrets/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.egg-info/
+staticfiles/
+media/
+
+# --- Node ---
+node_modules/
+dist/
+.vite/
+coverage/
+*.tsbuildinfo
+.pnpm-store/
+
+# --- Playwright ---
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# --- Logs ---
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# --- OS / IDE ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
