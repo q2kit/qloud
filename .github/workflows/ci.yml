@@ -68,6 +68,16 @@ jobs:
       - run: uv run python manage.py makemigrations --check --dry-run
         env:
           DJANGO_SETTINGS_MODULE: config.settings.test
+      - name: Deploy checks with production settings
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.prod
+          APP_DOMAIN: qloud.example.com
+          DATABASE_URL: postgres://qloud:qloud@localhost:5432/qloud
+          REDIS_URL: redis://localhost:6379/0
+          CELERY_BROKER_URL: redis://localhost:6379/1
+        run: |
+          DJANGO_SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))') \
+            uv run python manage.py check --deploy --fail-level WARNING
       - run: uv run pytest --cov
       - name: Dependency licenses
         run: uv run --with pip-licenses pip-licenses --from=mixed --format=json | python3 ../scripts/check_licenses.py pip
