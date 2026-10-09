@@ -121,6 +121,13 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
   - PR do AI agent tạo: dòng cuối là `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
 - PR **nối tiếp** (stacked, base không phải `master`): ghi rõ ở đầu body là phụ thuộc PR nào. Sau khi PR kia merge thì rebase lên `master` và đổi base.
 - Một PR một task. PR quá 600 dòng thay đổi (không tính lockfile và code sinh tự động) thì cân nhắc chia nhỏ.
-- CI (GitHub Actions) chạy trên mỗi PR: lint, type check, test BE (Postgres, Redis, LocalStack dạng service; token lấy từ secret `LOCALSTACK_AUTH_TOKEN`), test FE, build FE, Playwright.
+- **CI** (`.github/workflows/ci.yml`) chạy trên mỗi PR và mỗi lần push lên `master`:
+  - **Backend** (khi `qloud_backend/` hoặc file dùng chung thay đổi): ruff format/check, mypy, kiểm tra migration còn thiếu, pytest + coverage (Postgres, Redis qua `docker compose`; LocalStack thêm ở M2-03), kiểm tra giấy phép.
+  - **Frontend** (khi `qloud_frontend/` hoặc file dùng chung thay đổi): lint, format, typecheck, test + coverage, build, kiểm tra giấy phép.
+  - **Secret scan:** gitleaks trên các commit của PR.
+  - **PR conventions** (`scripts/check_pr.py`): tiêu đề đúng định dạng; có `[task-id]` thì body phải có `Closes #n`; cảnh báo nếu sửa code mà không sửa ROADMAP.
+  - **CI OK:** job tổng hợp, là job duy nhất cần đặt làm *required status check*.
+  - Kiểm tra giấy phép dùng `scripts/check_licenses.py`; LGPL chỉ được phép khi có trong `LGPL_ALLOWED` kèm lý do.
+  - Action bên thứ ba được ghim theo commit SHA (kèm comment phiên bản).
 - Merge vào `master` (squash) chỉ khi CI xanh và PR đã được duyệt.
 - Thao tác GitHub (issue, PR, review, CI) dùng `gh` CLI. Quy trình chi tiết ở mục 3 của `AGENTS.md`.
