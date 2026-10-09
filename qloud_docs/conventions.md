@@ -112,7 +112,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
   - **Thay đổi chính:** gạch đầu dòng, nói *cái gì* và *tại sao*, không dán diff.
   - **Cách kiểm tra:** lệnh đã thực sự chạy và kết quả (ví dụ `pytest: 42 passed`). Không ghi là đã test nếu chưa chạy.
     Điều gì chưa kiểm tra được thì ghi rõ.
-  - **Lưu ý cho reviewer:** migration mới, biến môi trường mới, dependency mới (kèm giấy phép), việc chủ dự án cần làm (tạo secret, cấu hình…), rủi ro.
+  - **Lưu ý cho reviewer:** migration mới, biến môi trường mới, dependency mới (kèm giấy phép), thao tác thủ công cần thực hiện (tạo secret, cấu hình…), rủi ro.
     Không có thì ghi "Không có".
   - **Ảnh chụp màn hình** (light và dark) khi có thay đổi UI.
   - **Checklist:** chỉ tick mục đã làm thật.

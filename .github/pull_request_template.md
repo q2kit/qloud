@@ -18,7 +18,7 @@ Body: tiếng Việt. Quy tắc: qloud_docs/conventions.md › Pull Request
 
 ## Lưu ý cho reviewer
 
-<!-- Migration, biến môi trường mới, dependency mới (kèm giấy phép), việc chủ dự án cần làm, rủi ro. Không có thì ghi "Không có". -->
+<!-- Migration, biến môi trường mới, dependency mới (kèm giấy phép), thao tác thủ công cần thực hiện, rủi ro. Không có thì ghi "Không có". -->
 -
 
 ## Ảnh chụp màn hình

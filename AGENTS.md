@@ -27,7 +27,7 @@ File này là **luật làm việc**. Nếu tài liệu khác mâu thuẫn với
 
 ## 3. Quy trình cho mỗi phiên làm việc
 
-Repo: `q2kit/qloud` trên GitHub, nhánh chính là **`master`**. Mọi thao tác với GitHub dùng **`gh` CLI** (chủ dự án đã đăng nhập sẵn).
+Repo: `q2kit/qloud` trên GitHub, nhánh chính là **`master`**. Mọi thao tác với GitHub dùng **`gh` CLI** (đã đăng nhập sẵn).
 Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue* trong ROADMAP). Mỗi task được giao qua **một Pull Request**.
 
 1. **Định hướng.**
@@ -154,21 +154,22 @@ Hiện tại chỉ có ít người dùng, nhưng hệ thống phải được t
 
 ## 8. Lệnh thường dùng
 
-> Khi viết lệnh cho chủ dự án: mỗi khối lệnh phải chạy đúng khi dán nguyên khối vào **một** terminal.
+> Khi viết lệnh thao tác thủ công: mỗi khối lệnh phải chạy đúng khi dán nguyên khối vào **một** terminal.
 > `cd` theo đường dẫn tuyệt đối từ gốc repo; tách riêng lệnh chỉ chạy một lần hoặc lệnh có thể ghi đè/xóa dữ liệu.
 
 > Phần này sẽ được điền khi dựng xong khung dự án (task M0 trong ROADMAP). Agent nào dựng khung thì cập nhật mục này.
 
 ```bash
 # Lần đầu: tạo file cấu hình (điền LOCALSTACK_AUTH_TOKEN trong .env ở gốc).
-# Luôn dùng `cp -n`: không bao giờ ghi đè .env đã có (chứa secret của chủ dự án).
+# Dùng `cp -n` để không ghi đè file .env đã có.
 cp -n .env.example .env
 cp -n qloud_backend/.env.example qloud_backend/.env
 
 # Hạ tầng dev: Postgres, Redis, LocalStack (S3), Mailpit
 docker compose up -d --wait
 docker compose ps
-docker compose down          # dừng (giữ dữ liệu); thêm -v để xóa sạch dữ liệu — hỏi chủ dự án trước
+docker compose down          # dừng và giữ dữ liệu
+docker compose down -v       # dừng và xóa toàn bộ dữ liệu dev
 
 # Mailpit UI: http://localhost:8025 · S3 endpoint: http://localhost:4566 (bucket qloud-dev)
 
