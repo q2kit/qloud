@@ -103,7 +103,7 @@
 |---|---|---|---|
 | M8-01 | Trang dung lượng, cảnh báo khi gần đầy | [#45](https://github.com/q2kit/qloud/issues/45) | ⬜ |
 | M8-02 | Rà soát bảo mật, rà soát trợ năng | [#46](https://github.com/q2kit/qloud/issues/46) | ⬜ |
-| M8-03 | Dockerfile production, Compose production, Caddy (TLS, phục vụ FE tĩnh, proxy `/api`) | [#47](https://github.com/q2kit/qloud/issues/47) | ⬜ |
+| M8-03 | Dockerfile production, Compose production, nginx (Origin Certificate, phục vụ FE tĩnh, proxy `/api`, real IP từ Cloudflare), hướng dẫn cấu hình Cloudflare và ufw | [#47](https://github.com/q2kit/qloud/issues/47) | ⬜ |
 | M8-04 | Deploy tự động qua GitHub Actions lên VPS | [#48](https://github.com/q2kit/qloud/issues/48) | ⬜ |
 | M8-05 | Backup Postgres hằng ngày, Sentry, log có cấu trúc | [#49](https://github.com/q2kit/qloud/issues/49) | ⬜ |
 
@@ -113,6 +113,7 @@
 
 > Mới nhất ở trên cùng. Mỗi dòng gồm: ngày — task — tóm tắt — người hoặc agent thực hiện.
 
+- 2026-10-09 — — Đổi phương án deploy: Cloudflare proxy (Full strict, Origin Certificate) + nginx trên VPS, bỏ Caddy (ADR-0006). — AI agent
 - 2026-10-09 — — Commit "Init" (docs). Tạo label, 9 milestone và 49 issue (#1–#49) trên GitHub cho các task; thêm cột Issue vào ROADMAP; thêm quy trình làm việc bằng `gh` vào AGENTS.md; domain cấu hình qua `.env`. — AI agent
 - 2026-10-09 — M0-02 — Chốt: chống bot bằng Turnstile + plan mặc định 5 GB (bạn bè dùng `friends-2026`); báo cáo vi phạm + admin gỡ link/khóa user; deploy toàn bộ (cả FE) lên VPS, cùng origin. Docs được duyệt. — AI agent
 - 2026-10-09 — M0-02 — Nâng bảng công nghệ lên bản ổn định mới nhất (Django 6.1, Python 3.14, PostgreSQL 18, React 19, Vite 8, TS 7, Tailwind 4); thêm luật "tra phiên bản trên registry, không dựa vào trí nhớ" vào AGENTS.md. — AI agent

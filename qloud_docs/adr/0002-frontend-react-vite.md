@@ -12,7 +12,7 @@ SPA dùng Vite + React + TypeScript; React Router; TanStack Query; Zustand; Tail
 
 ## Lý do và các phương án đã cân nhắc
 - **SPA thay vì Next.js:** không cần SSR hay SEO (chỉ có trang link công khai, và trang này cũng không cần SEO).
-  SPA build ra file tĩnh, host được ở bất kỳ đâu (hiện tại do Caddy trên VPS phục vụ), không cần chạy server Node.
+  SPA build ra file tĩnh, host được ở bất kỳ đâu (hiện tại do nginx trên VPS phục vụ), không cần chạy server Node.
 - **shadcn/ui:** code của component nằm ngay trong repo nên tùy biến hoàn toàn được, tránh bị "trông giống mọi app MUI/Ant khác".
   Radix lo phần trợ năng (a11y). Tailwind kết hợp CSS variable giúp làm dark mode dễ.
 - **Ant Design / MUI:** nhanh nhưng mang đậm phong cách riêng của thư viện, khó làm ra giao diện mang bản sắc của Qloud.

@@ -25,3 +25,4 @@ nếu quyết định thay đổi thì tạo ADR mới, và đánh dấu ADR cũ
 | [0003](0003-direct-to-s3-multipart-upload.md) | Upload thẳng lên S3 bằng multipart + presigned URL | Chấp nhận |
 | [0004](0004-hosting-vps.md) | Hosting backend trên VPS, không dùng Cloudflare Workers | Chấp nhận |
 | [0005](0005-storage-plans.md) | Giới hạn theo plan, gán cố định cho user lúc đăng ký | Chấp nhận |
+| [0006](0006-cloudflare-proxy-nginx.md) | Cloudflare proxy (Full strict + Origin Certificate) và nginx trên VPS | Chấp nhận |

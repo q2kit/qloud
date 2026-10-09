@@ -130,10 +130,17 @@ Với share link thì chỉ xét token của link đó và cây con bên dưới
 ## Triển khai
 
 - **Môi trường dev:** `docker compose` chạy PostgreSQL, Redis và MinIO. BE và FE chạy trực tiếp trên máy.
-- **Production (giai đoạn 1):** **mọi thứ chạy trên một VPS** bằng Docker Compose: caddy (TLS tự động, phục vụ file tĩnh của FE, reverse proxy cho API), api, worker, beat, postgres, redis.
+- **Production (giai đoạn 1):** **mọi thứ chạy trên một VPS** bằng Docker Compose: nginx, api, worker, beat, postgres, redis.
+  Phía trước VPS là **Cloudflare proxy** (DNS bật proxy — biểu tượng đám mây cam). Chi tiết ở [ADR-0006](adr/0006-cloudflare-proxy-nginx.md).
+  - **TLS:** chế độ SSL của Cloudflare là **Full (strict)**. nginx dùng **Cloudflare Origin Certificate**; file cert và key được mount vào container, đường dẫn cấu hình qua `.env`. VPS không dùng Let's Encrypt.
+  - **Firewall (ufw):** cổng 443 chỉ mở cho các dải IP của Cloudflare; SSH mở riêng. Cổng 80 đóng (Cloudflare tự chuyển HTTP sang HTTPS).
+  - **nginx:** phục vụ bản build FE (cache dài cho các file có hash trong tên, `index.html` thì không cache, mọi route SPA trả về `index.html`), và reverse proxy `/api/`, `/admin/` sang gunicorn.
+  - **IP thật của client:** nginx dùng `real_ip_header CF-Connecting-IP` + `set_real_ip_from <dải IP Cloudflare>`. Django tin header `X-Forwarded-For` và `X-Forwarded-Proto` từ nginx (`SECURE_PROXY_SSL_HEADER`).
+    Rate limit và báo cáo vi phạm đều dựa trên IP này.
+  - **Giới hạn của Cloudflare cần nhớ:** request body tối đa 100 MB (gói Free) và timeout 100 giây. Hai giới hạn này không ảnh hưởng, vì file đi thẳng lên S3/R2, không qua proxy. API không được có request chạy lâu.
   File lưu trên dịch vụ tương thích S3: AWS S3 hay Cloudflare R2 **chỉ khác nhau ở `.env`** (`S3_ENDPOINT_URL`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`).
-  Code không được dùng tính năng riêng của một nhà cung cấp. Frontend là static build, do Caddy phục vụ.
-- **Domain:** lấy từ `.env` (`APP_DOMAIN`). Caddy dùng biến này để xin chứng chỉ TLS; Django dùng nó cho `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` và các link trong email.
+  Code không được dùng tính năng riêng của một nhà cung cấp. Frontend là static build, do nginx phục vụ.
+- **Domain:** lấy từ `.env` (`APP_DOMAIN`). nginx dùng biến này cho `server_name`; Django dùng nó cho `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` và các link trong email.
   FE và API **cùng origin**: `https://<domain>/` là SPA, `https://<domain>/api/` là Django, `/admin/` là Django admin.
   Nhờ vậy không cần CORS cho API và cookie session đơn giản. Chỉ bucket S3 cần cấu hình CORS cho origin này.
 - **CI/CD:** GitHub Actions. Mỗi PR chạy lint, type check, test BE, test FE, build và E2E. Merge vào `master` thì build image rồi deploy lên VPS.
