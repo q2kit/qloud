@@ -25,7 +25,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 
 ## Công nghệ
 
-> Phiên bản tra trên registry ngày 2026-10-10. Khi khởi tạo (M0), tra lại một lần nữa rồi cập nhật bảng này cho khớp với lockfile.
+> Phiên bản tra trên registry ngày 2026-10-10 và khớp với `uv.lock`/`pnpm-lock.yaml`. Dependabot mở PR nâng phiên bản hằng tuần (`.github/dependabot.yml`); sửa bảng này trong cùng PR nâng phiên bản.
 
 | Thành phần | Phiên bản |
 |---|---|
@@ -140,7 +140,7 @@ Rule nào kiểm tra máy móc được thì để công cụ cưỡng chế, kh
 
 | Tầng | Công cụ | Vai trò |
 |---|---|---|
-| Cưỡng chế | GitHub Actions (`.github/workflows/ci.yml`, M0-09) + branch protection | Không thể bỏ qua: lint, typecheck, test, build, giấy phép, gitleaks, định dạng PR |
+| Cưỡng chế | GitHub Actions (`.github/workflows/ci.yml` và `pr.yml`, M0-09) + branch protection | Không thể bỏ qua: lint, typecheck, test, build, giấy phép, gitleaks (`ci.yml`); tiêu đề/body PR, tên branch (`pr.yml`) |
 | Phát hiện sớm | Git hooks bằng lefthook (`lefthook.yml`, M0-12) | Chạy trên máy, nhanh; có thể bị bỏ qua nên không thay thế CI |
 | Quy trình | Script trong repo + skill Claude Code (M2-00) | Đóng gói các bước gh/git lặp lại; Codex và người cũng dùng được script |
 | Phán đoán | `AGENTS.md` | Khi nào cần hỏi trước, định hướng, review |
@@ -159,16 +159,20 @@ Rule nào kiểm tra máy móc được thì để công cụ cưỡng chế, kh
   Phía trước VPS là **Cloudflare proxy** (DNS bật proxy — biểu tượng đám mây cam). Chi tiết ở [ADR-0006](adr/0006-cloudflare-proxy-nginx.md).
   - **TLS:** chế độ SSL của Cloudflare là **Full (strict)**. nginx dùng **Cloudflare Origin Certificate**; file cert và key được mount vào container, đường dẫn cấu hình qua `.env`. VPS không dùng Let's Encrypt.
   - **Firewall (ufw):** cổng 443 chỉ mở cho các dải IP của Cloudflare; SSH mở riêng. Cổng 80 đóng (Cloudflare tự chuyển HTTP sang HTTPS).
-  - **nginx:** phục vụ bản build FE (cache dài cho các file có hash trong tên, `index.html` thì không cache, mọi route SPA trả về `index.html`), và reverse proxy `/api/`, `/admin/` sang gunicorn.
+  - **nginx:** phục vụ bản build FE (cache dài cho các file có hash trong tên, `index.html` thì không cache, mọi route SPA trả về `index.html`), reverse proxy `/api/`, `/admin/` sang gunicorn, và phục vụ `/static/` (file tĩnh của Django admin, tạo bằng `collectstatic`).
   - **IP thật của client:** nginx dùng `real_ip_header CF-Connecting-IP` + `set_real_ip_from <dải IP Cloudflare>`. Django tin header `X-Forwarded-For` và `X-Forwarded-Proto` từ nginx (`SECURE_PROXY_SSL_HEADER`).
     Rate limit và báo cáo vi phạm đều dựa trên IP này.
+  - **Settings Django:** container api/worker/beat đặt `DJANGO_SETTINGS_MODULE=config.settings.prod`; `wsgi`, `asgi` và `celery` cũng mặc định là prod, chỉ `manage.py` mặc định là dev.
+    `config.settings.prod` dừng ngay khi khởi động nếu `APP_DOMAIN` thiếu hoặc là `localhost`, hay `DJANGO_SECRET_KEY` ngắn hơn 50 ký tự hoặc là giá trị mẫu.
+    Bật `SECURE_SSL_REDIRECT` (trừ `/api/v1/health`) và HSTS 1 năm (`DJANGO_HSTS_SECONDS`), không kèm `includeSubDomains`/`preload`.
+    CI chạy `manage.py check --deploy` với settings prod.
   - **Giới hạn của Cloudflare cần nhớ:** request body tối đa 100 MB (gói Free) và timeout 100 giây. Hai giới hạn này không ảnh hưởng, vì file đi thẳng lên S3/R2, không qua proxy. API không được có request chạy lâu.
   File lưu trên dịch vụ tương thích S3: AWS S3 hay Cloudflare R2 **chỉ khác nhau ở `.env`** (`S3_ENDPOINT_URL`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`).
   Code không được dùng tính năng riêng của một nhà cung cấp. Frontend là static build, do nginx phục vụ.
 - **Domain:** lấy từ `.env` (`APP_DOMAIN`). nginx dùng biến này cho `server_name`; Django dùng nó cho `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` và các link trong email.
   FE và API **cùng origin**: `https://<domain>/` là SPA, `https://<domain>/api/` là Django, `/admin/` là Django admin.
   Nhờ vậy không cần CORS cho API và cookie session đơn giản. Chỉ bucket S3 cần cấu hình CORS cho origin này.
-- **CI/CD:** GitHub Actions. Mỗi PR chạy lint, type check, test BE, test FE, build và E2E. Merge vào `master` thì build image rồi deploy lên VPS.
+- **CI/CD:** GitHub Actions. Mỗi PR chạy lint, type check, test BE, test FE, build và E2E. Deploy tự động khi merge vào `master` (build image rồi deploy lên VPS) **chưa làm**, thuộc M8-04.
 
 ## Hướng mở rộng sau này (chưa làm)
 - PostgreSQL managed kèm read replica; tách worker ra máy riêng; thêm CDN cho thumbnail.

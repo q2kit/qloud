@@ -1,0 +1,47 @@
+# Version-bump PRs (AGENTS.md › Luật về phiên bản). Major bumps arrive as separate PRs
+# and need approval before merging; minor and patch bumps are grouped per ecosystem.
+# `chore(deps)` keeps the PR titles valid for scripts/check_pr.py.
+version: 2
+
+updates:
+  - package-ecosystem: uv
+    directory: /qloud_backend
+    schedule:
+      interval: weekly
+    # Wait a few days after a release, against compromised or quickly yanked versions.
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: chore(deps)
+    groups:
+      backend-minor-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /qloud_frontend
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: chore(deps)
+    groups:
+      frontend-minor-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore(deps)
+    groups:
+      actions:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore(deps)

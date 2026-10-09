@@ -5,58 +5,62 @@ import {
   DrivePage,
   LoginPage,
   NotFoundPage,
+  RouteErrorPage,
   SectionPlaceholderPage,
 } from './pages';
 import { PublicLayout } from './public-layout';
+import type { RouteHandle } from './route-handle';
+
+type Section = 'recent' | 'shared' | 'trash' | 'settings';
+
+function sectionPlaceholderRoute(section: Section): RouteObject {
+  const handle: RouteHandle = { titleKey: `navigation.${section}` };
+  return {
+    path: section,
+    handle,
+    element: (
+      <SectionPlaceholderPage
+        titleKey={handle.titleKey}
+        descriptionKey={`placeholder.${section}`}
+      />
+    ),
+  };
+}
 
 export const appRoutes: RouteObject[] = [
   {
-    path: '/',
-    Component: AppLayout,
+    // Pathless root: catches render and loader errors from every route below,
+    // replacing React Router's built-in (English-only) error screen.
+    ErrorBoundary: RouteErrorPage,
     children: [
-      { index: true, Component: DrivePage },
       {
-        path: 'recent',
-        element: (
-          <SectionPlaceholderPage
-            titleKey="navigation.recent"
-            descriptionKey="placeholder.recent"
-          />
-        ),
+        path: '/',
+        Component: AppLayout,
+        children: [
+          {
+            index: true,
+            Component: DrivePage,
+            handle: {
+              titleKey: 'drive.title',
+              subtitleKey: 'shell.breadcrumbRoot',
+            } satisfies RouteHandle,
+          },
+          sectionPlaceholderRoute('recent'),
+          sectionPlaceholderRoute('shared'),
+          sectionPlaceholderRoute('trash'),
+          sectionPlaceholderRoute('settings'),
+          {
+            path: '*',
+            Component: NotFoundPage,
+            handle: { titleKey: 'notFound.title' } satisfies RouteHandle,
+          },
+        ],
       },
       {
-        path: 'shared',
-        element: (
-          <SectionPlaceholderPage
-            titleKey="navigation.shared"
-            descriptionKey="placeholder.shared"
-          />
-        ),
+        Component: PublicLayout,
+        children: [{ path: 'login', Component: LoginPage }],
       },
-      {
-        path: 'trash',
-        element: (
-          <SectionPlaceholderPage
-            titleKey="navigation.trash"
-            descriptionKey="placeholder.trash"
-          />
-        ),
-      },
-      {
-        path: 'settings',
-        element: (
-          <SectionPlaceholderPage
-            titleKey="navigation.settings"
-            descriptionKey="placeholder.settings"
-          />
-        ),
-      },
-      { path: '*', Component: NotFoundPage },
     ],
-  },
-  {
-    Component: PublicLayout,
-    children: [{ path: 'login', Component: LoginPage }],
   },
 ];
 

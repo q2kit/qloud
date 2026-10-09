@@ -18,6 +18,8 @@ export default defineConfig({
     proxy: {
       '/api': apiTarget,
       '/admin': apiTarget,
+      // Django admin assets (STATIC_URL = /static/).
+      '/static': apiTarget,
     },
   },
   test: {

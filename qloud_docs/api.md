@@ -28,7 +28,8 @@ cd ../qloud_frontend && pnpm api:generate
   ```json
   { "error": { "code": "quota_exceeded", "message": "Human readable", "details": {} } }
   ```
-  `code` là chuỗi ổn định để FE dịch sang thông báo i18n. Mã HTTP: 400 (dữ liệu sai), 401, 403, 404 (**dùng 404 thay cho 403 khi không muốn để lộ là node có tồn tại**), 409 (xung đột), 413, 429.
+  `code` là chuỗi ổn định để FE dịch sang thông báo i18n. Lỗi dữ liệu (`validation_error`) đặt lỗi theo trường ở `details.fields` (`{"name": ["..."]}`); lỗi không gắn với trường nào nằm ở khóa `non_field_errors`.
+  Mã HTTP: 400 (dữ liệu sai), 401, 403, 404 (**dùng 404 thay cho 403 khi không muốn để lộ là node có tồn tại**), 409 (xung đột), 413, 429.
 - **Rate limit:** auth 10 req/phút/IP; tạo upload 60 req/phút/user; các endpoint còn lại 600 req/phút/user.
 
 ## Danh sách endpoint (tổng quan)

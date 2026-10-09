@@ -7,8 +7,11 @@
 
 from typing import Any
 
+from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
+from django.http import Http404
 from rest_framework import exceptions, status
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler as drf_exception_handler
 
 
@@ -32,25 +35,28 @@ class AppError(exceptions.APIException):
 
 
 def exception_handler(exc: Exception, context: dict[str, Any]) -> Response | None:
+    # DRF converts these too, but only inside its handler; convert first so the branches
+    # below see an APIException and read its detail, not the repr of response.data.
+    if isinstance(exc, Http404):
+        exc = exceptions.NotFound(*exc.args)
+    elif isinstance(exc, DjangoPermissionDenied):
+        exc = exceptions.PermissionDenied(*exc.args)
+
     response = drf_exception_handler(exc, context)
-    if response is None:
-        return None
+    if response is None or not isinstance(exc, exceptions.APIException):
+        return response
 
     if isinstance(exc, AppError):
         code, message, details = exc.code, str(exc.detail), exc.details
     elif isinstance(exc, exceptions.ValidationError):
-        code, message, details = "validation_error", "Invalid input.", {"fields": exc.detail}
-    elif isinstance(exc, exceptions.APIException):
+        fields = exc.detail
+        if not isinstance(fields, dict):
+            fields = {api_settings.NON_FIELD_ERRORS_KEY: fields}
+        code, message, details = "validation_error", "Invalid input.", {"fields": fields}
+    else:
         codes = exc.get_codes()
         code = codes if isinstance(codes, str) else exc.default_code
         message, details = str(exc.detail), {}
-    else:
-        # Http404 / PermissionDenied already converted by DRF's handler
-        code, message, details = _code_for_status(response.status_code), str(response.data), {}
 
     response.data = {"error": {"code": code, "message": message, "details": details}}
     return response
-
-
-def _code_for_status(status_code: int) -> str:
-    return {404: "not_found", 403: "permission_denied"}.get(status_code, "error")

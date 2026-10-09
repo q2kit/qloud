@@ -47,3 +47,8 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 *.swp
+
+# --- AI agents ---
+# Worktrees of parallel agents and per-machine settings
+.claude/worktrees/
+.claude/settings.local.json

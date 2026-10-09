@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
-import { csrfMiddleware, getCookie } from './client';
+import { api, csrfMiddleware, getCookie } from './client';
 import { ApiError, unwrap } from './errors';
 
 const seen: { method: string; csrf: string | null; credentials: string }[] = [];
@@ -78,6 +78,36 @@ describe('unwrap', () => {
     ).toEqual({
       ok: true,
     });
+  });
+
+  it('returns undefined for a successful empty (204) response', async () => {
+    server.use(
+      http.get(
+        '*/api/v1/health',
+        () => new HttpResponse(null, { status: 204 }),
+      ),
+    );
+
+    const result = await api.GET('/api/v1/health');
+
+    expect(result.data).toBeUndefined();
+    expect(() => unwrap(result)).not.toThrow();
+    expect(unwrap(result)).toBeUndefined();
+  });
+
+  it('still throws for an empty error response', async () => {
+    server.use(
+      http.get(
+        '*/api/v1/health',
+        () => new HttpResponse(null, { status: 404 }),
+      ),
+    );
+
+    const result = await api.GET('/api/v1/health');
+
+    expect(() => unwrap(result)).toThrow(
+      expect.objectContaining({ status: 404, code: 'error' }) as ApiError,
+    );
   });
 
   it('throws ApiError with the unified error code', () => {

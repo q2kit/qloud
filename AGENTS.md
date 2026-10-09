@@ -32,7 +32,7 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
 
 1. **Định hướng.**
    - Đọc [qloud_docs/ROADMAP.md](qloud_docs/ROADMAP.md) và [qloud_docs/open-questions.md](qloud_docs/open-questions.md).
-   - Xem trạng thái trên GitHub: `gh pr list`, `gh pr list --state merged --limit 5`, `gh issue list --milestone "<milestone>"`.
+   - Xem trạng thái trên GitHub: `gh pr list`, `gh pr list --state merged --limit 5`, `gh issue list --milestone M<n>` (ví dụ `M1`).
      Đối chiếu với ROADMAP: PR đã merge mà task vẫn là 🟦 thì phải đồng bộ (xem bước 9). Có PR nào đang mở, đang bị yêu cầu sửa (review) hay CI đỏ thì xử lý trước, rồi mới làm task mới.
    - Chọn task tiếp theo: task chưa làm, đứng đầu milestone hiện tại, và không phụ thuộc vào task nào chưa xong.
 2. **Nhận task.**
@@ -42,6 +42,7 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
    - **Tiếp tục một branch đã có** (làm tiếp task, sửa theo review): kiểm tra base trước khi làm, **chỉ rebase nếu base có commit mới**: `git fetch origin && git merge-base --is-ancestor origin/<base> HEAD || git rebase origin/<base>`.
 3. **Đọc ngữ cảnh.** Đọc file feature liên quan trong `qloud_docs/features/`, cùng các phần liên quan
    của `architecture.md`, `data-model.md`, `api.md`, `ui-ux.md` và `conventions.md`. Không đọc thừa những gì không cần.
+   File feature còn `Nháp` thì chưa code: nhờ duyệt trước, theo từng milestone (xem [qloud_docs/README.md › Trạng thái tài liệu](qloud_docs/README.md#trạng-thái-tài-liệu)).
 4. **Lập kế hoạch.** Với task lớn (nhiều file, schema mới, API mới): viết kế hoạch ngắn thành comment trên issue (`gh issue comment <n>`),
    thêm label `needs:owner-decision` và báo lại. **Chờ được duyệt** rồi mới code. Task nhỏ, rõ ràng thì làm luôn.
 5. **Thực hiện.** Code + test đi cùng nhau (xem mục 6). Mỗi PR chỉ chứa một task. Commit nhỏ, theo Conventional Commits.
@@ -65,6 +66,8 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
    - **PR được merge từ bên ngoài phiên:** ở đầu phiên làm việc tiếp theo, agent kiểm tra các PR đã merge (`gh pr list --state merged`).
      Nếu task tương ứng trong ROADMAP vẫn là 🟦 thì đổi sang ✅ trong PR kế tiếp; nếu chưa có PR nào sắp mở thì mở một PR nhỏ chỉ để làm việc này.
    - Không để ROADMAP trên `master` lệch với GitHub quá một phiên làm việc.
+   - Issue tự đóng nhờ `Closes #<n>`; gỡ label trạng thái: `gh issue edit <n> --remove-label status:in-progress`.
+     Milestone không còn issue mở thì đóng nó: `gh api -X PATCH repos/q2kit/qloud/milestones/<number> -f state=closed`.
 10. **Báo cáo.** Tóm tắt: link PR, đã làm gì, đã kiểm tra thế nào, còn tồn đọng gì.
 
 **Các tình huống khác:**
@@ -122,7 +125,7 @@ Chi tiết và lý do: xem [qloud_docs/architecture.md](qloud_docs/architecture.
 - Đọc **tài liệu chính thức của đúng phiên bản đang dùng** (release notes, hướng dẫn migration) trước khi dùng API mới. Không viết theo cú pháp của phiên bản cũ.
 - Kiểm tra tính tương thích giữa các package (ví dụ một thư viện Django đã hỗ trợ Django 6.1 chưa). Nếu bản mới nhất chưa tương thích thì dùng bản thấp hơn gần nhất, và ghi lý do vào `architecture.md`.
 - Ghim phiên bản bằng lockfile (`uv.lock` cho BE, `pnpm-lock.yaml` cho FE). Bảng phiên bản trong `architecture.md` phải khớp với lockfile.
-- Dependabot hoặc Renovate tự mở PR nâng phiên bản; nâng major version thì phải hỏi trước.
+- Dependabot (`.github/dependabot.yml`) mở PR nâng phiên bản mỗi tuần (minor/patch gộp chung); nâng major version thì phải hỏi trước.
 
 ## 6. Tiêu chuẩn chất lượng (Definition of Done)
 
@@ -184,12 +187,12 @@ cd "$(git rev-parse --show-toplevel)/qloud_frontend" && pnpm dev
 ```
 
 ```bash
-cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run celery -A config worker -l info   # chỉ khi cần worker
+cd "$(git rev-parse --show-toplevel)/qloud_backend" && DJANGO_SETTINGS_MODULE=config.settings.dev uv run celery -A config worker -l info   # chỉ khi cần worker
 ```
 
 | Địa chỉ | Là gì |
 |---|---|
-| http://localhost:5173 | Frontend (Vite, proxy `/api` và `/admin` sang :8000) |
+| http://localhost:5173 | Frontend (Vite, proxy `/api`, `/admin` và `/static` sang :8000) |
 | http://localhost:8000/api/v1/health · `/api/docs/` · `/admin/` | Backend: health, Swagger UI, Django admin |
 | http://localhost:8025 | Mailpit (email dev) |
 | http://localhost:4566 | LocalStack S3 (bucket `qloud-dev`) |
@@ -197,8 +200,9 @@ cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run celery -A config w
 **Kiểm tra trước khi mở PR** — giống CI (cần hạ tầng đang chạy):
 
 ```bash
-cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run ruff format --check . && uv run ruff check . && uv run mypy . && uv run pytest --cov
+cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run ruff format --check . && uv run ruff check . && uv run mypy . && DJANGO_SETTINGS_MODULE=config.settings.test uv run python manage.py makemigrations --check --dry-run && uv run pytest --cov
 cd "$(git rev-parse --show-toplevel)/qloud_frontend" && pnpm lint && pnpm format:check && pnpm typecheck && pnpm test:coverage && pnpm build && pnpm test:e2e
+cd "$(git rev-parse --show-toplevel)" && python3 -m unittest discover -s scripts/tests   # khi sửa scripts/
 ```
 
 **Sau khi đổi API** — sinh lại schema và type, commit cả hai (CI chặn nếu cũ):

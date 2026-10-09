@@ -3,7 +3,40 @@ import { Outlet } from 'react-router';
 
 import { AppHeader } from './app-header';
 import { AppSidebar } from './app-sidebar';
-import { DetailPanel } from './detail-panel';
+import { DETAIL_SHEET_SELECTOR, DetailPanel } from './detail-panel';
+
+// Targets where `i` already means something: text entry (contenteditable="",
+// "true" and "plaintext-only") and Radix menus/listboxes, which use letter keys
+// for typeahead.
+const KEY_CONSUMING_TARGETS = [
+  'input',
+  'textarea',
+  'select',
+  '[contenteditable]:not([contenteditable="false"])',
+  '[role="menu"]',
+  '[role="menuitem"]',
+  '[role="listbox"]',
+].join(', ');
+
+function isDetailShortcut(event: KeyboardEvent): boolean {
+  if (
+    event.key.toLowerCase() !== 'i' ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.altKey ||
+    event.repeat ||
+    event.defaultPrevented
+  ) {
+    return false;
+  }
+  if (!(event.target instanceof Element)) return true;
+  if (event.target.closest(KEY_CONSUMING_TARGETS)) return false;
+  // Inside a modal (navigation drawer, future share dialog…) the shortcut must
+  // not stack the details sheet on top. The details sheet itself is the
+  // exception, so `i` closes it the same way it opened it.
+  const dialog = event.target.closest('[role="dialog"], [role="alertdialog"]');
+  return !dialog || dialog.matches(DETAIL_SHEET_SELECTOR);
+}
 
 export function AppLayout(): React.JSX.Element {
   const [isNavigationOpen, setIsNavigationOpen] = React.useState(false);
@@ -13,22 +46,7 @@ export function AppLayout(): React.JSX.Element {
 
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
-      if (
-        event.key.toLowerCase() === 'i' &&
-        !event.metaKey &&
-        !event.ctrlKey &&
-        !event.altKey &&
-        !(event.target instanceof HTMLInputElement) &&
-        !(event.target instanceof HTMLTextAreaElement) &&
-        !(event.target instanceof HTMLSelectElement) &&
-        !(
-          event.target instanceof HTMLElement &&
-          // Covers contenteditable="", "true" and "plaintext-only".
-          event.target.closest(
-            '[contenteditable]:not([contenteditable="false"])',
-          )
-        )
-      ) {
+      if (isDetailShortcut(event)) {
         setIsDetailOpen((current) => !current);
       }
     };

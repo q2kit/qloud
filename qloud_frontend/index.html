@@ -19,6 +19,10 @@
             window.matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.classList.toggle('dark', isDark);
         document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+        // Same values as THEME_COLORS in src/app/theme-provider.tsx.
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute('content', isDark ? '#1c1917' : '#fafaf9');
       })();
     </script>
   </head>

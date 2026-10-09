@@ -25,7 +25,13 @@ PR_TITLE = re.compile(
 BRANCH = re.compile(rf"^(?:{'|'.join(TYPES)})/(?:{TASK_ID}-)?(?P<slug>[a-z0-9]+(?:-[a-z0-9]+)*)$")
 
 HEADER_MAX = 72
+# GitHub appends ` (#123)` to the squash commit, which must still fit HEADER_MAX.
+PR_TITLE_MAX = HEADER_MAX - len(" (#123)")
 SLUG_MAX = 40
+# A trailing `[...]` that PR_TITLE did not take as the task ID, e.g. `[M2-4]`.
+STRAY_TASK = re.compile(r"\[[^\]]*\]\s*$")
+# Dependabot names its own branches and its titles can run long.
+BOT_BRANCH_PREFIX = "dependabot/"
 
 
 def subject_problems(subject: str) -> list[str]:
