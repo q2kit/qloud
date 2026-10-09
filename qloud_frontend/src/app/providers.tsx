@@ -1,13 +1,11 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import * as React from 'react';
+
+import { createQueryClient } from '@/lib/query-client';
 
 import { ThemeProvider } from './theme-provider';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { refetchOnWindowFocus: false },
-  },
-});
+const queryClient = createQueryClient();
 
 export function AppProviders({
   children,
