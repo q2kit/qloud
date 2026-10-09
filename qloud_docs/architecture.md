@@ -162,6 +162,10 @@ Rule nào kiểm tra máy móc được thì để công cụ cưỡng chế, kh
   - **nginx:** phục vụ bản build FE (cache dài cho các file có hash trong tên, `index.html` thì không cache, mọi route SPA trả về `index.html`), và reverse proxy `/api/`, `/admin/` sang gunicorn.
   - **IP thật của client:** nginx dùng `real_ip_header CF-Connecting-IP` + `set_real_ip_from <dải IP Cloudflare>`. Django tin header `X-Forwarded-For` và `X-Forwarded-Proto` từ nginx (`SECURE_PROXY_SSL_HEADER`).
     Rate limit và báo cáo vi phạm đều dựa trên IP này.
+  - **Settings Django:** container api/worker/beat đặt `DJANGO_SETTINGS_MODULE=config.settings.prod`; `wsgi`, `asgi` và `celery` cũng mặc định là prod, chỉ `manage.py` mặc định là dev.
+    `config.settings.prod` dừng ngay khi khởi động nếu `APP_DOMAIN` thiếu hoặc là `localhost`, hay `DJANGO_SECRET_KEY` ngắn hơn 50 ký tự hoặc là giá trị mẫu.
+    Bật `SECURE_SSL_REDIRECT` (trừ `/api/v1/health`) và HSTS 1 năm (`DJANGO_HSTS_SECONDS`), không kèm `includeSubDomains`/`preload`.
+    CI chạy `manage.py check --deploy` với settings prod.
   - **Giới hạn của Cloudflare cần nhớ:** request body tối đa 100 MB (gói Free) và timeout 100 giây. Hai giới hạn này không ảnh hưởng, vì file đi thẳng lên S3/R2, không qua proxy. API không được có request chạy lâu.
   File lưu trên dịch vụ tương thích S3: AWS S3 hay Cloudflare R2 **chỉ khác nhau ở `.env`** (`S3_ENDPOINT_URL`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`).
   Code không được dùng tính năng riêng của một nhà cung cấp. Frontend là static build, do nginx phục vụ.

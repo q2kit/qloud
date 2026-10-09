@@ -187,7 +187,7 @@ cd "$(git rev-parse --show-toplevel)/qloud_frontend" && pnpm dev
 ```
 
 ```bash
-cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run celery -A config worker -l info   # chỉ khi cần worker
+cd "$(git rev-parse --show-toplevel)/qloud_backend" && DJANGO_SETTINGS_MODULE=config.settings.dev uv run celery -A config worker -l info   # chỉ khi cần worker
 ```
 
 | Địa chỉ | Là gì |
