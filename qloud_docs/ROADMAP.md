@@ -113,6 +113,7 @@
 
 > Mới nhất ở trên cùng. Mỗi dòng gồm: ngày — task — tóm tắt — người hoặc agent thực hiện.
 
+- 2026-10-10 — — Sửa quy tắc rebase: chỉ rebase khi base branch có commit mới (kiểm tra bằng `git merge-base --is-ancestor`), không rebase vô điều kiện. — AI agent
 - 2026-10-10 — — Đánh dấu M0-06 ✅ (đã merge ở #55). Thêm quy tắc đồng bộ trạng thái ROADMAP sau khi merge; hướng dẫn tạo `.env` dùng `cp -n` để không ghi đè secret. — AI agent
 - 2026-10-10 — M0-06 — Dựng khung SPA với React, Vite, TypeScript, Tailwind/shadcn, Router, Query, i18n, theme, fetch CSRF và Vitest (Codex). Review: sửa `typecheck` (trước đó không kiểm tra file nào), bọc truy cập localStorage, dùng lucide-react 1.53.0 thay vì bỏ qua `minimumReleaseAge` của pnpm. — Codex + Claude
 - 2026-10-10 — M0-05 — Khung BE: Django 6.1 + DRF + Celery trên Python 3.14 (uv), settings base/dev/test/prod, `/api/v1/health`, định dạng lỗi chung, cursor pagination, BaseModel UUIDv7, custom User tối thiểu (tạo trước migration đầu tiên), email theo `MAILERS` của Django 6.1. 19 test, coverage 100%, ruff + mypy strict sạch. — AI agent
