@@ -89,3 +89,5 @@ Mỗi màn hình được mô tả chi tiết (trạng thái rỗng, đang tải
 ## Dark mode
 - Có 3 lựa chọn: `system` (mặc định), `light`, `dark`. Lưu vào profile, và cache ở localStorage để tránh trang bị nháy màu khi tải.
 - Dùng class `dark` của Tailwind kết hợp CSS variable. Mọi màu phải đi qua token, không viết mã màu trực tiếp.
+- `<meta name="theme-color">` (màu thanh trình duyệt trên mobile) theo theme đã phân giải, đặt ngay từ script chạy trước khi vẽ trang. Đây là chỗ duy nhất phải lặp mã màu (`--background`), vì thẻ meta không đọc được CSS variable.
+- Đổi theme ở một tab thì các tab khác đang mở cũng đổi theo (sự kiện `storage`).
