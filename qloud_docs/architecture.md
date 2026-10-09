@@ -47,6 +47,8 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 | TanStack Query | 5.104.1 |
 | Tailwind CSS | 4.3.3 |
 | Vitest | 5.0.3 |
+| openapi-typescript | 7.13.0 (khai báo peer `typescript ^5`, đã kiểm tra chạy đúng với TS 6; ngoại lệ ghi trong `pnpm-workspace.yaml`, theo dõi ở #56) |
+| openapi-fetch | 0.17.0 |
 | Playwright | 1.64 |
 
 MSW dùng bản 2.15.0 vì Vitest 5.0.3 chưa khai báo tương thích với MSW 3; sẽ nâng khi

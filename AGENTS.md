@@ -185,6 +185,7 @@ uv run python manage.py runserver        # http://localhost:8000/api/v1/health �
 uv run celery -A config worker -l info   # worker Celery
 uv run pytest --cov                      # test + coverage (cần docker compose đang chạy)
 uv run ruff format . && uv run ruff check . && uv run mypy .
+uv run python manage.py spectacular --file openapi.yaml --validate --fail-on-warn   # sau khi đổi API
 
 # Frontend (thư mục qloud_frontend, dùng pnpm)
 cd "$(git rev-parse --show-toplevel)/qloud_frontend"
@@ -194,6 +195,7 @@ pnpm test
 pnpm lint
 pnpm typecheck
 pnpm build
+pnpm api:generate                        # sinh lại type API từ qloud_backend/openapi.yaml
 ```
 
 ## 9. Git

@@ -32,19 +32,20 @@ def _check_redis() -> bool:
         return False
 
 
+HEALTH = inline_serializer(
+    "Health",
+    fields={
+        "status": serializers.ChoiceField(choices=["ok", "error"]),
+        "checks": serializers.DictField(child=serializers.ChoiceField(choices=["ok", "error"])),
+    },
+)
+
+
 class HealthView(APIView):
     authentication_classes = ()
     permission_classes = (AllowAny,)
 
-    @extend_schema(
-        responses=inline_serializer(
-            "Health",
-            fields={
-                "status": serializers.ChoiceField(choices=["ok", "error"]),
-                "checks": serializers.DictField(child=serializers.CharField()),
-            },
-        )
-    )
+    @extend_schema(operation_id="health_retrieve", responses={200: HEALTH, 503: HEALTH})
     def get(self, request: Request) -> Response:
         checks = {"database": _check_database(), "redis": _check_redis()}
         healthy = all(checks.values())

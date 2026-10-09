@@ -55,7 +55,10 @@ describe('useHealth', () => {
   it('returns an error for a failed response', async () => {
     server.use(
       http.get('/api/v1/health', () =>
-        HttpResponse.json({ detail: 'Unavailable' }, { status: 503 }),
+        HttpResponse.json(
+          { status: 'error', checks: { database: 'error', redis: 'ok' } },
+          { status: 503 },
+        ),
       ),
     );
     const { result } = renderHook(() => useHealth(), {
@@ -65,6 +68,9 @@ describe('useHealth', () => {
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
     });
-    expect(result.current.error?.message).toContain('503');
+    expect(result.current.error).toMatchObject({
+      name: 'ApiError',
+      status: 503,
+    });
   });
 });

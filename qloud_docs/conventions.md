@@ -26,6 +26,7 @@
 - TypeScript `strict`, không dùng `any` (bắt buộc dùng `unknown` rồi thu hẹp kiểu).
 - Component đặt tên PascalCase, mỗi file một component chính. Hook bắt đầu bằng `use`.
 - Dữ liệu từ server chỉ lấy qua TanStack Query. Không lưu bản sao dữ liệu server vào Zustand.
+- Gọi API qua client có kiểu `api` (`src/lib/api/client.ts`) + `unwrap()`; không dùng `fetch` trực tiếp. Đổi API thì sinh lại `openapi.yaml` và `schema.d.ts` (xem `api.md`).
 - Mọi chuỗi UI dùng `t('...')`. Mọi màu dùng token.
 - Truy cập được bằng bàn phím: phần tử tương tác phải là `button` hoặc `a` thật, có focus ring.
 
