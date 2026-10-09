@@ -1,4 +1,5 @@
 import pytest
+from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
 from django.http import Http404
 from rest_framework import exceptions, status
 from rest_framework.test import APIRequestFactory
@@ -66,6 +67,34 @@ def test_drf_and_django_errors_are_wrapped(exc, status_code, code):
 
     assert response.status_code == status_code
     assert response.data["error"]["code"] == code
+
+
+def test_non_dict_validation_error_is_keyed_as_non_field_errors():
+    response = _call(exceptions.ValidationError("Pick a different name."))
+
+    assert response.data["error"]["details"]["fields"] == {
+        "non_field_errors": ["Pick a different name."]
+    }
+
+
+@pytest.mark.parametrize(
+    ("exc", "status_code", "code", "message"),
+    [
+        (Http404("No Node matches."), 404, "not_found", "No Node matches."),
+        (Http404(), 404, "not_found", exceptions.NotFound.default_detail),
+        (
+            DjangoPermissionDenied(),
+            403,
+            "permission_denied",
+            exceptions.PermissionDenied.default_detail,
+        ),
+    ],
+)
+def test_django_errors_have_a_readable_message(exc, status_code, code, message):
+    response = _call(exc)
+
+    assert response.status_code == status_code
+    assert response.data == {"error": {"code": code, "message": str(message), "details": {}}}
 
 
 def test_unhandled_exception_is_not_swallowed():
