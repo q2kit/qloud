@@ -159,7 +159,7 @@ Rule nào kiểm tra máy móc được thì để công cụ cưỡng chế, kh
   Phía trước VPS là **Cloudflare proxy** (DNS bật proxy — biểu tượng đám mây cam). Chi tiết ở [ADR-0006](adr/0006-cloudflare-proxy-nginx.md).
   - **TLS:** chế độ SSL của Cloudflare là **Full (strict)**. nginx dùng **Cloudflare Origin Certificate**; file cert và key được mount vào container, đường dẫn cấu hình qua `.env`. VPS không dùng Let's Encrypt.
   - **Firewall (ufw):** cổng 443 chỉ mở cho các dải IP của Cloudflare; SSH mở riêng. Cổng 80 đóng (Cloudflare tự chuyển HTTP sang HTTPS).
-  - **nginx:** phục vụ bản build FE (cache dài cho các file có hash trong tên, `index.html` thì không cache, mọi route SPA trả về `index.html`), và reverse proxy `/api/`, `/admin/` sang gunicorn.
+  - **nginx:** phục vụ bản build FE (cache dài cho các file có hash trong tên, `index.html` thì không cache, mọi route SPA trả về `index.html`), reverse proxy `/api/`, `/admin/` sang gunicorn, và phục vụ `/static/` (file tĩnh của Django admin, tạo bằng `collectstatic`).
   - **IP thật của client:** nginx dùng `real_ip_header CF-Connecting-IP` + `set_real_ip_from <dải IP Cloudflare>`. Django tin header `X-Forwarded-For` và `X-Forwarded-Proto` từ nginx (`SECURE_PROXY_SSL_HEADER`).
     Rate limit và báo cáo vi phạm đều dựa trên IP này.
   - **Giới hạn của Cloudflare cần nhớ:** request body tối đa 100 MB (gói Free) và timeout 100 giây. Hai giới hạn này không ảnh hưởng, vì file đi thẳng lên S3/R2, không qua proxy. API không được có request chạy lâu.
