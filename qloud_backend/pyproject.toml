@@ -1,0 +1,89 @@
+[project]
+name = "qloud-backend"
+version = "0.1.0"
+description = "Qloud API — Django + DRF"
+license = "MIT"
+requires-python = ">=3.14"
+dependencies = [
+    "django>=6.1.2,<6.2",
+    "djangorestframework>=3.18.3",
+    "drf-spectacular>=0.30.0",
+    "django-environ>=0.14.0",
+    "psycopg[binary]>=3.3.6",
+    "celery[redis]>=5.6.3",
+    "redis>=8.1.0",
+    "gunicorn>=26.2.0",
+    "argon2-cffi>=25.1.0",
+    "django-stubs-ext>=6.1.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-django>=4.14.0",
+    "pytest-cov>=7.1.0",
+    "factory-boy>=3.3.3",
+    "ruff>=0.16.10",
+    "mypy>=2.3,<2.4",  # djangorestframework-stubs 3.18.1 requires mypy<2.4
+    "django-stubs[compatible-mypy]>=6.1.2",
+    "djangorestframework-stubs[compatible-mypy]>=3.18.1",
+    "celery-types>=0.26.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+extend-exclude = ["**/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "DJ", "S", "SIM", "RUF", "PT"]
+ignore = ["RUF012"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101", "S105", "S106"]
+"config/settings/*.py" = ["F405", "F403"]
+
+[tool.mypy]
+python_version = "3.14"
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+strict = true
+ignore_missing_imports = false
+exclude = ["/migrations/"]
+
+[[tool.mypy.overrides]]
+module = ["environ.*", "factory.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["*.tests.*", "conftest"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[tool.django-stubs]
+django_settings_module = "config.settings.test"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+addopts = "-ra --strict-markers --reuse-db"
+python_files = ["test_*.py"]
+# Fail on Django deprecations so code keeps up with the current Django version
+filterwarnings = ["error::django.utils.deprecation.RemovedAfterNextVersionWarning", "error:::django"]
+
+[tool.coverage.run]
+source = ["apps", "config"]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "config/wsgi.py",
+    "config/asgi.py",
+    "config/settings/dev.py",
+    "config/settings/prod.py",
+]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+skip_covered = true

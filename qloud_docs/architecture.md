@@ -29,13 +29,14 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 
 | Thành phần | Phiên bản |
 |---|---|
-| Python | 3.14 (nếu Celery hoặc một thư viện nào đó chưa ổn trên 3.14 thì dùng 3.13, và ghi lý do) |
+| Python | 3.14 (đã kiểm tra Celery worker chạy được trên 3.14) |
 | Django | 6.1 |
 | Django REST Framework | 3.18 |
-| drf-spectacular | 0.30 (classifier chính thức mới ghi tới Django 6.0 — cần kiểm tra lại khi làm M0) |
+| drf-spectacular | 0.30 (đã kiểm tra chạy được với Django 6.1) |
 | django-allauth | 65.x |
 | Celery | 5.6 |
 | psycopg | 3.3 |
+| mypy | 2.3 — **không phải bản mới nhất (2.4)** vì djangorestframework-stubs 3.18.1 yêu cầu `mypy<2.4` |
 | PostgreSQL | 18 |
 | Redis | 8 |
 | Node.js | bản LTS hiện hành |
@@ -58,10 +59,10 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 | S3 | boto3 |
 | Tác vụ nền | Celery + Redis (gồm celery beat cho tác vụ định kỳ) |
 | Ảnh | Pillow (thumbnail ảnh), pypdfium2 (render trang PDF; Apache-2.0/BSD, không cần thư viện hệ thống) |
-| Email | SMTP riêng (cấu hình qua `.env`), gửi qua Celery; dev dùng Mailpit |
+| Email | SMTP riêng (cấu hình qua `.env`), gửi qua Celery; dev dùng Mailpit. Cấu hình bằng setting `MAILERS` của Django 6.1 (các setting `EMAIL_*` đã bị deprecate) |
 | Cấu hình | django-environ |
 | Quản lý package | uv |
-| Chất lượng | ruff (lint + format), mypy + django-stubs |
+| Chất lượng | ruff (lint + format), mypy (strict) + django-stubs + django-stubs-ext |
 | Test | pytest, pytest-django, factory_boy; S3 thật trên LocalStack |
 
 **Cấu trúc module (Django apps):**
@@ -69,6 +70,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 qloud_backend/
 ├── config/            # settings (base/dev/test/prod), urls, celery, wsgi/asgi
 ├── apps/
+│   ├── core/          # BaseModel (UUIDv7 + timestamps), định dạng lỗi chung, phân trang, health
 │   ├── accounts/      # User, profile, tích hợp allauth
 │   ├── drive/         # Node, FileVersion, Blob — cây thư mục, đổi tên, di chuyển
 │   ├── uploads/       # UploadSession, multipart
