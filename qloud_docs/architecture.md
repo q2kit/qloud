@@ -139,7 +139,7 @@ Rule nào kiểm tra máy móc được thì để công cụ cưỡng chế, kh
 | Tầng | Công cụ | Vai trò |
 |---|---|---|
 | Cưỡng chế | GitHub Actions (`.github/workflows/ci.yml`, M0-09) + branch protection | Không thể bỏ qua: lint, typecheck, test, build, giấy phép, gitleaks, định dạng PR |
-| Phát hiện sớm | Git hooks bằng lefthook (M0-12) | Chạy trên máy, nhanh; có thể bị bỏ qua nên không thay thế CI |
+| Phát hiện sớm | Git hooks bằng lefthook (`lefthook.yml`, M0-12) | Chạy trên máy, nhanh; có thể bị bỏ qua nên không thay thế CI |
 | Quy trình | Script trong repo + skill Claude Code (M2-00) | Đóng gói các bước gh/git lặp lại; Codex và người cũng dùng được script |
 | Phán đoán | `AGENTS.md` | Khi nào cần hỏi trước, định hướng, review |
 

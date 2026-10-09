@@ -1,0 +1,37 @@
+# Git hooks (M0-12). Install once per clone: `lefthook install`.
+# CI is the enforcement layer; these hooks catch problems early and must stay fast.
+# Rules live in scripts/conventions.py (shared with CI).
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: backend ruff
+      root: qloud_backend/
+      glob: "qloud_backend/**/*.py"
+      run: uv run --frozen ruff check --fix {staged_files} && uv run --frozen ruff format {staged_files}
+      stage_fixed: true
+
+    - name: frontend prettier + eslint
+      root: qloud_frontend/
+      glob: "qloud_frontend/**/*.{ts,tsx,js,jsx,json,css,html,md,yml,yaml}"
+      run: >-
+        pnpm exec prettier --write --ignore-unknown {staged_files} &&
+        pnpm exec eslint --fix --no-warn-ignored {staged_files}
+      stage_fixed: true
+
+    - name: secrets (gitleaks)
+      run: gitleaks git --pre-commit --staged --redact --no-banner
+
+commit-msg:
+  jobs:
+    - name: conventional commit
+      run: python3 scripts/hooks/commit_msg.py {1}
+
+pre-push:
+  jobs:
+    - name: branch name and target
+      run: python3 scripts/hooks/pre_push_refs.py
+      use_stdin: true
+
+    - name: checks for changed side
+      run: scripts/hooks/pre_push_checks.sh
