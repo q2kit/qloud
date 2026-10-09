@@ -32,7 +32,7 @@
 | M0-07 | Design tokens và các layout chính (sidebar, header, khung panel chi tiết) | [#5](https://github.com/q2kit/qloud/issues/5) | ✅ |
 | M0-08 | Sinh API client cho FE từ OpenAPI schema | [#6](https://github.com/q2kit/qloud/issues/6) | ✅ |
 | M0-09 | GitHub Actions: lint, typecheck, test, build BE/FE; kiểm tra giấy phép; gitleaks; kiểm tra tiêu đề/body PR và cảnh báo thiếu cập nhật ROADMAP; sau đó bật required checks | [#7](https://github.com/q2kit/qloud/issues/7) | ✅ |
-| M0-10 | Khung Playwright E2E và đưa vào CI | [#8](https://github.com/q2kit/qloud/issues/8) | 🟦 |
+| M0-10 | Khung Playwright E2E và đưa vào CI | [#8](https://github.com/q2kit/qloud/issues/8) | ✅ |
 | M0-11 | Cập nhật mục "Lệnh thường dùng" trong AGENTS.md | [#9](https://github.com/q2kit/qloud/issues/9) | 🟦 |
 | M0-12 | Git hooks bằng lefthook: format/lint file đã stage, gitleaks, kiểm tra commit message, tên branch, chặn push `master`, typecheck/test phía có thay đổi | [#61](https://github.com/q2kit/qloud/issues/61) | ✅ |
 
@@ -115,6 +115,7 @@
 
 > Mới nhất ở trên cùng. Mỗi dòng gồm: ngày — task — tóm tắt — người hoặc agent thực hiện.
 
+- 2026-10-10 — M0-10 — PR #67 đã merge, đổi trạng thái sang ✅. — AI agent
 - 2026-10-10 — M0-11 — Viết lại AGENTS.md mục 8 theo việc: cài lần đầu, chạy dev (mỗi server một khối), kiểm tra giống CI, đổi API, lệnh hay dùng; tách lệnh xóa dữ liệu ra khối riêng có cảnh báo. Đã chạy thật từng khối từ thư mục con của repo. Thay `cp -n` bằng `[ -f ] || cp` (trên macOS `cp -n` trả exit 1 khi file đã có, làm hỏng chuỗi `&&`). — AI agent
 - 2026-10-10 — M0-10 — Playwright 1.64 E2E full-stack (Django :8001 + `vite preview` :4173 proxy `/api`), 5 smoke test (shell + health thật, điều hướng sidebar, 404, ngôn ngữ và giao diện giữ sau reload); job `E2E` trong CI, lưu report khi fail. Sửa `ALLOWED_HOSTS` của settings test (proxy đổi Host thành 127.0.0.1). — AI agent
 - 2026-10-10 — M0-08 — API client có kiểu: BE xuất `qloud_backend/openapi.yaml` (validate, fail on warn); FE sinh `schema.d.ts` bằng openapi-typescript 7.13 và gọi qua openapi-fetch 0.17 (cookie + CSRF middleware, `unwrap()`/`ApiError` theo định dạng lỗi chung). Thay `apiFetch`. CI chặn schema/type bị cũ. — AI agent
