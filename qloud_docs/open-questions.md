@@ -18,7 +18,7 @@
 | # | Câu hỏi | Quyết định | Ngày |
 |---|---|---|---|
 | Q-11 | Domain? | Cấu hình qua `.env` (`APP_DOMAIN`). Lưu ý: production cần một domain thật trỏ về VPS (Google OAuth và Let's Encrypt không dùng được với IP trần) | 2026-10-09 |
-| Q-02 | Frontend phục vụ từ đâu? | Cùng VPS, Caddy phục vụ file tĩnh, cùng origin với API | 2026-10-09 |
+| Q-02 | Frontend phục vụ từ đâu? | Cùng VPS, nginx phục vụ file tĩnh, cùng origin với API, phía trước là Cloudflare proxy ([ADR-0006](adr/0006-cloudflare-proxy-nginx.md)) | 2026-10-09 |
 | Q-13 | Chống lạm dụng khi mở đăng ký | Xác thực email trước khi upload + Cloudflare Turnstile + plan mặc định `free-2026` 5 GB; bạn bè được admin gán `friends-2026` 50 GB | 2026-10-09 |
 | Q-14 | Xử lý nội dung xấu qua link công khai | Có nút báo cáo vi phạm; admin gỡ link, gỡ mọi link của một node, khóa user ([sharing.md](features/sharing.md)) | 2026-10-09 |
 | Q-01 | S3 hay R2? | Code dùng API S3 chung; dùng AWS S3 hay Cloudflare R2 là do `.env` quyết định | 2026-10-09 |
