@@ -25,7 +25,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 
 ## Công nghệ
 
-> Phiên bản tra trên registry ngày 2026-10-10. Khi khởi tạo (M0), tra lại một lần nữa rồi cập nhật bảng này cho khớp với lockfile.
+> Phiên bản tra trên registry ngày 2026-10-10 và khớp với `uv.lock`/`pnpm-lock.yaml`. Dependabot mở PR nâng phiên bản hằng tuần (`.github/dependabot.yml`); sửa bảng này trong cùng PR nâng phiên bản.
 
 | Thành phần | Phiên bản |
 |---|---|
@@ -140,7 +140,7 @@ Rule nào kiểm tra máy móc được thì để công cụ cưỡng chế, kh
 
 | Tầng | Công cụ | Vai trò |
 |---|---|---|
-| Cưỡng chế | GitHub Actions (`.github/workflows/ci.yml`, M0-09) + branch protection | Không thể bỏ qua: lint, typecheck, test, build, giấy phép, gitleaks, định dạng PR |
+| Cưỡng chế | GitHub Actions (`.github/workflows/ci.yml` và `pr.yml`, M0-09) + branch protection | Không thể bỏ qua: lint, typecheck, test, build, giấy phép, gitleaks (`ci.yml`); tiêu đề/body PR, tên branch (`pr.yml`) |
 | Phát hiện sớm | Git hooks bằng lefthook (`lefthook.yml`, M0-12) | Chạy trên máy, nhanh; có thể bị bỏ qua nên không thay thế CI |
 | Quy trình | Script trong repo + skill Claude Code (M2-00) | Đóng gói các bước gh/git lặp lại; Codex và người cũng dùng được script |
 | Phán đoán | `AGENTS.md` | Khi nào cần hỏi trước, định hướng, review |
@@ -168,7 +168,7 @@ Rule nào kiểm tra máy móc được thì để công cụ cưỡng chế, kh
 - **Domain:** lấy từ `.env` (`APP_DOMAIN`). nginx dùng biến này cho `server_name`; Django dùng nó cho `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` và các link trong email.
   FE và API **cùng origin**: `https://<domain>/` là SPA, `https://<domain>/api/` là Django, `/admin/` là Django admin.
   Nhờ vậy không cần CORS cho API và cookie session đơn giản. Chỉ bucket S3 cần cấu hình CORS cho origin này.
-- **CI/CD:** GitHub Actions. Mỗi PR chạy lint, type check, test BE, test FE, build và E2E. Merge vào `master` thì build image rồi deploy lên VPS.
+- **CI/CD:** GitHub Actions. Mỗi PR chạy lint, type check, test BE, test FE, build và E2E. Deploy tự động khi merge vào `master` (build image rồi deploy lên VPS) **chưa làm**, thuộc M8-04.
 
 ## Hướng mở rộng sau này (chưa làm)
 - PostgreSQL managed kèm read replica; tách worker ra máy riêng; thêm CDN cho thumbnail.
