@@ -1,6 +1,21 @@
 # API
 
 > **Nguồn sự thật là OpenAPI schema** do drf-spectacular sinh ra (`/api/schema/`, giao diện xem tại `/api/docs/`).
+> Schema được commit ở `qloud_backend/openapi.yaml`; frontend sinh type từ file đó (`qloud_frontend/src/lib/api/schema.d.ts`).
+
+## Cập nhật schema và client (bắt buộc khi đổi API)
+
+```bash
+cd qloud_backend && uv run python manage.py spectacular --file openapi.yaml --validate --fail-on-warn
+cd ../qloud_frontend && pnpm api:generate
+```
+
+- Commit cả `openapi.yaml` và `schema.d.ts` trong cùng PR với thay đổi API. CI chặn nếu một trong hai bị cũ
+  (test `test_openapi_file.py` ở BE; bước so sánh type ở FE). Schema phải validate **không có cảnh báo**.
+- Mỗi view phải khai báo đủ response (kể cả mã lỗi) bằng `@extend_schema`, để type ở FE đúng.
+- FE gọi API qua `api` (`src/lib/api/client.ts`, openapi-fetch): tự gửi cookie và `X-CSRFToken`.
+  Dùng `unwrap()` để lấy `data` hoặc ném `ApiError` (`status`, `code`, `details` theo định dạng lỗi chung).
+  Không gọi `fetch` trực tiếp tới API.
 > File này chỉ mô tả quy ước chung và danh sách endpoint ở mức tổng quan. Khi thêm hoặc sửa endpoint, cập nhật bảng bên dưới.
 
 ## Quy ước

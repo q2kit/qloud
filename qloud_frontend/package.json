@@ -16,7 +16,8 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "api:generate": "openapi-typescript ../qloud_backend/openapi.yaml -o src/lib/api/schema.d.ts"
   },
   "dependencies": {
     "@fontsource/be-vietnam-pro": "5.3.0",
@@ -28,6 +29,7 @@
     "clsx": "2.1.1",
     "i18next": "26.4.2",
     "lucide-react": "1.53.0",
+    "openapi-fetch": "0.17.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-i18next": "17.0.16",
@@ -51,6 +53,7 @@
     "globals": "17.13.0",
     "jsdom": "30.1.2",
     "msw": "2.15.0",
+    "openapi-typescript": "7.13.0",
     "prettier": "3.9.9",
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",

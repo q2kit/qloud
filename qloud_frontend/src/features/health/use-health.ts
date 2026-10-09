@@ -1,23 +1,13 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
-import { apiFetch } from '@/lib/api-fetch';
+import { api } from '@/lib/api/client';
+import { unwrap } from '@/lib/api/errors';
+import type { components } from '@/lib/api/schema';
 
-export interface HealthResponse {
-  status: 'ok';
-  checks: {
-    database: 'ok';
-    redis: 'ok';
-  };
-}
+export type HealthResponse = components['schemas']['Health'];
 
 async function getHealth(): Promise<HealthResponse> {
-  const response = await apiFetch('/api/v1/health');
-  if (!response.ok) {
-    throw new Error(
-      `Health request failed with status ${String(response.status)}`,
-    );
-  }
-  return response.json() as Promise<HealthResponse>;
+  return unwrap(await api.GET('/api/v1/health'));
 }
 
 export function useHealth(): UseQueryResult<HealthResponse> {
