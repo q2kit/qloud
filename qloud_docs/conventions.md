@@ -37,7 +37,7 @@
 | BE API | pytest + DRF APIClient | Mọi endpoint: thành công, sai dữ liệu, chưa đăng nhập, **không có quyền** |
 | BE S3 | LocalStack (dev và CI) | Luồng upload multipart, presign |
 | FE unit | Vitest + Testing Library + MSW | Component và hook có logic |
-| E2E | Playwright | Luồng chính của từng feature (đăng ký, upload, chia sẻ, xóa và khôi phục…) |
+| E2E | Playwright (`qloud_frontend/e2e/`) | Luồng chính của từng feature (đăng ký, upload, chia sẻ, xóa và khôi phục…). Chạy trên stack thật, **không mock API**; tìm phần tử theo role/nhãn, không theo class CSS |
 
 - Coverage tối thiểu: BE 85%, FE 70% (CI chặn PR nếu giảm). Test không được phụ thuộc thứ tự chạy hay mạng ngoài.
 - Endpoint danh sách phải có test kiểm tra số lượng query (`django_assert_max_num_queries`).
@@ -129,6 +129,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 - **CI** (`.github/workflows/ci.yml`) chạy trên mỗi PR và mỗi lần push lên `master`:
   - **Backend** (khi `qloud_backend/` hoặc file dùng chung thay đổi): ruff format/check, mypy, kiểm tra migration còn thiếu, pytest + coverage (Postgres, Redis qua `docker compose`; LocalStack thêm ở M2-03), kiểm tra giấy phép.
   - **Frontend** (khi `qloud_frontend/` hoặc file dùng chung thay đổi): lint, format, typecheck, test + coverage, build, kiểm tra giấy phép.
+  - **E2E** (khi BE hoặc FE thay đổi): Playwright chạy full-stack thật — Django :8001 (Postgres, Redis) + bản build FE qua `vite preview` :4173 có proxy `/api`. Fail thì report và trace được lưu làm artifact 7 ngày.
   - **Secret scan:** gitleaks trên các commit của PR.
   - **PR conventions** (workflow riêng `.github/workflows/pr.yml`, chạy lại cả khi sửa tiêu đề/body; `scripts/check_pr.py`): tiêu đề đúng định dạng; có `[task-id]` thì body phải có `Closes #n`; cảnh báo nếu sửa code mà không sửa ROADMAP.
   - **CI OK:** job tổng hợp của `ci.yml`. *Required status checks* đã bật cho `master` (2026-10-10): **`CI OK`** và **`PR conventions`**, chế độ *strict* (PR phải chứa commit mới nhất của `master` mới merge được).

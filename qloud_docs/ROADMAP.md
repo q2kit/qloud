@@ -30,9 +30,9 @@
 | M0-05 | Khung BE: Django + DRF + settings theo môi trường + Celery + health endpoint + ruff/mypy/pytest | [#3](https://github.com/q2kit/qloud/issues/3) | ✅ |
 | M0-06 | Khung FE: Vite + React + TS + Tailwind + shadcn + Router + Query + i18n + dark mode + Vitest | [#4](https://github.com/q2kit/qloud/issues/4) | ✅ |
 | M0-07 | Design tokens và các layout chính (sidebar, header, khung panel chi tiết) | [#5](https://github.com/q2kit/qloud/issues/5) | ✅ |
-| M0-08 | Sinh API client cho FE từ OpenAPI schema | [#6](https://github.com/q2kit/qloud/issues/6) | 🟦 |
+| M0-08 | Sinh API client cho FE từ OpenAPI schema | [#6](https://github.com/q2kit/qloud/issues/6) | ✅ |
 | M0-09 | GitHub Actions: lint, typecheck, test, build BE/FE; kiểm tra giấy phép; gitleaks; kiểm tra tiêu đề/body PR và cảnh báo thiếu cập nhật ROADMAP; sau đó bật required checks | [#7](https://github.com/q2kit/qloud/issues/7) | ✅ |
-| M0-10 | Khung Playwright E2E và đưa vào CI | [#8](https://github.com/q2kit/qloud/issues/8) | ⬜ |
+| M0-10 | Khung Playwright E2E và đưa vào CI | [#8](https://github.com/q2kit/qloud/issues/8) | 🟦 |
 | M0-11 | Cập nhật mục "Lệnh thường dùng" trong AGENTS.md | [#9](https://github.com/q2kit/qloud/issues/9) | ⬜ |
 | M0-12 | Git hooks bằng lefthook: format/lint file đã stage, gitleaks, kiểm tra commit message, tên branch, chặn push `master`, typecheck/test phía có thay đổi | [#61](https://github.com/q2kit/qloud/issues/61) | ✅ |
 
@@ -115,6 +115,7 @@
 
 > Mới nhất ở trên cùng. Mỗi dòng gồm: ngày — task — tóm tắt — người hoặc agent thực hiện.
 
+- 2026-10-10 — M0-10 — Playwright 1.64 E2E full-stack (Django :8001 + `vite preview` :4173 proxy `/api`), 5 smoke test (shell + health thật, điều hướng sidebar, 404, ngôn ngữ và giao diện giữ sau reload); job `E2E` trong CI, lưu report khi fail. Sửa `ALLOWED_HOSTS` của settings test (proxy đổi Host thành 127.0.0.1). — AI agent
 - 2026-10-10 — M0-08 — API client có kiểu: BE xuất `qloud_backend/openapi.yaml` (validate, fail on warn); FE sinh `schema.d.ts` bằng openapi-typescript 7.13 và gọi qua openapi-fetch 0.17 (cookie + CSRF middleware, `unwrap()`/`ApiError` theo định dạng lỗi chung). Thay `apiFetch`. CI chặn schema/type bị cũ. — AI agent
 - 2026-10-10 — M0-12 — Git hooks bằng lefthook 2.2.1: pre-commit (ruff, prettier + eslint trên file đã stage, gitleaks), commit-msg (Conventional Commits), pre-push (tên branch, chặn push `master`, kiểm tra phía có thay đổi). Quy tắc dùng chung ở `scripts/conventions.py` (hook + CI). Bật required checks `CI OK` + `PR conventions` (strict). — AI agent
 - 2026-10-10 — M0-07 — Hoàn thiện design tokens và application shell responsive; đã kiểm tra local, chờ duyệt PR. — Codex

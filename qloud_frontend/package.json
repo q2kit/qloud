@@ -17,7 +17,8 @@
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "api:generate": "openapi-typescript ../qloud_backend/openapi.yaml -o src/lib/api/schema.d.ts"
+    "api:generate": "openapi-typescript ../qloud_backend/openapi.yaml -o src/lib/api/schema.d.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@fontsource/be-vietnam-pro": "5.3.0",
@@ -38,6 +39,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.64.0",
     "@tailwindcss/vite": "4.3.3",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",

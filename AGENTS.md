@@ -196,6 +196,8 @@ pnpm lint
 pnpm typecheck
 pnpm build
 pnpm api:generate                        # sinh lại type API từ qloud_backend/openapi.yaml
+pnpm exec playwright install chromium   # lần đầu: tải trình duyệt cho E2E
+pnpm test:e2e                            # E2E full-stack (cần docker compose); tự bật Django :8001 và vite preview :4173
 ```
 
 ## 9. Git
