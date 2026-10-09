@@ -8,7 +8,7 @@ Cần một S3 chạy cục bộ để dev và chạy test tích hợp: presigne
 Docs ban đầu chọn MinIO, nhưng MinIO bản cộng đồng đã ngừng phát hành image (repo `minio/minio` trên Docker Hub không còn tag nào).
 
 ## Quyết định
-Dùng **LocalStack** (`localstack/localstack`, chỉ bật dịch vụ `s3`), do chủ dự án chọn.
+Dùng **LocalStack** (`localstack/localstack`, chỉ bật dịch vụ `s3`).
 `infra/localstack/init-s3.sh` tạo bucket, CORS và lifecycle khi container sẵn sàng.
 
 ## Các phương án đã cân nhắc

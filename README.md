@@ -1,7 +1,7 @@
 # Qloud
 
 Ứng dụng web lưu trữ, sắp xếp, xem và chia sẻ file — cùng loại với Google Drive, với thiết kế riêng.
-Dự án được phát triển bởi AI agent dưới sự giám sát của chủ dự án.
+Dự án được phát triển bởi AI agent, có người review và duyệt mọi thay đổi.
 
 ## Cấu trúc
 

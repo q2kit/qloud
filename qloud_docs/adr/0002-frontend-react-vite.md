@@ -4,7 +4,7 @@
 - Ngày: 2026-10-09
 
 ## Bối cảnh
-Chủ dự án chọn React. Ứng dụng nằm hoàn toàn sau màn hình đăng nhập, rất tương tác (kéo thả, chọn nhiều, upload nền), và không cần SEO.
+Frontend dùng React. Ứng dụng nằm hoàn toàn sau màn hình đăng nhập, rất tương tác (kéo thả, chọn nhiều, upload nền), và không cần SEO.
 Cần i18n và dark mode. Giao diện phải mang bản sắc riêng.
 
 ## Quyết định

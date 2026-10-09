@@ -1,6 +1,6 @@
 # Quy ước
 
-> File luật. Muốn thay đổi file này phải được chủ dự án đồng ý.
+> File luật. Mọi thay đổi trong file này phải được duyệt trước.
 
 ## Chung
 - Code, comment, commit: tiếng Anh. Tài liệu: tiếng Việt.
@@ -10,7 +10,7 @@
 ## Giấy phép dependency
 - Dự án dùng giấy phép **MIT**. Chỉ dùng dependency có giấy phép permissive: MIT, BSD, Apache-2.0, ISC, PSF, HPND, MPL-2.0, Unlicense.
 - LGPL chỉ dùng được khi là thư viện liên kết động và đã ghi lại lý do (ví dụ psycopg).
-- **Cấm GPL và AGPL** trong code được import hoặc đóng gói. Nếu thật sự cần thì phải hỏi chủ dự án.
+- **Cấm GPL và AGPL** trong code được import hoặc đóng gói. Nếu thật sự cần thì phải hỏi trước.
 - CI có bước kiểm tra giấy phép (`pip-licenses`, `license-checker`).
 
 ## Backend (Python / Django)
@@ -62,7 +62,7 @@
   (`merge-base --is-ancestor` trả về thành công nghĩa là branch đã chứa base mới nhất → không cần rebase.)
   Nếu có rebase: giải quyết conflict (nếu có), chạy lại lint và test, rồi mới push. Base không đổi thì không rebase.
   **Không** merge base branch vào branch làm việc.
-- Khi PR báo conflict trên GitHub: agent tự rebase và giải quyết conflict, không chờ chủ dự án.
+- Khi PR báo conflict trên GitHub: agent tự rebase và giải quyết conflict, không cần chờ.
   Conflict ở Nhật ký ROADMAP thì giữ dòng của cả hai bên, dòng mới hơn ở trên.
 - **Force push:** chỉ được làm trên branch làm việc của chính mình, sau khi rebase, và luôn dùng `--force-with-lease`. **Cấm** force push lên `master` hoặc lên branch của người khác.
 - **Việc kéo dài nhiều phiên:** push branch sớm và mở PR ở dạng nháp (`gh pr create --draft`), để tiến độ hiện trên GitHub.
@@ -122,5 +122,5 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 - PR **nối tiếp** (stacked, base không phải `master`): ghi rõ ở đầu body là phụ thuộc PR nào. Sau khi PR kia merge thì rebase lên `master` và đổi base.
 - Một PR một task. PR quá 600 dòng thay đổi (không tính lockfile và code sinh tự động) thì cân nhắc chia nhỏ.
 - CI (GitHub Actions) chạy trên mỗi PR: lint, type check, test BE (Postgres, Redis, LocalStack dạng service; token lấy từ secret `LOCALSTACK_AUTH_TOKEN`), test FE, build FE, Playwright.
-- Merge vào `master` (squash) chỉ khi CI xanh và chủ dự án đã duyệt.
+- Merge vào `master` (squash) chỉ khi CI xanh và PR đã được duyệt.
 - Thao tác GitHub (issue, PR, review, CI) dùng `gh` CLI. Quy trình chi tiết ở mục 3 của `AGENTS.md`.

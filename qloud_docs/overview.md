@@ -7,7 +7,7 @@ Về chức năng thì cùng loại với Google Drive, nhưng giao diện và t
 
 ## Mục tiêu
 
-- **Giai đoạn 1 (hiện tại):** dùng miễn phí cho một nhóm nhỏ (chủ dự án và bạn bè). Cần ổn định, an toàn và dễ dùng.
+- **Giai đoạn 1 (hiện tại):** dùng miễn phí cho một nhóm nhỏ bạn bè. Cần ổn định, an toàn và dễ dùng.
 - **Giai đoạn sau:** thương mại hóa (gói trả phí theo dung lượng) và mở rộng lên số lượng người dùng lớn.
 
 Vì vậy, hệ thống được **thiết kế từ đầu để mở rộng được**: storage tách riêng, server stateless, phân quyền tập trung.

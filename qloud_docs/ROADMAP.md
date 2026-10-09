@@ -24,7 +24,7 @@
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
 | M0-01 | Viết AGENTS.md và bộ docs ban đầu | — | ✅ |
-| M0-02 | Chủ dự án duyệt docs và trả lời open-questions | — | ✅ |
+| M0-02 | Duyệt docs và trả lời open-questions | — | ✅ |
 | M0-03 | Thêm `.gitignore`, `.editorconfig`, README gốc (git repo và LICENSE MIT đã có sẵn) | [#1](https://github.com/q2kit/qloud/issues/1) | ✅ |
 | M0-04 | `docker-compose.yml` cho dev: Postgres, Redis, LocalStack (tự tạo bucket, cấu hình CORS), Mailpit; có `.env.example` | [#2](https://github.com/q2kit/qloud/issues/2) | ✅ |
 | M0-05 | Khung BE: Django + DRF + settings theo môi trường + Celery + health endpoint + ruff/mypy/pytest | [#3](https://github.com/q2kit/qloud/issues/3) | ✅ |
@@ -115,6 +115,7 @@
 
 > Mới nhất ở trên cùng. Mỗi dòng gồm: ngày — task — tóm tắt — người hoặc agent thực hiện.
 
+- 2026-10-10 — — Viết lại các câu gọi người duyệt bằng danh xưng cho tự nhiên hơn (docs, AGENTS.md, README, mô tả issue). — AI agent
 - 2026-10-10 — — Kế hoạch cưỡng chế rule bằng công cụ: mở rộng M0-09 (CI: giấy phép, gitleaks, kiểm tra PR, required checks); thêm M0-12 (git hooks bằng lefthook, #61); thêm M2-00 (script quy trình + skill, #62). — AI agent
 - 2026-10-10 — — Sửa quy tắc rebase: chỉ rebase khi base branch có commit mới (kiểm tra bằng `git merge-base --is-ancestor`), không rebase vô điều kiện. — AI agent
 - 2026-10-10 — — Đánh dấu M0-06 ✅ (đã merge ở #55). Thêm quy tắc đồng bộ trạng thái ROADMAP sau khi merge; hướng dẫn tạo `.env` dùng `cp -n` để không ghi đè secret. — AI agent
@@ -130,4 +131,4 @@
 - 2026-10-09 — M0-02 — Nâng bảng công nghệ lên bản ổn định mới nhất (Django 6.1, Python 3.14, PostgreSQL 18, React 19, Vite 8, TS 7, Tailwind 4); thêm luật "tra phiên bản trên registry, không dựa vào trí nhớ" vào AGENTS.md. — AI agent
 - 2026-10-09 — M0-02 — Cập nhật docs theo câu trả lời: storage do `.env` quyết định, đăng ký mở + SMTP riêng, giới hạn theo Plan (ADR-0005), chọn pypdfium2 cho PDF, quy tắc giấy phép, hướng UI (teal, Be Vietnam Pro). — AI agent
 
-- 2026-10-09 — M0-01 — Viết AGENTS.md và bộ docs ban đầu (overview, requirements, architecture, data-model, api, ui-ux, conventions, features, ADR). Chờ chủ dự án duyệt. — AI agent
+- 2026-10-09 — M0-01 — Viết AGENTS.md và bộ docs ban đầu (overview, requirements, architecture, data-model, api, ui-ux, conventions, features, ADR). Chờ duyệt. — AI agent
