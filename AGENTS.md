@@ -192,7 +192,7 @@ cd "$(git rev-parse --show-toplevel)/qloud_backend" && DJANGO_SETTINGS_MODULE=co
 
 | Địa chỉ | Là gì |
 |---|---|
-| http://localhost:5173 | Frontend (Vite, proxy `/api` và `/admin` sang :8000) |
+| http://localhost:5173 | Frontend (Vite, proxy `/api`, `/admin` và `/static` sang :8000) |
 | http://localhost:8000/api/v1/health · `/api/docs/` · `/admin/` | Backend: health, Swagger UI, Django admin |
 | http://localhost:8025 | Mailpit (email dev) |
 | http://localhost:4566 | LocalStack S3 (bucket `qloud-dev`) |

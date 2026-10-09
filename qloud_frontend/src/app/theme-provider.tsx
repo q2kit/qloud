@@ -6,6 +6,9 @@ export type Theme = 'system' | 'light' | 'dark';
 
 const THEME_STORAGE_KEY = 'qloud-theme';
 const DARK_MODE_QUERY = '(prefers-color-scheme: dark)';
+// Browser UI color per resolved theme: `--background` in index.css. Keep in
+// sync with the pre-paint script in index.html.
+const THEME_COLORS = { light: '#fafaf9', dark: '#1c1917' } as const;
 
 interface ThemeContextValue {
   theme: Theme;
@@ -29,6 +32,9 @@ function applyTheme(theme: Theme, prefersDark: boolean): void {
   const isDark = theme === 'dark' || (theme === 'system' && prefersDark);
   document.documentElement.classList.toggle('dark', isDark);
   document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute('content', isDark ? THEME_COLORS.dark : THEME_COLORS.light);
 }
 
 export function ThemeProvider({
@@ -48,6 +54,20 @@ export function ThemeProvider({
       mediaQuery.removeEventListener('change', updateTheme);
     };
   }, [theme]);
+
+  // Follow a theme picked in another tab. `key` is null when storage is cleared.
+  React.useEffect(() => {
+    const handleStorage = (event: StorageEvent): void => {
+      if (event.key === THEME_STORAGE_KEY || event.key === null) {
+        setThemeState(getStoredTheme());
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, []);
 
   const setTheme = React.useCallback((nextTheme: Theme): void => {
     writeStorage(THEME_STORAGE_KEY, nextTheme);

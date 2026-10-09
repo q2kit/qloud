@@ -38,6 +38,10 @@
     "navigationDescription": "Điều hướng tới các khu vực chính của Qloud.",
     "breadcrumbRoot": "Drive của tôi",
     "search": "Tìm kiếm và chạy lệnh",
+    "searchShortcut": "{{modifier}} K",
+    "keys": {
+      "ctrl": "Ctrl"
+    },
     "create": "Tạo mới"
   },
   "details": {
@@ -63,6 +67,11 @@
   "notFound": {
     "title": "Không tìm thấy trang",
     "description": "Đường dẫn này không tồn tại hoặc đã được di chuyển."
+  },
+  "routeError": {
+    "title": "Đã xảy ra lỗi",
+    "description": "Có lỗi không mong muốn khi hiển thị trang này. Hãy thử tải lại trang hoặc quay về Drive.",
+    "reload": "Tải lại trang"
   },
   "health": {
     "label": "Trạng thái dịch vụ",

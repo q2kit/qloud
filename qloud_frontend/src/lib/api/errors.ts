@@ -40,6 +40,8 @@ export function unwrap<T>(result: {
   error?: unknown;
   response: Response;
 }): T {
-  if (result.response.ok && result.data !== undefined) return result.data;
+  // openapi-fetch leaves `data` undefined for 204 / empty bodies; their schema
+  // type is already `undefined`, so a successful status alone decides.
+  if (result.response.ok) return result.data as T;
   throw new ApiError(result.response.status, result.error);
 }

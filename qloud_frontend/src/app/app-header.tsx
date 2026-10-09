@@ -5,7 +5,12 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 import { LanguageSwitcher } from './language-switcher';
+import { useRouteHandle } from './route-handle';
 import { ThemeSwitcher } from './theme-switcher';
+
+// Apple platforms show the Command key symbol; it is not a translatable word.
+const COMMAND_KEY_SYMBOL = '⌘';
+const isApplePlatform = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
 
 interface AppHeaderProps {
   isDetailOpen: boolean;
@@ -23,6 +28,10 @@ export function AppHeader({
   onDetailToggle,
 }: AppHeaderProps): React.JSX.Element {
   const { t } = useTranslation();
+  const { titleKey, subtitleKey } = useRouteHandle();
+  const searchShortcut = t('shell.searchShortcut', {
+    modifier: isApplePlatform ? COMMAND_KEY_SYMBOL : t('shell.keys.ctrl'),
+  });
 
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6 lg:px-8">
@@ -39,11 +48,13 @@ export function AppHeader({
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-base font-semibold tracking-tight">
-          {t('drive.title')}
+          {t(titleKey)}
         </p>
-        <p className="hidden truncate text-xs text-muted-foreground sm:block">
-          {t('shell.breadcrumbRoot')}
-        </p>
+        {subtitleKey && (
+          <p className="hidden truncate text-xs text-muted-foreground sm:block">
+            {t(subtitleKey)}
+          </p>
+        )}
       </div>
 
       {/* TODO(M6-02): Connect this trigger to the command palette. */}
@@ -57,7 +68,7 @@ export function AppHeader({
           {t('shell.search')}
         </span>
         <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-sans text-[11px]">
-          {/Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? '⌘ K' : 'Ctrl K'}
+          {searchShortcut}
         </kbd>
       </Button>
       {/* TODO(M6-02): Connect this trigger to the command palette. */}
