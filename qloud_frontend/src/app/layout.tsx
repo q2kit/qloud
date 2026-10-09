@@ -1,34 +1,77 @@
-import { Link, Outlet } from 'react-router';
-import { useTranslation } from 'react-i18next';
+import * as React from 'react';
+import { Outlet } from 'react-router';
 
-import { LanguageSwitcher } from './language-switcher';
-import { ThemeSwitcher } from './theme-switcher';
+import { AppHeader } from './app-header';
+import { AppSidebar } from './app-sidebar';
+import { DetailPanel } from './detail-panel';
 
 export function AppLayout(): React.JSX.Element {
-  const { t } = useTranslation();
+  const [isNavigationOpen, setIsNavigationOpen] = React.useState(false);
+  const [isDetailOpen, setIsDetailOpen] = React.useState(false);
+  const navigationTriggerRef = React.useRef<HTMLButtonElement>(null);
+  const detailTriggerRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (
+        event.key.toLowerCase() === 'i' &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.altKey &&
+        !(event.target instanceof HTMLInputElement) &&
+        !(event.target instanceof HTMLTextAreaElement) &&
+        !(event.target instanceof HTMLSelectElement) &&
+        !(
+          event.target instanceof HTMLElement &&
+          event.target.closest('[contenteditable="true"]')
+        )
+      ) {
+        setIsDetailOpen((current) => !current);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link
-            className="rounded-md text-lg font-semibold text-primary"
-            to="/"
-          >
-            {t('app.name')}
-          </Link>
-          <nav
-            className="flex items-center gap-1"
-            aria-label={t('navigation.preferences')}
-          >
-            <LanguageSwitcher />
-            <ThemeSwitcher />
-          </nav>
+    <div className="flex min-h-screen bg-background text-foreground">
+      <AppSidebar
+        isOpen={isNavigationOpen}
+        triggerRef={navigationTriggerRef}
+        onClose={() => {
+          setIsNavigationOpen(false);
+        }}
+        onOpenChange={setIsNavigationOpen}
+      />
+      <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
+        <AppHeader
+          isDetailOpen={isDetailOpen}
+          navigationTriggerRef={navigationTriggerRef}
+          detailTriggerRef={detailTriggerRef}
+          onNavigationOpen={() => {
+            setIsNavigationOpen(true);
+          }}
+          onDetailToggle={() => {
+            setIsDetailOpen((current) => !current);
+          }}
+        />
+        <div className="flex min-h-0 flex-1">
+          <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+            <Outlet />
+          </main>
+          <DetailPanel
+            isOpen={isDetailOpen}
+            triggerRef={detailTriggerRef}
+            onClose={() => {
+              setIsDetailOpen(false);
+            }}
+            onOpenChange={setIsDetailOpen}
+          />
         </div>
-      </header>
-      <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-16">
-        <Outlet />
-      </main>
+      </div>
     </div>
   );
 }

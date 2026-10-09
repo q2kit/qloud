@@ -4,13 +4,57 @@
   },
   "navigation": {
     "drive": "Drive",
+    "recent": "Recent",
+    "shared": "Shared with me",
+    "trash": "Trash",
+    "settings": "Settings",
+    "main": "Main navigation",
     "login": "Log in",
     "home": "Back to Drive",
     "preferences": "Display preferences"
   },
   "drive": {
     "title": "Drive",
-    "description": "The application shell is ready. File content will be built in a later milestone."
+    "description": "All your files and folders",
+    "view": {
+      "label": "View style",
+      "grid": "Grid view",
+      "list": "List view"
+    },
+    "empty": {
+      "title": "Your space is empty",
+      "description": "Upload a file or create your first folder. You can also drag and drop files into this area."
+    },
+    "actions": {
+      "upload": "Upload files",
+      "newFolder": "New folder"
+    }
+  },
+  "shell": {
+    "openNavigation": "Open navigation",
+    "closeNavigation": "Close navigation",
+    "openDetails": "Open details panel",
+    "closeDetails": "Close details panel",
+    "navigationDescription": "Navigate to the main areas of Qloud.",
+    "breadcrumbRoot": "My Drive",
+    "search": "Search and run commands",
+    "create": "Create"
+  },
+  "details": {
+    "title": "Details",
+    "emptyTitle": "Nothing selected",
+    "emptyDescription": "Select a file or folder to see its information, versions, and sharing access.",
+    "tabs": {
+      "info": "Info",
+      "versions": "Versions",
+      "sharing": "Sharing"
+    }
+  },
+  "placeholder": {
+    "recent": "Recent content will be implemented in M2-09.",
+    "shared": "Shared content will be implemented in M5-05.",
+    "trash": "Trash content will be implemented in M4-03.",
+    "settings": "Settings content will be implemented in M1-06."
   },
   "login": {
     "title": "Log in",
