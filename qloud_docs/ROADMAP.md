@@ -26,7 +26,7 @@
 | M0-01 | Viết AGENTS.md và bộ docs ban đầu | — | ✅ |
 | M0-02 | Chủ dự án duyệt docs và trả lời open-questions | — | ✅ |
 | M0-03 | Thêm `.gitignore`, `.editorconfig`, README gốc (git repo và LICENSE MIT đã có sẵn) | [#1](https://github.com/q2kit/qloud/issues/1) | ✅ |
-| M0-04 | `docker-compose.yml` cho dev: Postgres, Redis, LocalStack (tự tạo bucket, cấu hình CORS), Mailpit; có `.env.example` | [#2](https://github.com/q2kit/qloud/issues/2) | 🟦 |
+| M0-04 | `docker-compose.yml` cho dev: Postgres, Redis, LocalStack (tự tạo bucket, cấu hình CORS), Mailpit; có `.env.example` | [#2](https://github.com/q2kit/qloud/issues/2) | ✅ |
 | M0-05 | Khung BE: Django + DRF + settings theo môi trường + Celery + health endpoint + ruff/mypy/pytest | [#3](https://github.com/q2kit/qloud/issues/3) | 🟦 |
 | M0-06 | Khung FE: Vite + React + TS + Tailwind + shadcn + Router + Query + i18n + dark mode + Vitest | [#4](https://github.com/q2kit/qloud/issues/4) | ⬜ |
 | M0-07 | Design tokens và các layout chính (sidebar, header, khung panel chi tiết) | [#5](https://github.com/q2kit/qloud/issues/5) | ⬜ |
