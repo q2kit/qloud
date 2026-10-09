@@ -61,6 +61,11 @@ class PrTitleTests(unittest.TestCase):
             with self.subTest(title):
                 self.assertTrue(title_problems(title, "Closes #70"))
 
+    def test_dependabot_titles_skip_subject_case_and_length(self):
+        title = "chore(deps): Bump the frontend-minor-patch group in /qloud_frontend with 2 updates"
+        self.assertTrue(title_problems(title, ""))
+        self.assertEqual(title_problems(title, "", bot=True), [])
+
     def test_title_must_leave_room_for_the_pr_number(self):
         title = "fix(core): " + "a" * 60
         self.assertTrue(title_problems(title, ""))

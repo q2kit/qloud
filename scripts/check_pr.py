@@ -33,7 +33,8 @@ def title_problems(title: str, body: str, *, bot: bool = False) -> list[str]:
             f"(type: {', '.join(TYPES)}; scope: {', '.join(SCOPES)}, fe or fe-<feature>); "
             f"got: {title!r}"
         ]
-    errors = subject_problems(match.group("subject"))
+    # Dependabot always capitalises its subject ("Bump …"); its titles are not hand-written.
+    errors = [] if bot else subject_problems(match.group("subject"))
     if STRAY_TASK.search(match.group("subject")):
         errors.append("task ID must be written exactly ` [M<n>-<nn>]` at the end, e.g. ` [M2-04]`")
     if len(title) > PR_TITLE_MAX and not bot:
