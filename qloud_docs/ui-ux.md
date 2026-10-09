@@ -38,6 +38,12 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**. Không sao chép bố cục
 └────────────┴────────────────────────────────┴───────────┴─┴──────────────┘
 ```
 
+### Application shell (M0-07)
+
+| Light | Dark |
+|---|---|
+| ![Application shell — light](assets/m0-07-light.png) | ![Application shell — dark](assets/m0-07-dark.png) |
+
 ### Hành vi responsive của application shell
 
 - Từ breakpoint `lg`, sidebar rộng 256px cố định bên trái; trên màn hình nhỏ hơn, sidebar mở thành drawer có lớp nền che.

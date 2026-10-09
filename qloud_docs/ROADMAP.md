@@ -116,6 +116,7 @@
 > Mới nhất ở trên cùng. Mỗi dòng gồm: ngày — task — tóm tắt — người hoặc agent thực hiện.
 
 - 2026-10-10 — M0-07 — Hoàn thiện design tokens và application shell responsive; đã kiểm tra local, chờ duyệt PR. — Codex
+- 2026-10-10 — M0-07 — Review lần 2: rebase lên master, sửa phím tắt `i` bỏ qua mọi kiểu `contenteditable` (kèm test), đưa ảnh chụp vào `ui-ux.md`, đánh dấu M0-09 ✅. — Claude
 - 2026-10-10 — M0-09 — CI GitHub Actions: backend (ruff, mypy, migration check, pytest), frontend (lint, format, typecheck, test, build), kiểm tra giấy phép (`scripts/check_licenses.py`), gitleaks, kiểm tra PR (`scripts/check_pr.py`), job tổng hợp `CI OK`. Action ghim theo SHA. LocalStack trong CI hoãn tới M2-03. — AI agent
 - 2026-10-10 — — Viết lại các câu gọi người duyệt bằng danh xưng cho tự nhiên hơn (docs, AGENTS.md, README, mô tả issue). — AI agent
 - 2026-10-10 — — Kế hoạch cưỡng chế rule bằng công cụ: mở rộng M0-09 (CI: giấy phép, gitleaks, kiểm tra PR, required checks); thêm M0-12 (git hooks bằng lefthook, #61); thêm M2-00 (script quy trình + skill, #62). — AI agent

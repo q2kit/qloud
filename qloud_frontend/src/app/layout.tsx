@@ -23,7 +23,10 @@ export function AppLayout(): React.JSX.Element {
         !(event.target instanceof HTMLSelectElement) &&
         !(
           event.target instanceof HTMLElement &&
-          event.target.closest('[contenteditable="true"]')
+          // Covers contenteditable="", "true" and "plaintext-only".
+          event.target.closest(
+            '[contenteditable]:not([contenteditable="false"])',
+          )
         )
       ) {
         setIsDetailOpen((current) => !current);

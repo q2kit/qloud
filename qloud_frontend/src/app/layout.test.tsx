@@ -126,3 +126,26 @@ describe('application layout', () => {
     ).not.toBeInTheDocument();
   });
 });
+
+describe('details shortcut', () => {
+  it.each(['', 'true', 'plaintext-only'])(
+    'ignores i typed inside contenteditable="%s"',
+    async (value) => {
+      const user = userEvent.setup();
+      renderDrive();
+      const editor = document.createElement('div');
+      editor.setAttribute('contenteditable', value);
+      editor.tabIndex = 0;
+      document.body.append(editor);
+      editor.focus();
+
+      await user.keyboard('i');
+
+      expect(
+        screen.queryByRole('region', { name: /Chi tiết|Details/ }),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      editor.remove();
+    },
+  );
+});
