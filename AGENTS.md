@@ -154,6 +154,9 @@ Hiện tại chỉ có ít người dùng, nhưng hệ thống phải được t
 
 ## 8. Lệnh thường dùng
 
+> Khi viết lệnh cho chủ dự án: mỗi khối lệnh phải chạy đúng khi dán nguyên khối vào **một** terminal.
+> `cd` theo đường dẫn tuyệt đối từ gốc repo; tách riêng lệnh chỉ chạy một lần hoặc lệnh có thể ghi đè/xóa dữ liệu.
+
 > Phần này sẽ được điền khi dựng xong khung dự án (task M0 trong ROADMAP). Agent nào dựng khung thì cập nhật mục này.
 
 ```bash
@@ -170,7 +173,7 @@ docker compose down          # dừng (giữ dữ liệu); thêm -v để xóa s
 # Mailpit UI: http://localhost:8025 · S3 endpoint: http://localhost:4566 (bucket qloud-dev)
 
 # Backend (thư mục qloud_backend, dùng uv)
-cd qloud_backend
+cd "$(git rev-parse --show-toplevel)/qloud_backend"
 uv sync                                  # cài dependency (cả nhóm dev)
 uv run python manage.py migrate
 uv run python manage.py runserver        # http://localhost:8000/api/v1/health · /api/docs/
@@ -179,7 +182,7 @@ uv run pytest --cov                      # test + coverage (cần docker compose
 uv run ruff format . && uv run ruff check . && uv run mypy .
 
 # Frontend (thư mục qloud_frontend, dùng pnpm)
-cd qloud_frontend
+cd "$(git rev-parse --show-toplevel)/qloud_frontend"
 pnpm install
 pnpm dev                                 # http://localhost:5173, proxy /api và /admin sang :8000
 pnpm test

@@ -30,6 +30,8 @@ Hạ tầng (Postgres, Redis, LocalStack S3, Mailpit):
 docker compose up -d --wait
 ```
 
+Mỗi khối lệnh dưới đây chạy từ **thư mục gốc của repo**, mỗi khối một terminal.
+
 Backend (cần [uv](https://docs.astral.sh/uv/)):
 
 ```bash
