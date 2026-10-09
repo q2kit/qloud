@@ -1,0 +1,40 @@
+{
+  "app": {
+    "name": "Qloud"
+  },
+  "navigation": {
+    "drive": "Drive",
+    "login": "Log in",
+    "home": "Back to Drive",
+    "preferences": "Display preferences"
+  },
+  "drive": {
+    "title": "Drive",
+    "description": "The application shell is ready. File content will be built in a later milestone."
+  },
+  "login": {
+    "title": "Log in",
+    "description": "The login flow will be built in the authentication milestone."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "This address does not exist or has moved."
+  },
+  "health": {
+    "label": "Service status",
+    "checking": "Checking…",
+    "ok": "All systems operational",
+    "error": "Unable to connect"
+  },
+  "language": {
+    "label": "Language",
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "theme": {
+    "label": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  }
+}

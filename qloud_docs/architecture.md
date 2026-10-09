@@ -25,7 +25,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 
 ## Công nghệ
 
-> Phiên bản tra trên registry ngày 2026-10-09. Khi khởi tạo (M0), tra lại một lần nữa rồi cập nhật bảng này cho khớp với lockfile.
+> Phiên bản tra trên registry ngày 2026-10-10. Khi khởi tạo (M0), tra lại một lần nữa rồi cập nhật bảng này cho khớp với lockfile.
 
 | Thành phần | Phiên bản |
 |---|---|
@@ -40,14 +40,17 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 | PostgreSQL | 18 |
 | Redis | 8 |
 | Node.js | bản LTS hiện hành |
-| React | 19 |
-| TypeScript | 7 |
-| Vite | 8 |
-| React Router | 8 |
-| TanStack Query | 5 |
-| Tailwind CSS | 4 |
-| Vitest | 5 |
+| React | 19.3.0 |
+| TypeScript | 6.0.3 (bản 7.0.2 chưa tương thích với typescript-eslint 8.71.1; theo dõi việc nâng cấp ở [#56](https://github.com/q2kit/qloud/issues/56)) |
+| Vite | 8.3.4 |
+| React Router | 8.4.0 |
+| TanStack Query | 5.104.1 |
+| Tailwind CSS | 4.3.3 |
+| Vitest | 5.0.3 |
 | Playwright | 1.64 |
+
+MSW dùng bản 2.15.0 vì Vitest 5.0.3 chưa khai báo tương thích với MSW 3; sẽ nâng khi
+peer dependency chính thức cho phép.
 
 ### Backend — `qloud_backend/`
 | Mục đích | Thư viện |
