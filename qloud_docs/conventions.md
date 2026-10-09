@@ -42,7 +42,24 @@
 - Endpoint danh sách phải có test kiểm tra số lượng query (`django_assert_max_num_queries`).
 
 ## Git và CI
-- Branch: `<type>/<task-id>-<slug>`, ví dụ `feat/M2-04-upload-session`, `fix/M2-04-quota-race`, `docs/commit-pr-rules` (việc không thuộc task nào thì bỏ task ID).
+### Branch
+- `master` là nhánh chính, được bảo vệ (branch protection): **không commit hay push thẳng**, chỉ nhận thay đổi qua PR và squash merge.
+- **Tên branch:** `<type>/<task-id>-<slug>`
+  - `type`: dùng chung danh sách với commit — `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `chore`, `ci`, `build`.
+  - `task-id`: ID trong ROADMAP, ví dụ `M2-04`. Việc không thuộc task nào thì bỏ phần này.
+  - `slug`: tiếng Anh, kebab-case, chỉ gồm `a-z`, `0-9` và `-`, tối đa 40 ký tự.
+  - Ví dụ: `feat/M2-04-upload-session`, `fix/M2-04-quota-race`, `chore/M0-04-dev-compose`, `docs/commit-pr-rules`.
+- **Một branch cho một task và một PR.** Không dùng lại branch đã merge; việc mới thì tạo branch mới.
+- **Tạo branch từ `master` mới nhất:** `git switch master && git pull --ff-only && git switch -c <branch>`.
+- **Branch nối tiếp (stacked):** chỉ dùng khi task mới cần code của một PR chưa merge.
+  - Tạo branch từ branch của PR kia, và mở PR với `--base <branch-kia>`. Đầu body PR ghi rõ là phụ thuộc PR nào.
+  - Sau khi PR kia merge: `git rebase --onto origin/master <commit-cuối-của-branch-kia>`, rồi `gh pr edit <n> --base master`.
+- **Cập nhật branch theo `master`:** dùng `git rebase origin/master`, **không** merge `master` vào branch.
+- **Force push:** chỉ được làm trên branch làm việc của chính mình, sau khi rebase, và luôn dùng `--force-with-lease`. **Cấm** force push lên `master` hoặc lên branch của người khác.
+- **Việc kéo dài nhiều phiên:** push branch sớm và mở PR ở dạng nháp (`gh pr create --draft`), để tiến độ hiện trên GitHub.
+  Khi xong thì chuyển sang chờ review bằng `gh pr ready`.
+- **Sau khi merge:** xóa branch trên remote (`gh pr merge --squash --delete-branch`, hoặc GitHub tự xóa), xóa branch local, và chạy `git fetch --prune`.
+- Không để branch không có PR tồn tại quá một phiên làm việc; bỏ việc thì xóa branch đó.
 
 ### Commit message
 Theo [Conventional Commits](https://www.conventionalcommits.org/), **tiếng Anh**:

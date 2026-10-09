@@ -113,7 +113,7 @@
 
 > Mới nhất ở trên cùng. Mỗi dòng gồm: ngày — task — tóm tắt — người hoặc agent thực hiện.
 
-- 2026-10-09 — — Thêm quy tắc commit message và PR (tiêu đề PR theo Conventional Commits + task ID; body tiếng Việt theo template) vào conventions.md và AGENTS.md; cập nhật PR template. — AI agent
+- 2026-10-09 — — Thêm quy tắc branch, commit message và PR (tiêu đề PR theo Conventional Commits + task ID; body tiếng Việt theo template) vào conventions.md và AGENTS.md; cập nhật PR template. — AI agent
 - 2026-10-09 — M0-04 — `docker-compose.yml` (Postgres 18, Redis 8.10, LocalStack 2026.9.1, Mailpit 1.31) + script tạo bucket/CORS/lifecycle; `.env.example` cho compose và backend. Đã kiểm tra CORS, presigned multipart, ListParts, Range trên LocalStack. Chốt LocalStack thay MinIO (ADR-0007) và pnpm cho FE. — AI agent
 - 2026-10-09 — M0-03 — Thêm `.gitignore`, `.editorconfig`, README gốc. — AI agent
 - 2026-10-09 — — Đổi phương án deploy: Cloudflare proxy (Full strict, Origin Certificate) + nginx trên VPS, bỏ Caddy (ADR-0006). — AI agent

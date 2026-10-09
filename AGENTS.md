@@ -82,7 +82,8 @@ Milestone trên GitHub trùng tên với milestone trong ROADMAP (M0…M8).
 - Bất cứ thay đổi nào về **bảo mật, xác thực, phân quyền**, ngoài việc làm đúng như tài liệu đã mô tả.
 - Thay đổi **phạm vi sản phẩm**: thêm hoặc bớt tính năng so với `requirements.md`.
 - Thay đổi **hướng thiết kế UI** (design system, màu, bố cục tổng thể).
-- Thao tác khó hoàn tác: xóa dữ liệu, force push, sửa lịch sử git, thao tác trên môi trường production.
+- Thao tác khó hoàn tác: xóa dữ liệu, force push lên `master` hoặc branch của người khác, sửa lịch sử git đã merge, thao tác trên môi trường production.
+  (Rebase rồi `--force-with-lease` trên branch làm việc của chính mình thì được phép.)
 - Sửa các file luật: `AGENTS.md` và `qloud_docs/conventions.md`.
 
 Những việc được **tự làm**: code theo task đã có trong ROADMAP, viết test, refactor nội bộ không đổi hành vi,
@@ -163,7 +164,8 @@ docker compose down          # dừng (giữ dữ liệu); thêm -v để xóa s
 
 ## 9. Git
 
-- `master` luôn ở trạng thái deploy được, và chỉ nhận thay đổi qua PR (squash merge). Mỗi task làm trên một branch riêng, đặt tên `feat/<task-id>-<short-name>`, `fix/...`, `docs/...` hoặc `chore/...`.
+- `master` luôn ở trạng thái deploy được, được bảo vệ, chỉ nhận thay đổi qua PR (squash merge).
+- **Branch:** `<type>/<task-id>-<slug>`, tạo từ `master` mới nhất, một branch cho một task. Cập nhật bằng rebase; force push chỉ dùng `--force-with-lease` trên branch của mình. Chi tiết (gồm cả branch nối tiếp): [conventions.md › Branch](qloud_docs/conventions.md#branch).
 - **Commit message:** Conventional Commits, tiếng Anh, `<type>(<scope>): <subject>`, footer `Refs #<n>`. Chi tiết: [conventions.md › Commit message](qloud_docs/conventions.md#commit-message).
 - **PR:** tiêu đề `<type>(<scope>): <subject> [<task-id>]` (tiếng Anh — thành commit squash trên `master`); body tiếng Việt theo template, có `Closes #<n>`, cách kiểm tra *đã thực sự chạy*, và lưu ý cho reviewer. Chi tiết: [conventions.md › Pull Request](qloud_docs/conventions.md#pull-request).
 - Mỗi commit chứa thay đổi code cùng với thay đổi docs tương ứng.
