@@ -54,11 +54,13 @@
 - **Branch nối tiếp (stacked):** chỉ dùng khi task mới cần code của một PR chưa merge.
   - Tạo branch từ branch của PR kia, và mở PR với `--base <branch-kia>`. Đầu body PR ghi rõ là phụ thuộc PR nào.
   - Sau khi PR kia merge: `git rebase --onto origin/master <commit-cuối-của-branch-kia>`, rồi `gh pr edit <n> --base master`.
-- **Luôn rebase lên base branch** (`master`, hoặc branch cha nếu là branch nối tiếp) vào hai thời điểm:
+- **Kiểm tra base branch** (`master`, hoặc branch cha nếu là branch nối tiếp) vào hai thời điểm, và **chỉ rebase khi base có commit mới** (branch chưa chứa `origin/<base>`):
   1. **Trước khi bắt đầu làm task**, kể cả khi tiếp tục một branch đã có từ phiên trước.
-  2. **Ngay trước mỗi lần push hoặc tạo PR.**
+  2. **Trước khi push hoặc tạo PR.**
 
-  Lệnh: `git fetch origin && git rebase origin/<base>`. Có conflict thì giải quyết, rồi chạy lại lint và test trước khi push.
+  Lệnh: `git fetch origin && git merge-base --is-ancestor origin/<base> HEAD || git rebase origin/<base>`
+  (`merge-base --is-ancestor` trả về thành công nghĩa là branch đã chứa base mới nhất → không cần rebase.)
+  Nếu có rebase: giải quyết conflict (nếu có), chạy lại lint và test, rồi mới push. Base không đổi thì không rebase.
   **Không** merge base branch vào branch làm việc.
 - Khi PR báo conflict trên GitHub: agent tự rebase và giải quyết conflict, không chờ chủ dự án.
   Conflict ở Nhật ký ROADMAP thì giữ dòng của cả hai bên, dòng mới hơn ở trên.

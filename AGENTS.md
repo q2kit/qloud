@@ -39,7 +39,7 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
    - `gh issue view <n>` để đọc issue.
    - `gh issue edit <n> --add-assignee @me --add-label status:in-progress`.
    - Tạo branch từ `master` mới nhất: `git switch master && git pull --ff-only && git switch -c <type>/<task-id>-<slug>`, ví dụ `feat/M2-04-upload-session`.
-   - **Tiếp tục một branch đã có** (làm tiếp task, sửa theo review): **rebase lên base branch trước khi làm**: `git fetch origin && git rebase origin/<base>`.
+   - **Tiếp tục một branch đã có** (làm tiếp task, sửa theo review): kiểm tra base trước khi làm, **chỉ rebase nếu base có commit mới**: `git fetch origin && git merge-base --is-ancestor origin/<base> HEAD || git rebase origin/<base>`.
 3. **Đọc ngữ cảnh.** Đọc file feature liên quan trong `qloud_docs/features/`, cùng các phần liên quan
    của `architecture.md`, `data-model.md`, `api.md`, `ui-ux.md` và `conventions.md`. Không đọc thừa những gì không cần.
 4. **Lập kế hoạch.** Với task lớn (nhiều file, schema mới, API mới): viết kế hoạch ngắn thành comment trên issue (`gh issue comment <n>`),
@@ -52,8 +52,8 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
    - Nếu có quyết định kiến trúc mới thì tạo ADR trong `qloud_docs/adr/`.
    - Nếu phát sinh câu hỏi chưa trả lời được thì ghi vào `open-questions.md`.
 8. **Mở PR.**
-   - **Rebase lên base branch ngay trước mỗi lần push hoặc tạo PR**: `git fetch origin && git rebase origin/<base>`.
-     Có conflict thì giải quyết, rồi chạy lại lint và test trước khi push.
+   - **Trước khi push hoặc tạo PR, kiểm tra base branch; chỉ rebase nếu base có commit mới**: `git fetch origin && git merge-base --is-ancestor origin/<base> HEAD || git rebase origin/<base>`.
+     Nếu có rebase: giải quyết conflict (nếu có), chạy lại lint và test rồi mới push.
    - `git push -u origin HEAD` (sau khi rebase một branch đã push thì dùng `git push --force-with-lease`),
      rồi `gh pr create --base <base> --title "<type>(<scope>): <subject> [<task-id>]" --body-file <file>`.
    - Body PR theo [.github/pull_request_template.md](.github/pull_request_template.md), và **phải có `Closes #<n>`**.
