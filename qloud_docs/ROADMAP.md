@@ -24,16 +24,17 @@
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
 | M0-01 | Viết AGENTS.md và bộ docs ban đầu | — | ✅ |
-| M0-02 | Chủ dự án duyệt docs và trả lời open-questions | — | ✅ |
+| M0-02 | Duyệt docs và trả lời open-questions | — | ✅ |
 | M0-03 | Thêm `.gitignore`, `.editorconfig`, README gốc (git repo và LICENSE MIT đã có sẵn) | [#1](https://github.com/q2kit/qloud/issues/1) | ✅ |
 | M0-04 | `docker-compose.yml` cho dev: Postgres, Redis, LocalStack (tự tạo bucket, cấu hình CORS), Mailpit; có `.env.example` | [#2](https://github.com/q2kit/qloud/issues/2) | ✅ |
 | M0-05 | Khung BE: Django + DRF + settings theo môi trường + Celery + health endpoint + ruff/mypy/pytest | [#3](https://github.com/q2kit/qloud/issues/3) | ✅ |
 | M0-06 | Khung FE: Vite + React + TS + Tailwind + shadcn + Router + Query + i18n + dark mode + Vitest | [#4](https://github.com/q2kit/qloud/issues/4) | ✅ |
 | M0-07 | Design tokens và các layout chính (sidebar, header, khung panel chi tiết) | [#5](https://github.com/q2kit/qloud/issues/5) | ⬜ |
 | M0-08 | Sinh API client cho FE từ OpenAPI schema | [#6](https://github.com/q2kit/qloud/issues/6) | ⬜ |
-| M0-09 | GitHub Actions: lint, type check, test BE/FE, build, kiểm tra giấy phép dependency | [#7](https://github.com/q2kit/qloud/issues/7) | ⬜ |
+| M0-09 | GitHub Actions: lint, typecheck, test, build BE/FE; kiểm tra giấy phép; gitleaks; kiểm tra tiêu đề/body PR và cảnh báo thiếu cập nhật ROADMAP; sau đó bật required checks | [#7](https://github.com/q2kit/qloud/issues/7) | ⬜ |
 | M0-10 | Khung Playwright E2E và đưa vào CI | [#8](https://github.com/q2kit/qloud/issues/8) | ⬜ |
 | M0-11 | Cập nhật mục "Lệnh thường dùng" trong AGENTS.md | [#9](https://github.com/q2kit/qloud/issues/9) | ⬜ |
+| M0-12 | Git hooks bằng lefthook: format/lint file đã stage, gitleaks, kiểm tra commit message, tên branch, chặn push `master`, typecheck/test phía có thay đổi | [#61](https://github.com/q2kit/qloud/issues/61) | ⬜ |
 
 ## M1 — Xác thực ([auth.md](features/auth.md))
 | ID | Task | Issue | Trạng thái |
@@ -49,6 +50,7 @@
 ## M2 — Folder, file, upload, download ([files-folders.md](features/files-folders.md), [upload.md](features/upload.md))
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
+| M2-00 | (Làm đầu M2, sau khi M1 xong) Script quy trình `task-start`, `pr-open`, `roadmap-sync` + skill Claude Code bọc script; rút gọn AGENTS.md mục 3 | [#62](https://github.com/q2kit/qloud/issues/62) | ⬜ |
 | M2-01 | Model Node, Blob, FileVersion; dịch vụ phân quyền (lúc này mới có owner) | [#17](https://github.com/q2kit/qloud/issues/17) | ⬜ |
 | M2-02 | API: tạo folder, liệt kê con, chi tiết node và breadcrumb, đổi tên, di chuyển | [#18](https://github.com/q2kit/qloud/issues/18) | ⬜ |
 | M2-03 | Wrapper S3 (`storage`): presign, multipart | [#19](https://github.com/q2kit/qloud/issues/19) | ⬜ |
@@ -113,6 +115,8 @@
 
 > Mới nhất ở trên cùng. Mỗi dòng gồm: ngày — task — tóm tắt — người hoặc agent thực hiện.
 
+- 2026-10-10 — — Viết lại các câu gọi người duyệt bằng danh xưng cho tự nhiên hơn (docs, AGENTS.md, README, mô tả issue). — AI agent
+- 2026-10-10 — — Kế hoạch cưỡng chế rule bằng công cụ: mở rộng M0-09 (CI: giấy phép, gitleaks, kiểm tra PR, required checks); thêm M0-12 (git hooks bằng lefthook, #61); thêm M2-00 (script quy trình + skill, #62). — AI agent
 - 2026-10-10 — — Sửa quy tắc rebase: chỉ rebase khi base branch có commit mới (kiểm tra bằng `git merge-base --is-ancestor`), không rebase vô điều kiện. — AI agent
 - 2026-10-10 — — Đánh dấu M0-06 ✅ (đã merge ở #55). Thêm quy tắc đồng bộ trạng thái ROADMAP sau khi merge; hướng dẫn tạo `.env` dùng `cp -n` để không ghi đè secret. — AI agent
 - 2026-10-10 — M0-06 — Dựng khung SPA với React, Vite, TypeScript, Tailwind/shadcn, Router, Query, i18n, theme, fetch CSRF và Vitest (Codex). Review: sửa `typecheck` (trước đó không kiểm tra file nào), bọc truy cập localStorage, dùng lucide-react 1.53.0 thay vì bỏ qua `minimumReleaseAge` của pnpm. — Codex + Claude
@@ -127,4 +131,4 @@
 - 2026-10-09 — M0-02 — Nâng bảng công nghệ lên bản ổn định mới nhất (Django 6.1, Python 3.14, PostgreSQL 18, React 19, Vite 8, TS 7, Tailwind 4); thêm luật "tra phiên bản trên registry, không dựa vào trí nhớ" vào AGENTS.md. — AI agent
 - 2026-10-09 — M0-02 — Cập nhật docs theo câu trả lời: storage do `.env` quyết định, đăng ký mở + SMTP riêng, giới hạn theo Plan (ADR-0005), chọn pypdfium2 cho PDF, quy tắc giấy phép, hướng UI (teal, Be Vietnam Pro). — AI agent
 
-- 2026-10-09 — M0-01 — Viết AGENTS.md và bộ docs ban đầu (overview, requirements, architecture, data-model, api, ui-ux, conventions, features, ADR). Chờ chủ dự án duyệt. — AI agent
+- 2026-10-09 — M0-01 — Viết AGENTS.md và bộ docs ban đầu (overview, requirements, architecture, data-model, api, ui-ux, conventions, features, ADR). Chờ duyệt. — AI agent

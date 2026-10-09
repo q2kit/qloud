@@ -4,7 +4,7 @@
 - Ngày: 2026-10-09
 
 ## Bối cảnh
-Chủ dự án muốn giới hạn (quota…) thay đổi được: những user đăng ký sớm có thể được cấu hình cao,
+Yêu cầu: giới hạn (quota…) phải thay đổi được: những user đăng ký sớm có thể được cấu hình cao,
 và khi về sau hạ giới hạn cho user mới thì user cũ không bị ảnh hưởng. Sau này còn có gói trả phí.
 
 ## Quyết định

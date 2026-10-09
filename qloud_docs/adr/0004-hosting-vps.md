@@ -4,7 +4,7 @@
 - Ngày: 2026-10-09
 
 ## Bối cảnh
-Chủ dự án cân nhắc dùng Cloudflare Pages + Workers thay cho VPS.
+Có cân nhắc dùng Cloudflare Pages + Workers thay cho VPS.
 
 ## Quyết định
 Backend (Django, Celery, PostgreSQL, Redis) chạy trên **VPS bằng Docker Compose**.

@@ -1,8 +1,8 @@
 # AGENTS.md — Hướng dẫn cho AI agent làm việc trên Qloud
 
 Qloud là ứng dụng lưu trữ và chia sẻ file trên web (cùng loại với Google Drive, nhưng có thiết kế riêng).
-Toàn bộ dự án được phát triển bởi AI agent, có con người (chủ dự án) giám sát.
-File này là **luật làm việc**. Nếu tài liệu khác mâu thuẫn với file này thì theo file này, và báo lại cho chủ dự án.
+Toàn bộ dự án được phát triển bởi AI agent; mọi quyết định lớn và mọi lần merge đều do người duyệt.
+File này là **luật làm việc**. Nếu tài liệu khác mâu thuẫn với file này thì theo file này, và báo lại để sửa.
 
 ---
 
@@ -21,7 +21,7 @@ File này là **luật làm việc**. Nếu tài liệu khác mâu thuẫn với
 
 ## 2. Ngôn ngữ
 
-- **Tài liệu, mô tả task, trao đổi với chủ dự án:** tiếng Việt.
+- **Tài liệu, mô tả task, trao đổi trong phiên làm việc:** tiếng Việt.
 - **Code, tên biến, comment trong code, commit message, tên branch, tên file code:** tiếng Anh.
 - **Chuỗi hiển thị trên UI:** không viết cứng trong code, luôn dùng i18n key (hỗ trợ `vi` và `en`, mặc định `vi`).
 
@@ -43,7 +43,7 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
 3. **Đọc ngữ cảnh.** Đọc file feature liên quan trong `qloud_docs/features/`, cùng các phần liên quan
    của `architecture.md`, `data-model.md`, `api.md`, `ui-ux.md` và `conventions.md`. Không đọc thừa những gì không cần.
 4. **Lập kế hoạch.** Với task lớn (nhiều file, schema mới, API mới): viết kế hoạch ngắn thành comment trên issue (`gh issue comment <n>`),
-   thêm label `needs:owner-decision`, và báo cho chủ dự án. **Chờ chủ dự án duyệt** rồi mới code. Task nhỏ, rõ ràng thì làm luôn.
+   thêm label `needs:owner-decision` và báo lại. **Chờ được duyệt** rồi mới code. Task nhỏ, rõ ràng thì làm luôn.
 5. **Thực hiện.** Code + test đi cùng nhau (xem mục 6). Mỗi PR chỉ chứa một task. Commit nhỏ, theo Conventional Commits.
 6. **Kiểm tra trên máy.** Chạy lint, type check và test của phần đã sửa. Không mở PR khi test còn đỏ.
 7. **Cập nhật tài liệu, bắt buộc, trong cùng PR:**
@@ -58,14 +58,14 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
      rồi `gh pr create --base <base> --title "<type>(<scope>): <subject> [<task-id>]" --body-file <file>`.
    - Body PR theo [.github/pull_request_template.md](.github/pull_request_template.md), và **phải có `Closes #<n>`**.
    - Theo dõi CI bằng `gh pr checks --watch`. CI đỏ thì sửa cho tới khi xanh.
-9. **Review và merge.** **Chỉ chủ dự án được merge**, hoặc agent merge (`gh pr merge --squash --delete-branch`) khi chủ dự án nói rõ là đồng ý.
+9. **Review và merge.** **Agent không tự merge.** Chỉ merge (`gh pr merge --squash --delete-branch`) khi được yêu cầu rõ ràng cho đúng PR đó.
    Có góp ý review thì đọc bằng `gh pr view <n> --comments`, sửa trên cùng branch, rồi trả lời từng góp ý.
    Đổi trạng thái task trong ROADMAP sang ✅:
-   - **Agent merge** (khi được chủ dự án cho phép): push một commit đổi sang ✅ vào chính PR đó, rồi mới merge.
-   - **Chủ dự án tự merge:** ở đầu phiên làm việc tiếp theo, agent kiểm tra các PR đã merge (`gh pr list --state merged`).
+   - **Agent merge** (khi được yêu cầu): push một commit đổi sang ✅ vào chính PR đó, rồi mới merge.
+   - **PR được merge từ bên ngoài phiên:** ở đầu phiên làm việc tiếp theo, agent kiểm tra các PR đã merge (`gh pr list --state merged`).
      Nếu task tương ứng trong ROADMAP vẫn là 🟦 thì đổi sang ✅ trong PR kế tiếp; nếu chưa có PR nào sắp mở thì mở một PR nhỏ chỉ để làm việc này.
    - Không để ROADMAP trên `master` lệch với GitHub quá một phiên làm việc.
-10. **Báo cáo.** Tóm tắt cho chủ dự án: link PR, đã làm gì, đã kiểm tra thế nào, còn tồn đọng gì.
+10. **Báo cáo.** Tóm tắt: link PR, đã làm gì, đã kiểm tra thế nào, còn tồn đọng gì.
 
 **Các tình huống khác:**
 - Phát hiện bug hoặc việc ngoài phạm vi task: không sửa lẫn vào PR hiện tại. Tạo issue mới: `gh issue create --label bug|enhancement --milestone ...`.
@@ -82,7 +82,7 @@ Milestone trên GitHub trùng tên với milestone trong ROADMAP (M0…M8).
 
 > Nguyên tắc: **docs và code phải luôn khớp nhau.** Người hoặc agent đọc docs phải nắm được hệ thống đang làm được gì và tiến độ tới đâu.
 
-## 4. Những việc PHẢI hỏi chủ dự án trước khi làm
+## 4. Những việc PHẢI hỏi trước khi làm
 
 - Thêm, đổi hoặc bỏ một **công nghệ chính**: framework, database, hạ tầng, dịch vụ trả phí.
 - Thêm **dependency mới** không nằm trong danh sách ở `architecture.md` (thư viện nhỏ dùng cho dev hoặc test thì có thể tự thêm, nhưng phải ghi lại).
@@ -122,7 +122,7 @@ Chi tiết và lý do: xem [qloud_docs/architecture.md](qloud_docs/architecture.
 - Đọc **tài liệu chính thức của đúng phiên bản đang dùng** (release notes, hướng dẫn migration) trước khi dùng API mới. Không viết theo cú pháp của phiên bản cũ.
 - Kiểm tra tính tương thích giữa các package (ví dụ một thư viện Django đã hỗ trợ Django 6.1 chưa). Nếu bản mới nhất chưa tương thích thì dùng bản thấp hơn gần nhất, và ghi lý do vào `architecture.md`.
 - Ghim phiên bản bằng lockfile (`uv.lock` cho BE, `pnpm-lock.yaml` cho FE). Bảng phiên bản trong `architecture.md` phải khớp với lockfile.
-- Dependabot hoặc Renovate tự mở PR nâng phiên bản; nâng major version thì phải hỏi chủ dự án.
+- Dependabot hoặc Renovate tự mở PR nâng phiên bản; nâng major version thì phải hỏi trước.
 
 ## 6. Tiêu chuẩn chất lượng (Definition of Done)
 

@@ -1,6 +1,6 @@
 # UI / UX
 
-> Trạng thái: **Đã duyệt hướng tổng thể** (chủ dự án để agent quyết, 2026-10-09). Chi tiết vẫn có thể điều chỉnh khi làm M0-07.
+> Trạng thái: **Đã duyệt hướng tổng thể** (giao cho agent quyết, 2026-10-09). Chi tiết vẫn có thể điều chỉnh khi làm M0-07.
 
 ## Hướng thiết kế (đề xuất)
 
