@@ -17,11 +17,11 @@ Dự án được phát triển bởi AI agent, có người review và duyệt 
 
 ## Chạy dự án (dev)
 
-**Chỉ làm một lần** — tạo file cấu hình. `cp -n` không ghi đè nếu file đã có, nên chạy lại cũng không mất token đã điền:
+**Chỉ làm một lần** — tạo file cấu hình. Lệnh chỉ tạo khi file chưa có, nên chạy lại cũng không mất token đã điền:
 
 ```bash
-cp -n .env.example .env                              # rồi điền LOCALSTACK_AUTH_TOKEN
-cp -n qloud_backend/.env.example qloud_backend/.env
+[ -f .env ] || cp .env.example .env                                     # rồi điền LOCALSTACK_AUTH_TOKEN
+[ -f qloud_backend/.env ] || cp qloud_backend/.env.example qloud_backend/.env
 ```
 
 Cài git hooks (kiểm tra format, lint, secret, commit message trước khi commit/push):

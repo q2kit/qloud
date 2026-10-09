@@ -154,50 +154,75 @@ Hiện tại chỉ có ít người dùng, nhưng hệ thống phải được t
 
 ## 8. Lệnh thường dùng
 
-> Khi viết lệnh thao tác thủ công: mỗi khối lệnh phải chạy đúng khi dán nguyên khối vào **một** terminal.
-> `cd` theo đường dẫn tuyệt đối từ gốc repo; tách riêng lệnh chỉ chạy một lần hoặc lệnh có thể ghi đè/xóa dữ liệu.
+> Mọi khối lệnh chạy được từ **bất kỳ thư mục nào trong repo** và dán nguyên khối vào **một** terminal.
+> Quy tắc khi viết thêm: `cd` theo đường dẫn từ gốc repo (`git rev-parse --show-toplevel`); nối lệnh bằng `&&` để dừng khi có bước lỗi;
+> lệnh chỉ chạy một lần và lệnh có thể xóa/ghi đè dữ liệu luôn nằm ở khối riêng.
 
-> Phần này sẽ được điền khi dựng xong khung dự án (task M0 trong ROADMAP). Agent nào dựng khung thì cập nhật mục này.
+**Cài đặt lần đầu** (chạy lại cũng an toàn: chỉ tạo `.env` khi chưa có, không bao giờ ghi đè):
 
 ```bash
-# Lần đầu: tạo file cấu hình (điền LOCALSTACK_AUTH_TOKEN trong .env ở gốc).
-# Dùng `cp -n` để không ghi đè file .env đã có.
-cp -n .env.example .env
-cp -n qloud_backend/.env.example qloud_backend/.env
+cd "$(git rev-parse --show-toplevel)" &&
+  { [ -f .env ] || cp .env.example .env; } &&                                    # rồi điền LOCALSTACK_AUTH_TOKEN
+  { [ -f qloud_backend/.env ] || cp qloud_backend/.env.example qloud_backend/.env; } &&
+  brew install lefthook gitleaks && lefthook install &&   # git hooks (lefthook.yml)
+  (cd qloud_backend && uv sync) &&
+  (cd qloud_frontend && pnpm install && pnpm exec playwright install chromium)
+```
 
-# Lần đầu: cài git hooks (lefthook + gitleaks, cấu hình ở lefthook.yml)
-brew install lefthook gitleaks
-lefthook install
+**Chạy dev** — hạ tầng trước, rồi mỗi server một terminal:
 
-# Hạ tầng dev: Postgres, Redis, LocalStack (S3), Mailpit
-docker compose up -d --wait
-docker compose ps
-docker compose down          # dừng và giữ dữ liệu
-docker compose down -v       # dừng và xóa toàn bộ dữ liệu dev
+```bash
+cd "$(git rev-parse --show-toplevel)" && docker compose up -d --wait   # Postgres, Redis, LocalStack (S3), Mailpit
+```
 
-# Mailpit UI: http://localhost:8025 · S3 endpoint: http://localhost:4566 (bucket qloud-dev)
+```bash
+cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run python manage.py migrate && uv run python manage.py runserver
+```
 
-# Backend (thư mục qloud_backend, dùng uv)
-cd "$(git rev-parse --show-toplevel)/qloud_backend"
-uv sync                                  # cài dependency (cả nhóm dev)
-uv run python manage.py migrate
-uv run python manage.py runserver        # http://localhost:8000/api/v1/health · /api/docs/
-uv run celery -A config worker -l info   # worker Celery
-uv run pytest --cov                      # test + coverage (cần docker compose đang chạy)
-uv run ruff format . && uv run ruff check . && uv run mypy .
-uv run python manage.py spectacular --file openapi.yaml --validate --fail-on-warn   # sau khi đổi API
+```bash
+cd "$(git rev-parse --show-toplevel)/qloud_frontend" && pnpm dev
+```
 
-# Frontend (thư mục qloud_frontend, dùng pnpm)
-cd "$(git rev-parse --show-toplevel)/qloud_frontend"
-pnpm install
-pnpm dev                                 # http://localhost:5173, proxy /api và /admin sang :8000
-pnpm test
-pnpm lint
-pnpm typecheck
-pnpm build
-pnpm api:generate                        # sinh lại type API từ qloud_backend/openapi.yaml
-pnpm exec playwright install chromium   # lần đầu: tải trình duyệt cho E2E
-pnpm test:e2e                            # E2E full-stack (cần docker compose); tự bật Django :8001 và vite preview :4173
+```bash
+cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run celery -A config worker -l info   # chỉ khi cần worker
+```
+
+| Địa chỉ | Là gì |
+|---|---|
+| http://localhost:5173 | Frontend (Vite, proxy `/api` và `/admin` sang :8000) |
+| http://localhost:8000/api/v1/health · `/api/docs/` · `/admin/` | Backend: health, Swagger UI, Django admin |
+| http://localhost:8025 | Mailpit (email dev) |
+| http://localhost:4566 | LocalStack S3 (bucket `qloud-dev`) |
+
+**Kiểm tra trước khi mở PR** — giống CI (cần hạ tầng đang chạy):
+
+```bash
+cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run ruff format --check . && uv run ruff check . && uv run mypy . && uv run pytest --cov
+cd "$(git rev-parse --show-toplevel)/qloud_frontend" && pnpm lint && pnpm format:check && pnpm typecheck && pnpm test:coverage && pnpm build && pnpm test:e2e
+```
+
+**Sau khi đổi API** — sinh lại schema và type, commit cả hai (CI chặn nếu cũ):
+
+```bash
+cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run python manage.py spectacular --file openapi.yaml --validate --fail-on-warn
+cd "$(git rev-parse --show-toplevel)/qloud_frontend" && pnpm api:generate
+```
+
+**Lệnh hay dùng khác:**
+
+| Việc | Lệnh (từ thư mục tương ứng) |
+|---|---|
+| Tự sửa format + lint | BE: `uv run ruff check --fix . && uv run ruff format .` · FE: `pnpm format && pnpm lint --fix` |
+| Tạo migration | BE: `uv run python manage.py makemigrations <app>` |
+| Tạo tài khoản admin | BE: `uv run python manage.py createsuperuser` |
+| Chạy một test | BE: `uv run pytest apps/core/tests/test_health.py -k ok` · FE: `pnpm vitest run src/app/router.test.tsx` · E2E: `pnpm test:e2e -g "404"` |
+| Xem report E2E | FE: `pnpm exec playwright show-report` |
+| Dừng hạ tầng (giữ dữ liệu) | gốc repo: `docker compose down` |
+
+**Xóa toàn bộ dữ liệu dev** (Postgres, Redis, file trên LocalStack) — **không hoàn tác được, phải hỏi trước khi chạy**:
+
+```bash
+cd "$(git rev-parse --show-toplevel)" && docker compose down -v
 ```
 
 ## 9. Git
