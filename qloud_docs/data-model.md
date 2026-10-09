@@ -21,7 +21,7 @@ User 1─────* UploadSession ────▶ Node (đích)
 | Cột | Kiểu | Ghi chú |
 |---|---|---|
 | id | uuid | |
-| email | citext, unique | đăng nhập bằng email |
+| email | varchar(254), unique | đăng nhập bằng email; luôn lưu chữ thường, kèm unique constraint trên `lower(email)` |
 | display_name | varchar(100) | |
 | avatar_url | text, null | |
 | locale | varchar(5) | `vi` hoặc `en` |

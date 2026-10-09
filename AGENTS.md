@@ -163,7 +163,16 @@ docker compose down          # dừng (giữ dữ liệu); thêm -v để xóa s
 
 # Mailpit UI: http://localhost:8025 · S3 endpoint: http://localhost:4566 (bucket qloud-dev)
 
-# Backend, frontend: sẽ bổ sung ở M0-05, M0-06 (mục 8 hoàn thiện ở M0-11)
+# Backend (thư mục qloud_backend, dùng uv)
+cd qloud_backend
+uv sync                                  # cài dependency (cả nhóm dev)
+uv run python manage.py migrate
+uv run python manage.py runserver        # http://localhost:8000/api/v1/health · /api/docs/
+uv run celery -A config worker -l info   # worker Celery
+uv run pytest --cov                      # test + coverage (cần docker compose đang chạy)
+uv run ruff format . && uv run ruff check . && uv run mypy .
+
+# Frontend: sẽ bổ sung ở M0-06 (mục 8 hoàn thiện ở M0-11)
 ```
 
 ## 9. Git
