@@ -16,6 +16,7 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
   - **Panel chi tiết bên phải** (bật/tắt bằng phím `i`): thông tin, phiên bản, chia sẻ, hoạt động, tất cả trong một chỗ.
   - **Khay upload** nổi ở góc dưới: hiện tiến độ, tạm dừng/tiếp tục, thử lại.
   - **Phím tắt** cho mọi thao tác chính. Bấm `?` để xem danh sách phím tắt.
+- **Biểu tượng:** chữ Q trắng trên ô teal bo góc (`qloud_frontend/public/`: `favicon.svg`, `favicon.ico` 16+32px cho trình duyệt cũ, `apple-touch-icon.png` 180px không bo góc vì iOS tự bo).
 - **Component:** shadcn/ui trên nền Radix, được tùy biến theo token của Qloud.
 - **Responsive:** trên mobile, sidebar thu thành drawer, panel chi tiết thành bottom sheet, hành động chính là nút nổi "+".
 
