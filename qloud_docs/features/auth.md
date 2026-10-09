@@ -23,6 +23,11 @@
 - User bị khóa (`suspended_at`) thì không đăng nhập được, và nhận thông báo chung.
 - Rate limit: 10 lần thử đăng nhập mỗi phút trên mỗi IP, 5 lần mỗi phút trên mỗi email. Thông báo lỗi không được để lộ email có tồn tại hay không.
 
+## Cấu hình
+- OAuth: tạo OAuth app trên Google Cloud Console và GitHub Developer Settings, callback URL theo domain đang chạy;
+  client id và secret đặt trong `qloud_backend/.env`. Mỗi môi trường (dev, production) dùng app riêng.
+- SMTP và Turnstile: xem các quy tắc ở trên; production dùng key thật, dev và test dùng Mailpit và test key của Cloudflare.
+
 ## Tiêu chí chấp nhận
 - [ ] Đăng ký → nhận email xác thực → bấm link → tài khoản được xác thực.
 - [ ] Đăng nhập, đăng xuất. Truy cập route cần đăng nhập khi chưa đăng nhập thì bị chuyển về `/login?next=...`.

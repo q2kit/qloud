@@ -10,7 +10,7 @@
 
 | Milestone | Mục tiêu | Trạng thái |
 |---|---|---|
-| M0 | Nền tảng: docs, khung BE/FE, Docker, CI | 🟨 |
+| M0 | Nền tảng: docs, khung BE/FE, Docker, CI | ✅ |
 | M1 | Xác thực và tài khoản | ⬜ |
 | M2 | Folder, file, upload chia chunk, download | ⬜ |
 | M3 | Xem trước và thumbnail | ⬜ |
@@ -24,7 +24,7 @@
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
 | M0-01 | Viết AGENTS.md và bộ docs ban đầu | — | ✅ |
-| M0-02 | Duyệt docs và trả lời open-questions | — | ✅ |
+| M0-02 | Duyệt bộ docs ban đầu | — | ✅ |
 | M0-03 | Thêm `.gitignore`, `.editorconfig`, README gốc (git repo và LICENSE MIT đã có sẵn) | [#1](https://github.com/q2kit/qloud/issues/1) | ✅ |
 | M0-04 | `docker-compose.yml` cho dev: Postgres, Redis, LocalStack (tự tạo bucket, cấu hình CORS), Mailpit; có `.env.example` | [#2](https://github.com/q2kit/qloud/issues/2) | ✅ |
 | M0-05 | Khung BE: Django + DRF + settings theo môi trường + Celery + health endpoint + ruff/mypy/pytest | [#3](https://github.com/q2kit/qloud/issues/3) | ✅ |
@@ -35,14 +35,14 @@
 | M0-10 | Khung Playwright E2E và đưa vào CI | [#8](https://github.com/q2kit/qloud/issues/8) | ✅ |
 | M0-11 | Cập nhật mục "Lệnh thường dùng" trong AGENTS.md | [#9](https://github.com/q2kit/qloud/issues/9) | ✅ |
 | M0-12 | Git hooks bằng lefthook: format/lint file đã stage, gitleaks, kiểm tra commit message, tên branch, chặn push `master`, typecheck/test phía có thay đổi | [#61](https://github.com/q2kit/qloud/issues/61) | ✅ |
-| M0-13 | Sửa lỗi backend phát hiện khi rà soát M0: settings prod, exception handler, phân trang | [#70](https://github.com/q2kit/qloud/issues/70) | ⬜ |
-| M0-14 | Sửa lỗi frontend phát hiện khi rà soát M0: retry 4xx, 204, error boundary, tiêu đề trang, test 360px | [#71](https://github.com/q2kit/qloud/issues/71) | ⬜ |
-| M0-15 | Sửa docs, CI và quy trình phát hiện khi rà soát M0: giấy phép, Dependabot, kiểm tra PR, cổng Docker | [#72](https://github.com/q2kit/qloud/issues/72) | ⬜ |
+| M0-13 | Sửa lỗi backend phát hiện khi rà soát M0: settings prod, exception handler, phân trang | [#70](https://github.com/q2kit/qloud/issues/70) | ✅ |
+| M0-14 | Sửa lỗi frontend phát hiện khi rà soát M0: retry 4xx, 204, error boundary, tiêu đề trang, test 360px | [#71](https://github.com/q2kit/qloud/issues/71) | ✅ |
+| M0-15 | Sửa docs, CI và quy trình phát hiện khi rà soát M0: giấy phép, Dependabot, kiểm tra PR, cổng Docker | [#72](https://github.com/q2kit/qloud/issues/72) | ✅ |
 
 ## M1 — Xác thực ([auth.md](features/auth.md))
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
-| M1-01 | Model User và Plan (seed `free-2026`, `friends-2026`), khóa user, `get_limits()`, tạo folder gốc và gán plan khi đăng ký, Django admin cho plan/user | [#10](https://github.com/q2kit/qloud/issues/10) | ⬜ |
+| M1-01 | Model User và Plan (seed `free-2026`, `plus-2026`), khóa user, `get_limits()`, tạo folder gốc và gán plan khi đăng ký, Django admin cho plan/user | [#10](https://github.com/q2kit/qloud/issues/10) | ⬜ |
 | M1-02 | allauth headless: đăng ký, đăng nhập, đăng xuất, xác thực email, quên mật khẩu | [#11](https://github.com/q2kit/qloud/issues/11) | ⬜ |
 | M1-03 | OAuth Google và GitHub, liên kết tài khoản theo email đã xác thực | [#12](https://github.com/q2kit/qloud/issues/12) | ⬜ |
 | M1-04 | Rate limit và Cloudflare Turnstile cho auth; gửi email qua SMTP bằng Celery, template email `vi`/`en` | [#13](https://github.com/q2kit/qloud/issues/13) | ⬜ |
@@ -118,6 +118,7 @@
 
 > Mới nhất ở trên cùng. Mỗi dòng gồm: ngày — task — tóm tắt — người hoặc agent thực hiện.
 
+- 2026-10-10 — — Dọn docs: mô tả sản phẩm trung tính (bỏ so sánh và bối cảnh riêng), bỏ `open-questions.md` (quyết định đã nằm trong feature, architecture, data-model, ADR; câu hỏi mới hỏi trong phiên hoặc trên issue), đổi plan `friends-2026` thành `plus-2026`. M0-13, M0-14, M0-15 đã merge (#73, #75, #74): M0 xong. — AI agent
 - 2026-10-10 — — Rà soát lại toàn bộ M0 (BE, FE, docs/CI): thêm M0-13, M0-14, M0-15 để sửa các vấn đề tìm được. — AI agent
 - 2026-10-10 — M0-11 — PR #68 đã merge, đổi trạng thái sang ✅. — AI agent
 - 2026-10-10 — M0-10 — PR #67 đã merge, đổi trạng thái sang ✅. — AI agent

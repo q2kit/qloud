@@ -2,16 +2,16 @@
 
 ## Qloud là gì
 
-Qloud là ứng dụng web để **lưu trữ, sắp xếp, xem và chia sẻ file**.
-Về chức năng thì cùng loại với Google Drive, nhưng giao diện và trải nghiệm được thiết kế riêng, không sao chép.
+Qloud là ứng dụng web mã nguồn mở để **lưu trữ, sắp xếp, xem trước và chia sẻ file**.
+Mỗi người dùng có không gian lưu trữ riêng, giới hạn theo gói dung lượng. File và thư mục có thể chia sẻ cho người dùng khác
+(quyền xem hoặc sửa) hoặc qua link công khai. Upload chia nhỏ và tự tiếp tục khi gián đoạn, nên dùng được với file rất lớn.
 
-## Mục tiêu
+## Nguyên tắc thiết kế
 
-- **Giai đoạn 1 (hiện tại):** dùng miễn phí cho một nhóm nhỏ bạn bè. Cần ổn định, an toàn và dễ dùng.
-- **Giai đoạn sau:** thương mại hóa (gói trả phí theo dung lượng) và mở rộng lên số lượng người dùng lớn.
-
-Vì vậy, hệ thống được **thiết kế từ đầu để mở rộng được**: storage tách riêng, server stateless, phân quyền tập trung.
-Nhưng **chưa tối ưu sớm**: không làm microservice, sharding hay đa vùng khi chưa có nhu cầu thật.
+- **Mở rộng được mà không phải viết lại:** byte của file đi thẳng giữa trình duyệt và object storage, server ứng dụng stateless,
+  phân quyền tập trung ở một lớp duy nhất. Tăng tải bằng cách thêm instance.
+- **Không tối ưu sớm:** không làm microservice, sharding hay đa vùng khi chưa có nhu cầu thật.
+- **An toàn mặc định:** kiểm tra quyền phía server cho mọi request, không để lộ node mình không có quyền.
 
 ## Nền tảng
 

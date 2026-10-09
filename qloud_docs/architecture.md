@@ -39,7 +39,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 | mypy | 2.3 — **không phải bản mới nhất (2.4)** vì djangorestframework-stubs 3.18.1 yêu cầu `mypy<2.4` |
 | PostgreSQL | 18 |
 | Redis | 8 |
-| Node.js | bản LTS hiện hành |
+| Node.js | 24 (LTS; `engines` trong `package.json`, CI dùng cùng bản) |
 | React | 19.3.0 |
 | TypeScript | 6.0.3 (bản 7.0.2 chưa tương thích với typescript-eslint 8.71.1; theo dõi việc nâng cấp ở [#56](https://github.com/q2kit/qloud/issues/56)) |
 | Vite | 8.3.4 |
@@ -63,7 +63,7 @@ peer dependency chính thức cho phép.
 | DB driver | psycopg 3 |
 | S3 | boto3 |
 | Tác vụ nền | Celery + Redis (gồm celery beat cho tác vụ định kỳ) |
-| Ảnh | Pillow (thumbnail ảnh), pypdfium2 (render trang PDF; Apache-2.0/BSD, không cần thư viện hệ thống) |
+| Ảnh | Pillow (thumbnail ảnh), pypdfium2 (render trang PDF; Apache-2.0/BSD, không cần thư viện hệ thống). Không dùng PyMuPDF vì giấy phép AGPL |
 | Email | SMTP riêng (cấu hình qua `.env`), gửi qua Celery; dev dùng Mailpit. Cấu hình bằng setting `MAILERS` của Django 6.1 (các setting `EMAIL_*` đã bị deprecate) |
 | Cấu hình | django-environ |
 | Quản lý package | uv |
@@ -97,7 +97,7 @@ mọi selector của node đều phải đi qua đây.
 | Routing | React Router |
 | Dữ liệu từ server | TanStack Query; API client sinh từ OpenAPI (openapi-typescript + openapi-fetch) |
 | Trạng thái client | Zustand (hàng đợi upload, lựa chọn nhiều mục) |
-| UI | Tailwind CSS, shadcn/ui (Radix), lucide-react icons; Radix Dialog 1.2.0 cho modal focus/keyboard (MIT) |
+| UI | Tailwind CSS, shadcn/ui (Radix), lucide-react (icon) |
 | Form | react-hook-form + zod |
 | i18n | i18next + react-i18next |
 | Xem trước | pdf.js (PDF), thẻ `<video>` gốc của trình duyệt |
@@ -154,8 +154,8 @@ Rule nào kiểm tra máy móc được thì để công cụ cưỡng chế, kh
   |---|---|---|
   | `.env` (gốc repo) | docker compose | Hạ tầng: Postgres, Redis, LocalStack token, Mailpit, CORS của bucket |
   | `qloud_backend/.env` | Django, Celery | Secret key, `APP_DOMAIN`, DB/Redis URL, S3, SMTP, OAuth, Turnstile, Sentry |
-  | `qloud_frontend/.env` | Vite (`VITE_*`) | Chỉ các giá trị công khai, ví dụ Turnstile site key (thêm ở M0-06) |
-- **Production (giai đoạn 1):** **mọi thứ chạy trên một VPS** bằng Docker Compose: nginx, api, worker, beat, postgres, redis.
+  | `qloud_frontend/.env` | Vite (`VITE_*`) | Chỉ các giá trị công khai, ví dụ Turnstile site key |
+- **Production:** **mọi thứ chạy trên một VPS** bằng Docker Compose: nginx, api, worker, beat, postgres, redis.
   Phía trước VPS là **Cloudflare proxy** (DNS bật proxy — biểu tượng đám mây cam). Chi tiết ở [ADR-0006](adr/0006-cloudflare-proxy-nginx.md).
   - **TLS:** chế độ SSL của Cloudflare là **Full (strict)**. nginx dùng **Cloudflare Origin Certificate**; file cert và key được mount vào container, đường dẫn cấu hình qua `.env`. VPS không dùng Let's Encrypt.
   - **Firewall (ufw):** cổng 443 chỉ mở cho các dải IP của Cloudflare; SSH mở riêng. Cổng 80 đóng (Cloudflare tự chuyển HTTP sang HTTPS).
@@ -169,7 +169,9 @@ Rule nào kiểm tra máy móc được thì để công cụ cưỡng chế, kh
   - **Giới hạn của Cloudflare cần nhớ:** request body tối đa 100 MB (gói Free) và timeout 100 giây. Hai giới hạn này không ảnh hưởng, vì file đi thẳng lên S3/R2, không qua proxy. API không được có request chạy lâu.
   File lưu trên dịch vụ tương thích S3: AWS S3 hay Cloudflare R2 **chỉ khác nhau ở `.env`** (`S3_ENDPOINT_URL`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`).
   Code không được dùng tính năng riêng của một nhà cung cấp. Frontend là static build, do nginx phục vụ.
-- **Domain:** lấy từ `.env` (`APP_DOMAIN`). nginx dùng biến này cho `server_name`; Django dùng nó cho `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` và các link trong email.
+  - **Cần chuẩn bị trước khi deploy:** domain trên Cloudflare, Origin Certificate, bucket S3/R2 kèm access key, tài khoản SMTP,
+    OAuth app Google và GitHub cho domain production, Turnstile key. Tất cả đặt trong `.env` của server, không commit.
+- **Domain:** production cần một domain thật trỏ về Cloudflare (OAuth của Google và Cloudflare proxy không dùng được với IP trần), lấy từ `.env` (`APP_DOMAIN`). nginx dùng biến này cho `server_name`; Django dùng nó cho `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` và các link trong email.
   FE và API **cùng origin**: `https://<domain>/` là SPA, `https://<domain>/api/` là Django, `/admin/` là Django admin.
   Nhờ vậy không cần CORS cho API và cookie session đơn giản. Chỉ bucket S3 cần cấu hình CORS cho origin này.
 - **CI/CD:** GitHub Actions. Mỗi PR chạy lint, type check, test BE, test FE, build và E2E. Deploy tự động khi merge vào `master` (build image rồi deploy lên VPS) **chưa làm**, thuộc M8-04.

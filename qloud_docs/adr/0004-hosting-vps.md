@@ -8,7 +8,7 @@ Có cân nhắc dùng Cloudflare Pages + Workers thay cho VPS.
 
 ## Quyết định
 Backend (Django, Celery, PostgreSQL, Redis) chạy trên **VPS bằng Docker Compose**.
-Frontend (file tĩnh) cũng do nginx trên **cùng VPS** phục vụ (phía trước là Cloudflare proxy, xem ADR-0006), cùng origin với API (chốt 2026-10-09). File lưu trên S3 hoặc R2, tùy `.env`.
+Frontend (file tĩnh) cũng do nginx trên **cùng VPS** phục vụ (phía trước là Cloudflare proxy, xem ADR-0006), cùng origin với API. File lưu trên S3 hoặc R2, tùy `.env`.
 
 ## Lý do
 - **Cloudflare Workers không chạy được Django:** Python Workers chạy trên Pyodide, không hỗ trợ Django, Celery hay psycopg.
@@ -16,7 +16,7 @@ Frontend (file tĩnh) cũng do nginx trên **cùng VPS** phục vụ (phía trư
 - **D1 là SQLite:** không phù hợp với yêu cầu PostgreSQL (recursive CTE trên dữ liệu lớn, pg_trgm, khóa dòng cho quota).
   Workers có thể kết nối tới PostgreSQL bên ngoài qua Hyperdrive, nhưng khi đó vẫn phải có một nơi chạy PostgreSQL và vẫn phải bỏ Django.
 - Workers không có tác vụ nền dài kiểu Celery (tạo thumbnail chẳng hạn), chỉ có Queues và Cron với giới hạn CPU.
-- **VPS:** chi phí cố định, rẻ, kiểm soát được hoàn toàn. Đủ dùng cho giai đoạn 1, và sau này nâng cấp hoặc tách dịch vụ dễ dàng.
+- **VPS:** chi phí cố định, rẻ, kiểm soát được hoàn toàn. Đủ cho quy mô hiện tại; khi cần thì nâng cấp máy hoặc tách dịch vụ ra máy khác.
 
 ## Hệ quả
 - Phải tự lo vận hành: cập nhật OS, backup, TLS giữa Cloudflare và VPS (Origin Certificate, xem ADR-0006), giám sát.

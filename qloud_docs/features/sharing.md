@@ -3,7 +3,7 @@
 **Trạng thái:** Nháp · **Milestone:** M5 · **Màn hình:** S-07, S-11, S-12
 
 ## User stories
-- Tôi muốn chia sẻ một file hoặc folder cho bạn bè qua email, với quyền xem hoặc sửa.
+- Tôi muốn chia sẻ một file hoặc folder cho người khác qua email, với quyền xem hoặc sửa.
 - Tôi muốn tạo link công khai để ai có link cũng xem và tải được, có thể kèm hạn dùng.
 - Tôi muốn xem ai đang có quyền, rồi đổi quyền hoặc thu hồi.
 - Tôi muốn xem những gì người khác đã chia sẻ cho mình.
@@ -53,3 +53,6 @@
 - [ ] Gửi báo cáo từ trang link công khai thì admin nhận email, và báo cáo hiện trong admin.
 - [ ] Admin gỡ link thì link ngừng hoạt động ngay; khóa user thì user không đăng nhập được và mọi link của user ngừng hoạt động.
 - [ ] Qua link của folder A, không thể truy cập node nằm ngoài A bằng cách đổi `node_id`.
+
+## Ngoài phạm vi
+Mật khẩu cho share link, quyền sửa qua share link, mời người chưa có tài khoản (có thể làm sau MVP), chặn thừa kế quyền.

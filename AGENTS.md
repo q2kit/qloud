@@ -1,6 +1,6 @@
 # AGENTS.md — Hướng dẫn cho AI agent làm việc trên Qloud
 
-Qloud là ứng dụng lưu trữ và chia sẻ file trên web (cùng loại với Google Drive, nhưng có thiết kế riêng).
+Qloud là ứng dụng web mã nguồn mở để lưu trữ, xem trước và chia sẻ file.
 Toàn bộ dự án được phát triển bởi AI agent; mọi quyết định lớn và mọi lần merge đều do người duyệt.
 File này là **luật làm việc**. Nếu tài liệu khác mâu thuẫn với file này thì theo file này, và báo lại để sửa.
 
@@ -31,7 +31,7 @@ Repo: `q2kit/qloud` trên GitHub, nhánh chính là **`master`**. Mọi thao tá
 Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue* trong ROADMAP). Mỗi task được giao qua **một Pull Request**.
 
 1. **Định hướng.**
-   - Đọc [qloud_docs/ROADMAP.md](qloud_docs/ROADMAP.md) và [qloud_docs/open-questions.md](qloud_docs/open-questions.md).
+   - Đọc [qloud_docs/ROADMAP.md](qloud_docs/ROADMAP.md).
    - Xem trạng thái trên GitHub: `gh pr list`, `gh pr list --state merged --limit 5`, `gh issue list --milestone M<n>` (ví dụ `M1`).
      Đối chiếu với ROADMAP: PR đã merge mà task vẫn là 🟦 thì phải đồng bộ (xem bước 9). Có PR nào đang mở, đang bị yêu cầu sửa (review) hay CI đỏ thì xử lý trước, rồi mới làm task mới.
    - Chọn task tiếp theo: task chưa làm, đứng đầu milestone hiện tại, và không phụ thuộc vào task nào chưa xong.
@@ -51,7 +51,8 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
    - Đổi trạng thái task trong `ROADMAP.md` thành 🟦 (chờ duyệt), và thêm một dòng vào mục *Nhật ký*.
    - Nếu hành vi, API, schema hay màn hình thay đổi thì sửa tài liệu tương ứng.
    - Nếu có quyết định kiến trúc mới thì tạo ADR trong `qloud_docs/adr/`.
-   - Nếu phát sinh câu hỏi chưa trả lời được thì ghi vào `open-questions.md`.
+   - Câu hỏi cần quyết định thì hỏi trong phiên làm việc, hoặc comment trên issue kèm label `needs:owner-decision`.
+     Có câu trả lời thì viết **quyết định** vào đúng tài liệu (feature, architecture, data-model, ADR); không lưu bản hỏi–đáp trong repo.
 8. **Mở PR.**
    - **Trước khi push hoặc tạo PR, kiểm tra base branch; chỉ rebase nếu base có commit mới**: `git fetch origin && git merge-base --is-ancestor origin/<base> HEAD || git rebase origin/<base>`.
      Nếu có rebase: giải quyết conflict (nếu có), chạy lại lint và test rồi mới push.
@@ -102,7 +103,7 @@ Những việc được **tự làm**: code theo task đã có trong ROADMAP, vi
 sửa bug, cập nhật docs cho khớp với code, tạo branch, commit, push branch, tạo issue và PR, comment trên issue hoặc PR.
 **Không được** push thẳng lên `master`, tự merge PR khi chưa được đồng ý, đóng issue của người khác, hay sửa cấu hình repo (branch protection, secrets).
 
-## 5. Công nghệ đã chốt (tóm tắt)
+## 5. Công nghệ (tóm tắt)
 
 | Phần | Lựa chọn |
 |---|---|

@@ -27,8 +27,8 @@ Chi tiết của từng tính năng nằm trong [features/](features/). File nà
 | NF-03 | **Mở rộng:** server ứng dụng stateless; byte của file không đi qua server ứng dụng; tăng tải bằng cách thêm instance. |
 | NF-04 | **Bảo mật (cơ bản):** HTTPS; mật khẩu băm bằng Argon2; cookie HttpOnly/Secure/SameSite; CSRF; rate limit cho đăng nhập và các endpoint nhạy cảm; presigned URL có hạn ngắn; kiểm tra quyền phía server. |
 | NF-05 | **Toàn vẹn dữ liệu:** quota không bị vượt khi upload đồng thời; không để lại object mồ côi trên S3 lâu dài (có job dọn dẹp). |
-| NF-06 | **Sao lưu:** backup PostgreSQL hằng ngày. Bật versioning hoặc chính sách giữ lại trên bucket (xem open-questions). |
-| NF-07 | **Khả dụng:** chấp nhận downtime ngắn khi deploy ở giai đoạn 1. |
+| NF-06 | **Sao lưu:** backup PostgreSQL hằng ngày. Bucket không bật versioning; file được bảo vệ bởi thùng rác và lịch sử phiên bản ([trash.md](features/trash.md), [versioning.md](features/versioning.md)). |
+| NF-07 | **Khả dụng:** chấp nhận downtime ngắn khi deploy; chưa yêu cầu deploy không gián đoạn. |
 | NF-08 | **Quan sát:** log có cấu trúc (JSON); theo dõi lỗi (Sentry hoặc tương đương); healthcheck endpoint. |
 | NF-09 | **Trợ năng:** điều khiển được bằng bàn phím, đủ độ tương phản (WCAG AA), có nhãn ARIA. |
 | NF-10 | **Trình duyệt:** 2 phiên bản mới nhất của Chrome, Firefox, Safari, Edge. |

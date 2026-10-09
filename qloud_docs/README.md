@@ -9,7 +9,6 @@ Nếu code và docs mâu thuẫn nhau thì đó là bug: phải sửa một tron
 |---|---|---|
 | [overview.md](overview.md) | Tầm nhìn, phạm vi, thuật ngữ | Lần đầu tiếp cận dự án |
 | [ROADMAP.md](ROADMAP.md) | Milestone, task, trạng thái, nhật ký | **Mỗi phiên làm việc** — để biết tiến độ |
-| [open-questions.md](open-questions.md) | Câu hỏi và quyết định đang chờ | Mỗi phiên làm việc |
 | [requirements.md](requirements.md) | Yêu cầu chức năng và phi chức năng | Khi cần biết phạm vi |
 | [features/](features/) | Đặc tả từng tính năng: user story, quy tắc, tiêu chí chấp nhận | Trước khi làm một tính năng |
 | [architecture.md](architecture.md) | Kiến trúc, công nghệ, luồng chính | Khi thiết kế hoặc code |

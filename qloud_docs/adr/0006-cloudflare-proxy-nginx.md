@@ -14,7 +14,7 @@ Trên VPS vẫn cần một thành phần phục vụ file tĩnh của frontend 
 
 ## Các phương án đã cân nhắc
 - **Cloudflare Tunnel (cloudflared):** không cần mở cổng, nhưng thêm một daemon nữa và phụ thuộc vào tunnel. Đã chọn mở cổng 443.
-- **Caddy:** tính năng TLS tự động của Caddy trở nên thừa khi đã có Cloudflare Origin Certificate. (Agent đã từng ghi Caddy vào docs mà chưa hỏi; nay bỏ.)
+- **Caddy:** tính năng TLS tự động của Caddy trở nên thừa khi đã có Cloudflare Origin Certificate.
 - **Django + WhiteNoise phục vụ luôn FE:** ít container hơn, nhưng gắn chặt việc build FE vào image BE. Không chọn.
 
 ## Hệ quả

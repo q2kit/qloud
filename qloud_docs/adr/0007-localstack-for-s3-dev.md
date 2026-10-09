@@ -5,7 +5,7 @@
 
 ## Bối cảnh
 Cần một S3 chạy cục bộ để dev và chạy test tích hợp: presigned URL, multipart, ListParts, CORS, lifecycle.
-Docs ban đầu chọn MinIO, nhưng MinIO bản cộng đồng đã ngừng phát hành image (repo `minio/minio` trên Docker Hub không còn tag nào).
+MinIO bản cộng đồng đã ngừng phát hành image (repo `minio/minio` trên Docker Hub không còn tag nào).
 
 ## Quyết định
 Dùng **LocalStack** (`localstack/localstack`, chỉ bật dịch vụ `s3`).
@@ -18,5 +18,5 @@ Dùng **LocalStack** (`localstack/localstack`, chỉ bật dịch vụ `s3`).
 ## Hệ quả
 - **Bắt buộc auth token** (`LOCALSTACK_AUTH_TOKEN`). Không có token thì container thoát với mã 55.
   Mỗi dev đặt token trong `.env` ở gốc repo; CI dùng GitHub secret cùng tên.
-- Cần kiểm tra điều khoản của gói LocalStack đang dùng khi dự án thương mại hóa.
+- Gói LocalStack đang dùng có điều khoản sử dụng riêng; khi điều khoản đổi thì xem lại lựa chọn này.
 - Code không phụ thuộc LocalStack: chỉ khác `S3_ENDPOINT_URL` và `S3_ADDRESSING_STYLE=path`.

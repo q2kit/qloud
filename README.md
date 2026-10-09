@@ -1,7 +1,9 @@
 # Qloud
 
-Ứng dụng web lưu trữ, sắp xếp, xem và chia sẻ file — cùng loại với Google Drive, với thiết kế riêng.
-Dự án được phát triển bởi AI agent, có người review và duyệt mọi thay đổi.
+Ứng dụng web mã nguồn mở để lưu trữ, sắp xếp, xem trước và chia sẻ file: upload chia nhỏ tự tiếp tục khi gián đoạn,
+chia sẻ cho người dùng khác hoặc qua link công khai, thùng rác, lịch sử phiên bản, giao diện tiếng Việt và tiếng Anh.
+
+Code do AI agent viết; mọi thay đổi đều được review trước khi merge.
 
 ## Cấu trúc
 
@@ -56,8 +58,8 @@ pnpm install
 pnpm dev
 ```
 
-Vite chạy tại `http://localhost:5173` và chuyển tiếp `/api`, `/admin` tới backend tại
-`http://localhost:8000`.
+Vite chạy tại `http://localhost:5173` và chuyển tiếp `/api`, `/admin`, `/static` tới backend tại
+`http://localhost:8000`. Các lệnh khác (test, kiểm tra giống CI, sinh API client): [AGENTS.md mục 8](AGENTS.md#8-lệnh-thường-dùng).
 
 ## Giấy phép
 

@@ -1,17 +1,16 @@
 # UI / UX
 
-> Trạng thái: **Đã duyệt hướng tổng thể** (giao cho agent quyết, 2026-10-09). Chi tiết vẫn có thể điều chỉnh khi làm M0-07.
+> Trạng thái: **Đã duyệt**. Đổi hướng thiết kế (design system, màu, bố cục tổng thể) phải hỏi trước (AGENTS.md mục 4).
 
-## Hướng thiết kế (đề xuất)
+## Hướng thiết kế
 
-Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**. Không sao chép bố cục của Google Drive.
+Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
 
 - **Tính cách:** tối giản, nhiều khoảng trắng, chữ là trọng tâm, góc bo vừa phải (8px), bóng đổ rất nhẹ.
 - **Màu:** nền trung tính hơi ấm (thang stone). Chỉ có **một màu nhấn: teal** (light `#0f766e`, dark `#2dd4bf`), dùng cho hành động chính và trạng thái được chọn.
-  Chọn teal để tách khỏi màu xanh dương quen thuộc của Google Drive.
   Ngoài ra có các màu trạng thái: thành công, cảnh báo, lỗi. Mọi màu định nghĩa bằng CSS variable (design token) để làm dark mode.
 - **Font:** "Be Vietnam Pro" (giấy phép OFL, hiển thị dấu tiếng Việt đẹp), tự host và chỉ lấy các weight 400, 500, 600. Ở các cột số dùng chữ số có độ rộng đều (tabular figures).
-- **Điểm khác biệt so với Drive:**
+- **Điểm nhấn trong trải nghiệm:**
   - **Command palette (⌘K / Ctrl+K)** thay cho ô tìm kiếm cố định: dùng để tìm file, nhảy tới folder và chạy lệnh (tạo folder, upload…).
   - **Breadcrumb là tiêu đề trang**: kéo thả file vào một mục của breadcrumb là di chuyển file tới đó.
   - **Panel chi tiết bên phải** (bật/tắt bằng phím `i`): thông tin, phiên bản, chia sẻ, hoạt động, tất cả trong một chỗ.
@@ -38,7 +37,7 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**. Không sao chép bố cục
 └────────────┴────────────────────────────────┴───────────┴─┴──────────────┘
 ```
 
-### Application shell (M0-07)
+### Application shell
 
 | Light | Dark |
 |---|---|
