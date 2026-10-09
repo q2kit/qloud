@@ -24,3 +24,7 @@ Nếu code và docs mâu thuẫn nhau thì đó là bug: phải sửa một tron
 Đầu mỗi file feature có dòng **Trạng thái**, nhận một trong các giá trị:
 `Nháp` → `Đã duyệt` → `Đang làm` → `Hoàn thành`.
 Chỉ bắt đầu code một feature khi trạng thái của nó là `Đã duyệt`.
+
+**Duyệt theo milestone:** trước task đầu tiên của một milestone, agent nhờ duyệt các file feature mà milestone đó dùng
+(comment trên issue của task đầu, label `needs:owner-decision`). Khi được duyệt thì đổi `Nháp` → `Đã duyệt` trong một PR.
+Khi bắt đầu code feature thì đổi sang `Đang làm`, khi milestone xong thì `Hoàn thành`.

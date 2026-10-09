@@ -8,10 +8,12 @@
 - Không để code chết, không để lại `print` hay `console.log`. Mỗi TODO phải kèm task ID, ví dụ `# TODO(M3-04): ...`.
 
 ## Giấy phép dependency
-- Dự án dùng giấy phép **MIT**. Chỉ dùng dependency có giấy phép permissive: MIT, BSD, Apache-2.0, ISC, PSF, HPND, MPL-2.0, Unlicense.
-- LGPL chỉ dùng được khi là thư viện liên kết động và đã ghi lại lý do (ví dụ psycopg).
-- **Cấm GPL và AGPL** trong code được import hoặc đóng gói. Nếu thật sự cần thì phải hỏi trước.
-- CI có bước kiểm tra giấy phép (`pip-licenses`, `license-checker`).
+- Dự án là mã nguồn mở, giấy phép **MIT**. Dependency phải có giấy phép permissive.
+- **Danh sách cho phép** (SPDX): MIT, MIT-0, 0BSD, BSD-2-Clause, BSD-3-Clause, Apache-2.0, ISC, PSF-2.0, Python-2.0, HPND, MPL-2.0, Unlicense, CC0-1.0, BlueOak-1.0.0, Zlib.
+  Với biểu thức `A OR B` chỉ cần một vế được phép; `A AND B` thì cả hai.
+- **Ngoại lệ theo từng package** (ghi lý do, khớp đúng chuỗi giấy phép): LGPL cho thư viện liên kết động (psycopg); nội dung không phải code như font (OFL-1.1) hay dữ liệu dùng lúc build (CC-BY-4.0, caniuse-lite).
+- **Cấm GPL, AGPL** và giấy phép không phải mã nguồn mở (SSPL, BUSL, Commons Clause…). Nếu thật sự cần thì phải hỏi trước.
+- CI kiểm tra bằng `scripts/check_licenses.py` (dữ liệu từ `pip-licenses` và `pnpm licenses list`). Giấy phép lạ hoặc không xác định thì **fail** cho tới khi được xem xét và thêm vào danh sách hoặc ngoại lệ.
 
 ## Backend (Python / Django)
 - Format và lint bằng `ruff`. Type check bằng `mypy` (strict cho `services` và `selectors`).
@@ -39,7 +41,7 @@
 | FE unit | Vitest + Testing Library + MSW | Component và hook có logic |
 | E2E | Playwright (`qloud_frontend/e2e/`) | Luồng chính của từng feature (đăng ký, upload, chia sẻ, xóa và khôi phục…). Chạy trên stack thật, **không mock API**; tìm phần tử theo role/nhãn, không theo class CSS |
 
-- Coverage tối thiểu: BE 85%, FE 70% (CI chặn PR nếu giảm). Test không được phụ thuộc thứ tự chạy hay mạng ngoài.
+- Coverage tối thiểu: BE 85%, FE 70% (CI chặn PR nếu coverage thấp hơn ngưỡng; chưa so sánh mức tăng/giảm giữa các PR). Test không được phụ thuộc thứ tự chạy hay mạng ngoài.
 - Endpoint danh sách phải có test kiểm tra số lượng query (`django_assert_max_num_queries`).
 
 ## Git và CI
@@ -114,6 +116,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 - **Tiêu đề:** cùng định dạng với commit, kèm task ID ở cuối: `<type>(<scope>): <subject> [<task-id>]`,
   ví dụ `feat(uploads): add multipart upload session API [M2-04]`.
   Vì merge kiểu squash, tiêu đề PR sẽ thành commit trên `master`, nên phải đúng Conventional Commits. Viết tiếng Anh.
+  Tối đa **65 ký tự**: GitHub thêm ` (#123)` vào commit squash, dòng đầu vẫn phải ≤ 72. Task ID viết đúng dạng ` [M2-04]` ở cuối.
 - **Body:** **tiếng Việt**, theo `.github/pull_request_template.md`. Bắt buộc:
   - **Task:** task ID và `Closes #<n>` (mỗi issue một dòng `Closes`). PR không thuộc task nào thì ghi rõ lý do.
   - **Thay đổi chính:** gạch đầu dòng, nói *cái gì* và *tại sao*, không dán diff.
@@ -131,13 +134,14 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
   - **Frontend** (khi `qloud_frontend/` hoặc file dùng chung thay đổi): lint, format, typecheck, test + coverage, build, kiểm tra giấy phép.
   - **E2E** (khi BE hoặc FE thay đổi): Playwright chạy full-stack thật — Django :8001 (Postgres, Redis) + bản build FE qua `vite preview` :4173 có proxy `/api`. Fail thì report và trace được lưu làm artifact 7 ngày.
   - **Secret scan:** gitleaks trên các commit của PR.
-  - **PR conventions** (workflow riêng `.github/workflows/pr.yml`, chạy lại cả khi sửa tiêu đề/body; `scripts/check_pr.py`): tiêu đề đúng định dạng; có `[task-id]` thì body phải có `Closes #n`; cảnh báo nếu sửa code mà không sửa ROADMAP.
+  - **PR conventions** (workflow riêng `.github/workflows/pr.yml`, chạy lại cả khi sửa tiêu đề/body; `scripts/check_pr.py`): tiêu đề đúng định dạng và độ dài; có `[task-id]` thì body phải có `Closes #n`; tên branch đúng quy ước (trừ branch của Dependabot); cảnh báo nếu sửa code mà không sửa ROADMAP.
   - **CI OK:** job tổng hợp của `ci.yml`. *Required status checks* đã bật cho `master` (2026-10-10): **`CI OK`** và **`PR conventions`**, chế độ *strict* (PR phải chứa commit mới nhất của `master` mới merge được).
+- **Dependabot** (`.github/dependabot.yml`): mỗi tuần mở PR nâng phiên bản cho uv, npm, GitHub Actions và image Docker Compose, tiêu đề `chore(deps): ...`. Bản minor/patch được gộp; bản major là PR riêng và phải hỏi trước khi merge.
 - **Git hooks** (`lefthook.yml`), cài bằng `lefthook install`:
   - `pre-commit`: ruff (BE), prettier + eslint (FE) trên file đã stage, tự sửa và stage lại; gitleaks trên phần đã stage.
   - `commit-msg`: Conventional Commits.
   - `pre-push`: tên branch, chặn push lên `master`; cảnh báo nếu base có commit mới; mypy + pytest (BE, pytest chỉ chạy khi Postgres/Redis đang chạy) hoặc typecheck + test (FE) cho phía có thay đổi.
-  - Kiểm tra giấy phép dùng `scripts/check_licenses.py`; LGPL chỉ được phép khi có trong `LGPL_ALLOWED` kèm lý do.
+  - Script quy ước (`scripts/`) có test riêng (`python3 -m unittest discover -s scripts/tests`), chạy trong job Backend.
   - Action bên thứ ba được ghim theo commit SHA (kèm comment phiên bản).
 - Merge vào `master` (squash) chỉ khi CI xanh và PR đã được duyệt.
 - Thao tác GitHub (issue, PR, review, CI) dùng `gh` CLI. Quy trình chi tiết ở mục 3 của `AGENTS.md`.
