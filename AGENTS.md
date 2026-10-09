@@ -37,7 +37,8 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
 2. **Nhận task.**
    - `gh issue view <n>` để đọc issue.
    - `gh issue edit <n> --add-assignee @me --add-label status:in-progress`.
-   - Tạo branch từ `master` mới nhất: `git switch master && git pull && git switch -c <type>/<task-id>-<slug>`, ví dụ `feat/M2-04-upload-session`.
+   - Tạo branch từ `master` mới nhất: `git switch master && git pull --ff-only && git switch -c <type>/<task-id>-<slug>`, ví dụ `feat/M2-04-upload-session`.
+   - **Tiếp tục một branch đã có** (làm tiếp task, sửa theo review): **rebase lên base branch trước khi làm**: `git fetch origin && git rebase origin/<base>`.
 3. **Đọc ngữ cảnh.** Đọc file feature liên quan trong `qloud_docs/features/`, cùng các phần liên quan
    của `architecture.md`, `data-model.md`, `api.md`, `ui-ux.md` và `conventions.md`. Không đọc thừa những gì không cần.
 4. **Lập kế hoạch.** Với task lớn (nhiều file, schema mới, API mới): viết kế hoạch ngắn thành comment trên issue (`gh issue comment <n>`),
@@ -50,7 +51,10 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
    - Nếu có quyết định kiến trúc mới thì tạo ADR trong `qloud_docs/adr/`.
    - Nếu phát sinh câu hỏi chưa trả lời được thì ghi vào `open-questions.md`.
 8. **Mở PR.**
-   - `git push -u origin HEAD`, rồi `gh pr create --base master --title "[<task-id>] <tiêu đề>" --body-file <file>`.
+   - **Rebase lên base branch ngay trước mỗi lần push hoặc tạo PR**: `git fetch origin && git rebase origin/<base>`.
+     Có conflict thì giải quyết, rồi chạy lại lint và test trước khi push.
+   - `git push -u origin HEAD` (sau khi rebase một branch đã push thì dùng `git push --force-with-lease`),
+     rồi `gh pr create --base <base> --title "<type>(<scope>): <subject> [<task-id>]" --body-file <file>`.
    - Body PR theo [.github/pull_request_template.md](.github/pull_request_template.md), và **phải có `Closes #<n>`**.
    - Theo dõi CI bằng `gh pr checks --watch`. CI đỏ thì sửa cho tới khi xanh.
 9. **Review và merge.** **Chỉ chủ dự án được merge**, hoặc agent merge (`gh pr merge --squash --delete-branch`) khi chủ dự án nói rõ là đồng ý.
@@ -82,7 +86,8 @@ Milestone trên GitHub trùng tên với milestone trong ROADMAP (M0…M8).
 - Bất cứ thay đổi nào về **bảo mật, xác thực, phân quyền**, ngoài việc làm đúng như tài liệu đã mô tả.
 - Thay đổi **phạm vi sản phẩm**: thêm hoặc bớt tính năng so với `requirements.md`.
 - Thay đổi **hướng thiết kế UI** (design system, màu, bố cục tổng thể).
-- Thao tác khó hoàn tác: xóa dữ liệu, force push, sửa lịch sử git, thao tác trên môi trường production.
+- Thao tác khó hoàn tác: xóa dữ liệu, force push lên `master` hoặc branch của người khác, sửa lịch sử git đã merge, thao tác trên môi trường production.
+  (Rebase rồi `--force-with-lease` trên branch làm việc của chính mình thì được phép.)
 - Sửa các file luật: `AGENTS.md` và `qloud_docs/conventions.md`.
 
 Những việc được **tự làm**: code theo task đã có trong ROADMAP, viết test, refactor nội bộ không đổi hành vi,
@@ -163,7 +168,8 @@ docker compose down          # dừng (giữ dữ liệu); thêm -v để xóa s
 
 ## 9. Git
 
-- `master` luôn ở trạng thái deploy được, và chỉ nhận thay đổi qua PR (squash merge). Mỗi task làm trên một branch riêng, đặt tên `feat/<task-id>-<short-name>`, `fix/...`, `docs/...` hoặc `chore/...`.
-- Commit theo [Conventional Commits](https://www.conventionalcommits.org/), ví dụ `feat(upload): add multipart upload session`.
+- `master` luôn ở trạng thái deploy được, được bảo vệ, chỉ nhận thay đổi qua PR (squash merge).
+- **Branch:** `<type>/<task-id>-<slug>`, tạo từ `master` mới nhất, một branch cho một task. Cập nhật bằng rebase; force push chỉ dùng `--force-with-lease` trên branch của mình. Chi tiết (gồm cả branch nối tiếp): [conventions.md › Branch](qloud_docs/conventions.md#branch).
+- **Commit message:** Conventional Commits, tiếng Anh, `<type>(<scope>): <subject>`, footer `Refs #<n>`. Chi tiết: [conventions.md › Commit message](qloud_docs/conventions.md#commit-message).
+- **PR:** tiêu đề `<type>(<scope>): <subject> [<task-id>]` (tiếng Anh — thành commit squash trên `master`); body tiếng Việt theo template, có `Closes #<n>`, cách kiểm tra *đã thực sự chạy*, và lưu ý cho reviewer. Chi tiết: [conventions.md › Pull Request](qloud_docs/conventions.md#pull-request).
 - Mỗi commit chứa thay đổi code cùng với thay đổi docs tương ứng.
-- Tiêu đề PR: `[<task-id>] <mô tả ngắn>`. Body viết bằng tiếng Việt và theo template.

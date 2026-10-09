@@ -42,9 +42,83 @@
 - Endpoint danh sách phải có test kiểm tra số lượng query (`django_assert_max_num_queries`).
 
 ## Git và CI
-- Branch: `feat/<task-id>-<slug>`, `fix/...`, `docs/...`, `chore/...`.
-- Commit theo Conventional Commits: `feat(sharing): add public share links`.
-- PR theo `.github/pull_request_template.md`: task ID, `Closes #n`, thay đổi chính, cách test, ảnh chụp màn hình nếu có thay đổi UI.
+### Branch
+- `master` là nhánh chính, được bảo vệ (branch protection): **không commit hay push thẳng**, chỉ nhận thay đổi qua PR và squash merge.
+- **Tên branch:** `<type>/<task-id>-<slug>`
+  - `type`: dùng chung danh sách với commit — `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `chore`, `ci`, `build`.
+  - `task-id`: ID trong ROADMAP, ví dụ `M2-04`. Việc không thuộc task nào thì bỏ phần này.
+  - `slug`: tiếng Anh, kebab-case, chỉ gồm `a-z`, `0-9` và `-`, tối đa 40 ký tự.
+  - Ví dụ: `feat/M2-04-upload-session`, `fix/M2-04-quota-race`, `chore/M0-04-dev-compose`, `docs/commit-pr-rules`.
+- **Một branch cho một task và một PR.** Không dùng lại branch đã merge; việc mới thì tạo branch mới.
+- **Tạo branch từ `master` mới nhất:** `git switch master && git pull --ff-only && git switch -c <branch>`.
+- **Branch nối tiếp (stacked):** chỉ dùng khi task mới cần code của một PR chưa merge.
+  - Tạo branch từ branch của PR kia, và mở PR với `--base <branch-kia>`. Đầu body PR ghi rõ là phụ thuộc PR nào.
+  - Sau khi PR kia merge: `git rebase --onto origin/master <commit-cuối-của-branch-kia>`, rồi `gh pr edit <n> --base master`.
+- **Luôn rebase lên base branch** (`master`, hoặc branch cha nếu là branch nối tiếp) vào hai thời điểm:
+  1. **Trước khi bắt đầu làm task**, kể cả khi tiếp tục một branch đã có từ phiên trước.
+  2. **Ngay trước mỗi lần push hoặc tạo PR.**
+
+  Lệnh: `git fetch origin && git rebase origin/<base>`. Có conflict thì giải quyết, rồi chạy lại lint và test trước khi push.
+  **Không** merge base branch vào branch làm việc.
+- Khi PR báo conflict trên GitHub: agent tự rebase và giải quyết conflict, không chờ chủ dự án.
+  Conflict ở Nhật ký ROADMAP thì giữ dòng của cả hai bên, dòng mới hơn ở trên.
+- **Force push:** chỉ được làm trên branch làm việc của chính mình, sau khi rebase, và luôn dùng `--force-with-lease`. **Cấm** force push lên `master` hoặc lên branch của người khác.
+- **Việc kéo dài nhiều phiên:** push branch sớm và mở PR ở dạng nháp (`gh pr create --draft`), để tiến độ hiện trên GitHub.
+  Khi xong thì chuyển sang chờ review bằng `gh pr ready`.
+- **Sau khi merge:** xóa branch trên remote (`gh pr merge --squash --delete-branch`, hoặc GitHub tự xóa), xóa branch local, và chạy `git fetch --prune`.
+- Không để branch không có PR tồn tại quá một phiên làm việc; bỏ việc thì xóa branch đó.
+
+### Commit message
+Theo [Conventional Commits](https://www.conventionalcommits.org/), **tiếng Anh**:
+
+```
+<type>(<scope>): <subject>
+
+<body — không bắt buộc>
+
+<footer>
+```
+
+- **type:** `feat` (tính năng), `fix` (sửa bug), `docs`, `test`, `refactor` (không đổi hành vi), `perf`, `chore` (cấu hình, repo, dev tooling), `ci`, `build` (Docker, dependency).
+- **scope** (bắt buộc), chọn đúng nơi thay đổi:
+  - BE: tên Django app — `accounts`, `drive`, `uploads`, `sharing`, `trash`, `search`, `storage`, `core`.
+  - FE: `fe` hoặc `fe-<feature>` — ví dụ `fe-upload`, `fe-ui`, `fe-i18n`.
+  - Khác: `api` (OpenAPI/client), `dev` (môi trường dev), `env`, `ci`, `deploy`, `deps`, `repo`, `docs`, `roadmap`, `adr`.
+- **subject:** câu mệnh lệnh ("add", không phải "added"/"adds"), viết thường chữ đầu, không có dấu chấm cuối, tối đa 72 ký tự cho cả dòng đầu.
+- **body:** giải thích *tại sao* và các điểm không hiển nhiên; xuống dòng ở 72 ký tự. Không liệt kê lại diff.
+- **footer:**
+  - `Refs #<n>` để liên kết issue. Không dùng `Closes` trong commit — việc đóng issue do PR làm.
+  - Thay đổi phá vỡ tương thích: `BREAKING CHANGE: <mô tả>` (và thêm `!` sau scope: `feat(api)!: ...`).
+  - Commit do AI agent tạo: dòng cuối là trailer `Co-Authored-By: <tên model> <noreply@anthropic.com>`.
+- Mỗi commit là **một thay đổi logic**, build/test vẫn chạy được. Không trộn format lại code với thay đổi logic.
+
+Ví dụ:
+```
+feat(uploads): reserve quota when creating an upload session
+
+Reservation happens under SELECT FOR UPDATE on the owner row so two
+concurrent sessions cannot both pass the quota check.
+
+Refs #20
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+```
+
+### Pull Request
+- **Tiêu đề:** cùng định dạng với commit, kèm task ID ở cuối: `<type>(<scope>): <subject> [<task-id>]`,
+  ví dụ `feat(uploads): add multipart upload session API [M2-04]`.
+  Vì merge kiểu squash, tiêu đề PR sẽ thành commit trên `master`, nên phải đúng Conventional Commits. Viết tiếng Anh.
+- **Body:** **tiếng Việt**, theo `.github/pull_request_template.md`. Bắt buộc:
+  - **Task:** task ID và `Closes #<n>` (mỗi issue một dòng `Closes`). PR không thuộc task nào thì ghi rõ lý do.
+  - **Thay đổi chính:** gạch đầu dòng, nói *cái gì* và *tại sao*, không dán diff.
+  - **Cách kiểm tra:** lệnh đã thực sự chạy và kết quả (ví dụ `pytest: 42 passed`). Không ghi là đã test nếu chưa chạy.
+    Điều gì chưa kiểm tra được thì ghi rõ.
+  - **Lưu ý cho reviewer:** migration mới, biến môi trường mới, dependency mới (kèm giấy phép), việc chủ dự án cần làm (tạo secret, cấu hình…), rủi ro.
+    Không có thì ghi "Không có".
+  - **Ảnh chụp màn hình** (light và dark) khi có thay đổi UI.
+  - **Checklist:** chỉ tick mục đã làm thật.
+  - PR do AI agent tạo: dòng cuối là `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
+- PR **nối tiếp** (stacked, base không phải `master`): ghi rõ ở đầu body là phụ thuộc PR nào. Sau khi PR kia merge thì rebase lên `master` và đổi base.
+- Một PR một task. PR quá 600 dòng thay đổi (không tính lockfile và code sinh tự động) thì cân nhắc chia nhỏ.
 - CI (GitHub Actions) chạy trên mỗi PR: lint, type check, test BE (Postgres, Redis, LocalStack dạng service; token lấy từ secret `LOCALSTACK_AUTH_TOKEN`), test FE, build FE, Playwright.
 - Merge vào `master` (squash) chỉ khi CI xanh và chủ dự án đã duyệt.
 - Thao tác GitHub (issue, PR, review, CI) dùng `gh` CLI. Quy trình chi tiết ở mục 3 của `AGENTS.md`.
