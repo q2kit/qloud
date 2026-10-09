@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { describe, expect, it } from 'vitest';
@@ -7,8 +7,8 @@ import { describe, expect, it } from 'vitest';
 import { ThemeProvider } from './theme-provider';
 import { appRoutes } from './router';
 
-function renderDrive(): void {
-  const router = createMemoryRouter(appRoutes, { initialEntries: ['/'] });
+function renderDrive(path = '/'): void {
+  const router = createMemoryRouter(appRoutes, { initialEntries: [path] });
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -94,6 +94,29 @@ describe('application layout', () => {
     expect(
       screen.getByRole('heading', { name: /Gần đây|Recent/ }),
     ).toBeInTheDocument();
+  });
+
+  it('titles the header after the drive root', () => {
+    renderDrive();
+
+    const header = within(screen.getByRole('banner'));
+    expect(header.getByText('Drive')).toBeInTheDocument();
+    expect(header.getByText(/Drive của tôi|My Drive/)).toBeInTheDocument();
+  });
+
+  it.each([
+    ['/trash', /^(Thùng rác|Trash)$/],
+    ['/settings', /^(Cài đặt|Settings)$/],
+    ['/missing-page', /^(Không tìm thấy trang|Page not found)$/],
+  ])('titles the header after the matched route %s', (path, title) => {
+    renderDrive(path);
+
+    const header = within(screen.getByRole('banner'));
+    expect(header.getByText(title)).toBeInTheDocument();
+    expect(header.queryByText('Drive')).not.toBeInTheDocument();
+    expect(
+      header.queryByText(/Drive của tôi|My Drive/),
+    ).not.toBeInTheDocument();
   });
 
   it('toggles the details panel with the i shortcut', async () => {

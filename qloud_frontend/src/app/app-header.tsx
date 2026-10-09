@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 import { LanguageSwitcher } from './language-switcher';
+import { useRouteHandle } from './route-handle';
 import { ThemeSwitcher } from './theme-switcher';
 
 interface AppHeaderProps {
@@ -23,6 +24,7 @@ export function AppHeader({
   onDetailToggle,
 }: AppHeaderProps): React.JSX.Element {
   const { t } = useTranslation();
+  const { titleKey, subtitleKey } = useRouteHandle();
 
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6 lg:px-8">
@@ -39,11 +41,13 @@ export function AppHeader({
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-base font-semibold tracking-tight">
-          {t('drive.title')}
+          {t(titleKey)}
         </p>
-        <p className="hidden truncate text-xs text-muted-foreground sm:block">
-          {t('shell.breadcrumbRoot')}
-        </p>
+        {subtitleKey && (
+          <p className="hidden truncate text-xs text-muted-foreground sm:block">
+            {t(subtitleKey)}
+          </p>
+        )}
       </div>
 
       {/* TODO(M6-02): Connect this trigger to the command palette. */}

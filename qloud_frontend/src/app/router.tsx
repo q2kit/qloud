@@ -9,6 +9,23 @@ import {
   SectionPlaceholderPage,
 } from './pages';
 import { PublicLayout } from './public-layout';
+import type { RouteHandle } from './route-handle';
+
+type Section = 'recent' | 'shared' | 'trash' | 'settings';
+
+function sectionPlaceholderRoute(section: Section): RouteObject {
+  const handle: RouteHandle = { titleKey: `navigation.${section}` };
+  return {
+    path: section,
+    handle,
+    element: (
+      <SectionPlaceholderPage
+        titleKey={handle.titleKey}
+        descriptionKey={`placeholder.${section}`}
+      />
+    ),
+  };
+}
 
 export const appRoutes: RouteObject[] = [
   {
@@ -20,44 +37,23 @@ export const appRoutes: RouteObject[] = [
         path: '/',
         Component: AppLayout,
         children: [
-          { index: true, Component: DrivePage },
           {
-            path: 'recent',
-            element: (
-              <SectionPlaceholderPage
-                titleKey="navigation.recent"
-                descriptionKey="placeholder.recent"
-              />
-            ),
+            index: true,
+            Component: DrivePage,
+            handle: {
+              titleKey: 'drive.title',
+              subtitleKey: 'shell.breadcrumbRoot',
+            } satisfies RouteHandle,
           },
+          sectionPlaceholderRoute('recent'),
+          sectionPlaceholderRoute('shared'),
+          sectionPlaceholderRoute('trash'),
+          sectionPlaceholderRoute('settings'),
           {
-            path: 'shared',
-            element: (
-              <SectionPlaceholderPage
-                titleKey="navigation.shared"
-                descriptionKey="placeholder.shared"
-              />
-            ),
+            path: '*',
+            Component: NotFoundPage,
+            handle: { titleKey: 'notFound.title' } satisfies RouteHandle,
           },
-          {
-            path: 'trash',
-            element: (
-              <SectionPlaceholderPage
-                titleKey="navigation.trash"
-                descriptionKey="placeholder.trash"
-              />
-            ),
-          },
-          {
-            path: 'settings',
-            element: (
-              <SectionPlaceholderPage
-                titleKey="navigation.settings"
-                descriptionKey="placeholder.settings"
-              />
-            ),
-          },
-          { path: '*', Component: NotFoundPage },
         ],
       },
       {
