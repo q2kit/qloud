@@ -32,7 +32,8 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
 
 1. **Định hướng.**
    - Đọc [qloud_docs/ROADMAP.md](qloud_docs/ROADMAP.md) và [qloud_docs/open-questions.md](qloud_docs/open-questions.md).
-   - Xem trạng thái trên GitHub: `gh pr list`, `gh issue list --milestone "<milestone>"`. Có PR nào đang mở, đang bị yêu cầu sửa (review) hay CI đỏ thì xử lý trước, rồi mới làm task mới.
+   - Xem trạng thái trên GitHub: `gh pr list`, `gh pr list --state merged --limit 5`, `gh issue list --milestone "<milestone>"`.
+     Đối chiếu với ROADMAP: PR đã merge mà task vẫn là 🟦 thì phải đồng bộ (xem bước 9). Có PR nào đang mở, đang bị yêu cầu sửa (review) hay CI đỏ thì xử lý trước, rồi mới làm task mới.
    - Chọn task tiếp theo: task chưa làm, đứng đầu milestone hiện tại, và không phụ thuộc vào task nào chưa xong.
 2. **Nhận task.**
    - `gh issue view <n>` để đọc issue.
@@ -59,7 +60,11 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
    - Theo dõi CI bằng `gh pr checks --watch`. CI đỏ thì sửa cho tới khi xanh.
 9. **Review và merge.** **Chỉ chủ dự án được merge**, hoặc agent merge (`gh pr merge --squash --delete-branch`) khi chủ dự án nói rõ là đồng ý.
    Có góp ý review thì đọc bằng `gh pr view <n> --comments`, sửa trên cùng branch, rồi trả lời từng góp ý.
-   Sau khi merge: trạng thái task trong ROADMAP chuyển sang ✅. Việc này làm ngay trong PR trước khi merge, hoặc trong PR kế tiếp.
+   Đổi trạng thái task trong ROADMAP sang ✅:
+   - **Agent merge** (khi được chủ dự án cho phép): push một commit đổi sang ✅ vào chính PR đó, rồi mới merge.
+   - **Chủ dự án tự merge:** ở đầu phiên làm việc tiếp theo, agent kiểm tra các PR đã merge (`gh pr list --state merged`).
+     Nếu task tương ứng trong ROADMAP vẫn là 🟦 thì đổi sang ✅ trong PR kế tiếp; nếu chưa có PR nào sắp mở thì mở một PR nhỏ chỉ để làm việc này.
+   - Không để ROADMAP trên `master` lệch với GitHub quá một phiên làm việc.
 10. **Báo cáo.** Tóm tắt cho chủ dự án: link PR, đã làm gì, đã kiểm tra thế nào, còn tồn đọng gì.
 
 **Các tình huống khác:**
@@ -152,9 +157,10 @@ Hiện tại chỉ có ít người dùng, nhưng hệ thống phải được t
 > Phần này sẽ được điền khi dựng xong khung dự án (task M0 trong ROADMAP). Agent nào dựng khung thì cập nhật mục này.
 
 ```bash
-# Lần đầu: tạo file cấu hình (điền LOCALSTACK_AUTH_TOKEN trong .env ở gốc)
-cp .env.example .env
-cp qloud_backend/.env.example qloud_backend/.env
+# Lần đầu: tạo file cấu hình (điền LOCALSTACK_AUTH_TOKEN trong .env ở gốc).
+# Luôn dùng `cp -n`: không bao giờ ghi đè .env đã có (chứa secret của chủ dự án).
+cp -n .env.example .env
+cp -n qloud_backend/.env.example qloud_backend/.env
 
 # Hạ tầng dev: Postgres, Redis, LocalStack (S3), Mailpit
 docker compose up -d --wait

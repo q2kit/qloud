@@ -28,7 +28,7 @@
 | M0-03 | Thêm `.gitignore`, `.editorconfig`, README gốc (git repo và LICENSE MIT đã có sẵn) | [#1](https://github.com/q2kit/qloud/issues/1) | ✅ |
 | M0-04 | `docker-compose.yml` cho dev: Postgres, Redis, LocalStack (tự tạo bucket, cấu hình CORS), Mailpit; có `.env.example` | [#2](https://github.com/q2kit/qloud/issues/2) | ✅ |
 | M0-05 | Khung BE: Django + DRF + settings theo môi trường + Celery + health endpoint + ruff/mypy/pytest | [#3](https://github.com/q2kit/qloud/issues/3) | ✅ |
-| M0-06 | Khung FE: Vite + React + TS + Tailwind + shadcn + Router + Query + i18n + dark mode + Vitest | [#4](https://github.com/q2kit/qloud/issues/4) | 🟦 |
+| M0-06 | Khung FE: Vite + React + TS + Tailwind + shadcn + Router + Query + i18n + dark mode + Vitest | [#4](https://github.com/q2kit/qloud/issues/4) | ✅ |
 | M0-07 | Design tokens và các layout chính (sidebar, header, khung panel chi tiết) | [#5](https://github.com/q2kit/qloud/issues/5) | ⬜ |
 | M0-08 | Sinh API client cho FE từ OpenAPI schema | [#6](https://github.com/q2kit/qloud/issues/6) | ⬜ |
 | M0-09 | GitHub Actions: lint, type check, test BE/FE, build, kiểm tra giấy phép dependency | [#7](https://github.com/q2kit/qloud/issues/7) | ⬜ |
@@ -113,6 +113,7 @@
 
 > Mới nhất ở trên cùng. Mỗi dòng gồm: ngày — task — tóm tắt — người hoặc agent thực hiện.
 
+- 2026-10-10 — — Đánh dấu M0-06 ✅ (đã merge ở #55). Thêm quy tắc đồng bộ trạng thái ROADMAP sau khi merge; hướng dẫn tạo `.env` dùng `cp -n` để không ghi đè secret. — AI agent
 - 2026-10-10 — M0-06 — Dựng khung SPA với React, Vite, TypeScript, Tailwind/shadcn, Router, Query, i18n, theme, fetch CSRF và Vitest (Codex). Review: sửa `typecheck` (trước đó không kiểm tra file nào), bọc truy cập localStorage, dùng lucide-react 1.53.0 thay vì bỏ qua `minimumReleaseAge` của pnpm. — Codex + Claude
 - 2026-10-10 — M0-05 — Khung BE: Django 6.1 + DRF + Celery trên Python 3.14 (uv), settings base/dev/test/prod, `/api/v1/health`, định dạng lỗi chung, cursor pagination, BaseModel UUIDv7, custom User tối thiểu (tạo trước migration đầu tiên), email theo `MAILERS` của Django 6.1. 19 test, coverage 100%, ruff + mypy strict sạch. — AI agent
 - 2026-10-10 — — Thêm quy tắc luôn rebase lên base branch trước khi làm task và trước khi push/tạo PR. — AI agent

@@ -17,10 +17,17 @@ Dự án được phát triển bởi AI agent dưới sự giám sát của ch�
 
 ## Chạy dự án (dev)
 
+**Chỉ làm một lần** — tạo file cấu hình. `cp -n` không ghi đè nếu file đã có, nên chạy lại cũng không mất token đã điền:
+
 ```bash
-cp .env.example .env                              # điền LOCALSTACK_AUTH_TOKEN
-cp qloud_backend/.env.example qloud_backend/.env
-docker compose up -d --wait                       # Postgres, Redis, LocalStack (S3), Mailpit
+cp -n .env.example .env                              # rồi điền LOCALSTACK_AUTH_TOKEN
+cp -n qloud_backend/.env.example qloud_backend/.env
+```
+
+Hạ tầng (Postgres, Redis, LocalStack S3, Mailpit):
+
+```bash
+docker compose up -d --wait
 ```
 
 Backend (cần [uv](https://docs.astral.sh/uv/)):
