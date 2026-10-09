@@ -9,7 +9,8 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # A new push to a PR replaces its old run; runs on master each check their own merge.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -29,14 +30,14 @@ jobs:
         env:
           BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
-          # Shared files (CI, compose, scripts) re-run both sides.
+          # Shared files (CI, compose, scripts, editor settings) re-run both sides.
           if [ -z "$BASE" ] || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
             files="qloud_backend/ qloud_frontend/"
           else
             files=$(git diff --name-only "$BASE" HEAD)
           fi
           echo "$files"
-          shared='^(\.github/workflows/|scripts/|docker-compose\.yml|infra/)'
+          shared='^(\.github/workflows/|scripts/|docker-compose\.yml|infra/|\.editorconfig$)'
           echo "backend=$(echo "$files" | grep -qE "^qloud_backend/|$shared" && echo true || echo false)" >> "$GITHUB_OUTPUT"
           # The FE API types are generated from the backend schema.
           echo "frontend=$(echo "$files" | grep -qE "^qloud_frontend/|^qloud_backend/openapi\.yaml$|$shared" && echo true || echo false)" >> "$GITHUB_OUTPUT"
@@ -51,7 +52,9 @@ jobs:
         working-directory: qloud_backend
     env:
       # Required by docker-compose.yml interpolation even when LocalStack is not started.
-      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+      # Dependabot PRs get no Actions secrets, hence the placeholder; jobs that start
+      # LocalStack (M2-03) need the token added as a Dependabot secret as well.
+      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN || 'not-used' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
@@ -62,12 +65,24 @@ jobs:
         # LocalStack joins when the first S3 tests land (M2-03).
         run: docker compose up -d --wait postgres redis
       - run: uv sync --frozen
+      - name: Convention script tests
+        run: python3 -m unittest discover -s ../scripts/tests
       - run: uv run ruff format --check .
       - run: uv run ruff check .
       - run: uv run mypy .
       - run: uv run python manage.py makemigrations --check --dry-run
         env:
           DJANGO_SETTINGS_MODULE: config.settings.test
+      - name: Deploy checks with production settings
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.prod
+          APP_DOMAIN: qloud.example.com
+          DATABASE_URL: postgres://qloud:qloud@localhost:5432/qloud
+          REDIS_URL: redis://localhost:6379/0
+          CELERY_BROKER_URL: redis://localhost:6379/1
+        run: |
+          DJANGO_SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))') \
+            uv run python manage.py check --deploy --fail-level WARNING
       - run: uv run pytest --cov
       - name: Dependency licenses
         run: uv run --with pip-licenses pip-licenses --from=mixed --format=json | python3 ../scripts/check_licenses.py pip
@@ -107,7 +122,7 @@ jobs:
     if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     env:
-      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN || 'not-used' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0

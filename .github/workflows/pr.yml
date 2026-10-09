@@ -21,10 +21,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - name: Title, body and ROADMAP
+      - name: Title, body, branch name and ROADMAP
         env:
           # Passed via env, never interpolated into the script, to avoid injection.
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
+          PR_HEAD_REF: ${{ github.head_ref }}
           BASE: ${{ github.event.pull_request.base.sha }}
         run: git diff --name-only "$BASE" HEAD | python3 scripts/check_pr.py
