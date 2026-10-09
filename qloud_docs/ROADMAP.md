@@ -1,8 +1,6 @@
 # Roadmap & tiến độ
 
-> Đọc file này đầu mỗi phiên làm việc. Agent cập nhật trạng thái ngay khi bắt đầu và khi kết thúc một task.
->
-> Mỗi task có một GitHub Issue (cột *Issue*); PR đóng issue bằng `Closes #n`. Quy trình: AGENTS.md mục 3.
+> Mỗi task có một GitHub Issue; PR đóng issue bằng `Closes #n`. Quy trình: AGENTS.md mục 3.
 >
 > Trạng thái: ⬜ Chưa làm · 🟨 Đang làm · 🟦 Chờ duyệt · ✅ Xong · ⛔ Bị chặn (ghi lý do)
 
@@ -21,23 +19,7 @@
 | M8 | Quota UI, hoàn thiện, deploy production | ⬜ |
 
 ## M0 — Nền tảng
-| ID | Task | Issue | Trạng thái |
-|---|---|---|---|
-| M0-01 | Viết AGENTS.md và bộ docs ban đầu | — | ✅ |
-| M0-02 | Duyệt bộ docs ban đầu | — | ✅ |
-| M0-03 | Thêm `.gitignore`, `.editorconfig`, README gốc (git repo và LICENSE MIT đã có sẵn) | [#1](https://github.com/q2kit/qloud/issues/1) | ✅ |
-| M0-04 | `docker-compose.yml` cho dev: Postgres, Redis, LocalStack (tự tạo bucket, cấu hình CORS), Mailpit; có `.env.example` | [#2](https://github.com/q2kit/qloud/issues/2) | ✅ |
-| M0-05 | Khung BE: Django + DRF + settings theo môi trường + Celery + health endpoint + ruff/mypy/pytest | [#3](https://github.com/q2kit/qloud/issues/3) | ✅ |
-| M0-06 | Khung FE: Vite + React + TS + Tailwind + shadcn + Router + Query + i18n + dark mode + Vitest | [#4](https://github.com/q2kit/qloud/issues/4) | ✅ |
-| M0-07 | Design tokens và các layout chính (sidebar, header, khung panel chi tiết) | [#5](https://github.com/q2kit/qloud/issues/5) | ✅ |
-| M0-08 | Sinh API client cho FE từ OpenAPI schema | [#6](https://github.com/q2kit/qloud/issues/6) | ✅ |
-| M0-09 | GitHub Actions: lint, typecheck, test, build BE/FE; kiểm tra giấy phép; gitleaks; kiểm tra tiêu đề/body PR và cảnh báo thiếu cập nhật ROADMAP; sau đó bật required checks | [#7](https://github.com/q2kit/qloud/issues/7) | ✅ |
-| M0-10 | Khung Playwright E2E và đưa vào CI | [#8](https://github.com/q2kit/qloud/issues/8) | ✅ |
-| M0-11 | Cập nhật mục "Lệnh thường dùng" trong AGENTS.md | [#9](https://github.com/q2kit/qloud/issues/9) | ✅ |
-| M0-12 | Git hooks bằng lefthook: format/lint file đã stage, gitleaks, kiểm tra commit message, tên branch, chặn push `master`, typecheck/test phía có thay đổi | [#61](https://github.com/q2kit/qloud/issues/61) | ✅ |
-| M0-13 | Sửa lỗi backend phát hiện khi rà soát M0: settings prod, exception handler, phân trang | [#70](https://github.com/q2kit/qloud/issues/70) | ✅ |
-| M0-14 | Sửa lỗi frontend phát hiện khi rà soát M0: retry 4xx, 204, error boundary, tiêu đề trang, test 360px | [#71](https://github.com/q2kit/qloud/issues/71) | ✅ |
-| M0-15 | Sửa docs, CI và quy trình phát hiện khi rà soát M0: giấy phép, Dependabot, kiểm tra PR, cổng Docker | [#72](https://github.com/q2kit/qloud/issues/72) | ✅ |
+Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: milestone [M0](https://github.com/q2kit/qloud/milestone/1?closed=1) trên GitHub.
 
 ## M1 — Xác thực ([auth.md](features/auth.md))
 | ID | Task | Issue | Trạng thái |
@@ -111,38 +93,3 @@
 | M8-03 | Dockerfile production, Compose production, nginx (Origin Certificate, phục vụ FE tĩnh, proxy `/api`, real IP từ Cloudflare), hướng dẫn cấu hình Cloudflare và ufw | [#47](https://github.com/q2kit/qloud/issues/47) | ⬜ |
 | M8-04 | Deploy tự động qua GitHub Actions lên VPS | [#48](https://github.com/q2kit/qloud/issues/48) | ⬜ |
 | M8-05 | Backup Postgres hằng ngày, Sentry, log có cấu trúc | [#49](https://github.com/q2kit/qloud/issues/49) | ⬜ |
-
----
-
-## Nhật ký
-
-> Mới nhất ở trên cùng. Mỗi dòng gồm: ngày — task — tóm tắt — người hoặc agent thực hiện.
-
-- 2026-10-10 — — Dọn docs: mô tả sản phẩm trung tính (bỏ so sánh và bối cảnh riêng), bỏ `open-questions.md` (quyết định đã nằm trong feature, architecture, data-model, ADR; câu hỏi mới hỏi trong phiên hoặc trên issue), đổi plan `friends-2026` thành `plus-2026`. M0-13, M0-14, M0-15 đã merge (#73, #75, #74): M0 xong. — AI agent
-- 2026-10-10 — — Rà soát lại toàn bộ M0 (BE, FE, docs/CI): thêm M0-13, M0-14, M0-15 để sửa các vấn đề tìm được. — AI agent
-- 2026-10-10 — M0-11 — PR #68 đã merge, đổi trạng thái sang ✅. — AI agent
-- 2026-10-10 — M0-10 — PR #67 đã merge, đổi trạng thái sang ✅. — AI agent
-- 2026-10-10 — M0-11 — Viết lại AGENTS.md mục 8 theo việc: cài lần đầu, chạy dev (mỗi server một khối), kiểm tra giống CI, đổi API, lệnh hay dùng; tách lệnh xóa dữ liệu ra khối riêng có cảnh báo. Đã chạy thật từng khối từ thư mục con của repo. Thay `cp -n` bằng `[ -f ] || cp` (trên macOS `cp -n` trả exit 1 khi file đã có, làm hỏng chuỗi `&&`). — AI agent
-- 2026-10-10 — M0-10 — Playwright 1.64 E2E full-stack (Django :8001 + `vite preview` :4173 proxy `/api`), 5 smoke test (shell + health thật, điều hướng sidebar, 404, ngôn ngữ và giao diện giữ sau reload); job `E2E` trong CI, lưu report khi fail. Sửa `ALLOWED_HOSTS` của settings test (proxy đổi Host thành 127.0.0.1). — AI agent
-- 2026-10-10 — M0-08 — API client có kiểu: BE xuất `qloud_backend/openapi.yaml` (validate, fail on warn); FE sinh `schema.d.ts` bằng openapi-typescript 7.13 và gọi qua openapi-fetch 0.17 (cookie + CSRF middleware, `unwrap()`/`ApiError` theo định dạng lỗi chung). Thay `apiFetch`. CI chặn schema/type bị cũ. — AI agent
-- 2026-10-10 — M0-12 — Git hooks bằng lefthook 2.2.1: pre-commit (ruff, prettier + eslint trên file đã stage, gitleaks), commit-msg (Conventional Commits), pre-push (tên branch, chặn push `master`, kiểm tra phía có thay đổi). Quy tắc dùng chung ở `scripts/conventions.py` (hook + CI). Bật required checks `CI OK` + `PR conventions` (strict). — AI agent
-- 2026-10-10 — M0-07 — Hoàn thiện design tokens và application shell responsive; đã kiểm tra local, chờ duyệt PR. — Codex
-- 2026-10-10 — M0-07 — Review lần 2: rebase lên master, sửa phím tắt `i` bỏ qua mọi kiểu `contenteditable` (kèm test), đưa ảnh chụp vào `ui-ux.md`, đánh dấu M0-09 ✅. — Claude
-- 2026-10-10 — M0-09 — CI GitHub Actions: backend (ruff, mypy, migration check, pytest), frontend (lint, format, typecheck, test, build), kiểm tra giấy phép (`scripts/check_licenses.py`), gitleaks, kiểm tra PR (`scripts/check_pr.py`), job tổng hợp `CI OK`. Action ghim theo SHA. LocalStack trong CI hoãn tới M2-03. — AI agent
-- 2026-10-10 — — Viết lại các câu gọi người duyệt bằng danh xưng cho tự nhiên hơn (docs, AGENTS.md, README, mô tả issue). — AI agent
-- 2026-10-10 — — Kế hoạch cưỡng chế rule bằng công cụ: mở rộng M0-09 (CI: giấy phép, gitleaks, kiểm tra PR, required checks); thêm M0-12 (git hooks bằng lefthook, #61); thêm M2-00 (script quy trình + skill, #62). — AI agent
-- 2026-10-10 — — Sửa quy tắc rebase: chỉ rebase khi base branch có commit mới (kiểm tra bằng `git merge-base --is-ancestor`), không rebase vô điều kiện. — AI agent
-- 2026-10-10 — — Đánh dấu M0-06 ✅ (đã merge ở #55). Thêm quy tắc đồng bộ trạng thái ROADMAP sau khi merge; hướng dẫn tạo `.env` dùng `cp -n` để không ghi đè secret. — AI agent
-- 2026-10-10 — M0-06 — Dựng khung SPA với React, Vite, TypeScript, Tailwind/shadcn, Router, Query, i18n, theme, fetch CSRF và Vitest (Codex). Review: sửa `typecheck` (trước đó không kiểm tra file nào), bọc truy cập localStorage, dùng lucide-react 1.53.0 thay vì bỏ qua `minimumReleaseAge` của pnpm. — Codex + Claude
-- 2026-10-10 — M0-05 — Khung BE: Django 6.1 + DRF + Celery trên Python 3.14 (uv), settings base/dev/test/prod, `/api/v1/health`, định dạng lỗi chung, cursor pagination, BaseModel UUIDv7, custom User tối thiểu (tạo trước migration đầu tiên), email theo `MAILERS` của Django 6.1. 19 test, coverage 100%, ruff + mypy strict sạch. — AI agent
-- 2026-10-10 — — Thêm quy tắc luôn rebase lên base branch trước khi làm task và trước khi push/tạo PR. — AI agent
-- 2026-10-09 — — Thêm quy tắc branch, commit message và PR (tiêu đề PR theo Conventional Commits + task ID; body tiếng Việt theo template) vào conventions.md và AGENTS.md; cập nhật PR template. — AI agent
-- 2026-10-09 — M0-04 — `docker-compose.yml` (Postgres 18, Redis 8.10, LocalStack 2026.9.1, Mailpit 1.31) + script tạo bucket/CORS/lifecycle; `.env.example` cho compose và backend. Đã kiểm tra CORS, presigned multipart, ListParts, Range trên LocalStack. Chốt LocalStack thay MinIO (ADR-0007) và pnpm cho FE. — AI agent
-- 2026-10-09 — M0-03 — Thêm `.gitignore`, `.editorconfig`, README gốc. — AI agent
-- 2026-10-09 — — Đổi phương án deploy: Cloudflare proxy (Full strict, Origin Certificate) + nginx trên VPS, bỏ Caddy (ADR-0006). — AI agent
-- 2026-10-09 — — Commit "Init" (docs). Tạo label, 9 milestone và 49 issue (#1–#49) trên GitHub cho các task; thêm cột Issue vào ROADMAP; thêm quy trình làm việc bằng `gh` vào AGENTS.md; domain cấu hình qua `.env`. — AI agent
-- 2026-10-09 — M0-02 — Chốt: chống bot bằng Turnstile + plan mặc định 5 GB (bạn bè dùng `friends-2026`); báo cáo vi phạm + admin gỡ link/khóa user; deploy toàn bộ (cả FE) lên VPS, cùng origin. Docs được duyệt. — AI agent
-- 2026-10-09 — M0-02 — Nâng bảng công nghệ lên bản ổn định mới nhất (Django 6.1, Python 3.14, PostgreSQL 18, React 19, Vite 8, TS 7, Tailwind 4); thêm luật "tra phiên bản trên registry, không dựa vào trí nhớ" vào AGENTS.md. — AI agent
-- 2026-10-09 — M0-02 — Cập nhật docs theo câu trả lời: storage do `.env` quyết định, đăng ký mở + SMTP riêng, giới hạn theo Plan (ADR-0005), chọn pypdfium2 cho PDF, quy tắc giấy phép, hướng UI (teal, Be Vietnam Pro). — AI agent
-
-- 2026-10-09 — M0-01 — Viết AGENTS.md và bộ docs ban đầu (overview, requirements, architecture, data-model, api, ui-ux, conventions, features, ADR). Chờ duyệt. — AI agent

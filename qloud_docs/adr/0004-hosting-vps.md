@@ -1,23 +1,15 @@
-# 0004. Hosting backend trên VPS, không dùng Cloudflare Workers
+# 0004. Chạy trên VPS bằng Docker Compose
 
-- Trạng thái: Chấp nhận
-- Ngày: 2026-10-09
-
-## Bối cảnh
-Có cân nhắc dùng Cloudflare Pages + Workers thay cho VPS.
+- Trạng thái: Chấp nhận · 2026-10-09
 
 ## Quyết định
-Backend (Django, Celery, PostgreSQL, Redis) chạy trên **VPS bằng Docker Compose**.
-Frontend (file tĩnh) cũng do nginx trên **cùng VPS** phục vụ (phía trước là Cloudflare proxy, xem ADR-0006), cùng origin với API. File lưu trên S3 hoặc R2, tùy `.env`.
+Django, Celery, PostgreSQL, Redis và nginx (phục vụ FE tĩnh, cùng origin với API) chạy trên một VPS bằng Docker Compose,
+phía trước là Cloudflare proxy (ADR-0006). File lưu trên S3 hoặc R2, tùy `.env`.
 
 ## Lý do
-- **Cloudflare Workers không chạy được Django:** Python Workers chạy trên Pyodide, không hỗ trợ Django, Celery hay psycopg.
-  Muốn dùng Workers thì phải viết lại backend bằng JS/TS.
-- **D1 là SQLite:** không phù hợp với yêu cầu PostgreSQL (recursive CTE trên dữ liệu lớn, pg_trgm, khóa dòng cho quota).
-  Workers có thể kết nối tới PostgreSQL bên ngoài qua Hyperdrive, nhưng khi đó vẫn phải có một nơi chạy PostgreSQL và vẫn phải bỏ Django.
-- Workers không có tác vụ nền dài kiểu Celery (tạo thumbnail chẳng hạn), chỉ có Queues và Cron với giới hạn CPU.
-- **VPS:** chi phí cố định, rẻ, kiểm soát được hoàn toàn. Đủ cho quy mô hiện tại; khi cần thì nâng cấp máy hoặc tách dịch vụ ra máy khác.
+- Cloudflare Workers không chạy được Django, Celery hay psycopg (Python Workers chạy trên Pyodide); D1 là SQLite, không có
+  recursive CTE trên dữ liệu lớn, pg_trgm hay khóa dòng cho quota. Dùng Workers đồng nghĩa viết lại backend.
+- VPS: chi phí cố định, kiểm soát hoàn toàn; khi cần thì nâng máy hoặc tách dịch vụ.
 
 ## Hệ quả
-- Phải tự lo vận hành: cập nhật OS, backup, TLS giữa Cloudflare và VPS (Origin Certificate, xem ADR-0006), giám sát.
-- Vẫn có thể dùng Cloudflare cho DNS/proxy và R2 cho storage. Lưu ý giới hạn body 100 MB của proxy không ảnh hưởng, vì file đi thẳng lên R2/S3.
+- Tự vận hành: cập nhật OS, backup, TLS giữa Cloudflare và VPS, giám sát.

@@ -60,7 +60,7 @@ def main() -> int:
 
     touches_code = any(path.startswith(CODE_PREFIXES) for path in changed)
     if touches_code and "qloud_docs/ROADMAP.md" not in changed:
-        print("::warning::PR changes code but not qloud_docs/ROADMAP.md (status + Nhật ký).")
+        print("::warning::PR changes code but not qloud_docs/ROADMAP.md (task status).")
 
     for message in errors:
         print(f"::error::{message}")

@@ -32,5 +32,5 @@ Body: tiếng Việt. Quy tắc: qloud_docs/conventions.md › Pull Request
 - [ ] Lint, format, type check sạch
 - [ ] Migration chạy được (nếu có)
 - [ ] Có đủ bản dịch i18n `vi` + `en`, dark mode, responsive (nếu có UI)
-- [ ] Đã cập nhật docs: trạng thái ROADMAP + Nhật ký, các file feature/API/data-model liên quan
+- [ ] Đã cập nhật docs: trạng thái ROADMAP, các file feature/API/data-model liên quan
 - [ ] Không thêm dependency GPL/AGPL

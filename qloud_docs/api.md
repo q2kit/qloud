@@ -5,10 +5,7 @@
 
 ## Cập nhật schema và client (bắt buộc khi đổi API)
 
-```bash
-cd qloud_backend && uv run python manage.py spectacular --file openapi.yaml --validate --fail-on-warn
-cd ../qloud_frontend && pnpm api:generate
-```
+Lệnh: AGENTS.md mục 8 › *Sau khi đổi API*.
 
 - Commit cả `openapi.yaml` và `schema.d.ts` trong cùng PR với thay đổi API. CI chặn nếu một trong hai bị cũ
   (test `test_openapi_file.py` ở BE; bước so sánh type ở FE). Schema phải validate **không có cảnh báo**.
