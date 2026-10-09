@@ -17,7 +17,13 @@ Dự án được phát triển bởi AI agent dưới sự giám sát của ch�
 
 ## Chạy dự án (dev)
 
-> Sẽ được bổ sung khi dựng xong khung dự án (M0-04 → M0-06, M0-11).
+```bash
+cp .env.example .env                              # điền LOCALSTACK_AUTH_TOKEN
+cp qloud_backend/.env.example qloud_backend/.env
+docker compose up -d --wait                       # Postgres, Redis, LocalStack (S3), Mailpit
+```
+
+> Phần chạy backend và frontend sẽ được bổ sung ở M0-05, M0-06 và M0-11.
 
 ## Giấy phép
 

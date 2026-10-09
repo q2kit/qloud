@@ -62,7 +62,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 | Cấu hình | django-environ |
 | Quản lý package | uv |
 | Chất lượng | ruff (lint + format), mypy + django-stubs |
-| Test | pytest, pytest-django, factory_boy, moto hoặc MinIO cho S3 |
+| Test | pytest, pytest-django, factory_boy; S3 thật trên LocalStack |
 
 **Cấu trúc module (Django apps):**
 ```
@@ -129,7 +129,14 @@ Với share link thì chỉ xét token của link đó và cây con bên dưới
 
 ## Triển khai
 
-- **Môi trường dev:** `docker compose` chạy PostgreSQL, Redis và MinIO. BE và FE chạy trực tiếp trên máy.
+- **Môi trường dev:** `docker-compose.yml` ở thư mục gốc chạy PostgreSQL, Redis, **LocalStack** (giả lập S3, xem [ADR-0007](adr/0007-localstack-for-s3-dev.md)) và Mailpit. BE và FE chạy trực tiếp trên máy.
+  Khi LocalStack khởi động, `infra/localstack/init-s3.sh` tạo bucket, CORS và lifecycle rule giống production.
+- **File cấu hình (`.env`, không commit; mẫu là `.env.example` bên cạnh):**
+  | File | Ai đọc | Nội dung |
+  |---|---|---|
+  | `.env` (gốc repo) | docker compose | Hạ tầng: Postgres, Redis, LocalStack token, Mailpit, CORS của bucket |
+  | `qloud_backend/.env` | Django, Celery | Secret key, `APP_DOMAIN`, DB/Redis URL, S3, SMTP, OAuth, Turnstile, Sentry |
+  | `qloud_frontend/.env` | Vite (`VITE_*`) | Chỉ các giá trị công khai, ví dụ Turnstile site key (thêm ở M0-06) |
 - **Production (giai đoạn 1):** **mọi thứ chạy trên một VPS** bằng Docker Compose: nginx, api, worker, beat, postgres, redis.
   Phía trước VPS là **Cloudflare proxy** (DNS bật proxy — biểu tượng đám mây cam). Chi tiết ở [ADR-0006](adr/0006-cloudflare-proxy-nginx.md).
   - **TLS:** chế độ SSL của Cloudflare là **Full (strict)**. nginx dùng **Cloudflare Origin Certificate**; file cert và key được mount vào container, đường dẫn cấu hình qua `.env`. VPS không dùng Let's Encrypt.

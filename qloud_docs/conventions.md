@@ -34,7 +34,7 @@
 |---|---|---|
 | BE unit | pytest | Mọi service và selector có logic |
 | BE API | pytest + DRF APIClient | Mọi endpoint: thành công, sai dữ liệu, chưa đăng nhập, **không có quyền** |
-| BE S3 | MinIO (trong CI) hoặc moto | Luồng upload multipart, presign |
+| BE S3 | LocalStack (dev và CI) | Luồng upload multipart, presign |
 | FE unit | Vitest + Testing Library + MSW | Component và hook có logic |
 | E2E | Playwright | Luồng chính của từng feature (đăng ký, upload, chia sẻ, xóa và khôi phục…) |
 
@@ -45,6 +45,6 @@
 - Branch: `feat/<task-id>-<slug>`, `fix/...`, `docs/...`, `chore/...`.
 - Commit theo Conventional Commits: `feat(sharing): add public share links`.
 - PR theo `.github/pull_request_template.md`: task ID, `Closes #n`, thay đổi chính, cách test, ảnh chụp màn hình nếu có thay đổi UI.
-- CI (GitHub Actions) chạy trên mỗi PR: lint, type check, test BE (Postgres, Redis, MinIO dạng service), test FE, build FE, Playwright.
+- CI (GitHub Actions) chạy trên mỗi PR: lint, type check, test BE (Postgres, Redis, LocalStack dạng service; token lấy từ secret `LOCALSTACK_AUTH_TOKEN`), test FE, build FE, Playwright.
 - Merge vào `master` (squash) chỉ khi CI xanh và chủ dự án đã duyệt.
 - Thao tác GitHub (issue, PR, review, CI) dùng `gh` CLI. Quy trình chi tiết ở mục 3 của `AGENTS.md`.

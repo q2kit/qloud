@@ -19,4 +19,4 @@ Mọi kích thước file đều dùng chung một luồng này (file 0 byte là
 ## Hệ quả
 - Bucket phải cấu hình CORS và expose header `ETag`.
 - Phải dọn các multipart upload bị bỏ dở (Celery cùng với lifecycle rule của bucket).
-- Mọi nhà cung cấp tương thích S3 (AWS, R2, MinIO) đều dùng được; dev dùng MinIO.
+- Mọi nhà cung cấp tương thích S3 (AWS, R2…) đều dùng được; dev và CI dùng LocalStack (ADR-0007).
