@@ -121,6 +121,17 @@ describe('application layout', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('highlights the settings link like the other navigation items', () => {
+    renderDrive('/settings');
+
+    const settings = screen.getByRole('link', { name: /Cài đặt|Settings/ });
+    expect(settings).toHaveAttribute('aria-current', 'page');
+    expect(settings).toHaveClass('bg-sidebar-accent');
+    expect(
+      screen.getByRole('link', { name: /Gần đây|Recent/ }),
+    ).not.toHaveClass('bg-sidebar-accent');
+  });
+
   it('toggles the details panel with the i shortcut', async () => {
     const user = userEvent.setup();
     renderDrive();

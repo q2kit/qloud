@@ -31,6 +31,13 @@ const navigationItems = [
   { key: 'trash', to: '/trash', icon: Trash2 },
 ] as const;
 
+function navigationLinkClassName({ isActive }: { isActive: boolean }): string {
+  return cn(
+    'flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground',
+    isActive && 'bg-sidebar-accent text-sidebar-foreground',
+  );
+}
+
 export function AppSidebar({
   isOpen,
   triggerRef,
@@ -75,12 +82,7 @@ export function AppSidebar({
             to={to}
             end={'end' in item ? item.end : undefined}
             onClick={onClose}
-            className={({ isActive }) =>
-              cn(
-                'flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground',
-                isActive && 'bg-sidebar-accent text-sidebar-foreground',
-              )
-            }
+            className={navigationLinkClassName}
           >
             <Icon className="size-4.5" aria-hidden="true" />
             {t(`navigation.${key}`)}
@@ -92,7 +94,7 @@ export function AppSidebar({
         <NavLink
           to="/settings"
           onClick={onClose}
-          className="flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          className={navigationLinkClassName}
         >
           <Settings className="size-4.5" aria-hidden="true" />
           {t('navigation.settings')}
