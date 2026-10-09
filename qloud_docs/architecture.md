@@ -132,6 +132,17 @@ Quyền của một người trên một node = mức quyền cao nhất trong c
 có `Share` trực tiếp trên node; có `Share` trên một folder tổ tiên (quyền được thừa kế).
 Với share link thì chỉ xét token của link đó và cây con bên dưới node được chia sẻ.
 
+## Công cụ cưỡng chế quy tắc
+
+Rule nào kiểm tra máy móc được thì để công cụ cưỡng chế, không chỉ viết bằng chữ:
+
+| Tầng | Công cụ | Vai trò |
+|---|---|---|
+| Cưỡng chế | GitHub Actions (M0-09) + branch protection | Không thể bỏ qua: lint, typecheck, test, build, giấy phép, gitleaks, định dạng PR |
+| Phát hiện sớm | Git hooks bằng lefthook (M0-12) | Chạy trên máy, nhanh; có thể bị bỏ qua nên không thay thế CI |
+| Quy trình | Script trong repo + skill Claude Code (M2-00) | Đóng gói các bước gh/git lặp lại; Codex và người cũng dùng được script |
+| Phán đoán | `AGENTS.md` | Khi nào hỏi chủ dự án, định hướng, review |
+
 ## Triển khai
 
 - **Môi trường dev:** `docker-compose.yml` ở thư mục gốc chạy PostgreSQL, Redis, **LocalStack** (giả lập S3, xem [ADR-0007](adr/0007-localstack-for-s3-dev.md)) và Mailpit. BE và FE chạy trực tiếp trên máy.
