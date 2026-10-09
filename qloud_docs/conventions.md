@@ -54,7 +54,14 @@
 - **Branch nối tiếp (stacked):** chỉ dùng khi task mới cần code của một PR chưa merge.
   - Tạo branch từ branch của PR kia, và mở PR với `--base <branch-kia>`. Đầu body PR ghi rõ là phụ thuộc PR nào.
   - Sau khi PR kia merge: `git rebase --onto origin/master <commit-cuối-của-branch-kia>`, rồi `gh pr edit <n> --base master`.
-- **Cập nhật branch theo `master`:** dùng `git rebase origin/master`, **không** merge `master` vào branch.
+- **Luôn rebase lên base branch** (`master`, hoặc branch cha nếu là branch nối tiếp) vào hai thời điểm:
+  1. **Trước khi bắt đầu làm task**, kể cả khi tiếp tục một branch đã có từ phiên trước.
+  2. **Ngay trước mỗi lần push hoặc tạo PR.**
+
+  Lệnh: `git fetch origin && git rebase origin/<base>`. Có conflict thì giải quyết, rồi chạy lại lint và test trước khi push.
+  **Không** merge base branch vào branch làm việc.
+- Khi PR báo conflict trên GitHub: agent tự rebase và giải quyết conflict, không chờ chủ dự án.
+  Conflict ở Nhật ký ROADMAP thì giữ dòng của cả hai bên, dòng mới hơn ở trên.
 - **Force push:** chỉ được làm trên branch làm việc của chính mình, sau khi rebase, và luôn dùng `--force-with-lease`. **Cấm** force push lên `master` hoặc lên branch của người khác.
 - **Việc kéo dài nhiều phiên:** push branch sớm và mở PR ở dạng nháp (`gh pr create --draft`), để tiến độ hiện trên GitHub.
   Khi xong thì chuyển sang chờ review bằng `gh pr ready`.

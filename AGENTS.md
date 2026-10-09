@@ -37,7 +37,8 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
 2. **Nhận task.**
    - `gh issue view <n>` để đọc issue.
    - `gh issue edit <n> --add-assignee @me --add-label status:in-progress`.
-   - Tạo branch từ `master` mới nhất: `git switch master && git pull && git switch -c <type>/<task-id>-<slug>`, ví dụ `feat/M2-04-upload-session`.
+   - Tạo branch từ `master` mới nhất: `git switch master && git pull --ff-only && git switch -c <type>/<task-id>-<slug>`, ví dụ `feat/M2-04-upload-session`.
+   - **Tiếp tục một branch đã có** (làm tiếp task, sửa theo review): **rebase lên base branch trước khi làm**: `git fetch origin && git rebase origin/<base>`.
 3. **Đọc ngữ cảnh.** Đọc file feature liên quan trong `qloud_docs/features/`, cùng các phần liên quan
    của `architecture.md`, `data-model.md`, `api.md`, `ui-ux.md` và `conventions.md`. Không đọc thừa những gì không cần.
 4. **Lập kế hoạch.** Với task lớn (nhiều file, schema mới, API mới): viết kế hoạch ngắn thành comment trên issue (`gh issue comment <n>`),
@@ -50,7 +51,10 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
    - Nếu có quyết định kiến trúc mới thì tạo ADR trong `qloud_docs/adr/`.
    - Nếu phát sinh câu hỏi chưa trả lời được thì ghi vào `open-questions.md`.
 8. **Mở PR.**
-   - `git push -u origin HEAD`, rồi `gh pr create --base master --title "<type>(<scope>): <subject> [<task-id>]" --body-file <file>`.
+   - **Rebase lên base branch ngay trước mỗi lần push hoặc tạo PR**: `git fetch origin && git rebase origin/<base>`.
+     Có conflict thì giải quyết, rồi chạy lại lint và test trước khi push.
+   - `git push -u origin HEAD` (sau khi rebase một branch đã push thì dùng `git push --force-with-lease`),
+     rồi `gh pr create --base <base> --title "<type>(<scope>): <subject> [<task-id>]" --body-file <file>`.
    - Body PR theo [.github/pull_request_template.md](.github/pull_request_template.md), và **phải có `Closes #<n>`**.
    - Theo dõi CI bằng `gh pr checks --watch`. CI đỏ thì sửa cho tới khi xanh.
 9. **Review và merge.** **Chỉ chủ dự án được merge**, hoặc agent merge (`gh pr merge --squash --delete-branch`) khi chủ dự án nói rõ là đồng ý.
