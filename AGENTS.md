@@ -103,7 +103,7 @@ sửa bug, cập nhật docs cho khớp với code, tạo branch, commit, push b
 | Tác vụ nền | Celery + Redis |
 | Database | PostgreSQL 18 |
 | Lưu file | Object storage tương thích S3. Dùng AWS S3 hay Cloudflare R2 là do `.env` quyết định; code không phụ thuộc nhà cung cấp. Dev và CI: LocalStack (cần auth token) |
-| Frontend | pnpm, React 19, TypeScript 7, Vite 8, React Router 8, TanStack Query 5, Tailwind CSS 4, shadcn/ui (Radix), i18next |
+| Frontend | pnpm, React 19, TypeScript 6 (7 chưa tương thích typescript-eslint), Vite 8, React Router 8, TanStack Query 5, Tailwind CSS 4, shadcn/ui (Radix), i18next |
 | Test | pytest (BE), Vitest + Testing Library (FE), Playwright (E2E) |
 | Email | SMTP riêng (cấu hình qua `.env`); dev dùng Mailpit |
 | Hạ tầng | Docker Compose, VPS, GitHub Actions |
@@ -172,7 +172,14 @@ uv run celery -A config worker -l info   # worker Celery
 uv run pytest --cov                      # test + coverage (cần docker compose đang chạy)
 uv run ruff format . && uv run ruff check . && uv run mypy .
 
-# Frontend: sẽ bổ sung ở M0-06 (mục 8 hoàn thiện ở M0-11)
+# Frontend (thư mục qloud_frontend, dùng pnpm)
+cd qloud_frontend
+pnpm install
+pnpm dev                                 # http://localhost:5173, proxy /api và /admin sang :8000
+pnpm test
+pnpm lint
+pnpm typecheck
+pnpm build
 ```
 
 ## 9. Git

@@ -1,0 +1,40 @@
+{
+  "app": {
+    "name": "Qloud"
+  },
+  "navigation": {
+    "drive": "Drive",
+    "login": "Đăng nhập",
+    "home": "Về Drive",
+    "preferences": "Tùy chọn hiển thị"
+  },
+  "drive": {
+    "title": "Drive",
+    "description": "Khung ứng dụng đã sẵn sàng. Nội dung file sẽ được xây dựng ở milestone tiếp theo."
+  },
+  "login": {
+    "title": "Đăng nhập",
+    "description": "Luồng đăng nhập sẽ được xây dựng trong milestone xác thực."
+  },
+  "notFound": {
+    "title": "Không tìm thấy trang",
+    "description": "Đường dẫn này không tồn tại hoặc đã được di chuyển."
+  },
+  "health": {
+    "label": "Trạng thái dịch vụ",
+    "checking": "Đang kiểm tra…",
+    "ok": "Hoạt động bình thường",
+    "error": "Không thể kết nối"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "theme": {
+    "label": "Giao diện",
+    "system": "Theo hệ thống",
+    "light": "Sáng",
+    "dark": "Tối"
+  }
+}

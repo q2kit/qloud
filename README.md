@@ -32,7 +32,16 @@ uv run python manage.py migrate
 uv run python manage.py runserver     # http://localhost:8000/api/v1/health
 ```
 
-> Phần chạy frontend sẽ được bổ sung ở M0-06 và M0-11.
+Frontend (cần [pnpm](https://pnpm.io/)):
+
+```bash
+cd qloud_frontend
+pnpm install
+pnpm dev
+```
+
+Vite chạy tại `http://localhost:5173` và chuyển tiếp `/api`, `/admin` tới backend tại
+`http://localhost:8000`.
 
 ## Giấy phép
 
