@@ -17,6 +17,8 @@
 
 | # | Câu hỏi | Quyết định | Ngày |
 |---|---|---|---|
+| Q-15 | Giả lập S3 cho dev và CI (MinIO đã ngừng phát hành image) | **LocalStack**, cần auth token ([ADR-0007](adr/0007-localstack-for-s3-dev.md)) | 2026-10-09 |
+| Q-16 | Trình quản lý package cho FE | **pnpm** | 2026-10-09 |
 | Q-11 | Domain? | Cấu hình qua `.env` (`APP_DOMAIN`). Lưu ý: production cần một domain thật trỏ về VPS (Google OAuth và Let's Encrypt không dùng được với IP trần) | 2026-10-09 |
 | Q-02 | Frontend phục vụ từ đâu? | Cùng VPS, nginx phục vụ file tĩnh, cùng origin với API, phía trước là Cloudflare proxy ([ADR-0006](adr/0006-cloudflare-proxy-nginx.md)) | 2026-10-09 |
 | Q-13 | Chống lạm dụng khi mở đăng ký | Xác thực email trước khi upload + Cloudflare Turnstile + plan mặc định `free-2026` 5 GB; bạn bè được admin gán `friends-2026` 50 GB | 2026-10-09 |

@@ -97,8 +97,8 @@ sửa bug, cập nhật docs cho khớp với code, tạo branch, commit, push b
 | Auth | django-allauth (headless): email/mật khẩu, Google, GitHub |
 | Tác vụ nền | Celery + Redis |
 | Database | PostgreSQL 18 |
-| Lưu file | Object storage tương thích S3. Dùng AWS S3 hay Cloudflare R2 là do `.env` quyết định; code không phụ thuộc nhà cung cấp. Dev: MinIO |
-| Frontend | React 19, TypeScript 7, Vite 8, React Router 8, TanStack Query 5, Tailwind CSS 4, shadcn/ui (Radix), i18next |
+| Lưu file | Object storage tương thích S3. Dùng AWS S3 hay Cloudflare R2 là do `.env` quyết định; code không phụ thuộc nhà cung cấp. Dev và CI: LocalStack (cần auth token) |
+| Frontend | pnpm, React 19, TypeScript 7, Vite 8, React Router 8, TanStack Query 5, Tailwind CSS 4, shadcn/ui (Radix), i18next |
 | Test | pytest (BE), Vitest + Testing Library (FE), Playwright (E2E) |
 | Email | SMTP riêng (cấu hình qua `.env`); dev dùng Mailpit |
 | Hạ tầng | Docker Compose, VPS, GitHub Actions |
@@ -111,7 +111,7 @@ Chi tiết và lý do: xem [qloud_docs/architecture.md](qloud_docs/architecture.
   Trước khi thêm hoặc khởi tạo một package, tra phiên bản trên registry (`pip index versions <pkg>` / PyPI JSON API, `npm view <pkg> version`).
 - Đọc **tài liệu chính thức của đúng phiên bản đang dùng** (release notes, hướng dẫn migration) trước khi dùng API mới. Không viết theo cú pháp của phiên bản cũ.
 - Kiểm tra tính tương thích giữa các package (ví dụ một thư viện Django đã hỗ trợ Django 6.1 chưa). Nếu bản mới nhất chưa tương thích thì dùng bản thấp hơn gần nhất, và ghi lý do vào `architecture.md`.
-- Ghim phiên bản bằng lockfile (`uv.lock`, `package-lock.json` hoặc `pnpm-lock.yaml`). Bảng phiên bản trong `architecture.md` phải khớp với lockfile.
+- Ghim phiên bản bằng lockfile (`uv.lock` cho BE, `pnpm-lock.yaml` cho FE). Bảng phiên bản trong `architecture.md` phải khớp với lockfile.
 - Dependabot hoặc Renovate tự mở PR nâng phiên bản; nâng major version thì phải hỏi chủ dự án.
 
 ## 6. Tiêu chuẩn chất lượng (Definition of Done)
@@ -147,9 +147,18 @@ Hiện tại chỉ có ít người dùng, nhưng hệ thống phải được t
 > Phần này sẽ được điền khi dựng xong khung dự án (task M0 trong ROADMAP). Agent nào dựng khung thì cập nhật mục này.
 
 ```bash
-# docker compose up -d               # Postgres, Redis, MinIO
-# cd qloud_backend && ...            # chạy server, test, lint
-# cd qloud_frontend && ...           # chạy dev, test, lint
+# Lần đầu: tạo file cấu hình (điền LOCALSTACK_AUTH_TOKEN trong .env ở gốc)
+cp .env.example .env
+cp qloud_backend/.env.example qloud_backend/.env
+
+# Hạ tầng dev: Postgres, Redis, LocalStack (S3), Mailpit
+docker compose up -d --wait
+docker compose ps
+docker compose down          # dừng (giữ dữ liệu); thêm -v để xóa sạch dữ liệu — hỏi chủ dự án trước
+
+# Mailpit UI: http://localhost:8025 · S3 endpoint: http://localhost:4566 (bucket qloud-dev)
+
+# Backend, frontend: sẽ bổ sung ở M0-05, M0-06 (mục 8 hoàn thiện ở M0-11)
 ```
 
 ## 9. Git
