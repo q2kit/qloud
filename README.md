@@ -24,6 +24,13 @@ cp -n .env.example .env                              # rồi điền LOCALSTACK_
 cp -n qloud_backend/.env.example qloud_backend/.env
 ```
 
+Cài git hooks (kiểm tra format, lint, secret, commit message trước khi commit/push):
+
+```bash
+brew install lefthook gitleaks
+lefthook install
+```
+
 Hạ tầng (Postgres, Redis, LocalStack S3, Mailpit):
 
 ```bash

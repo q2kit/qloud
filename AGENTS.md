@@ -165,6 +165,10 @@ Hiện tại chỉ có ít người dùng, nhưng hệ thống phải được t
 cp -n .env.example .env
 cp -n qloud_backend/.env.example qloud_backend/.env
 
+# Lần đầu: cài git hooks (lefthook + gitleaks, cấu hình ở lefthook.yml)
+brew install lefthook gitleaks
+lefthook install
+
 # Hạ tầng dev: Postgres, Redis, LocalStack (S3), Mailpit
 docker compose up -d --wait
 docker compose ps
@@ -197,5 +201,6 @@ pnpm build
 - `master` luôn ở trạng thái deploy được, được bảo vệ, chỉ nhận thay đổi qua PR (squash merge).
 - **Branch:** `<type>/<task-id>-<slug>`, tạo từ `master` mới nhất, một branch cho một task. Cập nhật bằng rebase; force push chỉ dùng `--force-with-lease` trên branch của mình. Chi tiết (gồm cả branch nối tiếp): [conventions.md › Branch](qloud_docs/conventions.md#branch).
 - **Commit message:** Conventional Commits, tiếng Anh, `<type>(<scope>): <subject>`, footer `Refs #<n>`. Chi tiết: [conventions.md › Commit message](qloud_docs/conventions.md#commit-message).
+- **Git hooks** (lefthook) kiểm tra format/lint, secret, commit message, tên branch và chặn push lên `master`. **Không dùng `--no-verify`** nếu chưa được cho phép; hook sai thì sửa hook.
 - **PR:** tiêu đề `<type>(<scope>): <subject> [<task-id>]` (tiếng Anh — thành commit squash trên `master`); body tiếng Việt theo template, có `Closes #<n>`, cách kiểm tra *đã thực sự chạy*, và lưu ý cho reviewer. Chi tiết: [conventions.md › Pull Request](qloud_docs/conventions.md#pull-request).
 - Mỗi commit chứa thay đổi code cùng với thay đổi docs tương ứng.

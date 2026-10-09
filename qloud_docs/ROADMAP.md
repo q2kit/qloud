@@ -34,7 +34,7 @@
 | M0-09 | GitHub Actions: lint, typecheck, test, build BE/FE; kiểm tra giấy phép; gitleaks; kiểm tra tiêu đề/body PR và cảnh báo thiếu cập nhật ROADMAP; sau đó bật required checks | [#7](https://github.com/q2kit/qloud/issues/7) | ✅ |
 | M0-10 | Khung Playwright E2E và đưa vào CI | [#8](https://github.com/q2kit/qloud/issues/8) | ⬜ |
 | M0-11 | Cập nhật mục "Lệnh thường dùng" trong AGENTS.md | [#9](https://github.com/q2kit/qloud/issues/9) | ⬜ |
-| M0-12 | Git hooks bằng lefthook: format/lint file đã stage, gitleaks, kiểm tra commit message, tên branch, chặn push `master`, typecheck/test phía có thay đổi | [#61](https://github.com/q2kit/qloud/issues/61) | ⬜ |
+| M0-12 | Git hooks bằng lefthook: format/lint file đã stage, gitleaks, kiểm tra commit message, tên branch, chặn push `master`, typecheck/test phía có thay đổi | [#61](https://github.com/q2kit/qloud/issues/61) | 🟦 |
 
 ## M1 — Xác thực ([auth.md](features/auth.md))
 | ID | Task | Issue | Trạng thái |
@@ -115,6 +115,7 @@
 
 > Mới nhất ở trên cùng. Mỗi dòng gồm: ngày — task — tóm tắt — người hoặc agent thực hiện.
 
+- 2026-10-10 — M0-12 — Git hooks bằng lefthook 2.2.1: pre-commit (ruff, prettier + eslint trên file đã stage, gitleaks), commit-msg (Conventional Commits), pre-push (tên branch, chặn push `master`, kiểm tra phía có thay đổi). Quy tắc dùng chung ở `scripts/conventions.py` (hook + CI). Bật required checks `CI OK` + `PR conventions` (strict). — AI agent
 - 2026-10-10 — M0-07 — Hoàn thiện design tokens và application shell responsive; đã kiểm tra local, chờ duyệt PR. — Codex
 - 2026-10-10 — M0-07 — Review lần 2: rebase lên master, sửa phím tắt `i` bỏ qua mọi kiểu `contenteditable` (kèm test), đưa ảnh chụp vào `ui-ux.md`, đánh dấu M0-09 ✅. — Claude
 - 2026-10-10 — M0-09 — CI GitHub Actions: backend (ruff, mypy, migration check, pytest), frontend (lint, format, typecheck, test, build), kiểm tra giấy phép (`scripts/check_licenses.py`), gitleaks, kiểm tra PR (`scripts/check_pr.py`), job tổng hợp `CI OK`. Action ghim theo SHA. LocalStack trong CI hoãn tới M2-03. — AI agent

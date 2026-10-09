@@ -43,6 +43,8 @@
 
 ## Git và CI
 ### Branch
+> Tên branch và việc chặn push lên `master` được hook `pre-push` kiểm tra (`scripts/hooks/pre_push_refs.py`). Quy tắc nằm ở `scripts/conventions.py`.
+
 - `master` là nhánh chính, được bảo vệ (branch protection): **không commit hay push thẳng**, chỉ nhận thay đổi qua PR và squash merge.
 - **Tên branch:** `<type>/<task-id>-<slug>`
   - `type`: dùng chung danh sách với commit — `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `chore`, `ci`, `build`.
@@ -71,6 +73,8 @@
 - Không để branch không có PR tồn tại quá một phiên làm việc; bỏ việc thì xóa branch đó.
 
 ### Commit message
+> Được hook `commit-msg` kiểm tra (`scripts/hooks/commit_msg.py`). Danh sách `type` và `scope` **chỉ được định nghĩa ở `scripts/conventions.py`** (dùng chung cho hook và CI); muốn thêm scope thì sửa file đó và bảng dưới đây cùng lúc.
+
 Theo [Conventional Commits](https://www.conventionalcommits.org/), **tiếng Anh**:
 
 ```
@@ -126,7 +130,11 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
   - **Frontend** (khi `qloud_frontend/` hoặc file dùng chung thay đổi): lint, format, typecheck, test + coverage, build, kiểm tra giấy phép.
   - **Secret scan:** gitleaks trên các commit của PR.
   - **PR conventions** (workflow riêng `.github/workflows/pr.yml`, chạy lại cả khi sửa tiêu đề/body; `scripts/check_pr.py`): tiêu đề đúng định dạng; có `[task-id]` thì body phải có `Closes #n`; cảnh báo nếu sửa code mà không sửa ROADMAP.
-  - **CI OK:** job tổng hợp của `ci.yml`. *Required status checks* cần đặt: **`CI OK`** và **`PR conventions`**.
+  - **CI OK:** job tổng hợp của `ci.yml`. *Required status checks* đã bật cho `master` (2026-10-10): **`CI OK`** và **`PR conventions`**, chế độ *strict* (PR phải chứa commit mới nhất của `master` mới merge được).
+- **Git hooks** (`lefthook.yml`), cài bằng `lefthook install`:
+  - `pre-commit`: ruff (BE), prettier + eslint (FE) trên file đã stage, tự sửa và stage lại; gitleaks trên phần đã stage.
+  - `commit-msg`: Conventional Commits.
+  - `pre-push`: tên branch, chặn push lên `master`; cảnh báo nếu base có commit mới; mypy + pytest (BE, pytest chỉ chạy khi Postgres/Redis đang chạy) hoặc typecheck + test (FE) cho phía có thay đổi.
   - Kiểm tra giấy phép dùng `scripts/check_licenses.py`; LGPL chỉ được phép khi có trong `LGPL_ALLOWED` kèm lý do.
   - Action bên thứ ba được ghim theo commit SHA (kèm comment phiên bản).
 - Merge vào `master` (squash) chỉ khi CI xanh và PR đã được duyệt.
