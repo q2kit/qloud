@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
+const apiTarget = process.env.QLOUD_API_TARGET ?? 'http://localhost:8000';
 const rootDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
@@ -13,13 +14,15 @@ export default defineConfig({
     alias: { '@': path.resolve(rootDirectory, 'src') },
   },
   server: {
+    // `vite preview` reuses this proxy. E2E points it at its own backend port.
     proxy: {
-      '/api': 'http://localhost:8000',
-      '/admin': 'http://localhost:8000',
+      '/api': apiTarget,
+      '/admin': apiTarget,
     },
   },
   test: {
     environment: 'jsdom',
+    include: ['src/**/*.test.{ts,tsx}'],
     setupFiles: ['./src/test/setup.ts'],
     css: true,
     coverage: {
