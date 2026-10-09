@@ -102,6 +102,8 @@ describe('application layout', () => {
     const header = within(screen.getByRole('banner'));
     expect(header.getByText('Drive')).toBeInTheDocument();
     expect(header.getByText(/Drive của tôi|My Drive/)).toBeInTheDocument();
+    // jsdom's user agent is not an Apple platform.
+    expect(header.getByText('Ctrl K')).toBeInTheDocument();
   });
 
   it.each([

@@ -38,6 +38,10 @@
     "navigationDescription": "Điều hướng tới các khu vực chính của Qloud.",
     "breadcrumbRoot": "Drive của tôi",
     "search": "Tìm kiếm và chạy lệnh",
+    "searchShortcut": "{{modifier}} K",
+    "keys": {
+      "ctrl": "Ctrl"
+    },
     "create": "Tạo mới"
   },
   "details": {

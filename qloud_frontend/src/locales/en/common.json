@@ -38,6 +38,10 @@
     "navigationDescription": "Navigate to the main areas of Qloud.",
     "breadcrumbRoot": "My Drive",
     "search": "Search and run commands",
+    "searchShortcut": "{{modifier}} K",
+    "keys": {
+      "ctrl": "Ctrl"
+    },
     "create": "Create"
   },
   "details": {
