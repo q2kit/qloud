@@ -1,6 +1,6 @@
 # AGENTS.md — Hướng dẫn cho AI agent làm việc trên Qloud
 
-Qloud là ứng dụng lưu trữ và chia sẻ file trên web (cùng loại với Google Drive, nhưng có thiết kế riêng).
+Qloud là ứng dụng web mã nguồn mở để lưu trữ, xem trước và chia sẻ file.
 Toàn bộ dự án được phát triển bởi AI agent; mọi quyết định lớn và mọi lần merge đều do người duyệt.
 File này là **luật làm việc**. Nếu tài liệu khác mâu thuẫn với file này thì theo file này, và báo lại để sửa.
 
@@ -31,7 +31,7 @@ Repo: `q2kit/qloud` trên GitHub, nhánh chính là **`master`**. Mọi thao tá
 Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue* trong ROADMAP). Mỗi task được giao qua **một Pull Request**.
 
 1. **Định hướng.**
-   - Đọc [qloud_docs/ROADMAP.md](qloud_docs/ROADMAP.md) và [qloud_docs/open-questions.md](qloud_docs/open-questions.md).
+   - Đọc [qloud_docs/ROADMAP.md](qloud_docs/ROADMAP.md).
    - Xem trạng thái trên GitHub: `gh pr list`, `gh pr list --state merged --limit 5`, `gh issue list --milestone M<n>` (ví dụ `M1`).
      Đối chiếu với ROADMAP: PR đã merge mà task vẫn là 🟦 thì phải đồng bộ (xem bước 9). Có PR nào đang mở, đang bị yêu cầu sửa (review) hay CI đỏ thì xử lý trước, rồi mới làm task mới.
    - Chọn task tiếp theo: task chưa làm, đứng đầu milestone hiện tại, và không phụ thuộc vào task nào chưa xong.
@@ -48,10 +48,11 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
 5. **Thực hiện.** Code + test đi cùng nhau (xem mục 6). Mỗi PR chỉ chứa một task. Commit nhỏ, theo Conventional Commits.
 6. **Kiểm tra trên máy.** Chạy lint, type check và test của phần đã sửa. Không mở PR khi test còn đỏ.
 7. **Cập nhật tài liệu, bắt buộc, trong cùng PR:**
-   - Đổi trạng thái task trong `ROADMAP.md` thành 🟦 (chờ duyệt), và thêm một dòng vào mục *Nhật ký*.
+   - Đổi trạng thái task trong `ROADMAP.md` thành 🟦 (chờ duyệt).
    - Nếu hành vi, API, schema hay màn hình thay đổi thì sửa tài liệu tương ứng.
    - Nếu có quyết định kiến trúc mới thì tạo ADR trong `qloud_docs/adr/`.
-   - Nếu phát sinh câu hỏi chưa trả lời được thì ghi vào `open-questions.md`.
+   - Câu hỏi cần quyết định thì hỏi trong phiên làm việc, hoặc comment trên issue kèm label `needs:owner-decision`.
+     Có câu trả lời thì viết **quyết định** vào đúng tài liệu (feature, architecture, data-model, ADR); không lưu bản hỏi–đáp trong repo.
 8. **Mở PR.**
    - **Trước khi push hoặc tạo PR, kiểm tra base branch; chỉ rebase nếu base có commit mới**: `git fetch origin && git merge-base --is-ancestor origin/<base> HEAD || git rebase origin/<base>`.
      Nếu có rebase: giải quyết conflict (nếu có), chạy lại lint và test rồi mới push.
@@ -92,7 +93,7 @@ Milestone trên GitHub trùng tên với milestone trong ROADMAP (M0…M8).
 - Thay đổi **data model** theo kiểu phá vỡ dữ liệu hiện có: xóa hoặc đổi tên cột/bảng, migration không đảo ngược được.
 - Thay đổi **API đã công bố** theo kiểu không tương thích ngược.
 - Bất cứ thay đổi nào về **bảo mật, xác thực, phân quyền**, ngoài việc làm đúng như tài liệu đã mô tả.
-- Thay đổi **phạm vi sản phẩm**: thêm hoặc bớt tính năng so với `requirements.md`.
+- Thay đổi **phạm vi sản phẩm**: thêm hoặc bớt tính năng so với [overview.md](qloud_docs/overview.md).
 - Thay đổi **hướng thiết kế UI** (design system, màu, bố cục tổng thể).
 - Thao tác khó hoàn tác: xóa dữ liệu, force push lên `master` hoặc branch của người khác, sửa lịch sử git đã merge, thao tác trên môi trường production.
   (Rebase rồi `--force-with-lease` trên branch làm việc của chính mình thì được phép.)
@@ -102,7 +103,7 @@ Những việc được **tự làm**: code theo task đã có trong ROADMAP, vi
 sửa bug, cập nhật docs cho khớp với code, tạo branch, commit, push branch, tạo issue và PR, comment trên issue hoặc PR.
 **Không được** push thẳng lên `master`, tự merge PR khi chưa được đồng ý, đóng issue của người khác, hay sửa cấu hình repo (branch protection, secrets).
 
-## 5. Công nghệ đã chốt (tóm tắt)
+## 5. Công nghệ (tóm tắt)
 
 | Phần | Lựa chọn |
 |---|---|
@@ -124,7 +125,7 @@ Chi tiết và lý do: xem [qloud_docs/architecture.md](qloud_docs/architecture.
   Trước khi thêm hoặc khởi tạo một package, tra phiên bản trên registry (`pip index versions <pkg>` / PyPI JSON API, `npm view <pkg> version`).
 - Đọc **tài liệu chính thức của đúng phiên bản đang dùng** (release notes, hướng dẫn migration) trước khi dùng API mới. Không viết theo cú pháp của phiên bản cũ.
 - Kiểm tra tính tương thích giữa các package (ví dụ một thư viện Django đã hỗ trợ Django 6.1 chưa). Nếu bản mới nhất chưa tương thích thì dùng bản thấp hơn gần nhất, và ghi lý do vào `architecture.md`.
-- Ghim phiên bản bằng lockfile (`uv.lock` cho BE, `pnpm-lock.yaml` cho FE). Bảng phiên bản trong `architecture.md` phải khớp với lockfile.
+- Ghim phiên bản bằng lockfile (`uv.lock` cho BE, `pnpm-lock.yaml` cho FE). Bảng trong `architecture.md` chỉ ghi dòng phiên bản và ràng buộc; đổi major hoặc thêm ràng buộc thì sửa bảng.
 - Dependabot (`.github/dependabot.yml`) mở PR nâng phiên bản mỗi tuần (minor/patch gộp chung); nâng major version thì phải hỏi trước.
 
 ## 6. Tiêu chuẩn chất lượng (Definition of Done)
@@ -139,11 +140,11 @@ Một task chỉ được tính là xong khi đạt đủ các điều sau:
 - [ ] Migration chạy được trên database trống và trên database đã có dữ liệu.
 - [ ] Không có chuỗi UI viết cứng; có đủ bản dịch `vi` và `en`.
 - [ ] UI dùng được ở cả light mode và dark mode, và responsive tới màn hình 360px.
-- [ ] Docs đã được cập nhật (mục 3, bước 6).
+- [ ] Docs đã được cập nhật (mục 3, bước 7).
 
 ## 7. Nguyên tắc kỹ thuật bắt buộc
 
-Hiện tại chỉ có ít người dùng, nhưng hệ thống phải được thiết kế để **mở rộng được** mà không phải viết lại:
+Hệ thống phải **mở rộng được** mà không phải viết lại:
 
 - **Byte của file không bao giờ đi qua server ứng dụng.** Upload và download dùng presigned URL thẳng tới S3.
 - **Kiểm tra quyền ở phía server, cho mọi request.** Không tin bất cứ thứ gì từ client. Mọi truy vấn file và folder phải đi qua lớp phân quyền chung, không tự viết truy vấn riêng lẻ.
@@ -231,9 +232,8 @@ cd "$(git rev-parse --show-toplevel)" && docker compose down -v
 
 ## 9. Git
 
-- `master` luôn ở trạng thái deploy được, được bảo vệ, chỉ nhận thay đổi qua PR (squash merge).
-- **Branch:** `<type>/<task-id>-<slug>`, tạo từ `master` mới nhất, một branch cho một task. Cập nhật bằng rebase; force push chỉ dùng `--force-with-lease` trên branch của mình. Chi tiết (gồm cả branch nối tiếp): [conventions.md › Branch](qloud_docs/conventions.md#branch).
-- **Commit message:** Conventional Commits, tiếng Anh, `<type>(<scope>): <subject>`, footer `Refs #<n>`. Chi tiết: [conventions.md › Commit message](qloud_docs/conventions.md#commit-message).
-- **Git hooks** (lefthook) kiểm tra format/lint, secret, commit message, tên branch và chặn push lên `master`. **Không dùng `--no-verify`** nếu chưa được cho phép; hook sai thì sửa hook.
-- **PR:** tiêu đề `<type>(<scope>): <subject> [<task-id>]` (tiếng Anh — thành commit squash trên `master`); body tiếng Việt theo template, có `Closes #<n>`, cách kiểm tra *đã thực sự chạy*, và lưu ý cho reviewer. Chi tiết: [conventions.md › Pull Request](qloud_docs/conventions.md#pull-request).
-- Mỗi commit chứa thay đổi code cùng với thay đổi docs tương ứng.
+Quy tắc branch, commit, PR và các kiểm tra tự động: [conventions.md › Git và CI](qloud_docs/conventions.md#git-và-ci). Những điểm không được vi phạm:
+- Không push thẳng lên `master`, không force push lên `master` hay branch của người khác, không merge PR khi chưa được đồng ý.
+- Chỉ rebase khi base có commit mới; không merge base vào branch làm việc.
+- Không dùng `--no-verify` khi chưa được cho phép; hook sai thì sửa hook.
+- Mỗi commit chứa thay đổi code cùng thay đổi docs tương ứng.

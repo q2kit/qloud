@@ -55,9 +55,9 @@ Gói dung lượng. Đây là cách làm cho giới hạn **thay đổi được
   Sửa trực tiếp một plan đang dùng sẽ ảnh hưởng tới mọi user của plan đó; chỉ làm vậy khi cố ý (ví dụ tặng thêm dung lượng cho mọi người).
 - Migration dữ liệu ban đầu tạo 2 plan:
   - `free-2026` (**mặc định** cho đăng ký mở): 5 GB, file tối đa 5 GB, giữ 100 phiên bản trong 30 ngày, thùng rác 30 ngày.
-  - `friends-2026` (admin gán tay cho bạn bè): 50 GB, file tối đa 50 GB, các giới hạn khác như trên.
+  - `plus-2026` (admin gán thủ công): 50 GB, file tối đa 50 GB, các giới hạn khác như trên.
   Các con số này chỉnh được trong admin trước khi có user.
-- Admin quản lý plan qua Django admin. Sau này khi thương mại hóa, gói trả phí cũng là một plan.
+- Admin quản lý plan qua Django admin.
 
 ### `drive_node`
 | Cột | Kiểu | Ghi chú |

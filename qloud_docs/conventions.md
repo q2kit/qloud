@@ -45,103 +45,53 @@
 - Endpoint danh sách phải có test kiểm tra số lượng query (`django_assert_max_num_queries`).
 
 ## Git và CI
+
+> Quy tắc đặt tên (type, scope, branch, tiêu đề PR) chỉ định nghĩa ở `scripts/conventions.py`, dùng chung cho git hooks và CI.
+> Muốn thêm scope thì sửa file đó và danh sách dưới đây cùng lúc.
+
 ### Branch
-> Tên branch và việc chặn push lên `master` được hook `pre-push` kiểm tra (`scripts/hooks/pre_push_refs.py`). Quy tắc nằm ở `scripts/conventions.py`.
-
-- `master` là nhánh chính, được bảo vệ (branch protection): **không commit hay push thẳng**, chỉ nhận thay đổi qua PR và squash merge.
-- **Tên branch:** `<type>/<task-id>-<slug>`
-  - `type`: dùng chung danh sách với commit — `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `chore`, `ci`, `build`.
-  - `task-id`: ID trong ROADMAP, ví dụ `M2-04`. Việc không thuộc task nào thì bỏ phần này.
-  - `slug`: tiếng Anh, kebab-case, chỉ gồm `a-z`, `0-9` và `-`, tối đa 40 ký tự.
-  - Ví dụ: `feat/M2-04-upload-session`, `fix/M2-04-quota-race`, `chore/M0-04-dev-compose`, `docs/commit-pr-rules`.
-- **Một branch cho một task và một PR.** Không dùng lại branch đã merge; việc mới thì tạo branch mới.
-- **Tạo branch từ `master` mới nhất:** `git switch master && git pull --ff-only && git switch -c <branch>`.
-- **Branch nối tiếp (stacked):** chỉ dùng khi task mới cần code của một PR chưa merge.
-  - Tạo branch từ branch của PR kia, và mở PR với `--base <branch-kia>`. Đầu body PR ghi rõ là phụ thuộc PR nào.
-  - Sau khi PR kia merge: `git rebase --onto origin/master <commit-cuối-của-branch-kia>`, rồi `gh pr edit <n> --base master`.
-- **Kiểm tra base branch** (`master`, hoặc branch cha nếu là branch nối tiếp) vào hai thời điểm, và **chỉ rebase khi base có commit mới** (branch chưa chứa `origin/<base>`):
-  1. **Trước khi bắt đầu làm task**, kể cả khi tiếp tục một branch đã có từ phiên trước.
-  2. **Trước khi push hoặc tạo PR.**
-
-  Lệnh: `git fetch origin && git merge-base --is-ancestor origin/<base> HEAD || git rebase origin/<base>`
-  (`merge-base --is-ancestor` trả về thành công nghĩa là branch đã chứa base mới nhất → không cần rebase.)
-  Nếu có rebase: giải quyết conflict (nếu có), chạy lại lint và test, rồi mới push. Base không đổi thì không rebase.
-  **Không** merge base branch vào branch làm việc.
-- Khi PR báo conflict trên GitHub: agent tự rebase và giải quyết conflict, không cần chờ.
-  Conflict ở Nhật ký ROADMAP thì giữ dòng của cả hai bên, dòng mới hơn ở trên.
-- **Force push:** chỉ được làm trên branch làm việc của chính mình, sau khi rebase, và luôn dùng `--force-with-lease`. **Cấm** force push lên `master` hoặc lên branch của người khác.
-- **Việc kéo dài nhiều phiên:** push branch sớm và mở PR ở dạng nháp (`gh pr create --draft`), để tiến độ hiện trên GitHub.
-  Khi xong thì chuyển sang chờ review bằng `gh pr ready`.
-- **Sau khi merge:** xóa branch trên remote (`gh pr merge --squash --delete-branch`, hoặc GitHub tự xóa), xóa branch local, và chạy `git fetch --prune`.
-- Không để branch không có PR tồn tại quá một phiên làm việc; bỏ việc thì xóa branch đó.
+- `master` được bảo vệ: chỉ nhận thay đổi qua PR, squash merge, khi CI xanh. **Không** commit hay push thẳng.
+- **Tên:** `<type>/<task-id>-<slug>`; việc không thuộc task nào thì bỏ `<task-id>`. `slug` tiếng Anh, kebab-case, tối đa 40 ký tự.
+  Ví dụ: `feat/M2-04-upload-session`, `docs/commit-pr-rules`.
+- Một branch cho một task và một PR, tạo từ `master` mới nhất. Không dùng lại branch đã merge.
+- **Chỉ rebase khi base có commit mới**, kiểm tra trước khi bắt đầu làm và trước khi push/tạo PR:
+  `git fetch origin && git merge-base --is-ancestor origin/<base> HEAD || git rebase origin/<base>`.
+  Có rebase thì chạy lại lint và test rồi mới push. **Không** merge base vào branch làm việc. PR báo conflict thì tự rebase và giải quyết.
+- **Force push:** chỉ trên branch của chính mình, sau khi rebase, luôn dùng `--force-with-lease`. Cấm với `master` và branch của người khác.
+- **Branch nối tiếp (stacked)** chỉ khi task mới cần code của PR chưa merge: tạo từ branch kia, `gh pr create --base <branch-kia>`, ghi rõ ở đầu body.
+  PR kia merge xong thì `git rebase --onto origin/master <commit-cuối-của-branch-kia>` và `gh pr edit <n> --base master`.
+- Việc kéo dài nhiều phiên: push sớm, mở PR nháp (`--draft`), xong thì `gh pr ready`. Sau khi merge: xóa branch local và `git fetch --prune`.
 
 ### Commit message
-> Được hook `commit-msg` kiểm tra (`scripts/hooks/commit_msg.py`). Danh sách `type` và `scope` **chỉ được định nghĩa ở `scripts/conventions.py`** (dùng chung cho hook và CI); muốn thêm scope thì sửa file đó và bảng dưới đây cùng lúc.
+[Conventional Commits](https://www.conventionalcommits.org/), tiếng Anh: `<type>(<scope>): <subject>`, rồi body, rồi footer.
 
-Theo [Conventional Commits](https://www.conventionalcommits.org/), **tiếng Anh**:
-
-```
-<type>(<scope>): <subject>
-
-<body — không bắt buộc>
-
-<footer>
-```
-
-- **type:** `feat` (tính năng), `fix` (sửa bug), `docs`, `test`, `refactor` (không đổi hành vi), `perf`, `chore` (cấu hình, repo, dev tooling), `ci`, `build` (Docker, dependency).
-- **scope** (bắt buộc), chọn đúng nơi thay đổi:
-  - BE: tên Django app — `accounts`, `drive`, `uploads`, `sharing`, `trash`, `search`, `storage`, `core`.
-  - FE: `fe` hoặc `fe-<feature>` — ví dụ `fe-upload`, `fe-ui`, `fe-i18n`.
-  - Khác: `api` (OpenAPI/client), `dev` (môi trường dev), `env`, `ci`, `deploy`, `deps`, `repo`, `docs`, `roadmap`, `adr`.
-- **subject:** câu mệnh lệnh ("add", không phải "added"/"adds"), viết thường chữ đầu, không có dấu chấm cuối, tối đa 72 ký tự cho cả dòng đầu.
-- **body:** giải thích *tại sao* và các điểm không hiển nhiên; xuống dòng ở 72 ký tự. Không liệt kê lại diff.
-- **footer:**
-  - `Refs #<n>` để liên kết issue. Không dùng `Closes` trong commit — việc đóng issue do PR làm.
-  - Thay đổi phá vỡ tương thích: `BREAKING CHANGE: <mô tả>` (và thêm `!` sau scope: `feat(api)!: ...`).
-  - Commit do AI agent tạo: dòng cuối là trailer `Co-Authored-By: <tên model> <noreply@anthropic.com>`.
-- Mỗi commit là **một thay đổi logic**, build/test vẫn chạy được. Không trộn format lại code với thay đổi logic.
-
-Ví dụ:
-```
-feat(uploads): reserve quota when creating an upload session
-
-Reservation happens under SELECT FOR UPDATE on the owner row so two
-concurrent sessions cannot both pass the quota check.
-
-Refs #20
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-```
+- **type:** `feat`, `fix`, `docs`, `test`, `refactor` (không đổi hành vi), `perf`, `chore` (cấu hình, tooling), `ci`, `build` (Docker, dependency).
+- **scope** (bắt buộc): BE là tên Django app (`accounts`, `drive`, `uploads`, `sharing`, `trash`, `search`, `storage`, `core`);
+  FE là `fe` hoặc `fe-<feature>`; khác: `api`, `dev`, `env`, `ci`, `deploy`, `deps`, `repo`, `docs`, `roadmap`, `adr`.
+- **subject:** mệnh lệnh ("add", không phải "added"), chữ đầu viết thường, không dấu chấm cuối; cả dòng đầu tối đa 72 ký tự.
+- **body:** giải thích *tại sao*, xuống dòng ở 72 ký tự. **footer:** `Refs #<n>` (không dùng `Closes` trong commit);
+  thay đổi phá vỡ tương thích thì `BREAKING CHANGE: ...` và `!` sau scope; commit do AI agent tạo thì dòng cuối là `Co-Authored-By: <model> <noreply@anthropic.com>`.
+- Mỗi commit là một thay đổi logic, build và test vẫn chạy. Không trộn format lại code với thay đổi logic.
 
 ### Pull Request
-- **Tiêu đề:** cùng định dạng với commit, kèm task ID ở cuối: `<type>(<scope>): <subject> [<task-id>]`,
-  ví dụ `feat(uploads): add multipart upload session API [M2-04]`.
-  Vì merge kiểu squash, tiêu đề PR sẽ thành commit trên `master`, nên phải đúng Conventional Commits. Viết tiếng Anh.
-  Tối đa **65 ký tự**: GitHub thêm ` (#123)` vào commit squash, dòng đầu vẫn phải ≤ 72. Task ID viết đúng dạng ` [M2-04]` ở cuối.
-- **Body:** **tiếng Việt**, theo `.github/pull_request_template.md`. Bắt buộc:
-  - **Task:** task ID và `Closes #<n>` (mỗi issue một dòng `Closes`). PR không thuộc task nào thì ghi rõ lý do.
-  - **Thay đổi chính:** gạch đầu dòng, nói *cái gì* và *tại sao*, không dán diff.
-  - **Cách kiểm tra:** lệnh đã thực sự chạy và kết quả (ví dụ `pytest: 42 passed`). Không ghi là đã test nếu chưa chạy.
-    Điều gì chưa kiểm tra được thì ghi rõ.
-  - **Lưu ý cho reviewer:** migration mới, biến môi trường mới, dependency mới (kèm giấy phép), thao tác thủ công cần thực hiện (tạo secret, cấu hình…), rủi ro.
-    Không có thì ghi "Không có".
-  - **Ảnh chụp màn hình** (light và dark) khi có thay đổi UI.
-  - **Checklist:** chỉ tick mục đã làm thật.
+- **Tiêu đề** (tiếng Anh, thành commit squash): `<type>(<scope>): <subject> [<task-id>]`, tối đa **65 ký tự** (GitHub thêm ` (#123)`).
+  Ví dụ `feat(uploads): add multipart upload session API [M2-04]`.
+- **Body** (tiếng Việt) theo `.github/pull_request_template.md`:
+  - `Closes #<n>` cho mỗi issue; PR không thuộc task nào thì ghi rõ.
+  - Thay đổi chính: *cái gì* và *tại sao*, không dán diff.
+  - Cách kiểm tra: lệnh **đã thực sự chạy** và kết quả; điều chưa kiểm tra được thì ghi rõ.
+  - Lưu ý cho reviewer: migration, biến môi trường, dependency mới (kèm giấy phép), thao tác thủ công, rủi ro.
+  - Ảnh chụp light và dark khi đổi UI.
   - PR do AI agent tạo: dòng cuối là `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
-- PR **nối tiếp** (stacked, base không phải `master`): ghi rõ ở đầu body là phụ thuộc PR nào. Sau khi PR kia merge thì rebase lên `master` và đổi base.
-- Một PR một task. PR quá 600 dòng thay đổi (không tính lockfile và code sinh tự động) thì cân nhắc chia nhỏ.
-- **CI** (`.github/workflows/ci.yml`) chạy trên mỗi PR và mỗi lần push lên `master`:
-  - **Backend** (khi `qloud_backend/` hoặc file dùng chung thay đổi): ruff format/check, mypy, kiểm tra migration còn thiếu, pytest + coverage (Postgres, Redis qua `docker compose`; LocalStack thêm ở M2-03), kiểm tra giấy phép.
-  - **Frontend** (khi `qloud_frontend/` hoặc file dùng chung thay đổi): lint, format, typecheck, test + coverage, build, kiểm tra giấy phép.
-  - **E2E** (khi BE hoặc FE thay đổi): Playwright chạy full-stack thật — Django :8001 (Postgres, Redis) + bản build FE qua `vite preview` :4173 có proxy `/api`. Fail thì report và trace được lưu làm artifact 7 ngày.
-  - **Secret scan:** gitleaks trên các commit của PR.
-  - **PR conventions** (workflow riêng `.github/workflows/pr.yml`, chạy lại cả khi sửa tiêu đề/body; `scripts/check_pr.py`): tiêu đề đúng định dạng và độ dài; có `[task-id]` thì body phải có `Closes #n`; tên branch đúng quy ước (trừ branch của Dependabot); cảnh báo nếu sửa code mà không sửa ROADMAP.
-  - **CI OK:** job tổng hợp của `ci.yml`. *Required status checks* đã bật cho `master` (2026-10-10): **`CI OK`** và **`PR conventions`**, chế độ *strict* (PR phải chứa commit mới nhất của `master` mới merge được).
-- **Dependabot** (`.github/dependabot.yml`): mỗi tuần mở PR nâng phiên bản cho uv, npm, GitHub Actions và image Docker Compose, tiêu đề `chore(deps): Bump ...` (kiểm tra PR bỏ qua chữ hoa đầu subject và độ dài với PR của Dependabot). `@types/node` chỉ nâng trong cùng major với Node đang dùng. Bản minor/patch được gộp; bản major là PR riêng và phải hỏi trước khi merge.
-- **Git hooks** (`lefthook.yml`), cài bằng `lefthook install`:
-  - `pre-commit`: ruff (BE), prettier + eslint (FE) trên file đã stage, tự sửa và stage lại; gitleaks trên phần đã stage.
-  - `commit-msg`: Conventional Commits.
-  - `pre-push`: tên branch, chặn push lên `master`; cảnh báo nếu base có commit mới; mypy + pytest (BE, pytest chỉ chạy khi Postgres/Redis đang chạy) hoặc typecheck + test (FE) cho phía có thay đổi.
-  - Script quy ước (`scripts/`) có test riêng (`python3 -m unittest discover -s scripts/tests`), chạy trong job Backend.
-  - Action bên thứ ba được ghim theo commit SHA (kèm comment phiên bản).
-- Merge vào `master` (squash) chỉ khi CI xanh và PR đã được duyệt.
-- Thao tác GitHub (issue, PR, review, CI) dùng `gh` CLI. Quy trình chi tiết ở mục 3 của `AGENTS.md`.
+- Một PR một task. Quá 600 dòng thay đổi (không tính lockfile và code sinh tự động) thì cân nhắc chia nhỏ.
+
+### Kiểm tra tự động
+- **Required checks** của `master` (strict): `CI OK` (`.github/workflows/ci.yml`) và `PR conventions` (`pr.yml`).
+  - `ci.yml` chỉ chạy phía có thay đổi: Backend (ruff, mypy, migration còn thiếu, `check --deploy`, pytest, giấy phép, test của `scripts/`),
+    Frontend (lint, format, typecheck, test, build, giấy phép, type API khớp `openapi.yaml`), E2E (Playwright trên stack thật), gitleaks.
+  - `pr.yml`: tiêu đề, `Closes #n` khi có task ID, tên branch (trừ branch của Dependabot); cảnh báo khi sửa code mà không sửa ROADMAP.
+- **Git hooks** (`lefthook.yml`): pre-commit format/lint file đã stage + gitleaks; commit-msg; pre-push kiểm tra tên branch, chặn push `master`,
+  chạy typecheck và test phía có thay đổi. Không dùng `--no-verify` khi chưa được cho phép.
+- **Dependabot** (`.github/dependabot.yml`) mở PR `chore(deps): Bump ...` hằng tuần (kiểm tra PR bỏ qua chữ hoa và độ dài tiêu đề của bot);
+  bản major phải hỏi trước khi merge; `@types/node` giữ cùng major với Node.
+- Action bên thứ ba ghim theo commit SHA (kèm comment phiên bản).
