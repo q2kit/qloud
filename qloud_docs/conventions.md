@@ -125,8 +125,8 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
   - **Backend** (khi `qloud_backend/` hoặc file dùng chung thay đổi): ruff format/check, mypy, kiểm tra migration còn thiếu, pytest + coverage (Postgres, Redis qua `docker compose`; LocalStack thêm ở M2-03), kiểm tra giấy phép.
   - **Frontend** (khi `qloud_frontend/` hoặc file dùng chung thay đổi): lint, format, typecheck, test + coverage, build, kiểm tra giấy phép.
   - **Secret scan:** gitleaks trên các commit của PR.
-  - **PR conventions** (`scripts/check_pr.py`): tiêu đề đúng định dạng; có `[task-id]` thì body phải có `Closes #n`; cảnh báo nếu sửa code mà không sửa ROADMAP.
-  - **CI OK:** job tổng hợp, là job duy nhất cần đặt làm *required status check*.
+  - **PR conventions** (workflow riêng `.github/workflows/pr.yml`, chạy lại cả khi sửa tiêu đề/body; `scripts/check_pr.py`): tiêu đề đúng định dạng; có `[task-id]` thì body phải có `Closes #n`; cảnh báo nếu sửa code mà không sửa ROADMAP.
+  - **CI OK:** job tổng hợp của `ci.yml`. *Required status checks* cần đặt: **`CI OK`** và **`PR conventions`**.
   - Kiểm tra giấy phép dùng `scripts/check_licenses.py`; LGPL chỉ được phép khi có trong `LGPL_ALLOWED` kèm lý do.
   - Action bên thứ ba được ghim theo commit SHA (kèm comment phiên bản).
 - Merge vào `master` (squash) chỉ khi CI xanh và PR đã được duyệt.

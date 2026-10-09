@@ -1,5 +1,5 @@
 # CI is the enforcement layer (architecture.md › Công cụ cưỡng chế quy tắc).
-# `ci-ok` is the single job to mark as a required status check.
+# Required status checks: `CI OK` (this file) and `PR conventions` (pr.yml).
 name: CI
 
 on:
@@ -116,26 +116,10 @@ jobs:
           docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.30.1 \
             git /repo --redact --no-banner "$range"
 
-  pr-checks:
-    name: PR conventions
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-      - name: Title, body and ROADMAP
-        env:
-          # Passed via env, never interpolated into the script, to avoid injection.
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_BODY: ${{ github.event.pull_request.body }}
-          BASE: ${{ github.event.pull_request.base.sha }}
-        run: git diff --name-only "$BASE" HEAD | python3 scripts/check_pr.py
-
   ci-ok:
     name: CI OK
     if: always()
-    needs: [changes, backend, frontend, gitleaks, pr-checks]
+    needs: [changes, backend, frontend, gitleaks]
     runs-on: ubuntu-latest
     steps:
       - name: All required jobs passed or were skipped
