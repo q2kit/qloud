@@ -34,7 +34,7 @@
 | M0-09 | GitHub Actions: lint, typecheck, test, build BE/FE; kiểm tra giấy phép; gitleaks; kiểm tra tiêu đề/body PR và cảnh báo thiếu cập nhật ROADMAP; sau đó bật required checks | [#7](https://github.com/q2kit/qloud/issues/7) | ✅ |
 | M0-10 | Khung Playwright E2E và đưa vào CI | [#8](https://github.com/q2kit/qloud/issues/8) | ⬜ |
 | M0-11 | Cập nhật mục "Lệnh thường dùng" trong AGENTS.md | [#9](https://github.com/q2kit/qloud/issues/9) | ⬜ |
-| M0-12 | Git hooks bằng lefthook: format/lint file đã stage, gitleaks, kiểm tra commit message, tên branch, chặn push `master`, typecheck/test phía có thay đổi | [#61](https://github.com/q2kit/qloud/issues/61) | 🟦 |
+| M0-12 | Git hooks bằng lefthook: format/lint file đã stage, gitleaks, kiểm tra commit message, tên branch, chặn push `master`, typecheck/test phía có thay đổi | [#61](https://github.com/q2kit/qloud/issues/61) | ✅ |
 
 ## M1 — Xác thực ([auth.md](features/auth.md))
 | ID | Task | Issue | Trạng thái |
