@@ -1,11 +1,15 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { describe, expect, it } from 'vitest';
 
+import { setMediaQuery } from '@/test/match-media';
+
 import { ThemeProvider } from './theme-provider';
 import { appRoutes } from './router';
+
+const DESKTOP_PANEL_QUERY = '(min-width: 1280px)';
 
 function renderDrive(path = '/'): void {
   const router = createMemoryRouter(appRoutes, { initialEntries: [path] });
@@ -56,6 +60,55 @@ describe('application layout', () => {
       screen.queryByRole('dialog', { name: /Chi tiết|Details/ }),
     ).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();
+  });
+
+  it('shows details in a side panel on wide screens', async () => {
+    setMediaQuery(DESKTOP_PANEL_QUERY, true);
+    const user = userEvent.setup();
+    renderDrive();
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /Mở bảng chi tiết|Open details panel/,
+      }),
+    );
+    const panel = screen.getByRole('complementary', {
+      name: /Chi tiết|Details/,
+    });
+    expect(
+      within(panel).getByRole('heading', { name: /Chi tiết|Details/ }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    await user.click(
+      within(panel).getByRole('button', {
+        name: /Đóng bảng chi tiết|Close details panel/,
+      }),
+    );
+    expect(
+      screen.queryByRole('complementary', { name: /Chi tiết|Details/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('moves open details into the bottom sheet when the screen narrows', async () => {
+    setMediaQuery(DESKTOP_PANEL_QUERY, true);
+    const user = userEvent.setup();
+    renderDrive();
+    await user.keyboard('i');
+    expect(
+      screen.getByRole('complementary', { name: /Chi tiết|Details/ }),
+    ).toBeInTheDocument();
+
+    act(() => {
+      setMediaQuery(DESKTOP_PANEL_QUERY, false);
+    });
+
+    expect(
+      screen.queryByRole('complementary', { name: /Chi tiết|Details/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('dialog', { name: /Chi tiết|Details/ }),
+    ).toBeInTheDocument();
   });
 
   it('opens and closes the mobile navigation drawer accessibly', async () => {
