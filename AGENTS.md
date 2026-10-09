@@ -103,7 +103,7 @@ sửa bug, cập nhật docs cho khớp với code, tạo branch, commit, push b
 | Tác vụ nền | Celery + Redis |
 | Database | PostgreSQL 18 |
 | Lưu file | Object storage tương thích S3. Dùng AWS S3 hay Cloudflare R2 là do `.env` quyết định; code không phụ thuộc nhà cung cấp. Dev và CI: LocalStack (cần auth token) |
-| Frontend | pnpm, React 19, TypeScript 6 (7 chưa tương thích typescript-eslint), Vite 8, React Router 8, TanStack Query 5, Tailwind CSS 4, shadcn/ui (Radix), i18next |
+| Frontend | pnpm, React 19, TypeScript 6 (7 chưa tương thích typescript-eslint — #56), Vite 8, React Router 8, TanStack Query 5, Tailwind CSS 4, shadcn/ui (Radix), i18next |
 | Test | pytest (BE), Vitest + Testing Library (FE), Playwright (E2E) |
 | Email | SMTP riêng (cấu hình qua `.env`); dev dùng Mailpit |
 | Hạ tầng | Docker Compose, VPS, GitHub Actions |

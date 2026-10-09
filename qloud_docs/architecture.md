@@ -41,7 +41,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 | Redis | 8 |
 | Node.js | bản LTS hiện hành |
 | React | 19.3.0 |
-| TypeScript | 6.0.3 (bản 7.0.2 chưa tương thích với typescript-eslint 8.71.1) |
+| TypeScript | 6.0.3 (bản 7.0.2 chưa tương thích với typescript-eslint 8.71.1; theo dõi việc nâng cấp ở [#56](https://github.com/q2kit/qloud/issues/56)) |
 | Vite | 8.3.4 |
 | React Router | 8.4.0 |
 | TanStack Query | 5.104.1 |
