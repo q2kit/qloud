@@ -25,7 +25,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
 | M1-01 | Model User và Plan (seed `free-2026`, `plus-2026`), khóa user, `get_limits()`, tạo folder gốc và gán plan khi đăng ký, Django admin cho plan/user | [#10](https://github.com/q2kit/qloud/issues/10) | ✅ [PR #82](https://github.com/q2kit/qloud/pull/82) |
-| M1-02 | allauth headless: đăng ký, đăng nhập, đăng xuất, xác thực email, quên mật khẩu | [#11](https://github.com/q2kit/qloud/issues/11) | ⬜ |
+| M1-02 | allauth headless: đăng ký, đăng nhập, đăng xuất, xác thực email, quên mật khẩu | [#11](https://github.com/q2kit/qloud/issues/11) | 🟦 |
 | M1-03 | OAuth Google và GitHub, liên kết tài khoản theo email đã xác thực | [#12](https://github.com/q2kit/qloud/issues/12) | ⬜ |
 | M1-04 | Rate limit và Cloudflare Turnstile cho auth; gửi email qua SMTP bằng Celery, template email `vi`/`en` | [#13](https://github.com/q2kit/qloud/issues/13) | ⬜ |
 | M1-05 | FE: màn hình S-01 đến S-04, bảo vệ route | [#14](https://github.com/q2kit/qloud/issues/14) | ⬜ |

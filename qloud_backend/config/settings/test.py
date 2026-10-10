@@ -24,3 +24,7 @@ MAILERS = {"default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend
 
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
+
+# Auth rate limits are configured and tested in M1-04; keep tests independent of
+# counters left in the shared Redis cache.
+ACCOUNT_RATE_LIMITS = False

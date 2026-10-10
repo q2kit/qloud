@@ -32,7 +32,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 |---|---|---|
 | Python | 3.14 | |
 | Django / DRF / drf-spectacular | 6.1 / 3.18 / 0.30 | |
-| django-allauth | 65 | |
+| django-allauth | 65 | Extra `headless` (pyjwt, cryptography) và `headless-spec` (PyYAML) |
 | Celery | 5.6 | |
 | psycopg | 3.3 | |
 | mypy | 2.3 | djangorestframework-stubs 3.18 yêu cầu `mypy<2.4` |
@@ -84,10 +84,12 @@ mọi selector của node đều phải đi qua đây.
 
 M1-01: `accounts.services` xử lý tạo user/Drive nguyên tử, đổi plan mặc định và khóa user;
 `accounts.selectors.get_limits()` cung cấp giới hạn hiện tại. `drive.Node` mới có nền folder gốc, được hoàn thiện ở M2-01.
-Auth backend `accounts.backends.AccountBackend` kế thừa ModelBackend và chặn user bị khóa, gồm session đang có.
+Auth backend `accounts.backends.AccountBackend` kế thừa backend email của allauth (vốn kế thừa ModelBackend) và chặn user bị khóa, gồm session đang có.
 Hash session (`get_session_auth_hash` và bản fallback cho `SECRET_KEY_FALLBACKS`) gồm mật khẩu và `session_version`; khóa user tăng bộ đếm để thu hồi session độc lập session engine, kể cả khi mở khóa sau đó.
 Không quét/giải mã toàn bộ session. Session dùng ModelBackend/hash cũ trước M1-01 phải đăng nhập lại sau nâng cấp.
-Allauth sẽ tích hợp cùng quy tắc này ở M1-02. Action Django admin dùng gettext, catalog `vi` và `en` nằm trong `accounts/locale`;
+M1-02: allauth headless gắn ở `/api/auth/` (`config/urls.py`); `accounts.adapter.AccountAdapter` và `accounts.auth_views` tùy biến
+đăng ký/đăng nhập (xem auth.md). allauth không có type hint: `pyproject.toml` bỏ qua import của `allauth.*` và cho phép kế thừa trong ba module tích hợp.
+Action Django admin dùng gettext, catalog `vi` và `en` nằm trong `accounts/locale`;
 commit cả `.po` và `.mo` để runtime/CI không phụ thuộc gettext CLI. Khi sửa bản dịch, chạy
 `cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run --frozen python manage.py compilemessages -l vi -l en --ignore .venv`
 (cần `msgfmt` trên máy dev).
