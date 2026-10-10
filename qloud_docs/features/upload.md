@@ -55,6 +55,30 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). Model `Blob`/`FileV
   - 400 `upload_incomplete` (thiếu part hoặc sai kích thước; session vẫn còn), `invalid_part`;
   - 503 `storage_unavailable`.
 
+## Đã làm ở M2-08a ([#105](https://github.com/q2kit/qloud/issues/105))
+- **Lối vào:**
+  - menu "Tạo mới › Tải tệp lên", hoặc nút "Tải tệp lên" ở trạng thái rỗng;
+  - kéo file từ máy vào trang Drive (upload vào folder đang mở; trang hiện vùng thả "Thả để tải lên vào …") hoặc thả lên một folder trong danh sách (upload vào folder đó);
+  - kéo cả folder: chưa hỗ trợ ở M2-08a, các file lẻ vẫn được upload và trang báo một dòng.
+- **Engine** (`qloud_frontend/src/features/upload/engine.ts`, ngoài React; store `zustand` cho khay):
+  - **song song:** tối đa **4 part đang chạy trên toàn hàng đợi**, file lấy part theo thứ tự; tạo trước tối đa 2 session để file kế tiếp sẵn sàng;
+  - **URL part:** xin theo lô 20; các part bắt đầu cùng lúc dùng chung một request; URL được coi là hết hạn sau 55 phút;
+  - **tiến độ:** PUT bằng `XMLHttpRequest` để có tiến độ; tốc độ tính trên 5 giây gần nhất;
+  - **lỗi part:** thử lại sau 1, 2, 4, 8, 16 giây (5 lần), rồi file chuyển sang lỗi; storage trả 403 (URL hết hạn) thì xin URL mới và gửi lại ngay;
+  - **chưa hoàn tất khi còn part chưa xong:** part đang chờ thử lại vẫn tính là chưa xong, nên file chỉ hoàn tất khi đủ part;
+  - **mất mạng:** cả hàng đợi tạm dừng, có mạng lại (`online`) thì tự tiếp tục;
+  - **tạm dừng / tiếp tục / hủy:** tạm dừng hủy các request đang chạy và giữ session; tiếp tục đọc part đã có từ server (`GET /uploads/{id}`) và chỉ gửi phần thiếu; hủy gọi `DELETE /uploads/{id}`;
+  - **file 0 byte** hoàn tất ngay, không có part.
+- **Trùng tên:** hộp thoại "Tên đã được dùng" với "Giữ cả hai" (`on_conflict=rename`) hoặc "Bỏ qua"; ô "Áp dụng cho N tệp còn lại" trả lời luôn các file sau trong hàng đợi; Esc nghĩa là "Bỏ qua".
+- **Lỗi cần người dùng xử lý** (`quota_exceeded`, `file_too_large`, `email_not_verified`…) không tự thử lại, nhưng vẫn bấm "Thử lại" được (ví dụ sau khi đã giải phóng dung lượng). `email_not_verified` có nút "Gửi lại email xác thực" (allauth `PUT /account/email`).
+- **Khay upload:**
+  - tiêu đề "Đang tải lên 2/5" kèm tốc độ và thời gian còn lại; mất mạng thì báo;
+  - từng file có thanh tiến độ, trạng thái và nút (tạm dừng, tiếp tục, thử lại, hủy);
+  - hành động chung: tạm dừng/tiếp tục tất cả, thử lại các file lỗi, thu gọn, đóng khi đã xong hết;
+  - có `aria-live`.
+- **Rời trang** khi còn upload thì trình duyệt hỏi lại (`beforeunload`). Upload xong thì danh sách folder đích tự làm mới.
+- **E2E:** bucket `qloud-e2e` (CORS cho `http://localhost:4173`) do `infra/localstack/init-s3.sh` tạo; healthcheck của LocalStack chờ CORS của bucket này.
+
 ## Upload cả folder
 FE đọc cấu trúc thư mục (qua `webkitdirectory` hoặc DataTransfer items), gọi API để tạo các folder theo thứ tự từ trên xuống, rồi upload file vào đúng folder.
 

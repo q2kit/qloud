@@ -48,8 +48,8 @@ services:
       - localstack-data:/var/lib/localstack
       - ./infra/localstack/init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh:ro
     healthcheck:
-      # Chỉ healthy khi init script đã tạo xong bucket
-      test: ["CMD-SHELL", "awslocal s3api head-bucket --bucket $${S3_BUCKET}"]
+      # Chỉ healthy khi init script đã xong: bucket dev, rồi CORS của bucket E2E (bước cuối)
+      test: ["CMD-SHELL", "awslocal s3api head-bucket --bucket $${S3_BUCKET} && awslocal s3api get-bucket-cors --bucket qloud-e2e"]
       interval: 5s
       timeout: 5s
       retries: 30

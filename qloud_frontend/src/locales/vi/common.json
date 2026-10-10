@@ -55,7 +55,7 @@
     },
     "empty": {
       "title": "Thư mục này đang trống",
-      "description": "Tạo thư mục để sắp xếp tệp của bạn."
+      "description": "Kéo tệp từ máy vào đây để tải lên, hoặc tạo thư mục để sắp xếp."
     },
     "actions": {
       "upload": "Tải tệp lên",
@@ -271,6 +271,63 @@
       "disconnect": "Gỡ liên kết",
       "connectFailed": "Không liên kết được tài khoản. Có thể tài khoản này đã liên kết với người dùng khác.",
       "loadFailed": "Không tải được danh sách tài khoản liên kết."
+    }
+  },
+  "upload": {
+    "dropHere": "Thả để tải lên vào \"{{folder}}\"",
+    "tray": {
+      "label": "Tải lên",
+      "uploading": "Đang tải lên {{done}}/{{total}}",
+      "finished_other": "Đã tải lên {{count}} tệp",
+      "offline": "Mất kết nối — sẽ tự tiếp tục khi có mạng",
+      "speed": "{{speed}}/s · còn khoảng {{time}}",
+      "expand": "Mở rộng khay tải lên",
+      "collapse": "Thu gọn khay tải lên",
+      "close": "Đóng khay tải lên"
+    },
+    "actions": {
+      "pauseAll": "Tạm dừng tất cả",
+      "resumeAll": "Tiếp tục tất cả",
+      "retryFailed_other": "Thử lại {{count}} tệp lỗi",
+      "pause": "Tạm dừng {{name}}",
+      "resume": "Tiếp tục {{name}}",
+      "retry": "Thử lại {{name}}",
+      "cancel": "Hủy {{name}}"
+    },
+    "status": {
+      "queued": "Đang chờ",
+      "conflict": "Tên đã có trong thư mục",
+      "uploading": "{{loaded}} / {{size}}",
+      "completing": "Đang hoàn tất…",
+      "paused": "Đã tạm dừng · {{loaded}} / {{size}}",
+      "cancelled": "Đã hủy",
+      "skipped": "Đã bỏ qua",
+      "done": "Xong"
+    },
+    "errors": {
+      "upload_failed": "Không tải lên được. Hãy thử lại.",
+      "quota_exceeded": "Không đủ dung lượng cho tệp này.",
+      "file_too_large": "Tệp lớn hơn mức gói của bạn cho phép.",
+      "email_not_verified": "Hãy xác thực email trước khi tải tệp lên.",
+      "invalid_target": "Chỉ tải lên được vào một thư mục.",
+      "not_found": "Thư mục đích không còn tồn tại hoặc bạn không có quyền.",
+      "upload_expired": "Lượt tải lên đã hết hạn. Hãy chọn lại tệp.",
+      "upload_closed": "Lượt tải lên đã kết thúc.",
+      "target_unavailable": "Thư mục đích không còn nữa.",
+      "storage_unavailable": "Kho lưu trữ đang tạm lỗi. Hãy thử lại sau ít phút.",
+      "folders_not_supported": "Chưa hỗ trợ kéo thả cả thư mục; các tệp lẻ vẫn được tải lên."
+    },
+    "verify": {
+      "resend": "Gửi lại email xác thực",
+      "sent": "Đã gửi tới {{email}}.",
+      "failed": "Gửi không được — thử lại"
+    },
+    "conflict": {
+      "title": "Tên đã được dùng",
+      "description": "Thư mục này đã có một mục tên \"{{name}}\".",
+      "forAll_other": "Áp dụng cho {{count}} tệp còn lại",
+      "skip": "Bỏ qua",
+      "keepBoth": "Giữ cả hai"
     }
   }
 }

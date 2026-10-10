@@ -10,6 +10,10 @@ in emails lead to the frontend it serves.
 from .test import *  # noqa: I001
 from .base import _OAUTH_PROVIDERS, env
 
+# Created with CORS for the `vite preview` origin by infra/localstack/init-s3.sh, so
+# the browser can PUT parts straight to it (the pytest bucket has no CORS).
+S3_BUCKET = env("E2E_S3_BUCKET", default="qloud-e2e")
+
 # Celery stays eager, so the email reaches Mailpit within the request.
 MAILERS = {
     "default": {

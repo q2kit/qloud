@@ -1,4 +1,5 @@
-import { FolderPlus, Info, Menu, Plus, Search } from 'lucide-react';
+import { FileUp, FolderPlus, Info, Menu, Plus, Search } from 'lucide-react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { AccountMenu } from '@/features/auth/components/account-menu';
 import { useDriveStore } from '@/features/drive/store';
+import { useCurrentFolderId } from '@/features/drive/use-current-folder';
+import { useUploader } from '@/features/upload/context';
 import { cn } from '@/lib/utils';
 
 import { LanguageSwitcher } from './language-switcher';
@@ -38,6 +41,10 @@ export function AppHeader({
   const { t } = useTranslation();
   const { titleKey, subtitleKey } = useRouteHandle();
   const setCreatingFolder = useDriveStore((state) => state.setCreatingFolder);
+  const uploader = useUploader();
+  // Outside the Drive this is the root folder (useCurrentFolderId).
+  const folderId = useCurrentFolderId();
+  const fileInput = React.useRef<HTMLInputElement>(null);
   const searchShortcut = t('shell.searchShortcut', {
     modifier: isApplePlatform ? COMMAND_KEY_SYMBOL : t('shell.keys.ctrl'),
   });
@@ -90,7 +97,18 @@ export function AppHeader({
       >
         <Search />
       </Button>
-      {/* TODO(M2-08): Add "Upload files" to this menu. */}
+      <input
+        ref={fileInput}
+        type="file"
+        multiple
+        hidden
+        data-testid="upload-input"
+        onChange={(event) => {
+          const files = [...(event.target.files ?? [])];
+          if (folderId && files.length > 0) uploader.add(files, folderId);
+          event.target.value = ''; // the same file can be picked again
+        }}
+      />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button size="sm" aria-label={t('shell.create')}>
@@ -106,6 +124,15 @@ export function AppHeader({
           >
             <FolderPlus />
             {t('drive.actions.newFolder')}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            disabled={!folderId}
+            onSelect={() => {
+              fileInput.current?.click();
+            }}
+          >
+            <FileUp />
+            {t('drive.actions.upload')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

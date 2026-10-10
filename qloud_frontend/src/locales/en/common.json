@@ -56,7 +56,7 @@
     },
     "empty": {
       "title": "This folder is empty",
-      "description": "Create a folder to organize your files."
+      "description": "Drag files from your computer here to upload them, or create a folder."
     },
     "actions": {
       "upload": "Upload files",
@@ -275,6 +275,66 @@
       "disconnect": "Unlink",
       "connectFailed": "The account could not be linked. It may already belong to another user.",
       "loadFailed": "Linked accounts could not be loaded."
+    }
+  },
+  "upload": {
+    "dropHere": "Drop to upload to \"{{folder}}\"",
+    "tray": {
+      "label": "Uploads",
+      "uploading": "Uploading {{done}}/{{total}}",
+      "finished_one": "Uploaded {{count}} file",
+      "finished_other": "Uploaded {{count}} files",
+      "offline": "Offline — uploads resume when the connection is back",
+      "speed": "{{speed}}/s · about {{time}} left",
+      "expand": "Expand uploads",
+      "collapse": "Collapse uploads",
+      "close": "Close uploads"
+    },
+    "actions": {
+      "pauseAll": "Pause all",
+      "resumeAll": "Resume all",
+      "retryFailed_one": "Retry {{count}} failed file",
+      "retryFailed_other": "Retry {{count}} failed files",
+      "pause": "Pause {{name}}",
+      "resume": "Resume {{name}}",
+      "retry": "Retry {{name}}",
+      "cancel": "Cancel {{name}}"
+    },
+    "status": {
+      "queued": "Waiting",
+      "conflict": "Name already in this folder",
+      "uploading": "{{loaded}} / {{size}}",
+      "completing": "Finishing…",
+      "paused": "Paused · {{loaded}} / {{size}}",
+      "cancelled": "Cancelled",
+      "skipped": "Skipped",
+      "done": "Done"
+    },
+    "errors": {
+      "upload_failed": "Couldn't upload. Try again.",
+      "quota_exceeded": "Not enough storage left for this file.",
+      "file_too_large": "This file is larger than your plan allows.",
+      "email_not_verified": "Verify your email address before uploading.",
+      "invalid_target": "Files can only be uploaded into a folder.",
+      "not_found": "The destination folder no longer exists or isn't yours.",
+      "upload_expired": "This upload expired. Pick the file again.",
+      "upload_closed": "This upload has already ended.",
+      "target_unavailable": "The destination folder is gone.",
+      "storage_unavailable": "Storage is temporarily unavailable. Try again in a few minutes.",
+      "folders_not_supported": "Dropping whole folders isn't supported yet; the files were uploaded."
+    },
+    "verify": {
+      "resend": "Resend the verification email",
+      "sent": "Sent to {{email}}.",
+      "failed": "Couldn't send — try again"
+    },
+    "conflict": {
+      "title": "Name already in use",
+      "description": "This folder already has an item named \"{{name}}\".",
+      "forAll_one": "Do this for the {{count}} remaining file",
+      "forAll_other": "Do this for the {{count}} remaining files",
+      "skip": "Skip",
+      "keepBoth": "Keep both"
     }
   }
 }
