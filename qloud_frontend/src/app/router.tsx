@@ -1,4 +1,4 @@
-import { createBrowserRouter, type RouteObject } from 'react-router';
+import { createBrowserRouter, Navigate, type RouteObject } from 'react-router';
 
 import { RedirectIfAuthenticated, RequireAuth } from '@/features/auth/guards';
 import { LoginPage } from '@/features/auth/pages/login-page';
@@ -6,15 +6,11 @@ import { PasswordResetPage } from '@/features/auth/pages/password-reset-page';
 import { PasswordResetRequestPage } from '@/features/auth/pages/password-reset-request-page';
 import { SignupPage } from '@/features/auth/pages/signup-page';
 import { VerifyEmailPage } from '@/features/auth/pages/verify-email-page';
+import { DrivePage } from '@/features/drive/drive-page';
 import { SettingsPage } from '@/features/settings/settings-page';
 
 import { AppLayout } from './layout';
-import {
-  DrivePage,
-  NotFoundPage,
-  RouteErrorPage,
-  SectionPlaceholderPage,
-} from './pages';
+import { NotFoundPage, RouteErrorPage, SectionPlaceholderPage } from './pages';
 import { PublicLayout } from './public-layout';
 import type { RouteHandle } from './route-handle';
 
@@ -48,13 +44,17 @@ export const appRoutes: RouteObject[] = [
             path: '/',
             Component: AppLayout,
             children: [
+              { index: true, element: <Navigate to="/drive" replace /> },
+              // S-05 (ui-ux.md): the root folder, then any folder by id.
               {
-                index: true,
+                path: 'drive',
                 Component: DrivePage,
-                handle: {
-                  titleKey: 'drive.title',
-                  subtitleKey: 'shell.breadcrumbRoot',
-                } satisfies RouteHandle,
+                handle: { titleKey: 'drive.title' } satisfies RouteHandle,
+              },
+              {
+                path: 'drive/folders/:folderId',
+                Component: DrivePage,
+                handle: { titleKey: 'drive.title' } satisfies RouteHandle,
               },
               sectionPlaceholderRoute('recent'),
               sectionPlaceholderRoute('shared'),

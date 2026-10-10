@@ -1,8 +1,15 @@
-import { Info, Menu, Plus, Search } from 'lucide-react';
+import { FolderPlus, Info, Menu, Plus, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { AccountMenu } from '@/features/auth/components/account-menu';
+import { useDriveStore } from '@/features/drive/store';
 import { cn } from '@/lib/utils';
 
 import { LanguageSwitcher } from './language-switcher';
@@ -30,6 +37,7 @@ export function AppHeader({
 }: AppHeaderProps): React.JSX.Element {
   const { t } = useTranslation();
   const { titleKey, subtitleKey } = useRouteHandle();
+  const setCreatingFolder = useDriveStore((state) => state.setCreatingFolder);
   const searchShortcut = t('shell.searchShortcut', {
     modifier: isApplePlatform ? COMMAND_KEY_SYMBOL : t('shell.keys.ctrl'),
   });
@@ -82,11 +90,25 @@ export function AppHeader({
       >
         <Search />
       </Button>
-      {/* TODO(M2-02, M2-08): Enable when create and upload actions exist. */}
-      <Button size="sm" disabled>
-        <Plus />
-        <span className="hidden sm:inline">{t('shell.create')}</span>
-      </Button>
+      {/* TODO(M2-08): Add "Upload files" to this menu. */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button size="sm" aria-label={t('shell.create')}>
+            <Plus />
+            <span className="hidden sm:inline">{t('shell.create')}</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onSelect={() => {
+              setCreatingFolder(true);
+            }}
+          >
+            <FolderPlus />
+            {t('drive.actions.newFolder')}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <Button
         ref={detailTriggerRef}
         variant="ghost"

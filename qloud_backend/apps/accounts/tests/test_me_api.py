@@ -35,6 +35,7 @@ def test_me_returns_profile_and_preferences(api_client, user):
         "avatar_url": "https://avatars.example/alice.png",
         "locale": "vi",
         "theme": "system",
+        "root_folder_id": str(user.root_folder_id),
     }
 
 

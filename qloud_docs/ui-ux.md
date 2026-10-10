@@ -41,8 +41,10 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
 ### Hành vi responsive của application shell
 
 - Từ breakpoint `lg`, sidebar rộng 256px cố định bên trái; trên màn hình nhỏ hơn, sidebar mở thành drawer có lớp nền che.
-- Header luôn nằm trên cùng, gồm tiêu đề/breadcrumb, tìm kiếm hoặc command palette, hành động tạo mới, nút bật panel chi tiết và menu tài khoản (đăng xuất).
+- Header luôn nằm trên cùng, gồm tiêu đề, tìm kiếm hoặc command palette, menu "Tạo mới" (Thư mục mới; Tải tệp lên từ M2-08), nút bật panel chi tiết và menu tài khoản (đăng xuất).
   Tiêu đề header lấy theo route đang mở (`handle.titleKey` của route, ví dụ Drive, Gần đây, Thùng rác, 404).
+- Trang Drive (S-05): breadcrumb nằm đầu nội dung trang và là tiêu đề trang, mục cuối (folder hiện tại) là `<h1>`. Trên màn hình hẹp, các folder ở giữa thu thành "…".
+  `/` chuyển sang `/drive`.
 - Panel chi tiết rộng 320px ở desktop lớn (`xl`); trên màn hình nhỏ hơn hiển thị dạng bottom sheet.
 - Phím `i` bật/tắt panel chi tiết. Phím bị bỏ qua khi focus nằm trong ô nhập liệu, trong menu hoặc listbox (dùng chữ cái để nhảy tới mục), trong một hộp thoại khác (ví dụ drawer điều hướng), khi giữ phím (auto-repeat) hoặc khi sự kiện đã được xử lý. Trong bottom sheet chi tiết, `i` đóng sheet.
 - Màn hình đăng nhập và các trang công khai dùng layout riêng, không hiển thị application shell. Các màn hình auth (S-01 đến S-04) là một card ở giữa, rộng tối đa 384px.

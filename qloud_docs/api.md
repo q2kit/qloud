@@ -66,7 +66,7 @@ Callback của provider (không gọi trực tiếp): `/api/auth/oauth/<provider
 ### Tài khoản
 | Method | Path | Mô tả |
 |---|---|---|
-| GET/PATCH | `/me` | Hồ sơ và tùy chọn: `display_name`, `locale` (`vi`/`en`), `theme` (`system`/`light`/`dark`) sửa được; `id`, `email`, `avatar_url` chỉ đọc. PATCH chỉ ghi các trường được gửi |
+| GET/PATCH | `/me` | Hồ sơ và tùy chọn: `display_name`, `locale` (`vi`/`en`), `theme` (`system`/`light`/`dark`) sửa được; `id`, `email`, `avatar_url`, `root_folder_id` (folder gốc của Drive, M2-07a) chỉ đọc. PATCH chỉ ghi các trường được gửi |
 | GET | `/me/storage` | Quota, dung lượng đã dùng, chia theo loại file |
 
 ### Node

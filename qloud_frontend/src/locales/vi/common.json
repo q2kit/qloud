@@ -15,19 +15,68 @@
   },
   "drive": {
     "title": "Drive",
-    "description": "Tất cả tệp và thư mục của bạn",
+    "breadcrumb": "Đường dẫn thư mục",
+    "items": "Các mục trong thư mục",
+    "loading": "Đang tải nội dung thư mục",
+    "loadMore": "Tải thêm",
+    "loadingMore": "Đang tải…",
+    "selectionActions": "Thao tác với mục đang chọn",
+    "defaultFolderName": "Thư mục không tên",
     "view": {
       "label": "Kiểu hiển thị",
       "grid": "Dạng lưới",
       "list": "Dạng danh sách"
     },
+    "sort": {
+      "label": "Sắp xếp",
+      "nameAsc": "Tên (A → Z)",
+      "nameDesc": "Tên (Z → A)",
+      "newest": "Sửa gần đây nhất",
+      "oldest": "Sửa lâu nhất",
+      "largest": "Lớn nhất trước",
+      "smallest": "Nhỏ nhất trước"
+    },
+    "columns": {
+      "name": "Tên",
+      "modified": "Sửa lần cuối",
+      "size": "Kích thước"
+    },
+    "kind": {
+      "folder": "Thư mục",
+      "file": "Tệp"
+    },
+    "fields": {
+      "name": "Tên"
+    },
+    "dialogs": {
+      "newFolder": "Thư mục mới",
+      "rename": "Đổi tên"
+    },
     "empty": {
-      "title": "Không gian của bạn đang trống",
-      "description": "Tải tệp lên hoặc tạo thư mục đầu tiên. Bạn cũng có thể kéo và thả tệp vào khu vực này."
+      "title": "Thư mục này đang trống",
+      "description": "Tạo thư mục để sắp xếp tệp của bạn."
     },
     "actions": {
       "upload": "Tải tệp lên",
-      "newFolder": "Thư mục mới"
+      "newFolder": "Thư mục mới",
+      "create": "Tạo",
+      "rename": "Đổi tên",
+      "save": "Lưu",
+      "cancel": "Hủy",
+      "download": "Tải xuống",
+      "retry": "Thử lại"
+    },
+    "errors": {
+      "generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+      "name_conflict": "Đã có một mục cùng tên trong thư mục này.",
+      "invalid_target": "Chỉ có thể tạo bên trong một thư mục.",
+      "root_folder": "Không thể đổi tên thư mục gốc.",
+      "not_found": "Không tìm thấy mục này.",
+      "loadFailed": "Không tải được nội dung thư mục",
+      "loadFailedDescription": "Kiểm tra kết nối mạng rồi thử lại.",
+      "notFoundTitle": "Không tìm thấy thư mục",
+      "notFoundDescription": "Thư mục không tồn tại, đã bị xóa, hoặc bạn không có quyền xem.",
+      "downloadFailed": "Không tải xuống được tệp. Vui lòng thử lại."
     }
   },
   "shell": {
@@ -52,6 +101,12 @@
       "info": "Thông tin",
       "versions": "Phiên bản",
       "sharing": "Chia sẻ"
+    },
+    "fields": {
+      "type": "Loại",
+      "size": "Kích thước",
+      "modified": "Sửa lần cuối",
+      "created": "Tạo lúc"
     }
   },
   "placeholder": {
@@ -67,12 +122,6 @@
     "title": "Đã xảy ra lỗi",
     "description": "Có lỗi không mong muốn khi hiển thị trang này. Hãy thử tải lại trang hoặc quay về Drive.",
     "reload": "Tải lại trang"
-  },
-  "health": {
-    "label": "Trạng thái dịch vụ",
-    "checking": "Đang kiểm tra…",
-    "ok": "Hoạt động bình thường",
-    "error": "Không thể kết nối"
   },
   "language": {
     "label": "Ngôn ngữ",

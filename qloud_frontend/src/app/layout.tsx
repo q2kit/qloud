@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Outlet } from 'react-router';
 
+import { CreateFolderDialog } from '@/features/drive/components/create-folder-dialog';
+
 import { AppHeader } from './app-header';
 import { AppSidebar } from './app-sidebar';
 import { DETAIL_SHEET_SELECTOR, DetailPanel } from './detail-panel';
@@ -93,6 +95,7 @@ export function AppLayout(): React.JSX.Element {
           />
         </div>
       </div>
+      <CreateFolderDialog />
     </div>
   );
 }

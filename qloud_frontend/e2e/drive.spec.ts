@@ -1,0 +1,113 @@
+import { expect, test, type Page } from '@playwright/test';
+
+import { signUpViaApi } from './auth';
+
+// S-05 against the real backend (files-folders.md acceptance criteria).
+test.beforeEach(async ({ page }) => {
+  await signUpViaApi(page);
+});
+
+async function createFolder(page: Page, name: string): Promise<void> {
+  await page.getByRole('button', { name: 'Tạo mới' }).click();
+  await page.getByRole('menuitem', { name: 'Thư mục mới' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Thư mục mới' });
+  await dialog.getByLabel('Tên').fill(name);
+  await dialog.getByRole('button', { name: 'Tạo' }).click();
+  await expect(dialog).toBeHidden();
+}
+
+function item(page: Page, name: string) {
+  return page.getByRole('option', { name, exact: true });
+}
+
+test('nested folders, breadcrumb and reload', async ({ page }) => {
+  await page.goto('/drive');
+  await expect(page.getByText('Thư mục này đang trống')).toBeVisible();
+
+  for (const name of ['Dự án', 'Thiết kế', 'Logo']) {
+    await createFolder(page, name);
+    await item(page, name).dblclick();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(name);
+  }
+  await expect(page).toHaveURL(/\/drive\/folders\/[0-9a-f-]{36}$/);
+
+  // The path survives a reload: it comes from the server, not from navigation history.
+  await page.reload();
+  const crumbs = page.getByRole('navigation', { name: 'Đường dẫn thư mục' });
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Logo');
+  await expect(
+    crumbs.getByRole('link', { name: 'Drive của tôi' }),
+  ).toBeVisible();
+  await expect(crumbs.getByRole('link', { name: 'Thiết kế' })).toBeVisible();
+
+  await crumbs.getByRole('link', { name: 'Thiết kế' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Thiết kế');
+  await expect(item(page, 'Logo')).toBeVisible();
+});
+
+test('rename, and a clashing name is refused', async ({ page }) => {
+  await page.goto('/drive');
+  await createFolder(page, 'Báo cáo');
+  await createFolder(page, 'Nháp');
+
+  await item(page, 'Nháp').click();
+  await page.keyboard.press('F2');
+  const dialog = page.getByRole('dialog', { name: 'Đổi tên' });
+  await dialog.getByLabel('Tên').fill('báo cáo');
+  await dialog.getByRole('button', { name: 'Lưu' }).click();
+  await expect(
+    page
+      .getByRole('dialog', { name: 'Đổi tên' })
+      .getByText('Đã có một mục cùng tên trong thư mục này.'),
+  ).toBeVisible();
+
+  await page
+    .getByRole('dialog', { name: 'Đổi tên' })
+    .getByLabel('Tên')
+    .fill('Bản nháp');
+  await page
+    .getByRole('dialog', { name: 'Đổi tên' })
+    .getByRole('button', { name: 'Lưu' })
+    .click();
+  await expect(item(page, 'Bản nháp')).toBeVisible();
+  await page.reload();
+  await expect(item(page, 'Bản nháp')).toBeVisible();
+  await expect(item(page, 'Báo cáo')).toBeVisible();
+});
+
+test('the list view and sort order are remembered', async ({ page }) => {
+  await page.goto('/drive');
+  for (const name of ['file2', 'file10', 'File1'])
+    await createFolder(page, name);
+  await expect(page.getByRole('option')).toHaveText([
+    /^File1/,
+    /^file2/,
+    /^file10/,
+  ]);
+
+  await page.getByRole('button', { name: 'Dạng danh sách' }).click();
+  await page.getByRole('button', { name: /Tên \(A → Z\)|Sắp xếp/ }).click();
+  await page.getByRole('menuitemradio', { name: 'Tên (Z → A)' }).click();
+  await expect(page.getByRole('option')).toHaveText([
+    /^file10/,
+    /^file2/,
+    /^File1/,
+  ]);
+
+  await page.reload();
+  await expect(
+    page.getByRole('button', { name: 'Dạng danh sách' }),
+  ).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('option')).toHaveText([
+    /^file10/,
+    /^file2/,
+    /^File1/,
+  ]);
+});
+
+test('an unknown folder says so', async ({ page }) => {
+  await page.goto('/drive/folders/01a12567-4ae6-774f-ac0d-99128521dccf');
+  await expect(page.getByText('Không tìm thấy thư mục')).toBeVisible();
+  await page.getByRole('link', { name: 'Về Drive' }).click();
+  await expect(page).toHaveURL(/\/drive$/);
+});

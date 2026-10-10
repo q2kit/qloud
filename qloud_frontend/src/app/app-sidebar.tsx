@@ -25,7 +25,7 @@ interface AppSidebarProps {
 }
 
 const navigationItems = [
-  { key: 'drive', to: '/', icon: HardDrive, end: true },
+  { key: 'drive', to: '/drive', icon: HardDrive },
   { key: 'recent', to: '/recent', icon: Clock3 },
   { key: 'shared', to: '/shared', icon: Share2 },
   { key: 'trash', to: '/trash', icon: Trash2 },
@@ -51,7 +51,7 @@ export function AppSidebar({
       <div className="flex h-16 items-center justify-between px-5">
         <NavLink
           className="flex items-center gap-2.5 rounded-md"
-          to="/"
+          to="/drive"
           onClick={onClose}
         >
           <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
@@ -76,11 +76,10 @@ export function AppSidebar({
         className="flex-1 space-y-1 px-3 py-4"
         aria-label={t('navigation.main')}
       >
-        {navigationItems.map(({ key, to, icon: Icon, ...item }) => (
+        {navigationItems.map(({ key, to, icon: Icon }) => (
           <NavLink
             key={key}
             to={to}
-            end={'end' in item ? item.end : undefined}
             onClick={onClose}
             className={navigationLinkClassName}
           >

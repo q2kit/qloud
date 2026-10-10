@@ -3,6 +3,10 @@ allowBuilds:
 
 # openapi-typescript 7.13.0 declares typescript ^5 but works with 6 (verified:
 # `pnpm api:generate` output type-checks). Remove when it supports 6, see #56.
+minimumReleaseAgeExclude:
+  - '@tanstack/react-virtual@3.14.14'
+  - '@tanstack/virtual-core@3.18.0'
+
 peerDependencyRules:
   allowedVersions:
     openapi-typescript>typescript: '6'
