@@ -363,5 +363,26 @@
     "emptyDescription": "Upload files to Drive to see them here.",
     "loading": "Loading recent files",
     "loadFailed": "Couldn't load recent files"
+  },
+  "preview": {
+    "title": "File preview",
+    "description": "Preview and download files. Use arrow keys to switch files, Escape to close.",
+    "open": "Preview",
+    "previous": "Previous file",
+    "next": "Next file",
+    "close": "Close preview",
+    "loading": "Loading preview…",
+    "failed": "Unable to preview this file.",
+    "retry": "Try again",
+    "unsupported": "Preview is unavailable for this file type. You can download it.",
+    "pdf": {
+      "previous": "Previous page",
+      "next": "Next page",
+      "page": "Page",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "fit": "Fit page",
+      "canvas": "PDF page {{page}}"
+    }
   }
 }

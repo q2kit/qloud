@@ -239,7 +239,15 @@ describe('item menus', () => {
     const menu = within(screen.getByRole('menu'));
     expect(
       menu.getAllByRole('menuitem').map((item) => item.textContent),
-    ).toEqual(['Download↵', 'RenameF2', 'Move…', 'Infoi']);
+    ).toEqual([
+      'Preview↵',
+      'Open in new tab',
+      'Copy link',
+      'Download',
+      'RenameF2',
+      'Move…',
+      'Infoi',
+    ]);
     expect(selectedNames()).toEqual(['report.pdf']);
     await user.click(menu.getByRole('menuitem', { name: /Info/ }));
     expect(screen.getByRole('dialog', { name: 'Details' })).toBeVisible();
@@ -292,11 +300,11 @@ describe('item menus', () => {
 });
 
 describe('folder links (open in a new tab)', () => {
-  it('middle click and Ctrl/⌘+Enter open a folder in a new tab, not a file', async () => {
+  it('middle click and Ctrl/⌘+Enter open independent folder and file links', async () => {
     const user = userEvent.setup();
     const open = vi.spyOn(window, 'open').mockReturnValue(null);
     const photos = drive.folder('Photos');
-    drive.file('a.pdf');
+    const file = drive.file('a.pdf');
     renderApp('/drive', testUser);
 
     await user.pointer({
@@ -309,11 +317,16 @@ describe('folder links (open in a new tab)', () => {
       'noopener',
     );
     await user.pointer({ keys: '[MouseMiddle]', target: option('a.pdf') });
-    expect(open).toHaveBeenCalledTimes(1);
+    expect(open).toHaveBeenLastCalledWith(
+      `${window.location.origin}/drive/files/${compactId(file.id)}`,
+      '_blank',
+      'noopener',
+    );
+    expect(open).toHaveBeenCalledTimes(2);
 
     option('Photos').focus();
     await user.keyboard('{Control>}{Enter}{/Control}');
-    expect(open).toHaveBeenCalledTimes(2);
+    expect(open).toHaveBeenCalledTimes(3);
     // Still on the same page: a new tab, not navigation here.
     expect(
       screen.getByRole('heading', { level: 1, name: 'My Drive' }),

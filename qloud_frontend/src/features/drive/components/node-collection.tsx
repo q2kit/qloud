@@ -24,7 +24,7 @@ import type { DriveNode } from '../api';
 import { DESKTOP_INPUT_QUERY } from '../desktop-input';
 import { formatBytes, formatDate } from '../format';
 import type { DriveView } from '../preferences';
-import { NodeIcon } from './node-icon';
+import { NodeThumbnail } from './node-thumbnail';
 
 /** files-folders.md: virtualize once a folder has more than 200 items. */
 export const VIRTUALIZE_AFTER = 200;
@@ -51,7 +51,7 @@ export interface NodeCollectionProps {
   onLoadMore: () => void;
   onSelect: (node: DriveNode, modifiers: SelectModifiers) => void;
   onOpen: (node: DriveNode) => void;
-  /** Folders only: middle click and Ctrl/⌘+Enter. */
+  /** Middle click and Ctrl/⌘+Enter open the independent node URL. */
   onOpenInNewTab?: (node: DriveNode) => void;
   onRename?: (node: DriveNode) => void;
   /** The item menu for whatever is selected once `node` is part of the selection. */
@@ -139,7 +139,7 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
       props.onSelect(node, { toggle: true, range: false });
     } else if (event.key === 'Enter') {
       event.preventDefault();
-      if (modifier && node.kind === 'folder') props.onOpenInNewTab?.(node);
+      if (modifier) props.onOpenInNewTab?.(node);
       else props.onOpen(node);
     } else if (event.key === 'F2') {
       event.preventDefault();
@@ -434,10 +434,10 @@ function NodeItem({
     }),
     // Middle click: a folder in a new tab, like a link (Ctrl/⌘+click selects instead).
     onMouseDown: own((event: React.MouseEvent) => {
-      if (event.button === 1 && node.kind === 'folder') event.preventDefault(); // no autoscroll
+      if (event.button === 1) event.preventDefault(); // no autoscroll
     }),
     onAuxClick: own((event: React.MouseEvent) => {
-      if (event.button !== 1 || node.kind !== 'folder') return;
+      if (event.button !== 1) return;
       event.preventDefault();
       onOpenInNewTab?.(node);
     }),
@@ -512,9 +512,7 @@ function NodeItem({
           state,
         )}
       >
-        <span className="flex h-20 items-center justify-center rounded-md bg-secondary">
-          <NodeIcon node={node} className="size-9" />
-        </span>
+        <NodeThumbnail node={node} />
         <span className="flex min-w-0 items-end gap-1">
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-medium">
@@ -536,7 +534,7 @@ function NodeItem({
         )}
       >
         <span className="flex min-w-0 items-center gap-3">
-          <NodeIcon node={node} className="size-5" />
+          <NodeThumbnail node={node} list />
           <span className="truncate text-sm font-medium">{node.name}</span>
         </span>
         <span className="hidden truncate text-sm text-muted-foreground tabular-nums sm:block">

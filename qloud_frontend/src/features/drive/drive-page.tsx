@@ -26,6 +26,8 @@ import {
   useRename,
   type DriveNode,
 } from './api';
+import { FileViewer } from './components/file-viewer';
+import { useOpenPreview } from './use-open-preview';
 import { DriveBreadcrumb } from './components/drive-breadcrumb';
 import { FileBrowser } from './components/file-browser';
 import { CenteredState, LoadFailed } from './components/browser-states';
@@ -33,7 +35,7 @@ import { MoveDialog } from './components/move-dialog';
 import { NameDialog } from './components/name-dialog';
 import type { SelectModifiers } from './components/node-collection';
 import { driveErrorMessage } from './errors';
-import { compactId, folderPath, folderUrl, uuidFromUrl } from './paths';
+import { compactId, folderPath, nodeUrl, uuidFromUrl } from './paths';
 import { useDrivePreferences } from './preferences';
 import { useDriveStore } from './store';
 import { useCurrentFolderId } from './use-current-folder';
@@ -54,6 +56,7 @@ interface Moving {
 export function DrivePage(): React.JSX.Element {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const openPreview = useOpenPreview();
   const folderId = useCurrentFolderId();
   const { folderId: rawFolderId } = useParams();
   const folder = useNode(folderId);
@@ -257,10 +260,7 @@ export function DrivePage(): React.JSX.Element {
       void navigate(folderPath(node.id));
       return;
     }
-    // Until the viewer (M3) exists, opening a file downloads it.
-    downloadNode(node.id).catch(() => {
-      setActionError(t('drive.errors.downloadFailed'));
-    });
+    openPreview(node);
   };
 
   const submitRename = ({ node }: Renaming, raw: string): void => {
@@ -317,7 +317,11 @@ export function DrivePage(): React.JSX.Element {
 
   const handlers: ActionHandlers = {
     open,
-    download: open,
+    download: (node) => {
+      void downloadNode(node.id).catch(() => {
+        setActionError(t('drive.errors.downloadFailed'));
+      });
+    },
     rename: (node) => {
       setRenaming({ node, name: node.name });
     },
@@ -328,11 +332,11 @@ export function DrivePage(): React.JSX.Element {
       store.setDetailOpen(true);
     },
     openInNewTab: (node) => {
-      window.open(folderUrl(node.id), '_blank', 'noopener');
+      window.open(nodeUrl(node), '_blank', 'noopener');
     },
     copyLink: (node) => {
       setActionError(null);
-      navigator.clipboard.writeText(folderUrl(node.id)).then(
+      navigator.clipboard.writeText(nodeUrl(node)).then(
         () => {
           setAnnouncement(t('drive.linkCopied', { name: node.name }));
         },
@@ -465,6 +469,12 @@ export function DrivePage(): React.JSX.Element {
         }}
       />
 
+      <FileViewer
+        nodes={nodes}
+        hasMore={children.hasNextPage}
+        loadingMore={isFetchingNextPage}
+        loadMore={() => children.fetchNextPage()}
+      />
       <NameDialog
         open={renaming !== null}
         title={t('drive.dialogs.rename')}

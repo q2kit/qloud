@@ -53,3 +53,6 @@ Thumbs.db
 .claude/worktrees/
 .claude/settings.local.json
 celerybeat-schedule*
+
+# PDF.js runtime assets copied from the locked package.
+qloud_frontend/public/pdfjs/

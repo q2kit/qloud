@@ -356,5 +356,26 @@
     "emptyDescription": "Tải tệp lên Drive để xem chúng tại đây.",
     "loading": "Đang tải tệp gần đây",
     "loadFailed": "Không tải được tệp gần đây"
+  },
+  "preview": {
+    "title": "Xem trước tệp",
+    "description": "Xem trước và tải tệp. Dùng phím mũi tên để chuyển tệp, Esc để đóng.",
+    "open": "Xem trước",
+    "previous": "Tệp trước",
+    "next": "Tệp sau",
+    "close": "Đóng trình xem",
+    "loading": "Đang tải xem trước…",
+    "failed": "Không thể xem trước tệp này.",
+    "retry": "Thử lại",
+    "unsupported": "Loại tệp này chưa hỗ trợ xem trước. Bạn có thể tải về.",
+    "pdf": {
+      "previous": "Trang trước",
+      "next": "Trang sau",
+      "page": "Trang",
+      "zoomIn": "Phóng to",
+      "zoomOut": "Thu nhỏ",
+      "fit": "Vừa trang",
+      "canvas": "Trang PDF {{page}}"
+    }
   }
 }

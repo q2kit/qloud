@@ -34,3 +34,12 @@ export function uuidFromUrl(id: string): string {
     hex.slice(20),
   ].join('-');
 }
+
+export function nodeUrl(node: { id: string; kind: string }): string {
+  return new URL(
+    node.kind === 'folder'
+      ? folderPath(node.id)
+      : `/drive/files/${compactId(node.id)}`,
+    window.location.origin,
+  ).toString();
+}

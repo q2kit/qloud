@@ -6,6 +6,7 @@ import { PasswordResetPage } from '@/features/auth/pages/password-reset-page';
 import { PasswordResetRequestPage } from '@/features/auth/pages/password-reset-request-page';
 import { SignupPage } from '@/features/auth/pages/signup-page';
 import { VerifyEmailPage } from '@/features/auth/pages/verify-email-page';
+import { FileLinkPage } from '@/features/drive/file-link-page';
 import { DrivePage } from '@/features/drive/drive-page';
 import { RecentPage } from '@/features/drive/recent-page';
 import { SettingsPage } from '@/features/settings/settings-page';
@@ -56,6 +57,11 @@ export const appRoutes: RouteObject[] = [
                 path: 'drive/folders/:folderId',
                 Component: DrivePage,
                 handle: { titleKey: 'drive.title' } satisfies RouteHandle,
+              },
+              {
+                path: 'drive/files/:fileId',
+                Component: FileLinkPage,
+                handle: { titleKey: 'preview.title' } satisfies RouteHandle,
               },
               {
                 path: 'recent',

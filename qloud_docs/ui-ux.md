@@ -65,7 +65,7 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
 | S-07 | Được chia sẻ với tôi | `/shared` | sharing |
 | S-08 | Thùng rác | `/trash` | trash |
 | S-09 | Kết quả tìm kiếm | `/search?q=` | search |
-| S-10 | Trình xem file (overlay toàn màn hình) | `?preview=:id` trên route hiện tại | download-preview |
+| S-10 | Trình xem file (overlay toàn màn hình) | `?preview=:id` trên Drive/Gần đây; link riêng `/drive/files/:id` resolve folder hiện tại | download-preview |
 | S-11 | Hộp thoại chia sẻ | modal | sharing |
 | S-12 | Trang link công khai (có nút Báo cáo vi phạm) | `/s/:token` | sharing |
 | S-13 | Cài đặt: hồ sơ, ngôn ngữ, giao diện, tài khoản liên kết | `/settings` | auth |

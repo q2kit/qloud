@@ -14,6 +14,7 @@ export class FakeDrive {
   /** Milliseconds every write waits, to observe optimistic updates. */
   writeDelay = 0;
   failChildren = false;
+  pageLimit = Infinity;
   private counter = 0;
 
   constructor() {
@@ -146,6 +147,16 @@ export class FakeDrive {
         const node = this.nodes.get(String(params.id));
         return node ? HttpResponse.json(this.detail(node)) : notFound();
       }),
+      http.get('/api/v1/nodes/:id/preview', ({ params, request }) => {
+        this.requests.push(new URL(request.url));
+        if (!this.nodes.has(String(params.id))) return notFound();
+        return HttpResponse.json({
+          kind: 'unsupported',
+          url: null,
+          expires_at: null,
+          thumbnail: null,
+        });
+      }),
       http.get('/api/v1/nodes/:id/children', ({ params, request }) => {
         const url = new URL(request.url);
         this.requests.push(url);
@@ -157,7 +168,10 @@ export class FakeDrive {
         }
         if (!this.nodes.has(String(params.id))) return notFound();
         const ordering = url.searchParams.get('ordering') ?? 'name';
-        const size = Number(url.searchParams.get('page_size') ?? 50);
+        const size = Math.min(
+          Number(url.searchParams.get('page_size') ?? 50),
+          this.pageLimit,
+        );
         const start = Number(url.searchParams.get('cursor') ?? 0);
         const all = this.children(String(params.id), ordering);
         const next = new URL(url);

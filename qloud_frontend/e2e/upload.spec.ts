@@ -68,13 +68,21 @@ test('upload files, including one in several parts, then download it back', asyn
   await expect(item(page, 'empty.txt')).toBeVisible();
 
   await item(page, 'video-demo.bin').click();
+  await page.keyboard.press('Enter');
+  await expect(
+    page.getByRole('dialog', { name: 'video-demo.bin' }),
+  ).toBeVisible();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.keyboard.press('Enter'),
+    page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Tải xuống', exact: true })
+      .click(),
   ]);
   expect(download.suggestedFilename()).toBe('video-demo.bin');
   const path = await download.path();
   expect((await readFile(path)).equals(big)).toBe(true);
+  await page.getByRole('button', { name: 'Đóng trình xem' }).click();
 
   await tray(page).getByRole('button', { name: 'Đóng khay tải lên' }).click();
   await expect(tray(page)).toBeHidden();

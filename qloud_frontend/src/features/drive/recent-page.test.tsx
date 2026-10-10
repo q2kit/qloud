@@ -1,10 +1,4 @@
-import {
-  act,
-  fireEvent,
-  screen,
-  waitFor,
-  within,
-} from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { delay, http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
@@ -191,7 +185,8 @@ it('retries a failed request and reports a download failure without recording an
   expect(drive.requests.some((url) => url.pathname.endsWith('/download'))).toBe(
     false,
   );
-  fireEvent.keyDown(file, { key: 'Enter' });
+  await user.click(file);
+  await user.click(screen.getByRole('button', { name: 'Download' }));
   expect(
     await screen.findByText("Couldn't download the file. Please try again."),
   ).toBeVisible();

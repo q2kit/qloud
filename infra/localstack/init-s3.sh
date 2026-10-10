@@ -18,7 +18,7 @@ configure_bucket() {
       \"AllowedOrigins\": [${origins_json}],
       \"AllowedMethods\": [\"GET\", \"PUT\", \"HEAD\"],
       \"AllowedHeaders\": [\"*\"],
-      \"ExposeHeaders\": [\"ETag\"],
+      \"ExposeHeaders\": [\"ETag\", \"Accept-Ranges\", \"Content-Range\", \"Content-Length\"],
       \"MaxAgeSeconds\": 3600
     }]
   }"

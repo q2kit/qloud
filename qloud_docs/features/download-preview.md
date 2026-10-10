@@ -44,6 +44,14 @@
 - `thumbnail` là null nếu chưa có cặp ảnh của current version; khi có là `{url, large_url, expires_at}` cho WebP 256/1024px inline 5 phút. Không gọi worker hoặc đọc nguồn trong request; không cấp URL từ key cũ của version khác. FE có thể dùng icon và gọi lại sau khi worker hoàn thành.
 - Video đi trực tiếp S3 và giữ Range (206) để tua; integration test xác minh byte range, chưa kiểm thử UI tua video 2 GB (thuộc M3-03). API không làm thumbnail hiển thị trên web; chưa có thay đổi UI ở M3-02.
 
+### M3-03 — trình xem và thumbnail
+- Kế hoạch được duyệt tại [#29](https://github.com/q2kit/qloud/issues/29#issuecomment-6102467202), gồm bổ sung thumbnail ở **cả grid và list children**, áp dụng cho Drive/Gần đây.
+- Double click trên desktop, Enter hoặc nút Xem trước mở overlay toàn màn hình qua `?preview=:id`; nút Tải xuống tách riêng. ←/→ và nút trước/sau đi theo thứ tự danh sách, bỏ folder, tải tiếp cursor khi cần. Phím điều khiển media/PDF/input được giữ cho control đó. Esc/nút đóng, Back/Forward và khôi phục focus được hỗ trợ.
+- Thumbnail chỉ fetch cho ảnh/PDF trong viewport, lazy image; dùng icon nếu chưa có/lỗi. Query chung theo id/updated_at, polling mỗi 5 giây tối đa 6 lần thêm khi chưa có thumbnail; dừng khi rời viewport hoặc hết lượt. URL có thumbnail được refresh trước hạn 30 giây, query stale sau 210 giây.
+- Viewer refresh URL nguồn trước hạn 30 giây; loading/lỗi/thử lại và trạng thái không hỗ trợ có bản dịch vi/en. Ảnh dùng img; video/audio native controls và preload metadata; text đọc trực tiếp S3 và chèn text vào pre, không HTML/Markdown render. Khi đóng/đổi file, source fetch/PDF task/media được hủy hoặc dừng.
+- PDF dùng pdf.js 6.4, canvas từng trang, chọn trang/zoom/fit chiều rộng; không dựng mọi trang cùng lúc. Worker, CMap/font/WASM được build/host trong app, không dùng CDN. Không có annotation/action/scripting layer thực thi script hay liên kết trong PDF.
+- Link `/drive/files/:id` (UUID compact) resolve node và folder hiện tại, rồi mở overlay ở folder đó, nên vẫn đúng sau khi file di chuyển. Copy link/tab mới/middle click/Ctrl hoặc ⌘+Enter dùng route này cho file. Gần đây dùng cùng viewer và link.
+
 ### Link riêng cho file
 - **Link riêng cho file**, giống folder (M2-07b):
   - lưu lại hoặc mở ở tab khác thì ra đúng file đó trong trình xem;
@@ -52,7 +60,7 @@
 
 ## Tiêu chí chấp nhận
 - [x] Tải file có tên tiếng Việt có dấu thì giữ đúng tên.
-- [ ] Mở trình xem: dùng được phím ←/→ để chuyển file, Esc để đóng, nút Tải xuống.
-- [ ] Video 2 GB tua được ngay, không phải chờ tải hết.
-- [ ] File HTML hoặc SVG không bị render inline.
-- [ ] URL hết hạn sau 5 phút.
+- [x] Mở trình xem: dùng được phím ←/→ để chuyển file, Esc để đóng, nút Tải xuống.
+- [x] Video 2 GB tua được ngay, không phải chờ tải hết.
+- [x] File HTML hoặc SVG không bị render inline.
+- [x] URL hết hạn sau 5 phút.
