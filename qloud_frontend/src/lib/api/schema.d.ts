@@ -124,6 +124,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["uploads_list"];
+        put?: never;
+        post: operations["uploads_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/uploads/{upload_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["uploads_retrieve"];
+        put?: never;
+        post?: never;
+        delete: operations["uploads_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/uploads/{upload_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["uploads_complete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/uploads/{upload_id}/parts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["uploads_parts"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -144,6 +208,17 @@ export interface components {
             parent_id: string;
             name: string;
         };
+        CreateUploadRequest: {
+            /** Format: uuid */
+            parent_id: string;
+            filename: string;
+            size: number;
+            /** @default  */
+            mime_type: string;
+            fingerprint: string;
+            /** @default fail */
+            on_conflict: components["schemas"]["OnConflictEnum"];
+        };
         /** @description Schema of every error response, for `@extend_schema(responses=...)`. */
         Error: {
             error: components["schemas"]["ErrorBody"];
@@ -158,11 +233,17 @@ export interface components {
             };
         };
         Health: {
-            status: components["schemas"]["StatusEnum"];
+            status: components["schemas"]["HealthStatusEnum"];
             checks: {
                 [key: string]: "ok" | "error";
             };
         };
+        /**
+         * @description * `ok` - ok
+         *     * `error` - error
+         * @enum {string}
+         */
+        HealthStatusEnum: "ok" | "error";
         /**
          * @description * `folder` - Folder
          *     * `file` - File
@@ -229,12 +310,49 @@ export interface components {
             readonly breadcrumb: components["schemas"]["Breadcrumb"][];
             readonly capabilities: components["schemas"]["Capabilities"];
         };
+        /**
+         * @description * `fail` - Fail
+         *     * `rename` - Rename
+         * @enum {string}
+         */
+        OnConflictEnum: "fail" | "rename";
         PaginatedNodeList: {
             /** Format: uri */
             next: string | null;
             /** Format: uri */
             previous: string | null;
             results: components["schemas"]["Node"][];
+        };
+        PaginatedUploadSessionList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["UploadSession"][];
+        };
+        Part: {
+            part_number: number;
+            size: number;
+            etag: string;
+        };
+        PartUrl: {
+            part_number: number;
+            /** Format: uri */
+            url: string;
+        };
+        PartUrls: {
+            parts: components["schemas"]["PartUrl"][];
+            /** Format: date-time */
+            expires_at: string;
+        };
+        PartUrlsRequestRequest: {
+            part_numbers: number[];
         };
         PatchedMeRequest: {
             /** Tên hiển thị */
@@ -252,18 +370,62 @@ export interface components {
             turnstile_site_key: string | null;
         };
         /**
-         * @description * `ok` - ok
-         *     * `error` - error
-         * @enum {string}
-         */
-        StatusEnum: "ok" | "error";
-        /**
          * @description * `system` - Theo hệ thống
          *     * `light` - Sáng
          *     * `dark` - Tối
          * @enum {string}
          */
         ThemeEnum: "system" | "light" | "dark";
+        UploadSession: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly parent_id: string | null;
+            readonly filename: string;
+            readonly size: number;
+            readonly mime_type: string;
+            readonly fingerprint: string;
+            readonly on_conflict: components["schemas"]["OnConflictEnum"];
+            readonly part_size: number;
+            readonly part_count: number;
+            readonly status: components["schemas"]["UploadStatusEnum"];
+            /** Format: date-time */
+            readonly expires_at: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: uuid */
+            readonly node_id: string | null;
+        };
+        UploadSessionDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly parent_id: string | null;
+            readonly filename: string;
+            readonly size: number;
+            readonly mime_type: string;
+            readonly fingerprint: string;
+            readonly on_conflict: components["schemas"]["OnConflictEnum"];
+            readonly part_size: number;
+            readonly part_count: number;
+            readonly status: components["schemas"]["UploadStatusEnum"];
+            /** Format: date-time */
+            readonly expires_at: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: uuid */
+            readonly node_id: string | null;
+            /** @description Parts already in storage. */
+            readonly parts: components["schemas"]["Part"][];
+        };
+        /**
+         * @description * `active` - Active
+         *     * `completed` - Completed
+         *     * `aborted` - Aborted
+         *     * `expired` - Expired
+         * @enum {string}
+         */
+        UploadStatusEnum: "active" | "completed" | "aborted" | "expired";
     };
     responses: never;
     parameters: never;
@@ -571,6 +733,309 @@ export interface operations {
             };
             /** @description `name_conflict`. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    uploads_list: {
+        parameters: {
+            query?: {
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /**
+                 * @description * `active` - Active
+                 *     * `completed` - Completed
+                 *     * `aborted` - Aborted
+                 *     * `expired` - Expired
+                 */
+                status?: "active" | "completed" | "aborted" | "expired";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedUploadSessionList"];
+                };
+            };
+        };
+    };
+    uploads_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateUploadRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadSession"];
+                };
+            };
+            /** @description Invalid input, or the parent is not a folder. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `email_not_verified`. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such folder, or no access to it. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `name_conflict` (with `on_conflict=fail`). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `file_too_large` or `quota_exceeded`. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `storage_unavailable`. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    uploads_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                upload_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadSessionDetail"];
+                };
+            };
+            /** @description No such upload, or not yours. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    uploads_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                upload_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such upload, or not yours. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `upload_closed`: already completed. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    uploads_complete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                upload_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Node"];
+                };
+            };
+            /** @description `upload_incomplete`: parts missing or size mismatch. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such upload, or not yours. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `upload_closed`, or `target_unavailable` (the upload is cancelled). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `upload_closed` (409) or `upload_expired` (410). */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `storage_unavailable`. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    uploads_parts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                upload_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PartUrlsRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PartUrls"];
+                };
+            };
+            /** @description `invalid_part`. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such upload, or not yours. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `upload_closed` (409) or `upload_expired` (410). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `upload_closed` (409) or `upload_expired` (410). */
+            410: {
                 headers: {
                     [name: string]: unknown;
                 };

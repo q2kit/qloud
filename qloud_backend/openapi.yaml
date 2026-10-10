@@ -276,6 +276,260 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: '`name_conflict`.'
+  /api/v1/uploads:
+    get:
+      operationId: uploads_list
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          enum:
+          - active
+          - completed
+          - aborted
+          - expired
+          type: string
+          minLength: 1
+        description: |-
+          * `active` - Active
+          * `completed` - Completed
+          * `aborted` - Aborted
+          * `expired` - Expired
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUploadSessionList'
+          description: ''
+    post:
+      operationId: uploads_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadSession'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input, or the parent is not a folder.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: '`email_not_verified`.'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such folder, or no access to it.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: '`name_conflict` (with `on_conflict=fail`).'
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: '`file_too_large` or `quota_exceeded`.'
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: '`storage_unavailable`.'
+  /api/v1/uploads/{upload_id}:
+    get:
+      operationId: uploads_retrieve
+      parameters:
+      - in: path
+        name: upload_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadSessionDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such upload, or not yours.
+    delete:
+      operationId: uploads_destroy
+      parameters:
+      - in: path
+        name: upload_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such upload, or not yours.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: '`upload_closed`: already completed.'
+  /api/v1/uploads/{upload_id}/complete:
+    post:
+      operationId: uploads_complete
+      parameters:
+      - in: path
+        name: upload_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: '`upload_incomplete`: parts missing or size mismatch.'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such upload, or not yours.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: '`upload_closed`, or `target_unavailable` (the upload is cancelled).'
+        '410':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: '`upload_closed` (409) or `upload_expired` (410).'
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: '`storage_unavailable`.'
+  /api/v1/uploads/{upload_id}/parts:
+    post:
+      operationId: uploads_parts
+      parameters:
+      - in: path
+        name: upload_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartUrlsRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartUrls'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: '`invalid_part`.'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such upload, or not yours.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: '`upload_closed` (409) or `upload_expired` (410).'
+        '410':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: '`upload_closed` (409) or `upload_expired` (410).'
 components:
   schemas:
     Breadcrumb:
@@ -318,6 +572,36 @@ components:
       required:
       - name
       - parent_id
+    CreateUploadRequest:
+      type: object
+      properties:
+        parent_id:
+          type: string
+          format: uuid
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        size:
+          type: integer
+          minimum: 0
+        mime_type:
+          type: string
+          default: ''
+          maxLength: 255
+        fingerprint:
+          type: string
+          minLength: 1
+          maxLength: 128
+        on_conflict:
+          allOf:
+          - $ref: '#/components/schemas/OnConflictEnum'
+          default: fail
+      required:
+      - filename
+      - fingerprint
+      - parent_id
+      - size
     Error:
       type: object
       description: Schema of every error response, for `@extend_schema(responses=...)`.
@@ -346,7 +630,7 @@ components:
       type: object
       properties:
         status:
-          $ref: '#/components/schemas/StatusEnum'
+          $ref: '#/components/schemas/HealthStatusEnum'
         checks:
           type: object
           additionalProperties:
@@ -360,6 +644,14 @@ components:
       required:
       - checks
       - status
+    HealthStatusEnum:
+      enum:
+      - ok
+      - error
+      type: string
+      description: |-
+        * `ok` - ok
+        * `error` - error
     KindEnum:
       enum:
       - folder
@@ -538,6 +830,14 @@ components:
       - parent_id
       - size
       - updated_at
+    OnConflictEnum:
+      enum:
+      - fail
+      - rename
+      type: string
+      description: |-
+        * `fail` - Fail
+        * `rename` - Rename
     PaginatedNodeList:
       type: object
       required:
@@ -557,6 +857,75 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Node'
+    PaginatedUploadSessionList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UploadSession'
+    Part:
+      type: object
+      properties:
+        part_number:
+          type: integer
+        size:
+          type: integer
+        etag:
+          type: string
+      required:
+      - etag
+      - part_number
+      - size
+    PartUrl:
+      type: object
+      properties:
+        part_number:
+          type: integer
+        url:
+          type: string
+          format: uri
+      required:
+      - part_number
+      - url
+    PartUrls:
+      type: object
+      properties:
+        parts:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartUrl'
+        expires_at:
+          type: string
+          format: date-time
+      required:
+      - expires_at
+      - parts
+    PartUrlsRequestRequest:
+      type: object
+      properties:
+        part_numbers:
+          type: array
+          items:
+            type: integer
+            maximum: 10000
+            minimum: 1
+          maxItems: 100
+          minItems: 1
+      required:
+      - part_numbers
     PatchedMeRequest:
       type: object
       properties:
@@ -589,14 +958,6 @@ components:
             check it.
       required:
       - turnstile_site_key
-    StatusEnum:
-      enum:
-      - ok
-      - error
-      type: string
-      description: |-
-        * `ok` - ok
-        * `error` - error
     ThemeEnum:
       enum:
       - system
@@ -607,6 +968,155 @@ components:
         * `system` - Theo hệ thống
         * `light` - Sáng
         * `dark` - Tối
+    UploadSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        parent_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        filename:
+          type: string
+          readOnly: true
+        size:
+          type: integer
+          readOnly: true
+        mime_type:
+          type: string
+          readOnly: true
+        fingerprint:
+          type: string
+          readOnly: true
+        on_conflict:
+          allOf:
+          - $ref: '#/components/schemas/OnConflictEnum'
+          readOnly: true
+        part_size:
+          type: integer
+          readOnly: true
+        part_count:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/UploadStatusEnum'
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        node_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+      required:
+      - created_at
+      - expires_at
+      - filename
+      - fingerprint
+      - id
+      - mime_type
+      - node_id
+      - on_conflict
+      - parent_id
+      - part_count
+      - part_size
+      - size
+      - status
+    UploadSessionDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        parent_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        filename:
+          type: string
+          readOnly: true
+        size:
+          type: integer
+          readOnly: true
+        mime_type:
+          type: string
+          readOnly: true
+        fingerprint:
+          type: string
+          readOnly: true
+        on_conflict:
+          allOf:
+          - $ref: '#/components/schemas/OnConflictEnum'
+          readOnly: true
+        part_size:
+          type: integer
+          readOnly: true
+        part_count:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/UploadStatusEnum'
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        node_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        parts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Part'
+          readOnly: true
+          description: Parts already in storage.
+      required:
+      - created_at
+      - expires_at
+      - filename
+      - fingerprint
+      - id
+      - mime_type
+      - node_id
+      - on_conflict
+      - parent_id
+      - part_count
+      - part_size
+      - parts
+      - size
+      - status
+    UploadStatusEnum:
+      enum:
+      - active
+      - completed
+      - aborted
+      - expired
+      type: string
+      description: |-
+        * `active` - Active
+        * `completed` - Completed
+        * `aborted` - Aborted
+        * `expired` - Expired
   securitySchemes:
     cookieAuth:
       type: apiKey

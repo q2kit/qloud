@@ -15,6 +15,9 @@ Khi insert user, kiểm tra foreign key của PostgreSQL tự lấy [`FOR KEY SH
 Không xóa plan mặc định hoặc plan đã được gán cho user; plan inactive vẫn giữ giới hạn cho user cũ.
 Đơn vị seed: 1 GB = 1.000.000.000 byte.
 
+M2-04: tạo upload session giữ chỗ quota (`reserved_bytes`) trong transaction có khóa dòng User của owner; hoàn tất chuyển sang `used_bytes`, hủy thì trả lại.
+Test tranh chấp: 10 session đồng thời mà tổng vượt quota thì chỉ những session còn vừa được nhận.
+
 ## User stories
 - Tôi muốn biết mình đã dùng bao nhiêu dung lượng và phần nào chiếm nhiều nhất.
 - Tôi muốn được cảnh báo trước khi hết dung lượng.

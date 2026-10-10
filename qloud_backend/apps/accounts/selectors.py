@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from allauth.account.models import EmailAddress
+
 from .models import User
 
 
@@ -27,3 +29,9 @@ def get_limits(user: User) -> Limits:
         version_retention_days=plan.version_retention_days,
         trash_retention_days=plan.trash_retention_days,
     )
+
+
+def has_verified_email(user: User) -> bool:
+    """Whether the account's own address is verified (auth.md: needed to upload or share)."""
+    verified = EmailAddress.objects.filter(user=user, email__iexact=user.email, verified=True)
+    return bool(verified.exists())

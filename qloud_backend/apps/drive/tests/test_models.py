@@ -1,5 +1,5 @@
 import pytest
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError, connection, transaction
 from django.db.models import ProtectedError
 from django.utils import timezone
 
@@ -104,3 +104,14 @@ def test_string_forms(make_file):
         "notes.txt v1",
         f"blobs/{node.pk}",
     )
+
+
+def test_current_version_must_belong_to_the_node(make_file):
+    first, second = make_file("one.txt"), make_file("two.txt")
+    first.current_version = second.current_version
+    with transaction.atomic():
+        first.save()
+        # Deferred to commit, like Django's own foreign keys; check it now instead.
+        with pytest.raises(IntegrityError), transaction.atomic(), connection.cursor() as cursor:
+            cursor.execute("SET CONSTRAINTS node_current_version_own IMMEDIATE")
+        transaction.set_rollback(True)

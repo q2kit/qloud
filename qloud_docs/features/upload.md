@@ -30,6 +30,29 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). Model `Blob`/`FileV
 
 **Yêu cầu về CORS của bucket:** cho phép `PUT` và `GET` từ origin của FE, và `ExposeHeaders: ETag`.
 
+## Quyết định của M2-04 ([#20](https://github.com/q2kit/qloud/issues/20))
+- **Điều kiện tạo session:** quyền `editor` trên folder đích và **email đã xác thực** (403 `email_not_verified`; FE hiện thông báo kèm nút gửi lại email).
+  Giới hạn kích thước file và quota là của **owner folder đích**. Session chỉ người tạo thấy; người khác nhận 404.
+- **Trùng tên:**
+  - Lúc tạo session, `on_conflict=fail` (mặc định) trả 409 `name_conflict` để FE hỏi người dùng; `rename` là "Giữ cả hai".
+  - Tên bị trùng **trong lúc** upload thì khi hoàn tất luôn thêm hậu tố ` (n)`, không bỏ dữ liệu đã upload.
+  - "Thay thế" (phiên bản mới) thuộc M7-01.
+- **Folder đích bị xóa hoặc vào thùng rác trong lúc upload:**
+  - Khi hoàn tất, tạo lại các folder bị mất theo đường dẫn đã lưu lúc tạo session, bắt đầu từ folder sâu nhất còn tồn tại; folder gốc luôn còn.
+  - Folder cùng tên còn sống ở đó thì dùng lại, nên các file của một lần upload folder vẫn nằm chung một chỗ.
+  - Folder trong thùng rác giữ nguyên: folder tạo lại chỉ chứa file mới.
+  - Chỉ khi không còn folder nào trên đường dẫn mà người upload sửa được (M5) thì hủy upload, trả 409 `target_unavailable`.
+- **Gọi lại an toàn:** `complete` gọi lại trả về đúng node. Nếu S3 đã ghép xong mà bước ghi DB lỗi, lần gọi sau nhận ra object đã có và làm tiếp. `DELETE` gọi lại vẫn trả 204.
+- **Không giữ khóa DB khi gọi S3:** giữ chỗ quota, rồi `CreateMultipartUpload`; `ListParts`/`CompleteMultipartUpload`/`HeadObject`, rồi một transaction ghi Blob, Node, version và chuyển `reserved` → `used`.
+  Mọi thay đổi quota của một owner chạy lần lượt nhờ khóa dòng User của owner.
+- **Mã lỗi:**
+  - 403 `email_not_verified`;
+  - 413 `file_too_large`, `quota_exceeded`;
+  - 409 `name_conflict`, `upload_closed` (đã xong hoặc đã hủy), `target_unavailable`;
+  - 410 `upload_expired`;
+  - 400 `upload_incomplete` (thiếu part hoặc sai kích thước; session vẫn còn), `invalid_part`;
+  - 503 `storage_unavailable`.
+
 ## Upload cả folder
 FE đọc cấu trúc thư mục (qua `webkitdirectory` hoặc DataTransfer items), gọi API để tạo các folder theo thứ tự từ trên xuống, rồi upload file vào đúng folder.
 

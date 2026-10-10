@@ -33,4 +33,6 @@ def test_files_and_trash_migration_keeps_existing_trees():
         Node = executor.loader.project_state(BEFORE).apps.get_model("drive", "Node")
         assert Node.objects.filter(owner_id=user.pk).count() == 2
     finally:
-        MigrationExecutor(connection).migrate(AFTER)
+        # Every app's latest migration, including the ones after AFTER.
+        restore = MigrationExecutor(connection)
+        restore.migrate(restore.loader.graph.leaf_nodes())

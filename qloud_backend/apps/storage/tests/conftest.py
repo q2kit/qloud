@@ -2,21 +2,8 @@ import uuid
 from collections.abc import Iterator
 
 import pytest
-from botocore.exceptions import ClientError
-from django.conf import settings
 
 from apps.storage import s3
-
-
-@pytest.fixture(scope="session")
-def bucket() -> str:
-    """The test bucket on LocalStack (docker compose), created once per run."""
-    name = str(settings.S3_BUCKET)
-    try:
-        s3.client().head_bucket(Bucket=name)
-    except ClientError:
-        s3.client().create_bucket(Bucket=name)
-    return name
 
 
 @pytest.fixture

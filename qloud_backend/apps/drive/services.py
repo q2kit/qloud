@@ -102,6 +102,12 @@ def _free_names(target: Node, nodes: Sequence[Node]) -> dict[uuid.UUID, str]:
     return names
 
 
+def available_name(target: Node, name: str, kind: str) -> str:
+    """`name`, or its first ` (n)` variant that no live child of `target` uses."""
+    node = Node(kind=kind, name=name)  # unsaved: only feeds the candidate names
+    return _free_names(target, [node])[node.pk]
+
+
 def move(user: User, node_ids: Sequence[uuid.UUID], target_id: uuid.UUID) -> list[Node]:
     """Move nodes into a folder in one transaction; clashing names get ` (n)` suffixes."""
     ids = list(dict.fromkeys(node_ids))
