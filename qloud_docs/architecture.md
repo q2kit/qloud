@@ -148,6 +148,13 @@ Với share link thì chỉ xét token của link đó và cây con bên dưới
   | `qloud_backend/.env` | Django, Celery | Secret key, `APP_DOMAIN`, DB/Redis URL, S3, SMTP, OAuth, Turnstile, Sentry |
   | `qloud_frontend/.env` | Vite (`VITE_*`) | Chỉ giá trị công khai; hiện chưa cần biến nào. Cấu hình lúc chạy (ví dụ Turnstile site key) lấy từ `GET /api/v1/config` |
 
+### E2E
+- Playwright (`qloud_frontend/playwright.config.ts`) tự chạy Django (cổng 8001, `config.settings.e2e`), bản build FE qua `vite preview` (4173)
+  và provider OAuth giả `qloud_frontend/e2e/oauth-provider.ts` (8002); Postgres, Redis và Mailpit lấy từ docker compose.
+- `config.settings.e2e` kế thừa settings test (Celery eager, không rate limit, không Turnstile), cộng thêm: email gửi qua SMTP tới Mailpit,
+  test đọc link trong email bằng API của Mailpit; Google và GitHub trỏ tới provider giả (allauth cho đổi URL provider), key OAuth thật trong `.env` không được dùng.
+- Provider giả có trang "authorize" là một form để test chọn email, tên và email đã xác thực hay chưa. Danh tính nằm trong `code`/token, nên server không giữ trạng thái và test chạy song song được.
+
 ### Production
 - Một VPS chạy Docker Compose: nginx, api (gunicorn), worker, beat, postgres, redis; phía trước là Cloudflare proxy
   ([ADR-0004](adr/0004-hosting-vps.md), [ADR-0006](adr/0006-cloudflare-proxy-nginx.md)). Firewall chỉ mở 443 cho dải IP Cloudflare.

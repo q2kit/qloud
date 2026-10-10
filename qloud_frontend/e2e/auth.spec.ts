@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-// The main auth path; M1-07 covers the remaining flows (email links, OAuth).
+// The main auth path; email links, OAuth and rate limits: auth-flows.spec.ts.
 test('a visitor is sent to login, signs up, uses Drive and signs out', async ({
   page,
 }) => {
@@ -12,6 +12,10 @@ test('a visitor is sent to login, signs up, uses Drive and signs out', async ({
 
   await page.getByRole('link', { name: 'Đăng ký' }).click();
   await expect(page).toHaveURL(/\/signup\?next=%2Ftrash$/);
+  // The URL changes before the route renders; wait for the signup form.
+  await expect(
+    page.getByRole('heading', { name: 'Tạo tài khoản' }),
+  ).toBeVisible();
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Mật khẩu').fill('qloud-e2e-password');
   await page.getByRole('button', { name: 'Đăng ký' }).click();

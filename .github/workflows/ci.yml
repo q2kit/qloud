@@ -139,8 +139,9 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: qloud_frontend/pnpm-lock.yaml
-      - name: Start Postgres and Redis
-        run: docker compose up -d --wait postgres redis
+      - name: Start Postgres, Redis and Mailpit
+        # Mailpit receives the emails the auth flows read their links from.
+        run: docker compose up -d --wait postgres redis mailpit
       - run: uv sync --frozen
         working-directory: qloud_backend
       - run: pnpm install --frozen-lockfile
