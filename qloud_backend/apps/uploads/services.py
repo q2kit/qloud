@@ -305,11 +305,48 @@ def abort(user: User, session: UploadSession) -> None:
         if locked.status != Status.ACTIVE:
             return
         _release(locked, Status.ABORTED)
+    _drop_from_storage(locked)
+
+
+def _drop_from_storage(session: UploadSession) -> None:
+    """Remove the parts, and an object assembled before the upload was given up."""
     try:
-        if locked.s3_upload_id:
-            s3.abort_multipart_upload(locked.storage_key, locked.s3_upload_id)
-        # Also removes an object assembled before the target turned out to be gone.
-        s3.delete_objects([locked.storage_key])
+        if session.s3_upload_id:
+            s3.abort_multipart_upload(session.storage_key, session.s3_upload_id)
+        s3.delete_objects([session.storage_key])
     except s3.StorageError:
-        # The bucket's lifecycle rule (and M2-06) clean up whatever is left.
-        logger.warning("Could not clean up upload %s in S3", locked.pk, exc_info=True)
+        # The quota is already back; the bucket's lifecycle rule (abort incomplete
+        # multipart uploads after 8 days) removes what is left.
+        logger.warning("Could not clean up upload %s in S3", session.pk, exc_info=True)
+
+
+# --- expiry (M2-06) -------------------------------------------------------------------
+
+
+def expire(session_id: uuid.UUID) -> bool:
+    """Close one session past `expires_at` and hand its reservation back.
+
+    Takes the same locks in the same order as `complete` and `abort` (owner, then
+    session), so a completion that is running finishes first or not at all.
+    """
+    owner_id = (
+        UploadSession.objects.filter(pk=session_id).values_list("owner_id", flat=True).first()
+    )
+    if owner_id is None:
+        return False
+    with transaction.atomic():
+        _lock_owner(owner_id)
+        session = UploadSession.objects.select_for_update().get(pk=session_id)
+        if session.status != Status.ACTIVE or session.expires_at > timezone.now():
+            return False
+        _release(session, Status.EXPIRED)
+    _drop_from_storage(session)
+    return True
+
+
+def expired_session_ids(limit: int) -> list[uuid.UUID]:
+    return list(
+        UploadSession.objects.filter(status=Status.ACTIVE, expires_at__lte=timezone.now())
+        .order_by("expires_at")
+        .values_list("pk", flat=True)[:limit]
+    )

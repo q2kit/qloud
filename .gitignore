@@ -52,3 +52,4 @@ Thumbs.db
 # Worktrees of parallel agents and per-machine settings
 .claude/worktrees/
 .claude/settings.local.json
+celerybeat-schedule*

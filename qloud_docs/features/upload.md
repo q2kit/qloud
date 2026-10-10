@@ -27,6 +27,8 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). Model `Blob`/`FileV
    tạo Blob, Node (hoặc version mới), `reserved -= size`, `used += size`. Cuối cùng đẩy task thumbnail.
 6. **Hủy / hết hạn:** `AbortMultipartUpload` và trả lại phần quota đã giữ chỗ. Celery beat quét mỗi giờ để dọn các session quá `expires_at` (7 ngày).
    Bucket có thêm lifecycle rule `AbortIncompleteMultipartUpload` sau 8 ngày để dự phòng.
+   M2-06: task `uploads.tasks.expire_uploads` (`CELERY_BEAT_SCHEDULE`, mỗi giờ). Mỗi session một transaction, khóa theo cùng thứ tự với `complete`/`abort` (owner rồi session),
+   nên upload đang hoàn tất thì xong trước hoặc không bị đụng tới. Quota được trả lại kể cả khi S3 lỗi lúc dọn; phần còn sót do lifecycle rule xử lý. Chạy lại không làm gì thêm.
 
 **Yêu cầu về CORS của bucket:** cho phép `PUT` và `GET` từ origin của FE, và `ExposeHeaders: ETag`.
 
