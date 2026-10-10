@@ -111,3 +111,65 @@ test('an unknown folder says so', async ({ page }) => {
   await page.getByRole('link', { name: 'Về Drive' }).click();
   await expect(page).toHaveURL(/\/drive$/);
 });
+
+test.describe('selecting and moving (M2-07b)', () => {
+  test('drag several items into a folder, then back via the breadcrumb', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(
+      isMobile,
+      'HTML drag and drop needs a mouse; touch uses the Move dialog',
+    );
+    await page.goto('/drive');
+    for (const name of ['Đích', 'Một', 'Hai']) await createFolder(page, name);
+
+    await item(page, 'Hai').click();
+    await item(page, 'Một').click({ modifiers: ['ControlOrMeta'] });
+    await expect(page.getByText('2 mục đã chọn')).toBeVisible();
+    await item(page, 'Một').dragTo(item(page, 'Đích'));
+    await expect(page.getByRole('option')).toHaveText([/^Đích/]);
+
+    await item(page, 'Đích').dblclick();
+    await expect(page.getByRole('option')).toHaveText([/^Hai/, /^Một/]);
+    await item(page, 'Hai').dragTo(
+      page
+        .getByRole('navigation', { name: 'Đường dẫn thư mục' })
+        .getByRole('link', { name: 'Drive của tôi' }),
+    );
+    await expect(page.getByRole('option')).toHaveText([/^Một/]);
+    await page.goto('/drive');
+    await expect(page.getByRole('option')).toHaveText([/^Đích/, /^Hai/]);
+  });
+
+  test('the Move dialog, and a folder cannot go inside itself', async ({
+    page,
+  }) => {
+    await page.goto('/drive');
+    await createFolder(page, 'Cha');
+    await item(page, 'Cha').dblclick();
+    await createFolder(page, 'Con');
+    await page
+      .getByRole('navigation', { name: 'Đường dẫn thư mục' })
+      .getByRole('link', { name: 'Drive của tôi' })
+      .click();
+    await createFolder(page, 'Ghi chú');
+
+    // Right click: the item menu.
+    await item(page, 'Cha').click({ button: 'right' });
+    await page.getByRole('menuitem', { name: /Di chuyển/ }).click();
+    const dialog = page.getByRole('dialog', { name: 'Di chuyển 1 mục' });
+    await expect(dialog.getByRole('button', { name: 'Cha' })).toBeDisabled();
+    await dialog.getByRole('button', { name: 'Hủy' }).click();
+
+    await item(page, 'Ghi chú').click();
+    await page.getByRole('button', { name: 'Di chuyển…' }).click();
+    await dialog.getByRole('button', { name: 'Cha' }).click();
+    await dialog.getByRole('button', { name: 'Con' }).click();
+    await dialog.getByRole('button', { name: 'Di chuyển tới đây' }).click();
+    await expect(
+      page.getByRole('status').filter({ hasText: 'Đã di chuyển' }),
+    ).toHaveText('Đã di chuyển 1 mục tới "Con".');
+    await expect(page.getByRole('option')).toHaveText([/^Cha/]);
+  });
+});

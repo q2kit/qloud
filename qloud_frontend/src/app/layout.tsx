@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Outlet } from 'react-router';
 
 import { CreateFolderDialog } from '@/features/drive/components/create-folder-dialog';
+import { useDriveStore } from '@/features/drive/store';
 
 import { AppHeader } from './app-header';
 import { AppSidebar } from './app-sidebar';
@@ -42,7 +43,9 @@ function isDetailShortcut(event: KeyboardEvent): boolean {
 
 export function AppLayout(): React.JSX.Element {
   const [isNavigationOpen, setIsNavigationOpen] = React.useState(false);
-  const [isDetailOpen, setIsDetailOpen] = React.useState(false);
+  // In the store: "Info" in the item menu opens it too.
+  const isDetailOpen = useDriveStore((state) => state.isDetailOpen);
+  const setIsDetailOpen = useDriveStore((state) => state.setDetailOpen);
   const navigationTriggerRef = React.useRef<HTMLButtonElement>(null);
   const detailTriggerRef = React.useRef<HTMLButtonElement>(null);
 
@@ -57,7 +60,7 @@ export function AppLayout(): React.JSX.Element {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [setIsDetailOpen]);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">

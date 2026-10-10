@@ -18,7 +18,6 @@ import { FakeDrive, ROOT_ID } from '@/test/drive-server';
 import { renderApp } from '@/test/render-app';
 
 import { VIRTUALIZE_AFTER } from './components/node-collection';
-import { useDriveStore } from './store';
 
 const server = setupServer();
 let drive: FakeDrive;
@@ -29,7 +28,6 @@ beforeAll(() => {
 beforeEach(async () => {
   drive = new FakeDrive();
   server.use(...drive.handlers());
-  useDriveStore.setState({ selected: null, isCreatingFolder: false });
   await i18n.changeLanguage('en');
 });
 afterEach(() => {

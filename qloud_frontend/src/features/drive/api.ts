@@ -177,6 +177,75 @@ export function useRename(): UseMutationResult<
   });
 }
 
+function withoutNodes(data: ChildrenData | undefined, ids: Set<string>) {
+  if (!data) return data;
+  return {
+    ...data,
+    pages: data.pages.map((page) => ({
+      ...page,
+      results: page.results.filter((node) => !ids.has(node.id)),
+    })),
+  };
+}
+
+interface MoveVariables {
+  nodes: DriveNode[];
+  targetId: string;
+}
+
+/** One request for any number of items (files-folders.md); they leave the source at once. */
+export function useMove(): UseMutationResult<
+  DriveNode[],
+  Error,
+  MoveVariables,
+  { snapshot: [readonly unknown[], ChildrenData | undefined][] }
+> {
+  const queryClient = useQueryClient();
+  const sourcesOf = (nodes: DriveNode[]) =>
+    [...new Set(nodes.map((node) => node.parent_id ?? ''))].map((id) =>
+      driveKeys.children(id),
+    );
+  return useMutation({
+    mutationFn: async ({ nodes, targetId }) =>
+      unwrap(
+        await api.POST('/api/v1/nodes/move', {
+          body: {
+            node_ids: nodes.map((node) => node.id),
+            target_parent_id: targetId,
+          },
+        }),
+      ).nodes,
+    onMutate: async ({ nodes }) => {
+      const ids = new Set(nodes.map((node) => node.id));
+      const snapshot: [readonly unknown[], ChildrenData | undefined][] = [];
+      for (const key of sourcesOf(nodes)) {
+        await queryClient.cancelQueries({ queryKey: key });
+        snapshot.push(
+          ...queryClient.getQueriesData<ChildrenData>({ queryKey: key }),
+        );
+        queryClient.setQueriesData<ChildrenData>({ queryKey: key }, (data) =>
+          withoutNodes(data, ids),
+        );
+      }
+      return { snapshot };
+    },
+    onError: (_error, _variables, context) => {
+      for (const [key, data] of context?.snapshot ?? []) {
+        queryClient.setQueryData(key, data);
+      }
+    },
+    onSettled: (_data, _error, { nodes, targetId }) => {
+      for (const key of [...sourcesOf(nodes), driveKeys.children(targetId)]) {
+        void queryClient.invalidateQueries({ queryKey: key });
+      }
+      // Moved folders have a new breadcrumb.
+      void queryClient.invalidateQueries({
+        queryKey: [...driveKeys.all, 'node'],
+      });
+    },
+  });
+}
+
 /** Ask for a short-lived link and let the browser download from storage. */
 export async function downloadNode(id: string): Promise<void> {
   const link = unwrap(

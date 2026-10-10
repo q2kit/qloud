@@ -1,0 +1,294 @@
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { delay, http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest';
+
+import { i18n } from '@/lib/i18n';
+import { testUser } from '@/test/auth';
+import { FakeDrive, ROOT_ID } from '@/test/drive-server';
+import { renderApp } from '@/test/render-app';
+
+import { DRAG_TYPE } from './actions';
+
+const server = setupServer();
+let drive: FakeDrive;
+
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: 'bypass' });
+});
+beforeEach(async () => {
+  drive = new FakeDrive();
+  server.use(...drive.handlers());
+  await i18n.changeLanguage('en');
+});
+afterEach(() => {
+  server.resetHandlers();
+});
+afterAll(() => {
+  server.close();
+});
+
+const option = (name: string) => screen.getByRole('option', { name });
+// `hidden`: an open Radix menu hides the rest of the page from the accessibility tree.
+const selectedNames = () =>
+  screen
+    .getAllByRole('option', { hidden: true })
+    .filter((item) => item.getAttribute('aria-selected') === 'true')
+    .map((item) => item.getAttribute('aria-label'));
+const names = () =>
+  screen.getAllByRole('option').map((item) => item.getAttribute('aria-label'));
+
+/** jsdom has no DataTransfer; this is the part drag and drop uses. */
+function dataTransfer() {
+  const data = new Map<string, string>();
+  return {
+    data,
+    types: [] as string[],
+    dropEffect: 'none',
+    effectAllowed: 'all',
+    setData(type: string, value: string) {
+      data.set(type, value);
+      this.types.push(type);
+    },
+    getData: (type: string) => data.get(type) ?? '',
+  };
+}
+
+describe('selecting several items (M2-07b)', () => {
+  it('Ctrl/⌘+click, Shift+click, Ctrl+A and Esc', async () => {
+    const user = userEvent.setup();
+    for (const name of ['A', 'B', 'C', 'D']) drive.folder(name);
+    renderApp('/drive', testUser);
+    await screen.findByRole('option', { name: 'A' });
+
+    await user.click(option('A'));
+    await user.keyboard('{Control>}');
+    await user.click(option('C'));
+    await user.keyboard('{/Control}');
+    expect(selectedNames()).toEqual(['A', 'C']);
+    expect(screen.getByText('2 items selected')).toBeVisible();
+
+    await user.click(option('B'));
+    await user.keyboard('{Shift>}');
+    await user.click(option('D'));
+    await user.keyboard('{/Shift}');
+    expect(selectedNames()).toEqual(['B', 'C', 'D']);
+
+    await user.keyboard('{Control>}a{/Control}');
+    expect(selectedNames()).toEqual(['A', 'B', 'C', 'D']);
+    await user.click(
+      screen.getByRole('button', { name: 'Open details panel' }),
+    );
+    const panel = within(screen.getByRole('dialog', { name: 'Details' }));
+    expect(panel.getByText('4 items selected')).toBeVisible();
+    await user.keyboard('{Escape}');
+
+    option('A').focus();
+    await user.keyboard('{Escape}');
+    expect(selectedNames()).toEqual([]);
+  });
+
+  it('Ctrl/⌘+A works from anywhere on the page, not only the list', async () => {
+    const user = userEvent.setup();
+    for (const name of ['A', 'B']) drive.folder(name);
+    renderApp('/drive', testUser);
+    await screen.findByRole('option', { name: 'A' });
+    // Focus on a toolbar button, outside the listbox.
+    screen.getByRole('button', { name: 'List view' }).focus();
+    await user.keyboard('{Control>}a{/Control}');
+    expect(selectedNames()).toEqual(['A', 'B']);
+    await user.keyboard('{Escape}');
+    expect(selectedNames()).toEqual([]);
+  });
+
+  it('Shift+arrows grow the selection', async () => {
+    const user = userEvent.setup();
+    for (const name of ['A', 'B', 'C']) drive.folder(name);
+    renderApp('/drive', testUser);
+    await user.click(await screen.findByRole('option', { name: 'A' }));
+    await user.keyboard('{Shift>}{ArrowRight}{ArrowRight}{/Shift}');
+    expect(selectedNames()).toEqual(['A', 'B', 'C']);
+  });
+});
+
+describe('item menus', () => {
+  it('right click selects the item and offers its actions', async () => {
+    const user = userEvent.setup();
+    drive.folder('A');
+    drive.file('report.pdf');
+    renderApp('/drive', testUser);
+
+    await user.pointer({
+      keys: '[MouseRight]',
+      target: await screen.findByRole('option', { name: 'report.pdf' }),
+    });
+    const menu = within(screen.getByRole('menu'));
+    expect(
+      menu.getAllByRole('menuitem').map((item) => item.textContent),
+    ).toEqual(['Download↵', 'RenameF2', 'Move…', 'Infoi']);
+    expect(selectedNames()).toEqual(['report.pdf']);
+    await user.click(menu.getByRole('menuitem', { name: /Info/ }));
+    expect(screen.getByRole('dialog', { name: 'Details' })).toBeVisible();
+  });
+
+  it('the ⋯ button opens the same menu; several items only move', async () => {
+    const user = userEvent.setup();
+    drive.folder('A');
+    drive.folder('B');
+    renderApp('/drive', testUser);
+    await user.click(await screen.findByRole('option', { name: 'A' }));
+    await user.keyboard('{Control>}');
+    await user.click(option('B'));
+    await user.keyboard('{/Control}');
+
+    await user.click(
+      screen.getByRole('button', { name: 'More actions for B' }),
+    );
+    expect(
+      within(screen.getByRole('menu'))
+        .getAllByRole('menuitem')
+        .map((item) => item.textContent),
+    ).toEqual(['Move 2 items…']);
+  });
+});
+
+describe('moving', () => {
+  it('moves the selection with the dialog, optimistically', async () => {
+    const user = userEvent.setup();
+    drive.writeDelay = 200;
+    const target = drive.folder('Archive');
+    const inner = drive.folder('2025', target.id);
+    drive.folder('Notes');
+    drive.file('a.pdf');
+    renderApp('/drive', testUser);
+
+    await user.click(await screen.findByRole('option', { name: 'Notes' }));
+    await user.keyboard('{Control>}');
+    await user.click(option('a.pdf'));
+    await user.keyboard('{/Control}');
+    await user.click(screen.getByRole('button', { name: 'Move 2 items…' }));
+
+    const dialog = within(screen.getByRole('dialog', { name: 'Move 2 items' }));
+    // Where they already are: nothing to do yet.
+    expect(dialog.getByRole('button', { name: 'Move here' })).toBeDisabled();
+    // The items being moved cannot be entered.
+    expect(dialog.getByRole('button', { name: 'Notes' })).toBeDisabled();
+    await user.click(dialog.getByRole('button', { name: 'Archive' }));
+    await user.click(await dialog.findByRole('button', { name: '2025' }));
+    await dialog.findByText('No subfolders.');
+    await user.click(dialog.getByRole('button', { name: 'Move here' }));
+
+    // Gone from here before the server answers.
+    expect(names()).toEqual(['Archive']);
+    await waitFor(() => {
+      expect(drive.moves).toHaveLength(1);
+    });
+    expect(drive.moves[0]?.target_parent_id).toBe(inner.id);
+    expect(
+      await screen.findByText('Moved 2 items to "2025".'),
+    ).toBeInTheDocument();
+  });
+
+  it('puts the items back when the move is refused', async () => {
+    const user = userEvent.setup();
+    drive.folder('Other');
+    drive.folder('Mine');
+    // As if the tree changed elsewhere and the API now sees a cycle.
+    server.use(
+      http.post('/api/v1/nodes/move', async () => {
+        await delay(100);
+        return HttpResponse.json(
+          { error: { code: 'invalid_move', message: 'Cycle.', details: {} } },
+          { status: 400 },
+        );
+      }),
+    );
+    renderApp('/drive', testUser);
+    await user.click(await screen.findByRole('option', { name: 'Mine' }));
+    await user.click(screen.getByRole('button', { name: 'Move…' }));
+    const dialog = within(screen.getByRole('dialog', { name: 'Move 1 item' }));
+    // The folder being moved cannot be entered.
+    expect(dialog.getByRole('button', { name: 'Mine' })).toBeDisabled();
+    await user.click(dialog.getByRole('button', { name: 'Other' }));
+    await user.click(await dialog.findByRole('button', { name: 'Move here' }));
+
+    expect(names()).toEqual(['Other']);
+    expect(
+      await screen.findByText(
+        "A folder can't be moved into itself or one of its subfolders.",
+      ),
+    ).toBeVisible();
+    expect(names()).toEqual(['Mine', 'Other']);
+    expect(selectedNames()).toEqual(['Mine']);
+  });
+
+  it('drops on a folder or a breadcrumb link to move there', async () => {
+    const project = drive.folder('Project');
+    const target = drive.folder('Target', project.id);
+    drive.file('a.pdf', project.id);
+    drive.file('b.pdf', project.id);
+    renderApp(`/drive/folders/${project.id}`, testUser);
+    await screen.findByRole('option', { name: 'a.pdf' });
+
+    let transfer = dataTransfer();
+    fireEvent.dragStart(option('a.pdf'), { dataTransfer: transfer });
+    fireEvent.dragOver(option('Target'), { dataTransfer: transfer });
+    expect(option('Target').className).toContain('ring-2');
+    fireEvent.drop(option('Target'), { dataTransfer: transfer });
+    await waitFor(() => {
+      expect(drive.moves.at(-1)).toEqual({
+        node_ids: [expect.any(String)],
+        target_parent_id: target.id,
+      });
+    });
+    expect(transfer.data.get(DRAG_TYPE)).toBeDefined();
+
+    transfer = dataTransfer();
+    fireEvent.dragStart(await screen.findByRole('option', { name: 'b.pdf' }), {
+      dataTransfer: transfer,
+    });
+    const root = within(
+      screen.getByRole('navigation', { name: 'Folder path' }),
+    ).getByRole('link', { name: 'My Drive' });
+    fireEvent.dragOver(root, { dataTransfer: transfer });
+    fireEvent.drop(root, { dataTransfer: transfer });
+    await waitFor(() => {
+      expect(drive.moves.at(-1)?.target_parent_id).toBe(ROOT_ID);
+    });
+    await waitFor(() => {
+      expect(names()).toEqual(['Target']);
+    });
+  });
+
+  it('moves fifty items in one request', async () => {
+    const user = userEvent.setup();
+    const target = drive.folder('0 Target');
+    for (let i = 0; i < 50; i += 1) drive.file(`file ${String(i)}.txt`);
+    renderApp('/drive', testUser);
+    await user.click(await screen.findByRole('option', { name: 'file 0.txt' }));
+    await user.keyboard('{Control>}a{/Control}');
+    await user.keyboard('{Control>}');
+    await user.click(option('0 Target'));
+    await user.keyboard('{/Control}');
+    await user.click(screen.getByRole('button', { name: 'Move 50 items…' }));
+    const dialog = within(
+      screen.getByRole('dialog', { name: 'Move 50 items' }),
+    );
+    await user.click(await dialog.findByRole('button', { name: '0 Target' }));
+    await user.click(dialog.getByRole('button', { name: 'Move here' }));
+    await waitFor(() => {
+      expect(drive.moves).toHaveLength(1);
+    });
+    expect(drive.moves[0]?.node_ids).toHaveLength(50);
+    expect(drive.moves[0]?.target_parent_id).toBe(target.id);
+  });
+});

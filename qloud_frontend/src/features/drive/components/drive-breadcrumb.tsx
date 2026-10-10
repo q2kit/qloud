@@ -1,17 +1,26 @@
 import { ChevronRight } from 'lucide-react';
+import * as React from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
-import type { DriveNodeDetail } from '../api';
+import { readDraggedIds } from '../actions';
+import type { DriveNode, DriveNodeDetail } from '../api';
 import { folderPath } from '../paths';
 
 /** S-05: the breadcrumb is the page title; the current folder is the `<h1>`. */
 export function DriveBreadcrumb({
   folder,
+  onDrop,
 }: {
   folder: DriveNodeDetail;
+  /** Dropping dragged items on an ancestor moves them there (ui-ux.md). */
+  onDrop: (
+    target: Pick<DriveNode, 'id' | 'name' | 'is_root'>,
+    ids: string[],
+  ) => void;
 }): React.JSX.Element {
   const { t } = useTranslation();
+  const [over, setOver] = React.useState<string | null>(null);
   const label = (node: { name: string }, index: number): string =>
     // The root's stored name is technical; show the translated one.
     index === 0 ? t('shell.breadcrumbRoot') : node.name;
@@ -39,7 +48,30 @@ export function DriveBreadcrumb({
             )}
             <Link
               to={folderPath(index === 0 ? undefined : node.id)}
-              className="truncate rounded-sm hover:text-foreground hover:underline"
+              className={
+                over === node.id
+                  ? 'truncate rounded-sm bg-primary/15 px-1 text-foreground ring-2 ring-primary'
+                  : 'truncate rounded-sm hover:text-foreground hover:underline'
+              }
+              onDragOver={(event) => {
+                if (readDraggedIds(event) === null) return;
+                event.preventDefault();
+                event.dataTransfer.dropEffect = 'move';
+                setOver(node.id);
+              }}
+              onDragLeave={() => {
+                setOver(null);
+              }}
+              onDrop={(event) => {
+                const ids = readDraggedIds(event);
+                setOver(null);
+                if (!ids?.length) return;
+                event.preventDefault();
+                onDrop(
+                  { id: node.id, name: node.name, is_root: index === 0 },
+                  ids,
+                );
+              }}
             >
               {label(node, index)}
             </Link>

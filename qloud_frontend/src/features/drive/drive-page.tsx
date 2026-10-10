@@ -7,17 +7,23 @@ import { Button } from '@/components/ui/button';
 import { FormAlert } from '@/features/auth/components/form-field';
 import { ApiError } from '@/lib/api/errors';
 
+import { nodeActions, type ActionHandlers } from './actions';
 import {
   downloadNode,
   useChildren,
+  useMove,
   useNode,
   useRename,
   type DriveNode,
 } from './api';
 import { DriveBreadcrumb } from './components/drive-breadcrumb';
 import { DriveToolbar } from './components/drive-toolbar';
+import { MoveDialog } from './components/move-dialog';
 import { NameDialog } from './components/name-dialog';
-import { NodeCollection } from './components/node-collection';
+import {
+  NodeCollection,
+  type SelectModifiers,
+} from './components/node-collection';
 import { driveErrorMessage } from './errors';
 import { folderPath } from './paths';
 import { useDrivePreferences } from './preferences';
@@ -31,6 +37,11 @@ interface Renaming {
   error?: string;
 }
 
+interface Moving {
+  nodes: DriveNode[];
+  error?: string;
+}
+
 /** S-05: one folder of the Drive (files-folders.md). */
 export function DrivePage(): React.JSX.Element {
   const { t } = useTranslation();
@@ -39,22 +50,54 @@ export function DrivePage(): React.JSX.Element {
   const folder = useNode(folderId);
   const { view, setView, ordering, setOrdering } = useDrivePreferences();
   const children = useChildren(folderId, ordering);
-  const selected = useDriveStore((state) => state.selected);
-  const select = useDriveStore((state) => state.select);
-  const setCreatingFolder = useDriveStore((state) => state.setCreatingFolder);
+  const store = useDriveStore();
+  const { selected, select } = store;
   const rename = useRename();
+  const move = useMove();
   const [renaming, setRenaming] = React.useState<Renaming | null>(null);
+  const [moving, setMoving] = React.useState<Moving | null>(null);
   const [actionError, setActionError] = React.useState<string | null>(null);
+  const [announcement, setAnnouncement] = React.useState('');
 
   // A selection from another folder means nothing here (a just-created folder is kept).
   React.useEffect(() => {
-    if (selected && selected.parent_id !== folderId) select(null);
+    if (selected.some((node) => node.parent_id !== folderId)) select(null);
   }, [folderId, selected, select]);
 
   const nodes = React.useMemo(
     () => children.data?.pages.flatMap((page) => page.results) ?? [],
     [children.data],
   );
+  const selectedIds = React.useMemo(
+    () => new Set(selected.map((node) => node.id)),
+    [selected],
+  );
+  // Ctrl/⌘+A and Esc anywhere on the page, not only inside the list; otherwise the
+  // browser would select all the page's text. Typing, dialogs and menus keep them.
+  React.useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent): void => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (
+        event.defaultPrevented ||
+        target?.closest(
+          'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="dialog"], [role="menu"]',
+        )
+      ) {
+        return;
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a') {
+        event.preventDefault();
+        useDriveStore.getState().selectAll(nodes);
+      } else if (event.key === 'Escape') {
+        useDriveStore.getState().select(null);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [nodes]);
+
   const { fetchNextPage, isFetchingNextPage } = children;
   const loadMore = React.useCallback(() => {
     if (!isFetchingNextPage) void fetchNextPage();
@@ -76,16 +119,75 @@ export function DrivePage(): React.JSX.Element {
     const name = raw.trim();
     setRenaming(null);
     if (name === node.name) return;
-    select({ ...node, name });
+    store.update([{ ...node, name }]);
     rename.mutate(
       { node, name },
       {
         onError: (error) => {
-          select(node);
+          store.update([node]);
           setRenaming({ node, name, error: driveErrorMessage(error, t) });
         },
       },
     );
+  };
+
+  /** Optimistic: the items leave this folder at once and come back if the API refuses. */
+  const moveTo = (
+    items: DriveNode[],
+    target: Pick<DriveNode, 'id' | 'name' | 'is_root'>,
+  ): void => {
+    const targetName = target.is_root ? t('shell.breadcrumbRoot') : target.name;
+    setActionError(null);
+    setAnnouncement('');
+    setMoving(null);
+    select(null);
+    move.mutate(
+      { nodes: items, targetId: target.id },
+      {
+        onSuccess: (moved) => {
+          setAnnouncement(
+            t('drive.move.done', { count: moved.length, target: targetName }),
+          );
+        },
+        onError: (error) => {
+          store.selectAll(items);
+          setActionError(driveErrorMessage(error, t));
+        },
+      },
+    );
+  };
+
+  const dropOn = (
+    target: Pick<DriveNode, 'id' | 'name' | 'is_root'>,
+    ids: string[],
+  ): void => {
+    const byId = new Map(nodes.map((node) => [node.id, node]));
+    const items = ids.flatMap((id) => byId.get(id) ?? []);
+    if (items.length && items.every((node) => node.id !== target.id))
+      moveTo(items, target);
+  };
+
+  const handlers: ActionHandlers = {
+    open,
+    download: open,
+    rename: (node) => {
+      setRenaming({ node, name: node.name });
+    },
+    move: (items) => {
+      setMoving({ nodes: items });
+    },
+    info: () => {
+      store.setDetailOpen(true);
+    },
+  };
+
+  const onSelect = (
+    node: DriveNode,
+    { toggle, range }: SelectModifiers,
+  ): void => {
+    if (range) store.selectRange(nodes, node);
+    else if (toggle) store.toggle(node);
+    else select(node);
   };
 
   if (folder.isError) {
@@ -101,7 +203,7 @@ export function DrivePage(): React.JSX.Element {
     <section className="mx-auto flex max-w-7xl flex-col gap-4">
       <div className="flex min-h-9 items-center border-b border-border pb-4">
         {folder.data ? (
-          <DriveBreadcrumb folder={folder.data} />
+          <DriveBreadcrumb folder={folder.data} onDrop={dropOn} />
         ) : (
           <div
             className="h-7 w-48 animate-pulse rounded-md bg-secondary"
@@ -115,12 +217,15 @@ export function DrivePage(): React.JSX.Element {
         ordering={ordering}
         onView={setView}
         onOrdering={setOrdering}
-        onRename={(node) => {
-          setRenaming({ node, name: node.name });
+        actions={nodeActions(selected, handlers, t)}
+        onClearSelection={() => {
+          select(null);
         }}
-        onDownload={open}
       />
       {actionError && <FormAlert>{actionError}</FormAlert>}
+      <p className="sr-only" role="status">
+        {announcement}
+      </p>
 
       {children.isPending ? (
         <LoadingSkeleton view={view} />
@@ -129,22 +234,28 @@ export function DrivePage(): React.JSX.Element {
       ) : nodes.length === 0 ? (
         <EmptyFolder
           onCreate={() => {
-            setCreatingFolder(true);
+            store.setCreatingFolder(true);
           }}
         />
       ) : (
         <NodeCollection
           nodes={nodes}
           view={view}
-          selectedId={selected?.id ?? null}
+          selectedIds={selectedIds}
           hasMore={children.hasNextPage}
           isLoadingMore={isFetchingNextPage}
           onLoadMore={loadMore}
-          onSelect={select}
+          onSelect={onSelect}
           onOpen={open}
-          onRename={(node) => {
-            setRenaming({ node, name: node.name });
-          }}
+          onRename={handlers.rename}
+          // Read the store directly: the menu opens right after the item got selected.
+          actionsFor={() =>
+            nodeActions(useDriveStore.getState().selected, handlers, t)
+          }
+          dragIdsFor={(node) =>
+            selectedIds.has(node.id) ? [...selectedIds] : [node.id]
+          }
+          onDropOnFolder={dropOn}
         />
       )}
 
@@ -160,6 +271,17 @@ export function DrivePage(): React.JSX.Element {
         }}
         onSubmit={(name) => {
           if (renaming) submitRename(renaming, name);
+        }}
+      />
+      <MoveDialog
+        nodes={moving?.nodes ?? null}
+        startFolderId={folderId}
+        error={moving?.error}
+        onOpenChange={(next) => {
+          if (!next) setMoving(null);
+        }}
+        onMove={(target) => {
+          if (moving) moveTo(moving.nodes, target);
         }}
       />
     </section>

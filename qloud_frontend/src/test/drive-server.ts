@@ -10,6 +10,7 @@ export const ROOT_ID = '0190c0de-0000-7000-8000-00000000f000';
 export class FakeDrive {
   nodes = new Map<string, DriveNode>();
   requests: URL[] = [];
+  moves: { node_ids: string[]; target_parent_id: string }[] = [];
   /** Milliseconds every write waits, to observe optimistic updates. */
   writeDelay = 0;
   failChildren = false;
@@ -185,6 +186,37 @@ export class FakeDrive {
         const renamed = { ...node, name: body.name };
         this.nodes.set(node.id, renamed);
         return HttpResponse.json(this.detail(renamed));
+      }),
+      http.post('/api/v1/nodes/move', async ({ request }) => {
+        const body = (await request.json()) as {
+          node_ids: string[];
+          target_parent_id: string;
+        };
+        this.moves.push(body);
+        await delay(this.writeDelay);
+        // Like the API: the target may not be one of the nodes or inside one.
+        for (
+          let id: string | null = body.target_parent_id;
+          id;
+          id = this.nodes.get(id)?.parent_id ?? null
+        ) {
+          if (body.node_ids.includes(id)) {
+            return HttpResponse.json(
+              {
+                error: { code: 'invalid_move', message: 'Cycle.', details: {} },
+              },
+              { status: 400 },
+            );
+          }
+        }
+        const moved = body.node_ids.flatMap((id) => {
+          const node = this.nodes.get(id);
+          if (!node) return [];
+          const next = { ...node, parent_id: body.target_parent_id };
+          this.nodes.set(id, next);
+          return [next];
+        });
+        return HttpResponse.json({ nodes: moved });
       }),
       http.get('/api/v1/nodes/:id/download', ({ params }) =>
         HttpResponse.json({

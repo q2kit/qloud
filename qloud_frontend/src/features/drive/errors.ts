@@ -5,6 +5,7 @@ import { ApiError } from '@/lib/api/errors';
 const KNOWN = new Set([
   'name_conflict',
   'invalid_target',
+  'invalid_move',
   'root_folder',
   'not_found',
 ]);

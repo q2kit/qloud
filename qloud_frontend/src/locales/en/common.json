@@ -50,7 +50,9 @@
     },
     "dialogs": {
       "newFolder": "New folder",
-      "rename": "Rename"
+      "rename": "Rename",
+      "move_one": "Move {{count}} item",
+      "move_other": "Move {{count}} items"
     },
     "empty": {
       "title": "This folder is empty",
@@ -64,7 +66,14 @@
       "save": "Save",
       "cancel": "Cancel",
       "download": "Download",
-      "retry": "Try again"
+      "retry": "Try again",
+      "open": "Open",
+      "move": "Move…",
+      "moveCount_one": "Move {{count}} item…",
+      "moveCount_other": "Move {{count}} items…",
+      "moveHere": "Move here",
+      "info": "Info",
+      "more": "More actions for {{name}}"
     },
     "errors": {
       "generic": "Something went wrong. Please try again.",
@@ -76,7 +85,20 @@
       "loadFailedDescription": "Check your connection and try again.",
       "notFoundTitle": "Folder not found",
       "notFoundDescription": "This folder doesn't exist, was deleted, or you don't have access to it.",
-      "downloadFailed": "Couldn't download the file. Please try again."
+      "downloadFailed": "Couldn't download the file. Please try again.",
+      "invalid_move": "A folder can't be moved into itself or one of its subfolders."
+    },
+    "selection": {
+      "count_one": "{{count}} item selected",
+      "count_other": "{{count}} items selected",
+      "clear": "Clear selection"
+    },
+    "move": {
+      "description": "Pick the destination folder, then choose \"Move here\".",
+      "noFolders": "No subfolders.",
+      "folders": "Subfolders",
+      "done_one": "Moved {{count}} item to \"{{target}}\".",
+      "done_other": "Moved {{count}} items to \"{{target}}\"."
     }
   },
   "shell": {
