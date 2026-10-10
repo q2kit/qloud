@@ -9,6 +9,10 @@
 
 ## Quy tắc
 - Download: BE trả presigned GET URL có hạn 5 phút, với `Content-Disposition: attachment; filename*=UTF-8''...` để giữ đúng tên tiếng Việt.
+  M2-05 (`GET /nodes/{id}/download` → `{url, expires_at}`, `drive.downloads`):
+  - cần quyền xem; file trong thùng rác hoặc không có quyền thì 404; folder thì 400 `not_a_file`;
+  - tên file là tên **hiện tại** của node, nội dung là phiên bản hiện tại (phiên bản cũ: M7-02);
+  - tải về cũng ép `application/octet-stream` cho loại chạy được script (HTML, SVG, XML, `*+xml`, JavaScript).
 - Xem trước: presigned URL với `inline`. **Không bao giờ để trình duyệt render inline các loại có thể chạy script** (HTML, SVG, XML).
   Với những loại này, BE ép `Content-Type: application/octet-stream` và chỉ cho phép tải về.
 - Các loại hỗ trợ xem trước:
@@ -22,7 +26,7 @@
 - Tải nhiều file hoặc tải cả folder dạng zip: **chưa có trong MVP** (cần worker riêng để nén). Ghi chú để làm sau.
 
 ## Tiêu chí chấp nhận
-- [ ] Tải file có tên tiếng Việt có dấu thì giữ đúng tên.
+- [x] Tải file có tên tiếng Việt có dấu thì giữ đúng tên.
 - [ ] Mở trình xem: dùng được phím ←/→ để chuyển file, Esc để đóng, nút Tải xuống.
 - [ ] Video 2 GB tua được ngay, không phải chờ tải hết.
 - [ ] File HTML hoặc SVG không bị render inline.

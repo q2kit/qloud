@@ -13,11 +13,12 @@ from apps.accounts.models import User
 from apps.core.errors import ErrorSerializer
 from apps.sharing.permissions import get_node_or_404, nodes_for, role_of
 
-from . import selectors, services
+from . import downloads, selectors, services
 from .models import Node
 from .pagination import NodeChildrenPagination
 from .serializers import (
     CreateFolderSerializer,
+    DownloadLinkSerializer,
     MoveResultSerializer,
     MoveSerializer,
     NodeDetailSerializer,
@@ -65,6 +66,20 @@ class NodeDetailView(APIView):
         serializer.is_valid(raise_exception=True)
         node = services.rename(user, node_id, serializer.validated_data["name"])
         return _detail(user, node)
+
+
+class NodeDownloadView(APIView):
+    @extend_schema(
+        operation_id="nodes_download",
+        responses={
+            200: DownloadLinkSerializer,
+            400: OpenApiResponse(ErrorSerializer, description="`not_a_file`."),
+            404: NOT_FOUND,
+        },
+    )
+    def get(self, request: Request, node_id: uuid.UUID) -> Response:
+        node = get_node_or_404(_user(request), node_id)
+        return Response(DownloadLinkSerializer(downloads.download_link(node)).data)
 
 
 class NodeChildrenView(generics.ListAPIView[Node]):

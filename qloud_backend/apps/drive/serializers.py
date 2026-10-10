@@ -95,5 +95,10 @@ class MoveSerializer(serializers.Serializer[dict[str, Any]]):
     target_parent_id = serializers.UUIDField()
 
 
+class DownloadLinkSerializer(serializers.Serializer[Any]):
+    url = serializers.URLField(help_text="Presigned GET URL; send the browser straight to it.")
+    expires_at = serializers.DateTimeField()
+
+
 class MoveResultSerializer(serializers.Serializer[dict[str, Any]]):
     nodes = NodeSerializer(many=True)

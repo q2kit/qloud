@@ -108,6 +108,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/nodes/{node_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["nodes_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/nodes/move": {
         parameters: {
             query?: never;
@@ -218,6 +234,15 @@ export interface components {
             fingerprint: string;
             /** @default fail */
             on_conflict: components["schemas"]["OnConflictEnum"];
+        };
+        DownloadLink: {
+            /**
+             * Format: uri
+             * @description Presigned GET URL; send the browser straight to it.
+             */
+            url: string;
+            /** Format: date-time */
+            expires_at: string;
         };
         /** @description Schema of every error response, for `@extend_schema(responses=...)`. */
         Error: {
@@ -679,6 +704,45 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedNodeList"];
+                };
+            };
+            /** @description No such node, or no access to it. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    nodes_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                node_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DownloadLink"];
+                };
+            };
+            /** @description `not_a_file`. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             /** @description No such node, or no access to it. */

@@ -238,6 +238,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: No such node, or no access to it.
+  /api/v1/nodes/{node_id}/download:
+    get:
+      operationId: nodes_download
+      parameters:
+      - in: path
+        name: node_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadLink'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: '`not_a_file`.'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such node, or no access to it.
   /api/v1/nodes/move:
     post:
       operationId: nodes_move
@@ -602,6 +635,19 @@ components:
       - fingerprint
       - parent_id
       - size
+    DownloadLink:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Presigned GET URL; send the browser straight to it.
+        expires_at:
+          type: string
+          format: date-time
+      required:
+      - expires_at
+      - url
     Error:
       type: object
       description: Schema of every error response, for `@extend_schema(responses=...)`.
