@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 import { signUpViaApi } from './auth';
+import { openDriveFolder } from './drive';
 
 // S-05 against the real backend (files-folders.md acceptance criteria).
 test.beforeEach(async ({ page }) => {
@@ -26,7 +27,7 @@ test('nested folders, breadcrumb and reload', async ({ page }) => {
 
   for (const name of ['Dự án', 'Thiết kế', 'Logo']) {
     await createFolder(page, name);
-    await item(page, name).dblclick();
+    await openDriveFolder(page, name);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(name);
   }
   await expect(page).toHaveURL(/\/drive\/folders\/[0-9a-f]{32}$/);
@@ -130,7 +131,7 @@ test.describe('selecting and moving (M2-07b)', () => {
     await item(page, 'Một').dragTo(item(page, 'Đích'));
     await expect(page.getByRole('option')).toHaveText([/^Đích/]);
 
-    await item(page, 'Đích').dblclick();
+    await openDriveFolder(page, 'Đích');
     await expect(page.getByRole('option')).toHaveText([/^Hai/, /^Một/]);
     await item(page, 'Hai').dragTo(
       page
@@ -147,7 +148,7 @@ test.describe('selecting and moving (M2-07b)', () => {
   }) => {
     await page.goto('/drive');
     await createFolder(page, 'Cha');
-    await item(page, 'Cha').dblclick();
+    await openDriveFolder(page, 'Cha');
     await createFolder(page, 'Con');
     await page
       .getByRole('navigation', { name: 'Đường dẫn thư mục' })
@@ -181,7 +182,7 @@ test('every folder has its own link: new tab and bookmark', async ({
 }) => {
   await page.goto('/drive');
   await createFolder(page, 'Ảnh');
-  await item(page, 'Ảnh').dblclick();
+  await openDriveFolder(page, 'Ảnh');
   await createFolder(page, 'Hè 2026');
   const link = page.url();
   await page
@@ -245,7 +246,7 @@ test('rubber-band selection, Backspace to the parent, menus keep the keys', asyn
     await expect(page.getByText('3 mục đã chọn')).toBeHidden();
   }
 
-  await item(page, 'Một').dblclick();
+  await openDriveFolder(page, 'Một');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Một');
   await page.keyboard.press('Backspace');
   await expect(page).toHaveURL(/\/drive$/);

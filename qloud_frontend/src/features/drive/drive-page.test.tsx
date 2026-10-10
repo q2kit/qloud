@@ -1,4 +1,10 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
 import {
@@ -16,6 +22,8 @@ import { i18n } from '@/lib/i18n';
 import { testUser } from '@/test/auth';
 import { FakeDrive, ROOT_ID } from '@/test/drive-server';
 import { renderApp } from '@/test/render-app';
+import { setMediaQuery } from '@/test/match-media';
+import { DESKTOP_INPUT_QUERY } from './desktop-input';
 
 import { VIRTUALIZE_AFTER } from './components/node-collection';
 import { compactId } from './paths';
@@ -27,6 +35,7 @@ beforeAll(() => {
   server.listen({ onUnhandledRequest: 'bypass' });
 });
 beforeEach(async () => {
+  setMediaQuery(DESKTOP_INPUT_QUERY, true);
   drive = new FakeDrive();
   server.use(...drive.handlers());
   await i18n.changeLanguage('en');
@@ -43,6 +52,56 @@ const names = async () =>
   (await items()).map((item) => item.getAttribute('title'));
 
 describe('Drive (S-05)', () => {
+  it('touch devices ignore double click but keep explicit Open and New folder actions', async () => {
+    setMediaQuery(DESKTOP_INPUT_QUERY, false);
+    const user = userEvent.setup();
+    const photos = drive.folder('Photos');
+    drive.file('note.txt');
+    const router = renderApp('/drive', testUser);
+    await items();
+    await user.dblClick(screen.getByRole('option', { name: 'Photos' }));
+    expect(router.state.location.pathname).toBe('/drive');
+    await user.dblClick(screen.getByRole('option', { name: 'note.txt' }));
+    expect(
+      drive.requests.some((url) => url.pathname.endsWith('/download')),
+    ).toBe(false);
+    await user.dblClick(screen.getByTestId('folder-content'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('option', { name: 'Photos' }));
+    await user.click(screen.getByRole('button', { name: 'Open' }));
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Photos' }),
+    ).toBeVisible();
+    expect(router.state.location.pathname).toBe(
+      `/drive/folders/${compactId(photos.id)}`,
+    );
+    await user.click(screen.getByRole('button', { name: 'New folder' }));
+    expect(screen.getByRole('dialog', { name: 'New folder' })).toBeVisible();
+  });
+
+  it('updates double click behavior when the primary input capability changes', async () => {
+    const user = userEvent.setup();
+    drive.folder('Photos');
+    const router = renderApp('/drive', testUser);
+    await items();
+    act(() => {
+      setMediaQuery(DESKTOP_INPUT_QUERY, false);
+    });
+    await user.dblClick(screen.getByTestId('folder-content'));
+    await user.dblClick(screen.getByRole('option', { name: 'Photos' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/drive');
+    act(() => {
+      setMediaQuery(DESKTOP_INPUT_QUERY, true);
+    });
+    await user.dblClick(screen.getByTestId('folder-content'));
+    expect(screen.getByRole('dialog', { name: 'New folder' })).toBeVisible();
+    await user.keyboard('{Escape}');
+    await user.dblClick(screen.getByRole('option', { name: 'Photos' }));
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Photos' }),
+    ).toBeVisible();
+  });
   it('opens the root at /drive: folders first, in natural order', async () => {
     drive.file('file10.txt');
     drive.file('file2.txt');
@@ -170,6 +229,100 @@ describe('Drive (S-05)', () => {
       'aria-selected',
       'true',
     );
+  });
+
+  it.each(['grid', 'list'])(
+    'creates a child from empty space in %s view',
+    async (view) => {
+      const user = userEvent.setup();
+      localStorage.setItem('qloud.drive.view', view);
+      const parent = drive.folder('Projects');
+      drive.file('notes.txt', parent.id);
+      renderApp(`/drive/folders/${compactId(parent.id)}`, testUser);
+      await items();
+      await user.dblClick(screen.getByTestId('folder-content'));
+      const dialog = within(screen.getByRole('dialog', { name: 'New folder' }));
+      expect(dialog.getByLabelText('Name')).toHaveFocus();
+      await user.clear(dialog.getByLabelText('Name'));
+      await user.type(dialog.getByLabelText('Name'), 'Reports{Enter}');
+      expect(
+        await screen.findByRole('option', { name: 'Reports' }),
+      ).toBeVisible();
+      expect(
+        [...drive.nodes.values()].find((node) => node.name === 'Reports')
+          ?.parent_id,
+      ).toBe(parent.id);
+    },
+  );
+
+  it('opens from an empty root; cancel creates nothing and repeated double clicks do not stack', async () => {
+    const user = userEvent.setup();
+    renderApp('/drive', testUser);
+    await screen.findByText('This folder is empty');
+    const area = screen.getByTestId('folder-content');
+    await user.dblClick(area);
+    fireEvent.doubleClick(area); // a second event behind the open modal
+    expect(screen.getAllByRole('dialog', { name: 'New folder' })).toHaveLength(
+      1,
+    );
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(drive.nodes.size).toBe(1); // root only
+    await user.dblClick(area);
+    await user.clear(screen.getByLabelText('Name'));
+    await user.type(screen.getByLabelText('Name'), 'Reports{Enter}');
+    expect(
+      await screen.findByRole('option', { name: 'Reports' }),
+    ).toBeVisible();
+    expect(
+      [...drive.nodes.values()].find((node) => node.name === 'Reports')
+        ?.parent_id,
+    ).toBe(ROOT_ID);
+  });
+
+  it('ignores the breadcrumb, view controls and an open item menu', async () => {
+    const user = userEvent.setup();
+    drive.folder('A');
+    renderApp('/drive', testUser);
+    await items();
+    await user.dblClick(screen.getByRole('heading', { level: 1 }));
+    await user.dblClick(screen.getByRole('button', { name: 'List view' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // Use the actual contextmenu event: user-event does not synthesize it.
+    fireEvent.contextMenu(screen.getByRole('option', { name: 'A' }));
+    expect(screen.getByRole('menu')).toBeVisible();
+    fireEvent.doubleClick(screen.getByTestId('folder-content'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('does not create while loading or when the children request fails', async () => {
+    const user = userEvent.setup();
+    drive.failChildren = true;
+    renderApp('/drive', testUser);
+    fireEvent.doubleClick(screen.getByTestId('folder-content'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await screen.findByText("Couldn't load this folder");
+    await user.dblClick(screen.getByTestId('folder-content'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('a double click after drawing a selection box does not create a folder', async () => {
+    drive.folder('A');
+    renderApp('/drive', testUser);
+    await items();
+    const area = screen.getByTestId('folder-content');
+    fireEvent.pointerDown(area, {
+      button: 0,
+      pointerType: 'mouse',
+      clientX: 200,
+      clientY: 300,
+    });
+    fireEvent.pointerMove(window, { clientX: 210, clientY: 310 });
+    fireEvent.pointerUp(window);
+    fireEvent.doubleClick(area);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // A fresh genuine double click works again.
+    await userEvent.setup().dblClick(area);
+    expect(screen.getByRole('dialog', { name: 'New folder' })).toBeVisible();
   });
 
   it('keeps the dialog open with a message when the name is taken', async () => {
