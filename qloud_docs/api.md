@@ -86,7 +86,7 @@ M2-02 (5 endpoint trên):
 - `move`: 1–1000 id, một transaction; trả `{nodes: [...]}` sau khi chuyển (tên có thể đã thêm hậu tố). Một id không thấy hoặc không có quyền thì 404 và không chuyển gì.
 - Mã lỗi: `name_conflict` (409), `invalid_target` (400: đích không phải folder), `invalid_move` (400: vào chính nó/cây con, hoặc sang Drive của người khác), `root_folder` (400: đổi tên/di chuyển folder gốc).
 | POST | `/nodes/trash` | Đưa nhiều node vào thùng rác `{node_ids}` |
-| GET | `/nodes/{id}/download` | Trả về `{url, expires_at}` (presigned) |
+| GET | `/nodes/{id}/download` | Trả về `{url, expires_at}` (presigned, 5 phút; folder → 400 `not_a_file`) |
 | GET | `/nodes/{id}/preview` | URL xem trước hoặc thumbnail |
 | GET | `/recent` | Các file mới mở hoặc mới sửa |
 | GET | `/shared-with-me` | Các node người khác đã chia sẻ cho mình |

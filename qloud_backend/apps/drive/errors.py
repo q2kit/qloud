@@ -22,3 +22,8 @@ class InvalidMove(AppError):
 class RootFolder(AppError):
     default_code = "root_folder"
     default_detail = "The root folder cannot be renamed, moved or deleted."
+
+
+class NotAFile(AppError):
+    default_code = "not_a_file"
+    default_detail = "Only files can be downloaded."
