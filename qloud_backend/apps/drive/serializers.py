@@ -103,3 +103,18 @@ class DownloadLinkSerializer(serializers.Serializer[Any]):
 
 class MoveResultSerializer(serializers.Serializer[dict[str, Any]]):
     nodes = NodeSerializer(many=True)
+
+
+class ThumbnailLinkSerializer(serializers.Serializer[Any]):
+    url = serializers.URLField()
+    large_url = serializers.URLField()
+    expires_at = serializers.DateTimeField()
+
+
+class PreviewLinkSerializer(serializers.Serializer[Any]):
+    kind = serializers.ChoiceField(
+        choices=["image", "pdf", "video", "audio", "text", "unsupported"]
+    )
+    url = serializers.URLField(allow_null=True)
+    expires_at = serializers.DateTimeField(allow_null=True)
+    thumbnail = ThumbnailLinkSerializer(allow_null=True)

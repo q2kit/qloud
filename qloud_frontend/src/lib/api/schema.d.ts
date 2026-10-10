@@ -124,6 +124,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/nodes/{node_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["nodes_preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/nodes/move": {
         parameters: {
             query?: never;
@@ -417,6 +433,24 @@ export interface components {
         PatchedRenameRequest: {
             name?: string;
         };
+        /**
+         * @description * `image` - image
+         *     * `pdf` - pdf
+         *     * `video` - video
+         *     * `audio` - audio
+         *     * `text` - text
+         *     * `unsupported` - unsupported
+         * @enum {string}
+         */
+        PreviewKindEnum: "image" | "pdf" | "video" | "audio" | "text" | "unsupported";
+        PreviewLink: {
+            kind: components["schemas"]["PreviewKindEnum"];
+            /** Format: uri */
+            url: string | null;
+            /** Format: date-time */
+            expires_at: string | null;
+            thumbnail: components["schemas"]["ThumbnailLink"] | null;
+        };
         PublicConfig: {
             /** @description Cloudflare Turnstile site key; null when the server does not check it. */
             turnstile_site_key: string | null;
@@ -428,6 +462,14 @@ export interface components {
          * @enum {string}
          */
         ThemeEnum: "system" | "light" | "dark";
+        ThumbnailLink: {
+            /** Format: uri */
+            url: string;
+            /** Format: uri */
+            large_url: string;
+            /** Format: date-time */
+            expires_at: string;
+        };
         UploadSession: {
             /** Format: uuid */
             readonly id: string;
@@ -761,6 +803,45 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DownloadLink"];
+                };
+            };
+            /** @description `not_a_file`. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such node, or no access to it. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    nodes_preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                node_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreviewLink"];
                 };
             };
             /** @description `not_a_file`. */

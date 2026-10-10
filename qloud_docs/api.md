@@ -96,9 +96,15 @@ M2-02 (5 endpoint trên):
 - Mã lỗi: `name_conflict` (409), `invalid_target` (400: đích không phải folder), `invalid_move` (400: vào chính nó/cây con, hoặc sang Drive của người khác), `root_folder` (400: đổi tên/di chuyển folder gốc).
 | POST | `/nodes/trash` | Đưa nhiều node vào thùng rác `{node_ids}` |
 | GET | `/nodes/{id}/download` | Trả về `{url, expires_at}` (presigned, 5 phút; folder → 400 `not_a_file`) |
-| GET | `/nodes/{id}/preview` | URL xem trước hoặc thumbnail |
+| GET | `/nodes/{id}/preview` | `{kind, url, expires_at, thumbnail}` (M3-02, presigned 5 phút) |
 | GET | `/recent` | Tối đa 100 file của mình được cập nhật gần nhất (M2-09) |
 | GET | `/shared-with-me` | Các node người khác đã chia sẻ cho mình |
+
+### Xem trước (M3-02)
+- `GET /nodes/{id}/preview`: yêu cầu đăng nhập/quyền viewer, node còn sống; không thấy/không có quyền/trashed → 404, folder → 400 `not_a_file`.
+- Response: `{kind, url, expires_at, thumbnail}`. `kind` là `image | pdf | video | audio | text | unsupported`. `url` và `expires_at` null khi unsupported; FE dùng endpoint download khi đó.
+- `thumbnail`: null khi chưa tạo xong hoặc key không thuộc current version; có thì `{url, large_url, expires_at}` (256/1024px WebP). Tất cả URL inline hạn 5 phút, byte trực tiếp từ S3, hỗ trợ Range.
+- MIME/size lấy từ current version, tên từ node hiện tại. Text trong allowlist nhỏ hơn 1.000.000 byte ép `text/plain`; không cấp URL preview cho loại chạy script hoặc MIME ngoài allowlist. Danh sách cụ thể và quyết định: [download-preview.md](features/download-preview.md#m3-02--api-preview).
 
 ### Gần đây (M2-09)
 - `GET /recent` yêu cầu đăng nhập, chỉ trả file còn sống thuộc owner hiện tại, đi qua `sharing.permissions.nodes_for`.

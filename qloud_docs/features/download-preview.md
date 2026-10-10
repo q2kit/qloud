@@ -35,6 +35,15 @@
 - Broker không nhận task thì ghi log và giữ upload thành công, dùng icon dự phòng; không hứa tự tạo lại thumbnail cho trường hợp chưa enqueue được. Task có thể được enqueue lại theo version id khi vận hành.
 - M3-02 cấp URL preview/thumbnail; M3-03 hiển thị thumbnail và trình xem. M3-01 chưa đổi API hoặc UI.
 
+### M3-02 — API preview
+- Hợp đồng API được duyệt tại [#28](https://github.com/q2kit/qloud/issues/28#issuecomment-6102279503).
+- `GET /nodes/{id}/preview` trả `{kind, url, expires_at, thumbnail}`; cần quyền xem, chỉ file còn sống và phiên bản hiện hành. Không thấy/không có quyền/đã vào thùng rác trả 404; folder trả 400 `not_a_file`.
+- `kind`: `image`, `pdf`, `video`, `audio`, `text`, `unsupported`. Loại không hỗ trợ trả 200 với `url`, `expires_at`, `thumbnail` bằng null; tải qua endpoint download hiện có.
+- Ảnh JPEG/PNG/GIF/WebP/AVIF, PDF, video MP4/WebM, audio MPEG (MP3)/WAV/OGG được cấp presigned URL inline 5 phút. MIME chuẩn hóa từ current version, không đoán từ tên file; Content-Disposition giữ tên node hiện tại.
+- Text nhỏ hơn **1.000.000 byte**, MIME trong allowlist, được ép `text/plain` để FE hiển thị text an toàn: `text/plain`, `text/markdown`, `text/x-markdown`, `text/csv`, `application/json`, `text/x-python`, `text/x-c`, `text/x-c++`, `text/x-java-source`, `text/x-go`, `text/x-rust`, `text/x-shellscript`, `application/x-sh`, `application/x-python-code`, `text/css`, `text/x-typescript`, `application/typescript`. Không cấp URL preview cho HTML/SVG/XML/JavaScript, mọi MIME `*+xml` hoặc chứa `javascript`, và các MIME ngoài allowlist.
+- `thumbnail` là null nếu chưa có cặp ảnh của current version; khi có là `{url, large_url, expires_at}` cho WebP 256/1024px inline 5 phút. Không gọi worker hoặc đọc nguồn trong request; không cấp URL từ key cũ của version khác. FE có thể dùng icon và gọi lại sau khi worker hoàn thành.
+- Video đi trực tiếp S3 và giữ Range (206) để tua; integration test xác minh byte range, chưa kiểm thử UI tua video 2 GB (thuộc M3-03). API không làm thumbnail hiển thị trên web; chưa có thay đổi UI ở M3-02.
+
 ### Link riêng cho file
 - **Link riêng cho file**, giống folder (M2-07b):
   - lưu lại hoặc mở ở tab khác thì ra đúng file đó trong trình xem;
