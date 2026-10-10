@@ -1,4 +1,12 @@
-import { FileUp, FolderPlus, Info, Menu, Plus, Search } from 'lucide-react';
+import {
+  FileUp,
+  FolderUp,
+  FolderPlus,
+  Info,
+  Menu,
+  Plus,
+  Search,
+} from 'lucide-react';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -13,6 +21,8 @@ import { AccountMenu } from '@/features/auth/components/account-menu';
 import { useDriveStore } from '@/features/drive/store';
 import { useCurrentFolderId } from '@/features/drive/use-current-folder';
 import { useUploader } from '@/features/upload/context';
+import { useFolderUploader } from '@/features/upload/folder-context';
+import { treeFromFiles } from '@/features/upload/drop';
 import { cn } from '@/lib/utils';
 
 import { LanguageSwitcher } from './language-switcher';
@@ -44,6 +54,8 @@ export function AppHeader({
   const uploader = useUploader();
   // Outside the Drive this is the root folder (useCurrentFolderId).
   const folderId = useCurrentFolderId();
+  const folderUploader = useFolderUploader();
+  const directoryInput = React.useRef<HTMLInputElement>(null);
   const fileInput = React.useRef<HTMLInputElement>(null);
   const searchShortcut = t('shell.searchShortcut', {
     modifier: isApplePlatform ? COMMAND_KEY_SYMBOL : t('shell.keys.ctrl'),
@@ -109,6 +121,20 @@ export function AppHeader({
           event.target.value = ''; // the same file can be picked again
         }}
       />
+      <input
+        ref={directoryInput}
+        type="file"
+        multiple
+        hidden
+        {...{ webkitdirectory: '' }}
+        data-testid="upload-folder-input"
+        onChange={(event) => {
+          const files = [...(event.target.files ?? [])];
+          if (folderId && files.length)
+            folderUploader.addTree(treeFromFiles(files), folderId);
+          event.target.value = '';
+        }}
+      />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button size="sm" aria-label={t('shell.create')}>
@@ -133,6 +159,13 @@ export function AppHeader({
           >
             <FileUp />
             {t('drive.actions.upload')}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            disabled={!folderId}
+            onSelect={() => directoryInput.current?.click()}
+          >
+            <FolderUp />
+            {t('upload.actions.folder')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

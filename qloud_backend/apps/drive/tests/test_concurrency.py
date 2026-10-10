@@ -42,3 +42,28 @@ def test_crossing_moves_cannot_build_a_cycle():
     assert results == ["moved", "refused"]
     parents = {node.name: node.parent_id for node in Node.objects.filter(pk__in=[a.pk, b.pk])}
     assert root.pk in parents.values()
+
+
+@pytest.mark.parametrize("choice", ["rename", "reuse"])
+def test_concurrent_folder_conflict_choices(choice):
+    user = User.objects.create_user("folders@example.com")
+    root = Node.objects.get(owner=user, parent=None)
+
+    def run():
+        try:
+            return services.create_folder(user, root.pk, "Docs", choice).pk
+        finally:
+            connections.close_all()
+
+    with ThreadPoolExecutor(2) as pool:
+        futures = [pool.submit(run), pool.submit(run)]
+        ids = [future.result(timeout=10) for future in futures]
+    if choice == "reuse":
+        assert ids[0] == ids[1]
+        assert Node.objects.filter(parent=root).count() == 1
+    else:
+        assert ids[0] != ids[1]
+        assert set(Node.objects.filter(parent=root).values_list("name", flat=True)) == {
+            "Docs",
+            "Docs (1)",
+        }

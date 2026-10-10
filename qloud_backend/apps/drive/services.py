@@ -2,6 +2,7 @@
 
 import uuid
 from collections.abc import Iterator, Sequence
+from typing import Literal
 
 from django.db import IntegrityError, transaction
 from django.db.models import Q
@@ -31,17 +32,32 @@ def _target_folder(user: User, folder_id: uuid.UUID) -> Node:
     return folder
 
 
-def create_folder(user: User, parent_id: uuid.UUID, name: str) -> Node:
-    """`name` is already normalized (drive.names)."""
-    parent = _target_folder(user, parent_id)
-    try:
-        with transaction.atomic():
-            # The folder belongs to the owner of its parent, who may not be `user` (M5).
-            return Node.objects.create(owner_id=parent.owner_id, parent=parent, name=name)
-    except IntegrityError as error:
-        if _is_name_conflict(error):
-            raise NameConflict from error
-        raise
+def create_folder(
+    user: User,
+    parent_id: uuid.UUID,
+    name: str,
+    on_conflict: Literal["fail", "rename", "reuse"] = "fail",
+) -> Node:
+    """Create or reuse a live folder; never reuse a file with the same name."""
+    with transaction.atomic():
+        parent = _target_folder(user, parent_id)
+        # Serialize conflict choices with other tree writes for this owner.
+        User.objects.select_for_update().get(pk=parent.owner_id)
+        if on_conflict == "reuse":
+            existing = nodes_for(user, Role.EDITOR).filter(parent=parent, name__iexact=name).first()
+            if existing is not None:
+                if existing.kind != Node.Kind.FOLDER:
+                    raise NameConflict
+                return existing
+        elif on_conflict == "rename":
+            name = available_name(parent, name, Node.Kind.FOLDER)
+        try:
+            with transaction.atomic():
+                return Node.objects.create(owner_id=parent.owner_id, parent=parent, name=name)
+        except IntegrityError as error:
+            if _is_name_conflict(error):
+                raise NameConflict from error
+            raise
 
 
 def rename(user: User, node_id: uuid.UUID, name: str) -> Node:

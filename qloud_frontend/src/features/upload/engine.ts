@@ -7,11 +7,12 @@
 import { ApiError } from '@/lib/api/errors';
 
 import {
-  quickFingerprint,
   type OnConflict,
   type UploadApi,
   type UploadedNode,
+  type UploadSession,
 } from './api';
+import { fingerprint } from './fingerprint';
 import { useUploadStore, type UploadItem } from './store';
 
 /** At most this many parts in flight over the whole queue, whatever the number of files. */
@@ -39,6 +40,7 @@ export interface PartRequest {
 
 export interface EngineDeps {
   api: UploadApi;
+  fingerprint?: (file: File) => Promise<string>;
   createRequest: () => PartRequest;
   /** A file reached its folder: refresh that folder's listing. */
   onUploaded: (node: UploadedNode, parentId: string) => void;
@@ -83,6 +85,7 @@ export type ConflictChoice = 'rename' | 'skip';
 
 export class UploadEngine {
   private readonly runtimes = new Map<string, Runtime>();
+  private lifecycle = 0;
   private readonly samples: { at: number; bytes: number }[] = [];
   /** "Apply to the rest": how later name conflicts in this queue are answered. */
   private conflictPolicy: ConflictChoice | null = null;
@@ -97,8 +100,32 @@ export class UploadEngine {
     return this.store.items.find((item) => item.id === id);
   }
 
+  /** Attach a reselected file to its existing server session, without a new reservation. */
+  async restore(file: File, session: UploadSession): Promise<boolean> {
+    const lifecycle = this.lifecycle;
+    const hash = await (this.deps.fingerprint ?? fingerprint)(file);
+    if (lifecycle !== this.lifecycle) return false;
+    if (hash !== session.fingerprint || file.size !== session.size)
+      return false;
+    if (this.store.items.some((item) => item.sessionId === session.id))
+      return true;
+    const [id] = this.enqueue([file], session.parent_id ?? '', session);
+    if (id) await this.resync(id);
+    return true;
+  }
+
   /** Queue files for a folder; returns their ids in the store. */
   add(files: File[], parentId: string): string[] {
+    const ids = this.enqueue(files, parentId);
+    this.pump();
+    return ids;
+  }
+
+  private enqueue(
+    files: File[],
+    parentId: string,
+    session?: UploadSession,
+  ): string[] {
     if (!this.store.items.some((item) => item.status === 'conflict'))
       this.conflictPolicy = null;
     const items: UploadItem[] = files.map((file) => ({
@@ -107,7 +134,8 @@ export class UploadEngine {
       size: file.size,
       type: file.type,
       parentId,
-      status: 'queued',
+      status: session ? 'paused' : 'queued',
+      sessionId: session?.id,
       loaded: 0,
     }));
     items.forEach((item, index) => {
@@ -116,6 +144,7 @@ export class UploadEngine {
       this.runtimes.set(item.id, {
         file,
         onConflict: 'fail',
+        session: session ? toSession(session) : undefined,
         preparing: false,
         completing: false,
         pending: [],
@@ -129,7 +158,6 @@ export class UploadEngine {
       });
     });
     this.store.add(items);
-    this.pump();
     return items.map((item) => item.id);
   }
 
@@ -162,7 +190,8 @@ export class UploadEngine {
     }
     for (const item of items) {
       const runtime = this.runtimes.get(item.id);
-      if (!runtime || item.status !== 'uploading') continue;
+      if (!runtime || runtime.preparing || item.status !== 'uploading')
+        continue;
       while (
         runtime.pending.length > 0 &&
         this.inFlight() < MAX_PARTS_IN_FLIGHT
@@ -187,10 +216,12 @@ export class UploadEngine {
     runtime.preparing = true;
     const generation = runtime.generation;
     try {
+      const hash = await (this.deps.fingerprint ?? fingerprint)(runtime.file);
+      if (generation !== runtime.generation) return;
       const session = await this.deps.api.create({
         parentId: this.item(id)?.parentId ?? '',
         file: runtime.file,
-        fingerprint: quickFingerprint(runtime.file),
+        fingerprint: hash,
         onConflict: runtime.onConflict,
       });
       if (generation !== runtime.generation) {
@@ -202,7 +233,11 @@ export class UploadEngine {
       }
       runtime.session = toSession(session);
       runtime.pending = range(runtime.session.partCount);
-      this.store.patch(id, { status: 'uploading', error: undefined });
+      this.store.patch(id, {
+        status: 'uploading',
+        sessionId: session.id,
+        error: undefined,
+      });
     } catch (error) {
       if (generation !== runtime.generation) return;
       if (error instanceof ApiError && error.code === 'name_conflict') {
@@ -404,6 +439,7 @@ export class UploadEngine {
   private async resync(id: string): Promise<void> {
     const runtime = this.runtimes.get(id);
     if (!runtime?.session) return;
+    runtime.preparing = true;
     const generation = runtime.generation;
     try {
       const detail = await this.deps.api.detail(runtime.session.id);
@@ -420,6 +456,8 @@ export class UploadEngine {
     } catch (error) {
       if (generation !== runtime.generation) return;
       this.store.patch(id, { status: 'error', error: errorCode(error) });
+    } finally {
+      runtime.preparing = false;
     }
     this.pump();
   }
@@ -528,6 +566,14 @@ export class UploadEngine {
 
   retryFailed(): void {
     for (const item of this.store.items) this.retry(item.id);
+  }
+
+  /** Stop local work on logout; server sessions remain resumable on the next visit. */
+  dispose(): void {
+    this.lifecycle += 1;
+    for (const id of this.runtimes.keys()) this.stop(id);
+    this.runtimes.clear();
+    useUploadStore.setState(useUploadStore.getInitialState(), true);
   }
 
   // --- network ------------------------------------------------------------------------

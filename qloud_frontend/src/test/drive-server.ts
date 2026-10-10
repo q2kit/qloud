@@ -128,6 +128,9 @@ export class FakeDrive {
         { status: 409 },
       );
     return [
+      http.get('/api/v1/uploads', () =>
+        HttpResponse.json({ results: [], next: null, previous: null }),
+      ),
       http.get('/api/v1/me', () =>
         HttpResponse.json({
           id: testUser.id,

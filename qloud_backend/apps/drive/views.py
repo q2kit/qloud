@@ -112,6 +112,7 @@ class FolderCreateView(APIView):
             _user(request),
             serializer.validated_data["parent_id"],
             serializer.validated_data["name"],
+            serializer.validated_data["on_conflict"],
         )
         return Response(NodeSerializer(folder).data, status=status.HTTP_201_CREATED)
 

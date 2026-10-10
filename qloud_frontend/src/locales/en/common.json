@@ -298,7 +298,8 @@
       "pause": "Pause {{name}}",
       "resume": "Resume {{name}}",
       "retry": "Retry {{name}}",
-      "cancel": "Cancel {{name}}"
+      "cancel": "Cancel {{name}}",
+      "folder": "Upload folder"
     },
     "status": {
       "queued": "Waiting",
@@ -321,7 +322,9 @@
       "upload_closed": "This upload has already ended.",
       "target_unavailable": "The destination folder is gone.",
       "storage_unavailable": "Storage is temporarily unavailable. Try again in a few minutes.",
-      "folders_not_supported": "Dropping whole folders isn't supported yet; the files were uploaded."
+      "folder_failed": "Cannot read or upload this folder. Please select it again.",
+      "name_conflict": "The name belongs to a file. Choose Keep both to upload the folder.",
+      "fingerprint_mismatch": "This file does not match the original. Select the same file, with its original modification time."
     },
     "verify": {
       "resend": "Resend the verification email",
@@ -335,6 +338,22 @@
       "forAll_other": "Do this for the {{count}} remaining files",
       "skip": "Skip",
       "keepBoth": "Keep both"
+    },
+    "folder": {
+      "preparing": "Preparing folders…",
+      "dismiss": "Dismiss",
+      "title": "Folder name already used",
+      "description": "An item named \"{{name}}\" already exists. Merge into an existing folder or keep both?",
+      "merge": "Merge"
+    },
+    "resume": {
+      "title": "Unfinished uploads",
+      "description": "Select the original file to continue from the parts already uploaded, or cancel to release storage.",
+      "retry": "Try again",
+      "more": "Show more",
+      "pick": "Reselect {{name}}",
+      "select": "Select file",
+      "cancel": "Cancel"
     }
   }
 }

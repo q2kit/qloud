@@ -82,6 +82,7 @@ class NameField(serializers.CharField):
 class CreateFolderSerializer(serializers.Serializer[dict[str, Any]]):
     parent_id = serializers.UUIDField()
     name = NameField()
+    on_conflict = serializers.ChoiceField(choices=["fail", "rename", "reuse"], default="fail")
 
 
 class RenameSerializer(serializers.Serializer[dict[str, Any]]):

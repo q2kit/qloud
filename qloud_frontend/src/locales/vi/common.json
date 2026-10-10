@@ -292,7 +292,8 @@
       "pause": "Tạm dừng {{name}}",
       "resume": "Tiếp tục {{name}}",
       "retry": "Thử lại {{name}}",
-      "cancel": "Hủy {{name}}"
+      "cancel": "Hủy {{name}}",
+      "folder": "Tải thư mục lên"
     },
     "status": {
       "queued": "Đang chờ",
@@ -315,7 +316,9 @@
       "upload_closed": "Lượt tải lên đã kết thúc.",
       "target_unavailable": "Thư mục đích không còn nữa.",
       "storage_unavailable": "Kho lưu trữ đang tạm lỗi. Hãy thử lại sau ít phút.",
-      "folders_not_supported": "Chưa hỗ trợ kéo thả cả thư mục; các tệp lẻ vẫn được tải lên."
+      "folder_failed": "Không đọc hoặc tải thư mục lên được. Hãy chọn lại thư mục.",
+      "name_conflict": "Tên này đang được một tệp sử dụng. Hãy chọn Giữ cả hai để tải thư mục lên.",
+      "fingerprint_mismatch": "Tệp này không khớp với bản gốc. Hãy chọn đúng tệp, giữ nguyên thời gian chỉnh sửa."
     },
     "verify": {
       "resend": "Gửi lại email xác thực",
@@ -328,6 +331,22 @@
       "forAll_other": "Áp dụng cho {{count}} tệp còn lại",
       "skip": "Bỏ qua",
       "keepBoth": "Giữ cả hai"
+    },
+    "folder": {
+      "preparing": "Đang chuẩn bị thư mục…",
+      "dismiss": "Đóng",
+      "title": "Tên thư mục đã được dùng",
+      "description": "Đã có mục tên \"{{name}}\". Gộp vào thư mục có sẵn hay giữ cả hai?",
+      "merge": "Gộp"
+    },
+    "resume": {
+      "title": "Tệp tải lên dở dang",
+      "description": "Chọn lại tệp gốc để tiếp tục từ các phần đã tải lên, hoặc hủy để trả lại dung lượng.",
+      "retry": "Thử lại",
+      "more": "Xem thêm",
+      "pick": "Chọn lại {{name}}",
+      "select": "Chọn tệp",
+      "cancel": "Hủy"
     }
   }
 }

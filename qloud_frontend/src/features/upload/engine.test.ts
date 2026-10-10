@@ -21,6 +21,7 @@ import {
   MAX_PARTS_IN_FLIGHT,
   UploadEngine,
   type PartRequest,
+  type EngineDeps,
 } from './engine';
 import { useUploadStore } from './store';
 
@@ -99,9 +100,13 @@ let api: { [K in keyof UploadApi]: Mock<UploadApi[K]> };
 let uploaded: string[];
 let ids: number;
 
-function engine() {
+function engine(
+  fingerprint: EngineDeps['fingerprint'] = (file) =>
+    Promise.resolve(`hash-${file.name}`),
+) {
   return new UploadEngine({
     api,
+    fingerprint,
     createRequest: () => {
       const request = new FakeRequest();
       requests.push(request);
@@ -367,4 +372,97 @@ describe('upload engine', () => {
     await flush();
     expect(api.create).toHaveBeenCalledTimes(2);
   });
+});
+
+it('restores the same session after reload and sends only missing parts', async () => {
+  const uploader = engine();
+  const f = file('resumed.bin', 9 * MiB);
+  const existing = {
+    ...session('old-session', f.size),
+    parent_id: 'original-folder',
+    fingerprint: 'hash-resumed.bin',
+  };
+  api.detail.mockResolvedValueOnce(
+    detailWith([{ part_number: 1, size: 8 * MiB }]),
+  );
+  expect(await uploader.restore(f, existing)).toBe(true);
+  await flush();
+  expect(api.create).not.toHaveBeenCalled();
+  expect(api.detail).toHaveBeenCalledWith('old-session');
+  expect(open().map((r) => r.url)).toEqual(['https://s3.test/old-session/2']);
+  expect(items()[0]?.loaded).toBe(8 * MiB);
+  expect(items()[0]?.parentId).toBe('original-folder');
+  // A second selection cannot schedule the same session twice.
+  expect(await uploader.restore(f, existing)).toBe(true);
+  expect(items()).toHaveLength(1);
+  open()[0]?.ok();
+  await flush();
+  expect(api.complete).toHaveBeenCalledWith('old-session');
+});
+
+it('refuses a different file without creating a session or sending bytes', async () => {
+  const uploader = engine();
+  expect(
+    await uploader.restore(file('wrong.bin', 10), {
+      ...session('old', 10),
+      fingerprint: 'hash-original.bin',
+    }),
+  ).toBe(false);
+  expect(api.create).not.toHaveBeenCalled();
+  expect(api.detail).not.toHaveBeenCalled();
+  expect(items()).toHaveLength(0);
+});
+
+it('does not schedule resumed parts until the server has answered, even when another file finishes', async () => {
+  const uploader = engine();
+  const [id = ''] = uploader.add([file('a.bin', 9 * MiB)], 'f');
+  await flush();
+  uploader.pause(id);
+  let resolveDetail: (detail: UploadSessionDetail) => void = () => undefined;
+  api.detail.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        resolveDetail = resolve;
+      }),
+  );
+  uploader.resume(id);
+  uploader.add([file('empty', 0)], 'f');
+  await flush();
+  expect(open()).toHaveLength(0);
+  expect(api.complete).not.toHaveBeenCalledWith('s1');
+  resolveDetail(detailWith([{ part_number: 1, size: 8 * MiB }]));
+  await flush();
+  expect(open().map((r) => r.url)).toEqual(['https://s3.test/s1/2']);
+});
+
+it('stops requests on logout but leaves server sessions available for reload', async () => {
+  const uploader = engine();
+  uploader.add([file('a.bin', 10)], 'f');
+  await flush();
+  uploader.dispose();
+  expect(requests[0]?.aborted).toBe(true);
+  expect(items()).toHaveLength(0);
+  expect(api.abort).not.toHaveBeenCalled();
+  requests[0]?.ok();
+  await flush();
+  expect(api.complete).not.toHaveBeenCalled();
+});
+
+it('ignores a file selection that finishes hashing after logout', async () => {
+  let resolveHash: (value: string) => void = () => undefined;
+  const uploader = engine(
+    () =>
+      new Promise((resolve) => {
+        resolveHash = resolve;
+      }),
+  );
+  const restoring = uploader.restore(file('a.bin', 10), {
+    ...session('old', 10),
+    fingerprint: 'hash',
+  });
+  uploader.dispose();
+  resolveHash('hash');
+  expect(await restoring).toBe(false);
+  expect(items()).toHaveLength(0);
+  expect(api.detail).not.toHaveBeenCalled();
 });

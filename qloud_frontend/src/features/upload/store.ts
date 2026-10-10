@@ -18,6 +18,7 @@ export interface UploadItem {
   size: number;
   type: string;
   parentId: string;
+  sessionId?: string;
   status: UploadStatus;
   /** Bytes in storage plus those of parts on their way. */
   loaded: number;

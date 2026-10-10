@@ -4,6 +4,7 @@ import { Outlet } from 'react-router';
 import { CreateFolderDialog } from '@/features/drive/components/create-folder-dialog';
 import { useDriveStore } from '@/features/drive/store';
 import { ConflictDialog } from '@/features/upload/components/conflict-dialog';
+import { FolderUploadFeedback } from '@/features/upload/components/folder-upload-feedback';
 import { UploadTray } from '@/features/upload/components/upload-tray';
 import { UploadProvider } from '@/features/upload/uploader';
 
@@ -105,6 +106,7 @@ export function AppLayout(): React.JSX.Element {
         <CreateFolderDialog />
         <UploadTray />
         <ConflictDialog />
+        <FolderUploadFeedback />
       </div>
     </UploadProvider>
   );
