@@ -268,8 +268,10 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
-    # Several components have a `status` field with different choices.
+    # Several components use the same field names with different choices.
     "ENUM_NAME_OVERRIDES": {
+        "KindEnum": "apps.drive.models.Node.Kind",
+        "PreviewKindEnum": ["image", "pdf", "video", "audio", "text", "unsupported"],
         "UploadStatusEnum": "apps.uploads.models.UploadSession.Status",
         "FolderConflictEnum": ["fail", "rename", "reuse"],
         "OnConflictEnum": "apps.uploads.models.UploadSession.OnConflict",

@@ -7,8 +7,7 @@ from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.drive.downloads import safe_content_type
-from apps.drive.models import Blob, FileVersion, Node
-from apps.storage import s3
+from apps.drive.models import Node
 
 pytestmark = pytest.mark.django_db
 
@@ -21,28 +20,6 @@ def download(node_id: Any) -> str:
 def client(api_client, user):
     api_client.force_authenticate(user)
     return api_client
-
-
-@pytest.fixture
-def stored_file(user, root, bucket):
-    """A file whose current version really is in the bucket."""
-
-    def make(name: str, body: bytes, mime_type: str) -> Node:
-        node = Node.objects.create(
-            owner=user, parent=root, kind=Node.Kind.FILE, name=name, mime_type=mime_type,
-            size=len(body),
-        )  # fmt: skip
-        key = s3.new_blob_key()
-        s3.client().put_object(Bucket=bucket, Key=key, Body=body, ContentType=mime_type)
-        blob = Blob.objects.create(storage_key=key, size=len(body), etag="e")
-        node.current_version = FileVersion.objects.create(
-            node=node, blob=blob, version_number=1, size=len(body), mime_type=mime_type,
-            uploaded_by=user, original_name=name,
-        )  # fmt: skip
-        node.save()
-        return node
-
-    return make
 
 
 def fetch(url: str) -> Any:

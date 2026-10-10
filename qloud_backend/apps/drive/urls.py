@@ -6,6 +6,7 @@ from .views import (
     NodeDetailView,
     NodeDownloadView,
     NodeMoveView,
+    NodePreviewView,
     RecentView,
 )
 
@@ -15,5 +16,6 @@ urlpatterns = [
     path("nodes/<uuid:node_id>", NodeDetailView.as_view(), name="node-detail"),
     path("nodes/<uuid:node_id>/children", NodeChildrenView.as_view(), name="node-children"),
     path("nodes/<uuid:node_id>/download", NodeDownloadView.as_view(), name="node-download"),
+    path("nodes/<uuid:node_id>/preview", NodePreviewView.as_view(), name="node-preview"),
     path("folders", FolderCreateView.as_view(), name="folders"),
 ]
