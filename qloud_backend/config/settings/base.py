@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "apps.drive",
     "apps.sharing",
     "apps.storage",
+    "apps.uploads",
 ]
 
 MIDDLEWARE = [
@@ -257,6 +258,8 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
+    # Several components have a `status` field with different choices.
+    "ENUM_NAME_OVERRIDES": {"UploadStatusEnum": "apps.uploads.models.UploadSession.Status"},
 }
 
 # --- Logging ---

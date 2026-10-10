@@ -8,8 +8,6 @@ from django.test.utils import CaptureQueriesContext
 @pytest.mark.parametrize("existing_count", [0, 1200])
 def test_migration_backfill_and_reverse(existing_count):
     latest = [("accounts", "0002_user_avatar_url_user_locale_and_more")]
-    # Restored at the end: rolling `drive` back to zero must not leave later migrations off.
-    head = [*latest, ("drive", "0002_node_files_and_trash")]
     old = [("accounts", "0001_initial"), ("drive", None)]
     executor = MigrationExecutor(connection)
     executor.migrate(old)
@@ -49,4 +47,6 @@ def test_migration_backfill_and_reverse(existing_count):
         state = executor.loader.project_state([("accounts", "0001_initial")]).apps
         assert state.get_model("accounts", "User").objects.count() == existing_count
     finally:
-        MigrationExecutor(connection).migrate(head)
+        # Every app's latest migration: rolling `drive` back to zero also unapplied its dependents.
+        restore = MigrationExecutor(connection)
+        restore.migrate(restore.loader.graph.leaf_nodes())

@@ -39,7 +39,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M2-01 | Hoàn thiện model Node (nền folder gốc ở M1-01), Blob, FileVersion; dịch vụ phân quyền (lúc này mới có owner) | [#17](https://github.com/q2kit/qloud/issues/17) | ✅ [PR #92](https://github.com/q2kit/qloud/pull/92) |
 | M2-02 | API: tạo folder, liệt kê con, chi tiết node và breadcrumb, đổi tên, di chuyển | [#18](https://github.com/q2kit/qloud/issues/18) | ✅ [PR #94](https://github.com/q2kit/qloud/pull/94) |
 | M2-03 | Wrapper S3 (`storage`): presign, multipart | [#19](https://github.com/q2kit/qloud/issues/19) | ✅ [PR #96](https://github.com/q2kit/qloud/pull/96) |
-| M2-04 | API upload session: tạo, lấy part URL, lấy trạng thái, hoàn tất, hủy; giữ chỗ quota | [#20](https://github.com/q2kit/qloud/issues/20) | ⬜ |
+| M2-04 | API upload session: tạo, lấy part URL, lấy trạng thái, hoàn tất, hủy; giữ chỗ quota | [#20](https://github.com/q2kit/qloud/issues/20) | ✅ [PR #97](https://github.com/q2kit/qloud/pull/97) |
 | M2-05 | API download (presigned GET) | [#21](https://github.com/q2kit/qloud/issues/21) | ⬜ |
 | M2-06 | Celery: dọn upload hết hạn, abort multipart | [#22](https://github.com/q2kit/qloud/issues/22) | ⬜ |
 | M2-07 | FE: màn hình Drive (lưới/danh sách, sắp xếp, chọn nhiều, menu chuột phải, kéo thả để di chuyển) | [#23](https://github.com/q2kit/qloud/issues/23) | ⬜ |

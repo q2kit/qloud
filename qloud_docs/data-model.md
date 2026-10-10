@@ -123,14 +123,18 @@ object trên S3 phải được xóa trước, việc này thuộc thùng rác (
 | keep_forever | bool | không bị chính sách giữ phiên bản tự động dọn |
 
 `version_number` ≥ 1. `uploaded_by` dùng `SET_NULL`.
+`drive_node.current_version_id` chỉ trỏ được tới version **của chính node đó**: khóa ngoại hai cột `(current_version_id, id) → drive_file_version (id, node_id)`,
+kèm unique `(id, node_id)`, viết bằng SQL trong migration `drive.0004` vì Django không khai báo được. Cột trống thì không bị kiểm tra.
 
 ### `uploads_upload_session`
 | Cột | Kiểu | Ghi chú |
 |---|---|---|
 | id | uuid | |
-| user_id | uuid → User | |
-| parent_id | uuid → Node | folder đích |
-| target_node_id | uuid → Node, null | có giá trị khi upload phiên bản mới cho file đã có |
+| user_id | uuid → User | người upload; chỉ người này thấy session |
+| owner_id | uuid → User | bị tính quota: owner của folder đích. Lưu riêng để trả lại phần giữ chỗ cả khi folder đã bị xóa |
+| parent_id | uuid → Node, null | folder đích; `SET_NULL` khi folder bị xóa |
+| parent_path | jsonb | `[{id, name}]` từ folder gốc tới folder đích, chụp lúc tạo, để tạo lại đường dẫn bị mất khi hoàn tất |
+| target_node_id | uuid → Node, null | có giá trị khi upload phiên bản mới cho file đã có (M7-01, chưa có) |
 | filename | varchar(255) | |
 | size | bigint | |
 | mime_type | varchar(255) | |
@@ -140,6 +144,10 @@ object trên S3 phải được xóa trước, việc này thuộc thùng rác (
 | part_size | int | |
 | status | enum(`active`,`completed`,`aborted`,`expired`) | |
 | expires_at | timestamptz | mặc định 7 ngày |
+| on_conflict | enum(`fail`,`rename`) | trùng tên lúc tạo: 409 hay "Giữ cả hai" |
+| node_id | uuid → Node, null | file đã tạo, để `complete` gọi lại trả đúng node |
+
+`storage_key` unique; `s3_upload_id` trống với file 0 byte. Index `(user_id, status, created_at, id)` cho danh sách, `(status, expires_at)` cho việc dọn ở M2-06.
 
 Trạng thái của từng part **không lưu trong DB**: lấy từ S3 `ListParts` khi cần resume.
 

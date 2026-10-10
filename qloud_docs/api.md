@@ -101,6 +101,10 @@ M2-02 (5 endpoint trên):
 | DELETE | `/uploads/{id}` | Hủy upload |
 | GET | `/uploads?status=active` | Các upload dở dang, để resume |
 
+M2-04: `POST /uploads` trả session `{id, part_size, part_count, expires_at, ...}` (201), nhận thêm `on_conflict` (`fail`|`rename`); `target_node_id` chờ M7-01.
+`POST /uploads/{id}/parts` nhận tối đa 100 số part, trả `{parts: [{part_number, url}], expires_at}` (URL hạn 1 giờ).
+`GET /uploads/{id}` có thêm `parts` (`part_number, size, etag`) đọc từ S3. `?status=active` bỏ qua session đã hết hạn. Quy tắc và mã lỗi: [upload.md](features/upload.md#quyết-định-của-m2-04-20).
+
 ### Phiên bản
 | Method | Path | Mô tả |
 |---|---|---|

@@ -16,6 +16,7 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
 - Trong một folder, tên là duy nhất (không phân biệt hoa thường, không tính các node trong thùng rác).
   - **Tạo folder hoặc đổi tên** bị trùng thì trả lỗi 409 `name_conflict`.
   - **Upload** bị trùng tên: hỏi người dùng *Thay thế* (tạo phiên bản mới, xem versioning), *Giữ cả hai* (tự thêm hậu tố ` (1)`) hoặc *Bỏ qua*.
+    BE trả 409 `name_conflict` khi tạo session; *Giữ cả hai* là gửi lại với `on_conflict=rename` (xem [upload.md](upload.md)).
   - **Di chuyển** bị trùng tên: tự thêm hậu tố ` (n)` **trước phần mở rộng** của file, n nhỏ nhất chưa trùng:
     `report.pdf` → `report (1).pdf`; folder và file không có phần mở rộng (`Docs`, `.env`) thì thêm vào cuối. Tên dài thì cắt bớt để không quá 255 ký tự.
   - Folder gốc không đổi tên, không di chuyển được (400 `root_folder`).

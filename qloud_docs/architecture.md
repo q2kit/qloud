@@ -94,6 +94,7 @@ email auth gửi qua task Celery `accounts.tasks.send_email`, template ở `acco
 M1-06: `GET /api/v1/config` (`core.views.ConfigView`) cấp cấu hình công khai lúc chạy cho SPA; `GET/PATCH /api/v1/me` (`accounts.views.MeView`) cho hồ sơ và tùy chọn. allauth không có type hint: `pyproject.toml` bỏ qua import của `allauth.*` và cho phép kế thừa trong ba module tích hợp.
 M2-03: `storage.s3` là module duy nhất gọi object storage (boto3, client tạo một lần mỗi process). Nó cấp presigned URL cho từng part (hạn 1 giờ) và cho download (5 phút, `Content-Disposition` theo RFC 6266 để giữ tên tiếng Việt), và lo các bước multipart, `list_parts` đọc đủ mọi trang, xóa theo lô 1000 key.
 Lỗi S3 gói thành `StorageError` (`code` = mã lỗi S3). Key có dạng `blobs/{uuid7}`, không chứa tên file. Cấu hình `S3_*` đọc từ env; test và CI chạy trên LocalStack.
+M2-04: app `uploads` (`UploadSession`, `services.py`): giữ chỗ quota, cấp URL part, hoàn tất (tạo Blob/Node/FileVersion), hủy. Không gọi S3 trong transaction; quota của một owner thay đổi lần lượt nhờ khóa dòng User. Quy tắc: [upload.md](features/upload.md).
 Action Django admin dùng gettext, catalog `vi` và `en` nằm trong `accounts/locale`;
 commit cả `.po` và `.mo` để runtime/CI không phụ thuộc gettext CLI. Khi sửa bản dịch, chạy
 `cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run --frozen python manage.py compilemessages -l vi -l en --ignore .venv`
