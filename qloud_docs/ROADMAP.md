@@ -43,7 +43,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M2-05 | API download (presigned GET) | [#21](https://github.com/q2kit/qloud/issues/21) | ✅ [PR #98](https://github.com/q2kit/qloud/pull/98) |
 | M2-06 | Celery: dọn upload hết hạn, abort multipart | [#22](https://github.com/q2kit/qloud/issues/22) | ✅ [PR #99](https://github.com/q2kit/qloud/pull/99) |
 | M2-07a | FE: màn hình Drive — duyệt (lưới/danh sách, sắp xếp, cuộn vô hạn, tạo folder, đổi tên, chi tiết). Task con của [#23](https://github.com/q2kit/qloud/issues/23) | [#100](https://github.com/q2kit/qloud/issues/100) | ✅ [PR #102](https://github.com/q2kit/qloud/pull/102) |
-| M2-07b | FE: màn hình Drive — chọn nhiều, menu chuột phải, kéo thả để di chuyển. Task con của [#23](https://github.com/q2kit/qloud/issues/23) | [#101](https://github.com/q2kit/qloud/issues/101) | 🟦 |
+| M2-07b | FE: màn hình Drive — chọn nhiều, menu chuột phải, kéo thả để di chuyển. Task con của [#23](https://github.com/q2kit/qloud/issues/23) | [#101](https://github.com/q2kit/qloud/issues/101) | ✅ [PR #104](https://github.com/q2kit/qloud/pull/104) |
 | M2-08 | FE: trình quản lý upload (hàng đợi, song song, thử lại, resume sau khi reload, khay upload, kéo thả upload cả folder) | [#24](https://github.com/q2kit/qloud/issues/24) | ⬜ |
 | M2-09 | FE: trang Gần đây | [#25](https://github.com/q2kit/qloud/issues/25) | ⬜ |
 | M2-10 | E2E: tạo folder, upload file lớn, ngắt rồi resume, download | [#26](https://github.com/q2kit/qloud/issues/26) | ⬜ |
