@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 
 import { signUpViaApi, signUpVerifiedViaApi } from './auth';
+import { openDriveFolder } from './drive';
 
 // M2-08a against the real stack: parts go from Chromium straight to LocalStack S3
 // (bucket qloud-e2e, CORS for vite preview), sessions through Django.
@@ -133,7 +134,7 @@ test('files dropped from the computer onto a folder upload into it', async ({
 
   await expect(tray(page).getByText('Đã tải lên 1 tệp')).toBeVisible();
   await expect(page.getByRole('option')).toHaveCount(1); // not in this folder
-  await folder.dblclick();
+  await openDriveFolder(page, 'Ảnh');
   await expect(item(page, 'logo.png')).toBeVisible();
 });
 

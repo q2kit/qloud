@@ -1,4 +1,10 @@
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
 import {
@@ -16,6 +22,8 @@ import { i18n } from '@/lib/i18n';
 import { testUser } from '@/test/auth';
 import { FakeDrive, ROOT_ID } from '@/test/drive-server';
 import { renderApp } from '@/test/render-app';
+import { setMediaQuery } from '@/test/match-media';
+import { DESKTOP_INPUT_QUERY } from './desktop-input';
 
 import { VIRTUALIZE_AFTER } from './components/node-collection';
 import { compactId } from './paths';
@@ -27,6 +35,7 @@ beforeAll(() => {
   server.listen({ onUnhandledRequest: 'bypass' });
 });
 beforeEach(async () => {
+  setMediaQuery(DESKTOP_INPUT_QUERY, true);
   drive = new FakeDrive();
   server.use(...drive.handlers());
   await i18n.changeLanguage('en');
@@ -43,6 +52,56 @@ const names = async () =>
   (await items()).map((item) => item.getAttribute('title'));
 
 describe('Drive (S-05)', () => {
+  it('touch devices ignore double click but keep explicit Open and New folder actions', async () => {
+    setMediaQuery(DESKTOP_INPUT_QUERY, false);
+    const user = userEvent.setup();
+    const photos = drive.folder('Photos');
+    drive.file('note.txt');
+    const router = renderApp('/drive', testUser);
+    await items();
+    await user.dblClick(screen.getByRole('option', { name: 'Photos' }));
+    expect(router.state.location.pathname).toBe('/drive');
+    await user.dblClick(screen.getByRole('option', { name: 'note.txt' }));
+    expect(
+      drive.requests.some((url) => url.pathname.endsWith('/download')),
+    ).toBe(false);
+    await user.dblClick(screen.getByTestId('folder-content'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('option', { name: 'Photos' }));
+    await user.click(screen.getByRole('button', { name: 'Open' }));
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Photos' }),
+    ).toBeVisible();
+    expect(router.state.location.pathname).toBe(
+      `/drive/folders/${compactId(photos.id)}`,
+    );
+    await user.click(screen.getByRole('button', { name: 'New folder' }));
+    expect(screen.getByRole('dialog', { name: 'New folder' })).toBeVisible();
+  });
+
+  it('updates double click behavior when the primary input capability changes', async () => {
+    const user = userEvent.setup();
+    drive.folder('Photos');
+    const router = renderApp('/drive', testUser);
+    await items();
+    act(() => {
+      setMediaQuery(DESKTOP_INPUT_QUERY, false);
+    });
+    await user.dblClick(screen.getByTestId('folder-content'));
+    await user.dblClick(screen.getByRole('option', { name: 'Photos' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/drive');
+    act(() => {
+      setMediaQuery(DESKTOP_INPUT_QUERY, true);
+    });
+    await user.dblClick(screen.getByTestId('folder-content'));
+    expect(screen.getByRole('dialog', { name: 'New folder' })).toBeVisible();
+    await user.keyboard('{Escape}');
+    await user.dblClick(screen.getByRole('option', { name: 'Photos' }));
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Photos' }),
+    ).toBeVisible();
+  });
   it('opens the root at /drive: folders first, in natural order', async () => {
     drive.file('file10.txt');
     drive.file('file2.txt');

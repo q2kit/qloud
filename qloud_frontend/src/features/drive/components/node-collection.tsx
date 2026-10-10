@@ -17,9 +17,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/lib/use-media-query';
 
 import { DRAG_TYPE, readDraggedIds, type NodeAction } from '../actions';
 import type { DriveNode } from '../api';
+import { DESKTOP_INPUT_QUERY } from '../desktop-input';
 import { formatBytes, formatDate } from '../format';
 import type { DriveView } from '../preferences';
 import { NodeIcon } from './node-icon';
@@ -61,6 +63,7 @@ interface NodeCollectionProps {
 }
 
 interface ItemContext {
+  canDoubleClick: boolean;
   dragging: ReadonlySet<string>;
   dropTargetId: string | null;
   setDragging: (ids: string[]) => void;
@@ -97,6 +100,7 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
   const { nodes, view, hasMore, isLoadingMore, onLoadMore } = props;
   const containerRef = React.useRef<HTMLDivElement>(null);
   const columns = useColumns(containerRef, view);
+  const desktopInput = useMediaQuery(DESKTOP_INPUT_QUERY);
   const virtual = nodes.length > VIRTUALIZE_AFTER;
   const [dragging, setDraggingState] = React.useState<ReadonlySet<string>>(
     new Set(),
@@ -141,6 +145,7 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
   };
 
   const context: ItemContext = {
+    canDoubleClick: desktopInput,
     dragging,
     dropTargetId,
     setDragging: (ids) => {
@@ -399,7 +404,7 @@ function NodeItem({
       });
     }),
     onDoubleClick: own(() => {
-      onOpen(node);
+      if (context.canDoubleClick) onOpen(node);
     }),
     // Middle click: a folder in a new tab, like a link (Ctrl/⌘+click selects instead).
     onMouseDown: own((event: React.MouseEvent) => {

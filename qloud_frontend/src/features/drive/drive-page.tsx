@@ -16,6 +16,7 @@ import { useUploader } from '@/features/upload/context';
 import { treeFromDrop } from '@/features/upload/drop';
 import { useFolderUploader } from '@/features/upload/folder-context';
 import { ApiError } from '@/lib/api/errors';
+import { useMediaQuery } from '@/lib/use-media-query';
 
 import { nodeActions, type ActionHandlers } from './actions';
 import {
@@ -36,6 +37,7 @@ import {
   type SelectModifiers,
 } from './components/node-collection';
 import { driveErrorMessage } from './errors';
+import { DESKTOP_INPUT_QUERY } from './desktop-input';
 import { compactId, folderPath, folderUrl } from './paths';
 import { useDrivePreferences } from './preferences';
 import { useDriveStore } from './store';
@@ -135,9 +137,11 @@ export function DrivePage(): React.JSX.Element {
     [selected],
   );
   const contentRef = React.useRef<HTMLDivElement>(null);
+  const desktopInput = useMediaQuery(DESKTOP_INPUT_QUERY);
   const marquee = useMarquee({
     containerRef: contentRef,
     selectedIds,
+    canDoubleClick: desktopInput,
     enabled: Boolean(folder.data) && children.isSuccess && !folder.isError,
     onSelect: (ids) => {
       const chosen = new Set(ids);

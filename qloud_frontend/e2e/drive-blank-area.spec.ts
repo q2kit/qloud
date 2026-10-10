@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 import { signUpVerifiedViaApi } from './auth';
+import { openDriveFolder } from './drive';
 
 test.use({ launchOptions: { slowMo: process.env.DRIVE_BLANK_LIVE ? 250 : 0 } });
 
@@ -46,6 +47,21 @@ async function bottom(page: Page) {
   return { x: rect.x + 20, y: rect.y + rect.height - 12 };
 }
 
+async function openCreate(
+  page: Page,
+  point: { x: number; y: number },
+  isMobile: boolean,
+) {
+  await page.mouse.dblclick(point.x, point.y);
+  const dialog = page.getByRole('dialog', { name: 'Thư mục mới' });
+  if (isMobile) {
+    await expect(dialog).toBeHidden();
+    await page.getByRole('button', { name: 'Tạo mới' }).click();
+    await page.getByRole('menuitem', { name: 'Thư mục mới' }).click();
+  }
+  await expect(dialog).toBeVisible();
+}
+
 for (const view of ['grid', 'list'] as const) {
   test(`bottom blank area creates folders and keeps selection/open behavior in ${view}`, async ({
     page,
@@ -57,7 +73,7 @@ for (const view of ['grid', 'list'] as const) {
     if (view === 'list')
       await page.getByRole('button', { name: 'Dạng danh sách' }).click();
     let point = await bottom(page);
-    await page.mouse.dblclick(point.x, point.y);
+    await openCreate(page, point, isMobile);
     const dialog = page.getByRole('dialog', { name: 'Thư mục mới' });
     await expect(dialog.getByLabel('Tên')).toBeFocused();
     if (process.env.DRIVE_BLANK_LIVE && view === 'grid') {
@@ -87,7 +103,7 @@ for (const view of ['grid', 'list'] as const) {
     }
     await dialog.getByRole('button', { name: 'Hủy' }).click();
     await expect(page.getByRole('option')).toHaveCount(0);
-    await page.mouse.dblclick(point.x, point.y);
+    await openCreate(page, point, isMobile);
     await dialog.getByLabel('Tên').fill('Con');
     await dialog.getByRole('button', { name: 'Tạo', exact: true }).click();
     await expect(item(page, 'Con')).toBeVisible();
@@ -114,17 +130,22 @@ for (const view of ['grid', 'list'] as const) {
     }
 
     // Existing name-conflict validation is reused.
-    await page.mouse.dblclick(point.x, point.y);
+    await openCreate(page, point, isMobile);
     await dialog.getByLabel('Tên').fill('con');
     await dialog.getByRole('button', { name: 'Tạo', exact: true }).click();
     await expect(
       dialog.getByText('Đã có một mục cùng tên trong thư mục này.'),
     ).toBeVisible();
     await dialog.getByRole('button', { name: 'Hủy' }).click();
-    // Selection can wrap the toolbar on 360px; let it settle before double click.
-    await item(page, 'Con').click();
-    await expect(item(page, 'Con')).toHaveAttribute('aria-selected', 'true');
-    await item(page, 'Con').dblclick();
+    if (isMobile) {
+      await item(page, 'Con').click();
+      await item(page, 'Con').dblclick();
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText('Dự án');
+      await page.touchscreen.tap(point.x, point.y);
+      await page.touchscreen.tap(point.x, point.y);
+      await expect(dialog).toBeHidden();
+    }
+    await openDriveFolder(page, 'Con');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Con');
     await expect(dialog).toBeHidden();
 
@@ -132,7 +153,7 @@ for (const view of ['grid', 'list'] as const) {
     await page.goto('/drive');
     await expect(item(page, 'Dự án')).toBeVisible();
     point = await bottom(page);
-    await page.mouse.dblclick(point.x, point.y);
+    await openCreate(page, point, isMobile);
     await dialog.getByLabel('Tên').fill('Ở gốc');
     await dialog.getByRole('button', { name: 'Tạo', exact: true }).click();
     await expect(item(page, 'Ở gốc')).toBeVisible();
@@ -177,9 +198,7 @@ test('dropping at the bottom uploads to the current folder; a child remains a se
     page.getByRole('region', { name: 'Tải lên' }).getByText('Đã tải lên 2 tệp'),
   ).toBeVisible();
   await expect(item(page, 'child.txt')).toHaveCount(0);
-  await item(page, 'Con').click();
-  await expect(item(page, 'Con')).toHaveAttribute('aria-selected', 'true');
-  await item(page, 'Con').dblclick();
+  await openDriveFolder(page, 'Con');
   await expect(item(page, 'child.txt')).toBeVisible();
   await expect(item(page, 'bottom.txt')).toHaveCount(0);
 });
@@ -198,4 +217,21 @@ test('long lists still scroll to the last item', async ({ page }) => {
   await item(page, 'Folder 34').scrollIntoViewIfNeeded();
   await expect(item(page, 'Folder 34')).toBeInViewport();
   expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+});
+
+test('desktop double click stays enabled in a narrow window', async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(
+    isMobile,
+    'This checks resizing a desktop window, not a touch device',
+  );
+  const { parent } = await seed(page);
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.goto(`/drive/folders/${parent.replaceAll('-', '')}`);
+  await expect(page.getByText('Thư mục này đang trống')).toBeVisible();
+  const point = await bottom(page);
+  await page.mouse.dblclick(point.x, point.y);
+  await expect(page.getByRole('dialog', { name: 'Thư mục mới' })).toBeVisible();
 });

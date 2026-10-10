@@ -34,6 +34,7 @@ export function useMarquee({
   onSelect,
   onClear,
   onCreate,
+  canDoubleClick,
   enabled = true,
 }: {
   containerRef: React.RefObject<HTMLElement | null>;
@@ -41,6 +42,7 @@ export function useMarquee({
   onSelect: (ids: string[]) => void;
   onClear: () => void;
   onCreate: () => void;
+  canDoubleClick: boolean;
   enabled?: boolean;
 }): {
   box: Box | null;
@@ -67,7 +69,13 @@ export function useMarquee({
     );
 
   const onDoubleClick = (event: React.MouseEvent): void => {
-    if (event.button !== 0 || dragged.current || !isEmpty(event)) return;
+    if (
+      !canDoubleClick ||
+      event.button !== 0 ||
+      dragged.current ||
+      !isEmpty(event)
+    )
+      return;
     event.preventDefault();
     onCreate();
   };

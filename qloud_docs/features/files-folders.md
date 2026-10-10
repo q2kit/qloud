@@ -42,7 +42,7 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
 - **Chọn và bàn phím:**
   - click để chọn một mục (chọn nhiều ở M2-07b); phím mũi tên để di chuyển, Enter để mở, F2 để đổi tên;
   - mục đang chọn hiện trong panel chi tiết (loại, kích thước, ngày sửa, ngày tạo) và có nút Đổi tên/Tải xuống trên thanh công cụ.
-- **Mở:** bấm đúp hoặc Enter; folder thì vào trong, file thì tải về cho tới khi M3 có trình xem.
+- **Mở:** bấm đúp trên desktop có chuột/hover, hoặc Enter/nút Mở/menu trên mọi thiết bị; folder thì vào trong, file thì tải về cho tới khi M3 có trình xem.
 - **Tạo folder:** menu "Tạo mới" ở header hoặc nút ở trạng thái rỗng; tên trùng thì báo ngay trong hộp thoại.
 - **Đổi tên:**
   - lạc quan (tên mới hiện ngay);
@@ -81,9 +81,10 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
   - file chưa có link riêng: làm ở M3 cùng trình xem (xem [download-preview.md](download-preview.md)).
 
 ## Tiêu chí chấp nhận
-### M2-11 và M2-12 — vùng trống của Drive ([#109](https://github.com/q2kit/qloud/issues/109), [#111](https://github.com/q2kit/qloud/issues/111))
-- Double click vào vùng trống của folder đang mở sẽ mở modal tạo thư mục con hiện có, với parent là folder đang xem; áp dụng cho folder gốc và folder lồng nhau, dạng lưới/danh sách, rỗng/có nội dung.
-- Double click lên item vẫn mở folder/file; click đơn trên vùng trống vẫn bỏ chọn. Kéo vùng chọn, kéo thả di chuyển/upload và các cách tạo folder hiện có vẫn hoạt động.
+### M2-11, M2-12 và M2-13 — vùng trống và double click của Drive ([#109](https://github.com/q2kit/qloud/issues/109), [#111](https://github.com/q2kit/qloud/issues/111), [#112](https://github.com/q2kit/qloud/issues/112))
+- Double click **chỉ trên desktop**: thiết bị có con trỏ chính chính xác và hỗ trợ hover (`(hover: hover) and (pointer: fine)`), không dựa vào chiều rộng viewport. Theo quyết định của owner ở #112, thiết bị cảm ứng không dùng double click để mở item hay tạo folder; chọn item rồi dùng nút/menu Mở/Tải xuống, tạo folder qua menu/nút hiện có. Bàn phím giữ Enter và các thao tác hiện có.
+- Trên desktop, double click vào vùng trống của folder đang mở sẽ mở modal tạo thư mục con hiện có, với parent là folder đang xem; áp dụng cho folder gốc và folder lồng nhau, dạng lưới/danh sách, rỗng/có nội dung.
+- Trên desktop, double click lên item vẫn mở folder/file; click đơn trên vùng trống vẫn bỏ chọn. Kéo vùng chọn, kéo thả di chuyển/upload và các cách tạo folder hiện có vẫn hoạt động.
 - Không kích hoạt từ breadcrumb, toolbar, nút, menu hoặc modal; không mở khi đang có menu/modal hoặc folder đang tải, lỗi, không tồn tại hay không có quyền.
 - Dùng lại focus, validation và xử lý lỗi của modal tạo folder; không đổi API/schema. Kết thúc thao tác kéo vùng chọn không mở modal.
 - Section của Drive và vùng nội dung bên dưới thanh công cụ giãn hết chiều cao còn lại dưới header (trừ padding của trang). Upload qua drag/drop, kéo vùng chọn và double click hoạt động tới đáy vùng nội dung, kể cả khi ít mục hoặc folder rỗng; không giới hạn ở 50vh.

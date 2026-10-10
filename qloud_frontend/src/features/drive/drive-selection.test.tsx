@@ -17,6 +17,8 @@ import { i18n } from '@/lib/i18n';
 import { testUser } from '@/test/auth';
 import { FakeDrive, ROOT_ID } from '@/test/drive-server';
 import { renderApp } from '@/test/render-app';
+import { setMediaQuery } from '@/test/match-media';
+import { DESKTOP_INPUT_QUERY } from './desktop-input';
 
 import { DRAG_TYPE } from './actions';
 import { compactId } from './paths';
@@ -28,6 +30,7 @@ beforeAll(() => {
   server.listen({ onUnhandledRequest: 'bypass' });
 });
 beforeEach(async () => {
+  setMediaQuery(DESKTOP_INPUT_QUERY, true);
   drive = new FakeDrive();
   server.use(...drive.handlers());
   await i18n.changeLanguage('en');
