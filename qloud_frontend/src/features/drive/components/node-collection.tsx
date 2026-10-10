@@ -23,6 +23,7 @@ import type { DriveNode } from '../api';
 import { formatBytes, formatDate } from '../format';
 import type { DriveView } from '../preferences';
 import { NodeIcon } from './node-icon';
+import { useMarquee } from './use-marquee';
 
 /** files-folders.md: virtualize once a folder has more than 200 items. */
 export const VIRTUALIZE_AFTER = 200;
@@ -54,6 +55,9 @@ interface NodeCollectionProps {
   /** Ids dragged when a drag starts on `node`: the selection if it holds `node`. */
   dragIdsFor: (node: DriveNode) => string[];
   onDropOnFolder: (folder: DriveNode, ids: string[]) => void;
+  /** Rubber-band selection on empty space (desktop file managers). */
+  onMarqueeSelect: (ids: string[]) => void;
+  onClearSelection: () => void;
 }
 
 interface ItemContext {
@@ -146,8 +150,33 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
     onKeyDown,
   };
 
+  const marquee = useMarquee({
+    containerRef,
+    selectedIds: props.selectedIds,
+    onSelect: props.onMarqueeSelect,
+    onClear: props.onClearSelection,
+  });
+
   return (
-    <div ref={containerRef}>
+    // Tall enough to leave empty space below the items for the selection box.
+    <div
+      ref={containerRef}
+      className="min-h-[50vh]"
+      onPointerDown={marquee.onPointerDown}
+    >
+      {marquee.box && (
+        <div
+          aria-hidden="true"
+          data-testid="selection-box"
+          className="pointer-events-none fixed z-30 rounded-sm border border-primary bg-primary/10"
+          style={{
+            left: marquee.box.left - window.scrollX,
+            top: marquee.box.top - window.scrollY,
+            width: marquee.box.right - marquee.box.left,
+            height: marquee.box.bottom - marquee.box.top,
+          }}
+        />
+      )}
       {view === 'list' && (
         <div
           aria-hidden="true"
@@ -347,6 +376,18 @@ function NodeItem({
         }
       : {};
 
+  // Menus render in portals, but React events still bubble up the component tree to
+  // this item: only handle what really happens inside it (not keys or clicks in a menu).
+  const own =
+    <E extends React.SyntheticEvent>(handler: (event: E) => void) =>
+    (event: E): void => {
+      if (
+        event.target instanceof Node &&
+        event.currentTarget.contains(event.target)
+      ) {
+        handler(event);
+      }
+    };
   const props = {
     role: 'option',
     'aria-selected': selected,
@@ -356,27 +397,27 @@ function NodeItem({
     tabIndex: selected || (selectedIds.size === 0 && index === 0) ? 0 : -1,
     title: node.name,
     draggable: true,
-    onClick: (event: React.MouseEvent) => {
+    onClick: own((event: React.MouseEvent) => {
       onSelect(node, {
         toggle: event.ctrlKey || event.metaKey,
         range: event.shiftKey,
       });
-    },
-    onDoubleClick: () => {
+    }),
+    onDoubleClick: own(() => {
       onOpen(node);
-    },
+    }),
     // Middle click: a folder in a new tab, like a link (Ctrl/⌘+click selects instead).
-    onMouseDown: (event: React.MouseEvent) => {
+    onMouseDown: own((event: React.MouseEvent) => {
       if (event.button === 1 && node.kind === 'folder') event.preventDefault(); // no autoscroll
-    },
-    onAuxClick: (event: React.MouseEvent) => {
+    }),
+    onAuxClick: own((event: React.MouseEvent) => {
       if (event.button !== 1 || node.kind !== 'folder') return;
       event.preventDefault();
       onOpenInNewTab(node);
-    },
-    onKeyDown: (event: React.KeyboardEvent) => {
+    }),
+    onKeyDown: own((event: React.KeyboardEvent) => {
       context.onKeyDown(event, index);
-    },
+    }),
     onDragStart: (event: React.DragEvent) => {
       const ids = dragIdsFor(node);
       if (!selected) onSelect(node, { toggle: false, range: false });

@@ -29,7 +29,7 @@ test('nested folders, breadcrumb and reload', async ({ page }) => {
     await item(page, name).dblclick();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(name);
   }
-  await expect(page).toHaveURL(/\/drive\/folders\/[0-9a-f-]{36}$/);
+  await expect(page).toHaveURL(/\/drive\/folders\/[0-9a-f]{32}$/);
 
   // The path survives a reload: it comes from the server, not from navigation history.
   await page.reload();
@@ -205,6 +205,50 @@ test('every folder has its own link: new tab and bookmark', async ({
   expect(tab.url()).toBe(link);
   await expect(tab.getByRole('heading', { level: 1 })).toHaveText('Ảnh');
   // This tab stays where it was.
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Drive của tôi',
+  );
+});
+
+test('rubber-band selection, Backspace to the parent, menus keep the keys', async ({
+  page,
+  isMobile,
+}) => {
+  await page.goto('/drive');
+  for (const name of ['Một', 'Hai', 'Ba']) await createFolder(page, name);
+
+  // Arrows in an open menu move inside the menu, not the selection behind it.
+  await item(page, 'Hai').click({ button: 'right' });
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  // CSS, not roles: an open menu hides the page from the accessibility tree.
+  const byName = (name: string) =>
+    page.locator(`[role="option"][aria-label="${name}"]`);
+  await expect(page.getByRole('menu')).toBeVisible();
+  await expect(byName('Hai')).toHaveAttribute('aria-selected', 'true');
+  await expect(byName('Ba')).toHaveAttribute('aria-selected', 'false');
+  await page.keyboard.press('Escape');
+
+  if (!isMobile) {
+    // From empty space below the items, drag a box over all three.
+    const first = await item(page, 'Ba').boundingBox();
+    const last = await item(page, 'Một').boundingBox();
+    if (!first || !last) throw new Error('items not laid out');
+    await page.mouse.move(last.x + last.width + 10, last.y + last.height + 40);
+    await page.mouse.down();
+    await page.mouse.move(first.x + 10, first.y + 10, { steps: 8 });
+    await expect(page.getByTestId('selection-box')).toBeVisible();
+    await page.mouse.up();
+    await expect(page.getByText('3 mục đã chọn')).toBeVisible();
+    // A click on empty space clears it.
+    await page.mouse.click(last.x + last.width + 10, last.y + last.height + 40);
+    await expect(page.getByText('3 mục đã chọn')).toBeHidden();
+  }
+
+  await item(page, 'Một').dblclick();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Một');
+  await page.keyboard.press('Backspace');
+  await expect(page).toHaveURL(/\/drive$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'Drive của tôi',
   );

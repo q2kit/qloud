@@ -19,6 +19,7 @@ import { FakeDrive, ROOT_ID } from '@/test/drive-server';
 import { renderApp } from '@/test/render-app';
 
 import { DRAG_TYPE } from './actions';
+import { compactId } from './paths';
 
 const server = setupServer();
 let drive: FakeDrive;
@@ -121,6 +122,80 @@ describe('selecting several items (M2-07b)', () => {
   });
 });
 
+describe('rubber-band selection', () => {
+  /** Lay the items out in a row, 100px wide with 20px gaps (jsdom has no layout). */
+  function layOut(names: string[]) {
+    names.forEach((name, index) => {
+      const left = index * 120;
+      option(name).getBoundingClientRect = () =>
+        ({
+          left,
+          top: 0,
+          width: 100,
+          height: 100,
+          right: left + 100,
+          bottom: 100,
+        }) as DOMRect;
+    });
+    const area = screen.getByRole('listbox').parentElement;
+    if (!area) throw new Error('no selection area');
+    return area;
+  }
+  const press = (area: HTMLElement, x: number, init: object = {}) => {
+    fireEvent.pointerDown(area, {
+      button: 0,
+      pointerType: 'mouse',
+      clientX: x,
+      clientY: 50,
+      ...init,
+    });
+  };
+
+  it('dragging on empty space selects what the box touches', async () => {
+    for (const name of ['A', 'B', 'C', 'D']) drive.folder(name);
+    renderApp('/drive', testUser);
+    await screen.findByRole('option', { name: 'A' });
+    const area = layOut(['A', 'B', 'C', 'D']);
+
+    press(area, 110); // the gap between A and B
+    fireEvent.pointerMove(window, { clientX: 112, clientY: 50 }); // below the threshold
+    expect(screen.queryByTestId('selection-box')).not.toBeInTheDocument();
+    fireEvent.pointerMove(window, { clientX: 250, clientY: 60 });
+    expect(screen.getByTestId('selection-box')).toBeInTheDocument();
+    expect(selectedNames()).toEqual(['B', 'C']);
+    fireEvent.pointerUp(window);
+    expect(screen.queryByTestId('selection-box')).not.toBeInTheDocument();
+    expect(selectedNames()).toEqual(['B', 'C']);
+
+    // With Ctrl/⌘ the box adds to what is selected.
+    press(area, 470, { ctrlKey: true });
+    fireEvent.pointerMove(window, { clientX: 380, clientY: 60 });
+    fireEvent.pointerUp(window);
+    expect(selectedNames()).toEqual(['B', 'C', 'D']);
+
+    // A click on empty space clears the selection.
+    press(area, 470);
+    fireEvent.pointerUp(window);
+    expect(selectedNames()).toEqual([]);
+  });
+
+  it('a press on an item is a click or a drag to move, never a box', async () => {
+    for (const name of ['A', 'B']) drive.folder(name);
+    renderApp('/drive', testUser);
+    await screen.findByRole('option', { name: 'A' });
+    layOut(['A', 'B']);
+    fireEvent.pointerDown(option('A'), {
+      button: 0,
+      pointerType: 'mouse',
+      clientX: 50,
+      clientY: 50,
+    });
+    fireEvent.pointerMove(window, { clientX: 200, clientY: 60 });
+    expect(screen.queryByTestId('selection-box')).not.toBeInTheDocument();
+    fireEvent.pointerUp(window);
+  });
+});
+
 describe('item menus', () => {
   it('right click selects the item and offers its actions', async () => {
     const user = userEvent.setup();
@@ -139,6 +214,31 @@ describe('item menus', () => {
     expect(selectedNames()).toEqual(['report.pdf']);
     await user.click(menu.getByRole('menuitem', { name: /Info/ }));
     expect(screen.getByRole('dialog', { name: 'Details' })).toBeVisible();
+  });
+
+  it('keys and clicks inside an open menu leave the selection alone', async () => {
+    const user = userEvent.setup();
+    for (const name of ['A', 'B', 'C']) drive.folder(name);
+    renderApp('/drive', testUser);
+
+    // Menus render in a portal, but React events still bubble to the item.
+    await user.pointer({
+      keys: '[MouseRight]',
+      target: await screen.findByRole('option', { name: 'B' }),
+    });
+    await user.keyboard('{ArrowDown}{ArrowDown}{ArrowUp}');
+    expect(selectedNames()).toEqual(['B']);
+    await user.keyboard('{Escape}');
+
+    await user.keyboard('{Control>}');
+    await user.click(option('C'));
+    await user.keyboard('{/Control}');
+    await user.click(
+      screen.getByRole('button', { name: 'More actions for C' }),
+    );
+    await user.click(screen.getByRole('menuitem', { name: 'Move 2 items…' }));
+    expect(screen.getByRole('dialog', { name: 'Move 2 items' })).toBeVisible();
+    expect(selectedNames()).toEqual(['B', 'C']);
   });
 
   it('the ⋯ button opens the same menu; several items only move', async () => {
@@ -175,7 +275,7 @@ describe('folder links (open in a new tab)', () => {
       target: await screen.findByRole('option', { name: 'Photos' }),
     });
     expect(open).toHaveBeenCalledWith(
-      `${window.location.origin}/drive/folders/${photos.id}`,
+      `${window.location.origin}/drive/folders/${compactId(photos.id)}`,
       '_blank',
       'noopener',
     );
@@ -214,7 +314,7 @@ describe('folder links (open in a new tab)', () => {
     ]);
     await user.click(menu.getByRole('menuitem', { name: 'Copy link' }));
     expect(await navigator.clipboard.readText()).toBe(
-      `${window.location.origin}/drive/folders/${photos.id}`,
+      `${window.location.origin}/drive/folders/${compactId(photos.id)}`,
     );
     expect(
       await screen.findByText('Copied the link to "Photos".'),

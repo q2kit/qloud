@@ -1,6 +1,6 @@
 import { FolderOpen, FolderPlus, FolderX, RotateCw } from 'lucide-react';
 import * as React from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ import {
   type SelectModifiers,
 } from './components/node-collection';
 import { driveErrorMessage } from './errors';
-import { folderPath, folderUrl } from './paths';
+import { compactId, folderPath, folderUrl } from './paths';
 import { useDrivePreferences } from './preferences';
 import { useDriveStore } from './store';
 import { useCurrentFolderId } from './use-current-folder';
@@ -47,6 +47,7 @@ export function DrivePage(): React.JSX.Element {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const folderId = useCurrentFolderId();
+  const { folderId: rawFolderId } = useParams();
   const folder = useNode(folderId);
   const { view, setView, ordering, setOrdering } = useDrivePreferences();
   const children = useChildren(folderId, ordering);
@@ -72,7 +73,22 @@ export function DrivePage(): React.JSX.Element {
     () => new Set(selected.map((node) => node.id)),
     [selected],
   );
-  // Ctrl/⌘+A and Esc anywhere on the page, not only inside the list; otherwise the
+  // Older links carry the dashed UUID: show the compact form (paths.ts).
+  React.useEffect(() => {
+    if (rawFolderId && rawFolderId !== compactId(rawFolderId)) {
+      void navigate(folderPath(rawFolderId), { replace: true });
+    }
+  }, [rawFolderId, navigate]);
+
+  const crumbs = folder.data?.breadcrumb;
+  const parentCrumb = crumbs?.at(-1);
+  const parent = React.useMemo(
+    () =>
+      parentCrumb ? { id: parentCrumb.id, isRoot: crumbs?.length === 1 } : null,
+    [parentCrumb, crumbs?.length],
+  );
+
+  // Ctrl/⌘+A, Esc and Backspace anywhere on the page, not only inside the list; otherwise the
   // browser would select all the page's text. Typing, dialogs and menus keep them.
   React.useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
@@ -90,13 +106,23 @@ export function DrivePage(): React.JSX.Element {
         useDriveStore.getState().selectAll(nodes);
       } else if (event.key === 'Escape') {
         useDriveStore.getState().select(null);
+      } else if (
+        event.key === 'Backspace' &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.altKey &&
+        parent
+      ) {
+        // Like a file manager: back up to the parent folder (nothing at the root).
+        event.preventDefault();
+        void navigate(folderPath(parent.isRoot ? undefined : parent.id));
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [nodes]);
+  }, [nodes, parent, navigate]);
 
   const { fetchNextPage, isFetchingNextPage } = children;
   const loadMore = React.useCallback(() => {
@@ -271,6 +297,13 @@ export function DrivePage(): React.JSX.Element {
             selectedIds.has(node.id) ? [...selectedIds] : [node.id]
           }
           onDropOnFolder={dropOn}
+          onMarqueeSelect={(ids) => {
+            const chosen = new Set(ids);
+            store.selectAll(nodes.filter((node) => chosen.has(node.id)));
+          }}
+          onClearSelection={() => {
+            select(null);
+          }}
         />
       )}
 
