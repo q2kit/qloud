@@ -1,9 +1,11 @@
 import type { TFunction } from 'i18next';
 import {
   Download,
+  ExternalLink,
   FolderInput,
   FolderOpen,
   Info,
+  Link,
   Pencil,
   type LucideIcon,
 } from 'lucide-react';
@@ -24,6 +26,9 @@ export interface ActionHandlers {
   rename: (node: DriveNode) => void;
   move: (nodes: DriveNode[]) => void;
   info: (node: DriveNode) => void;
+  /** Folders only: each has its own URL (files get theirs with the viewer, M3). */
+  openInNewTab: (node: DriveNode) => void;
+  copyLink: (node: DriveNode) => void;
 }
 
 /**
@@ -62,6 +67,26 @@ export function nodeActions(
         (node.kind === 'folder' ? handlers.open : handlers.download)(node);
       },
     },
+    ...(node.kind === 'folder'
+      ? [
+          {
+            key: 'openInNewTab',
+            label: t('drive.actions.openInNewTab'),
+            icon: ExternalLink,
+            run: () => {
+              handlers.openInNewTab(node);
+            },
+          },
+          {
+            key: 'copyLink',
+            label: t('drive.actions.copyLink'),
+            icon: Link,
+            run: () => {
+              handlers.copyLink(node);
+            },
+          },
+        ]
+      : []),
     {
       key: 'rename',
       label: t('drive.actions.rename'),

@@ -65,6 +65,12 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
   - mọi cách đều gửi **một** request cho cả vùng chọn;
   - lạc quan: mục rời folder ngay, API từ chối (ví dụ `invalid_move`) thì quay lại kèm thông báo;
   - kết quả được đọc cho trình đọc màn hình ("Đã di chuyển 2 mục tới …").
+- **Link riêng của folder:**
+  - mỗi folder có URL `/drive/folders/:id` (folder gốc là `/drive`); lưu lại hoặc mở ở tab khác vẫn ra đúng folder, vì folder và breadcrumb được tải theo id từ server;
+  - id là UUID nên không đoán được, và người không có quyền nhận 404;
+  - mở trong thẻ mới bằng **middle click**, **Ctrl/⌘+Enter**, hoặc mục "Mở trong thẻ mới" trong menu; menu có thêm "Sao chép liên kết";
+  - **Ctrl/⌘+click vẫn là chọn thêm**, không mở thẻ mới;
+  - file chưa có link riêng: làm ở M3 cùng trình xem (xem [download-preview.md](download-preview.md)).
 
 ## Tiêu chí chấp nhận
 - [x] Tạo folder lồng nhau 3 cấp; breadcrumb hiển thị đúng; reload trang vẫn đúng.

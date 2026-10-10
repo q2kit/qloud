@@ -10,6 +10,7 @@ import {
   describe,
   expect,
   it,
+  vi,
 } from 'vitest';
 
 import { i18n } from '@/lib/i18n';
@@ -158,6 +159,66 @@ describe('item menus', () => {
         .getAllByRole('menuitem')
         .map((item) => item.textContent),
     ).toEqual(['Move 2 items…']);
+  });
+});
+
+describe('folder links (open in a new tab)', () => {
+  it('middle click and Ctrl/⌘+Enter open a folder in a new tab, not a file', async () => {
+    const user = userEvent.setup();
+    const open = vi.spyOn(window, 'open').mockReturnValue(null);
+    const photos = drive.folder('Photos');
+    drive.file('a.pdf');
+    renderApp('/drive', testUser);
+
+    await user.pointer({
+      keys: '[MouseMiddle]',
+      target: await screen.findByRole('option', { name: 'Photos' }),
+    });
+    expect(open).toHaveBeenCalledWith(
+      `${window.location.origin}/drive/folders/${photos.id}`,
+      '_blank',
+      'noopener',
+    );
+    await user.pointer({ keys: '[MouseMiddle]', target: option('a.pdf') });
+    expect(open).toHaveBeenCalledTimes(1);
+
+    option('Photos').focus();
+    await user.keyboard('{Control>}{Enter}{/Control}');
+    expect(open).toHaveBeenCalledTimes(2);
+    // Still on the same page: a new tab, not navigation here.
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'My Drive' }),
+    ).toBeVisible();
+    open.mockRestore();
+  });
+
+  it('a folder menu can open it in a new tab or copy its link', async () => {
+    const user = userEvent.setup();
+    const photos = drive.folder('Photos');
+    renderApp('/drive', testUser);
+
+    await user.pointer({
+      keys: '[MouseRight]',
+      target: await screen.findByRole('option', { name: 'Photos' }),
+    });
+    const menu = within(screen.getByRole('menu'));
+    expect(
+      menu.getAllByRole('menuitem').map((item) => item.textContent),
+    ).toEqual([
+      'Open↵',
+      'Open in new tab',
+      'Copy link',
+      'RenameF2',
+      'Move…',
+      'Infoi',
+    ]);
+    await user.click(menu.getByRole('menuitem', { name: 'Copy link' }));
+    expect(await navigator.clipboard.readText()).toBe(
+      `${window.location.origin}/drive/folders/${photos.id}`,
+    );
+    expect(
+      await screen.findByText('Copied the link to "Photos".'),
+    ).toBeInTheDocument();
   });
 });
 

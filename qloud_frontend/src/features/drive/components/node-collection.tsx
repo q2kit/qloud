@@ -46,6 +46,8 @@ interface NodeCollectionProps {
   onLoadMore: () => void;
   onSelect: (node: DriveNode, modifiers: SelectModifiers) => void;
   onOpen: (node: DriveNode) => void;
+  /** Folders only: middle click and Ctrl/⌘+Enter. */
+  onOpenInNewTab: (node: DriveNode) => void;
   onRename: (node: DriveNode) => void;
   /** The item menu for whatever is selected once `node` is part of the selection. */
   actionsFor: (node: DriveNode) => NodeAction[];
@@ -126,7 +128,8 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
       props.onSelect(node, { toggle: true, range: false });
     } else if (event.key === 'Enter') {
       event.preventDefault();
-      props.onOpen(node);
+      if (modifier && node.kind === 'folder') props.onOpenInNewTab(node);
+      else props.onOpen(node);
     } else if (event.key === 'F2') {
       event.preventDefault();
       props.onRename(node);
@@ -299,6 +302,7 @@ function NodeItem({
   context,
   onSelect,
   onOpen,
+  onOpenInNewTab,
   actionsFor,
   dragIdsFor,
   onDropOnFolder,
@@ -360,6 +364,15 @@ function NodeItem({
     },
     onDoubleClick: () => {
       onOpen(node);
+    },
+    // Middle click: a folder in a new tab, like a link (Ctrl/⌘+click selects instead).
+    onMouseDown: (event: React.MouseEvent) => {
+      if (event.button === 1 && node.kind === 'folder') event.preventDefault(); // no autoscroll
+    },
+    onAuxClick: (event: React.MouseEvent) => {
+      if (event.button !== 1 || node.kind !== 'folder') return;
+      event.preventDefault();
+      onOpenInNewTab(node);
     },
     onKeyDown: (event: React.KeyboardEvent) => {
       context.onKeyDown(event, index);

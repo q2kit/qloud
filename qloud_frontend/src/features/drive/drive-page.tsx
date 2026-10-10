@@ -25,7 +25,7 @@ import {
   type SelectModifiers,
 } from './components/node-collection';
 import { driveErrorMessage } from './errors';
-import { folderPath } from './paths';
+import { folderPath, folderUrl } from './paths';
 import { useDrivePreferences } from './preferences';
 import { useDriveStore } from './store';
 import { useCurrentFolderId } from './use-current-folder';
@@ -179,6 +179,20 @@ export function DrivePage(): React.JSX.Element {
     info: () => {
       store.setDetailOpen(true);
     },
+    openInNewTab: (node) => {
+      window.open(folderUrl(node.id), '_blank', 'noopener');
+    },
+    copyLink: (node) => {
+      setActionError(null);
+      navigator.clipboard.writeText(folderUrl(node.id)).then(
+        () => {
+          setAnnouncement(t('drive.linkCopied', { name: node.name }));
+        },
+        () => {
+          setActionError(t('drive.errors.copyFailed'));
+        },
+      );
+    },
   };
 
   const onSelect = (
@@ -247,6 +261,7 @@ export function DrivePage(): React.JSX.Element {
           onLoadMore={loadMore}
           onSelect={onSelect}
           onOpen={open}
+          onOpenInNewTab={handlers.openInNewTab}
           onRename={handlers.rename}
           // Read the store directly: the menu opens right after the item got selected.
           actionsFor={() =>

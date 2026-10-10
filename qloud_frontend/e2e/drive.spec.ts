@@ -173,3 +173,39 @@ test.describe('selecting and moving (M2-07b)', () => {
     await expect(page.getByRole('option')).toHaveText([/^Cha/]);
   });
 });
+
+test('every folder has its own link: new tab and bookmark', async ({
+  page,
+  context,
+  isMobile,
+}) => {
+  await page.goto('/drive');
+  await createFolder(page, 'Ảnh');
+  await item(page, 'Ảnh').dblclick();
+  await createFolder(page, 'Hè 2026');
+  const link = page.url();
+  await page
+    .getByRole('navigation', { name: 'Đường dẫn thư mục' })
+    .getByRole('link', { name: 'Drive của tôi' })
+    .click();
+
+  // A saved link opened in another tab lands on the same folder.
+  const bookmark = await context.newPage();
+  await bookmark.goto(link);
+  await expect(bookmark.getByRole('heading', { level: 1 })).toHaveText('Ảnh');
+  await expect(bookmark.getByRole('option')).toHaveText([/^Hè 2026/]);
+  await bookmark.close();
+
+  test.skip(isMobile, 'Middle click needs a mouse');
+  const [tab] = await Promise.all([
+    context.waitForEvent('page'),
+    item(page, 'Ảnh').click({ button: 'middle' }),
+  ]);
+  await tab.waitForLoadState();
+  expect(tab.url()).toBe(link);
+  await expect(tab.getByRole('heading', { level: 1 })).toHaveText('Ảnh');
+  // This tab stays where it was.
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    'Drive của tôi',
+  );
+});

@@ -71,7 +71,9 @@
       "moveCount_other": "Di chuyển {{count}} mục…",
       "moveHere": "Di chuyển tới đây",
       "info": "Thông tin",
-      "more": "Thao tác khác với {{name}}"
+      "more": "Thao tác khác với {{name}}",
+      "openInNewTab": "Mở trong thẻ mới",
+      "copyLink": "Sao chép liên kết"
     },
     "errors": {
       "generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
@@ -84,7 +86,8 @@
       "notFoundTitle": "Không tìm thấy thư mục",
       "notFoundDescription": "Thư mục không tồn tại, đã bị xóa, hoặc bạn không có quyền xem.",
       "downloadFailed": "Không tải xuống được tệp. Vui lòng thử lại.",
-      "invalid_move": "Không thể di chuyển một thư mục vào chính nó hoặc thư mục con của nó."
+      "invalid_move": "Không thể di chuyển một thư mục vào chính nó hoặc thư mục con của nó.",
+      "copyFailed": "Không sao chép được liên kết."
     },
     "selection": {
       "count_other": "{{count}} mục đã chọn",
@@ -95,7 +98,8 @@
       "noFolders": "Không có thư mục con.",
       "folders": "Các thư mục con",
       "done_other": "Đã di chuyển {{count}} mục tới \"{{target}}\"."
-    }
+    },
+    "linkCopied": "Đã sao chép liên kết tới \"{{name}}\"."
   },
   "shell": {
     "openNavigation": "Mở điều hướng",

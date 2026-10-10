@@ -65,7 +65,10 @@ export function DriveToolbar({
               </span>
             </Button>
             {actions
-              .filter((action) => action.key !== 'info')
+              // The menu has the rest (new tab, link, info).
+              .filter((action) =>
+                ['open', 'rename', 'move'].includes(action.key),
+              )
               .map((action) => (
                 <Button
                   key={action.key}

@@ -73,7 +73,9 @@
       "moveCount_other": "Move {{count}} items…",
       "moveHere": "Move here",
       "info": "Info",
-      "more": "More actions for {{name}}"
+      "more": "More actions for {{name}}",
+      "openInNewTab": "Open in new tab",
+      "copyLink": "Copy link"
     },
     "errors": {
       "generic": "Something went wrong. Please try again.",
@@ -86,7 +88,8 @@
       "notFoundTitle": "Folder not found",
       "notFoundDescription": "This folder doesn't exist, was deleted, or you don't have access to it.",
       "downloadFailed": "Couldn't download the file. Please try again.",
-      "invalid_move": "A folder can't be moved into itself or one of its subfolders."
+      "invalid_move": "A folder can't be moved into itself or one of its subfolders.",
+      "copyFailed": "Couldn't copy the link."
     },
     "selection": {
       "count_one": "{{count}} item selected",
@@ -99,7 +102,8 @@
       "folders": "Subfolders",
       "done_one": "Moved {{count}} item to \"{{target}}\".",
       "done_other": "Moved {{count}} items to \"{{target}}\"."
-    }
+    },
+    "linkCopied": "Copied the link to \"{{name}}\"."
   },
   "shell": {
     "openNavigation": "Open navigation",
