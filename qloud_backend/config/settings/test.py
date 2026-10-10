@@ -17,6 +17,7 @@ os.environ.setdefault("S3_ENDPOINT_URL", "http://localhost:4566")
 os.environ.setdefault("S3_ACCESS_KEY_ID", "test")
 os.environ.setdefault("S3_SECRET_ACCESS_KEY", "test")
 os.environ.setdefault("S3_ADDRESSING_STYLE", "path")
+os.environ.setdefault("S3_BUCKET", "qloud-test")
 
 from .base import *  # noqa: E402
 
