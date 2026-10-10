@@ -189,3 +189,5 @@ Code: `apps/sharing/permissions.py` (M2-01; app `sharing` chưa có model, Share
 - **Giới hạn của Cloudflare:** body tối đa 100 MB, timeout 100 giây. API không được có request chạy lâu; file không đi qua proxy.
 - **Cần có trước khi deploy:** domain thật trên Cloudflare (OAuth và proxy không dùng được với IP trần), Origin Certificate, bucket kèm access key,
   tài khoản SMTP, OAuth app Google/GitHub cho domain production, Turnstile key. Tất cả nằm trong `.env` của server.
+
+M2-09: stack E2E tắt persistent DB connections (`CONN_MAX_AGE=0`) để request trong các thread của Django runserver giải phóng kết nối sau khi xong; các bài seed dữ liệu/phân trang chạy song song không tích lũy kết nối vượt giới hạn PostgreSQL. Cấu hình ứng dụng dev/production giữ nguyên.

@@ -10,6 +10,10 @@ in emails lead to the frontend it serves.
 from .test import *  # noqa: I001
 from .base import _OAUTH_PROVIDERS, env
 
+# Django runserver handles concurrent E2E requests in short-lived threads;
+# retained connections can exhaust PostgreSQL during API-seeded pagination tests.
+DATABASES["default"]["CONN_MAX_AGE"] = 0
+
 # Created with CORS for the `vite preview` origin by infra/localstack/init-s3.sh, so
 # the browser can PUT parts straight to it (the pytest bucket has no CORS).
 S3_BUCKET = env("E2E_S3_BUCKET", default="qloud-e2e")
