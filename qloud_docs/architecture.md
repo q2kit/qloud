@@ -120,7 +120,7 @@ commit cả `.po` và `.mo` để runtime/CI không phụ thuộc gettext CLI. K
 | UI | Tailwind CSS, shadcn/ui (Radix), lucide-react (icon) |
 | Form | react-hook-form + zod |
 | i18n | i18next + react-i18next |
-| Xem trước | pdf.js (PDF), thẻ `<video>` gốc của trình duyệt |
+| Xem trước | pdf.js 6.4 (`pdfjs-dist`, Apache-2.0), thẻ `<video>`/`<audio>` gốc của trình duyệt |
 | Test | Vitest, Testing Library, MSW, Playwright |
 | Chất lượng | eslint, prettier, tsc |
 
@@ -194,3 +194,5 @@ M2-09: stack E2E tắt persistent DB connections (`CONN_MAX_AGE=0`) để reques
 - **Giới hạn của Cloudflare:** body tối đa 100 MB, timeout 100 giây. API không được có request chạy lâu; file không đi qua proxy.
 - **Cần có trước khi deploy:** domain thật trên Cloudflare (OAuth và proxy không dùng được với IP trần), Origin Certificate, bucket kèm access key,
   tài khoản SMTP, OAuth app Google/GitHub cho domain production, Turnstile key. Tất cả nằm trong `.env` của server.
+
+M3-03: frontend dùng query preview theo node id/updated_at, chỉ tải thumbnail khi item hiển thị (grid/list). Viewer PDF lazy-load module, worker và CMap/font/WASM đi từ assets nội bộ; `scripts/copy-pdfjs-assets.mjs` sao chép từ dependency lockfile trước dev/build, thư mục sinh `public/pdfjs` không commit/lint/format. Chọn pdf.js 6.4 sau kiểm tra [release v6.4.299](https://github.com/mozilla/pdf.js/releases/tag/v6.4.299) và [API/examples chính thức](https://mozilla.github.io/pdf.js/examples/); render canvas không gắn scripting/action layer. S3 CORS expose `Accept-Ranges`, `Content-Range`, `Content-Length` cùng `ETag` để pdf.js đọc Range; production bucket cần cùng cấu hình header.

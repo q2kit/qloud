@@ -15,7 +15,6 @@ import {
   describe,
   expect,
   it,
-  vi,
 } from 'vitest';
 
 import { i18n } from '@/lib/i18n';
@@ -504,32 +503,20 @@ describe('Drive (S-05)', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('downloads a file on double click', async () => {
+  it('opens the viewer on double click and closes it with Escape', async () => {
     const user = userEvent.setup();
-    const assign = vi.fn();
-    const original = window.location;
-    Object.defineProperty(window, 'location', {
-      configurable: true,
-      // Only what the download path reads; the memory router never touches it.
-      value: { origin: original.origin, href: original.href, assign },
-    });
-    try {
-      const file = drive.file('report.pdf');
-      renderApp('/drive', testUser);
-      await user.dblClick(
-        await screen.findByRole('option', { name: /report\.pdf/ }),
-      );
-      await waitFor(() => {
-        expect(assign).toHaveBeenCalledWith(
-          `https://storage.example/${file.id}?signed`,
-        );
-      });
-    } finally {
-      Object.defineProperty(window, 'location', {
-        configurable: true,
-        value: original,
-      });
-    }
+    drive.file('report.pdf');
+    renderApp('/drive', testUser);
+    const file = await screen.findByRole('option', { name: /report\.pdf/ });
+    await user.dblClick(file);
+    expect(
+      await screen.findByRole('dialog', { name: 'report.pdf' }),
+    ).toBeVisible();
+    expect(await screen.findByText(/Preview is unavailable/)).toBeVisible();
+    await user.keyboard('{Escape}');
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+    );
   });
 
   it('offers to retry when the folder cannot be loaded', async () => {

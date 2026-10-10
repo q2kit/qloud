@@ -203,9 +203,12 @@ test('reload resumes an API-created partial upload, rejects a changed file and s
     expect(parts).toHaveLength(1);
     expect(new URL(parts[0] ?? '').searchParams.get('partNumber')).toBe('2');
     await item(page, 'resume.bin').click();
+    await page.keyboard.press('Enter');
+    const viewer = page.getByRole('dialog', { name: 'resume.bin' });
+    await expect(viewer).toBeVisible();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.keyboard.press('Enter'),
+      viewer.getByRole('button', { name: 'Tải xuống', exact: true }).click(),
     ]);
     expect((await readFile(await download.path())).equals(bytes)).toBe(true);
   } finally {

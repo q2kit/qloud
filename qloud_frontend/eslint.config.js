@@ -8,9 +8,12 @@ export default tseslint.config(
   {
     ignores: [
       'dist',
+      'public/pdfjs',
       'coverage',
       'playwright-report',
       'test-results',
+      'playwright-report-dev',
+      'test-results-dev',
       'src/lib/api/schema.d.ts',
     ],
   },

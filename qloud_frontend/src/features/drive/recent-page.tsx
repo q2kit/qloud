@@ -1,4 +1,12 @@
-import { Clock3, Download, FolderOpen, Info } from 'lucide-react';
+import {
+  Clock3,
+  Download,
+  Eye,
+  FolderOpen,
+  Info,
+  ExternalLink,
+  Link,
+} from 'lucide-react';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -10,13 +18,16 @@ import type { NodeAction } from './actions';
 import { downloadNode, useRecent, type DriveNode } from './api';
 import { CenteredState } from './components/browser-states';
 import { FileBrowser } from './components/file-browser';
-import { folderPath } from './paths';
+import { FileViewer } from './components/file-viewer';
+import { useOpenPreview } from './use-open-preview';
+import { folderPath, nodeUrl } from './paths';
 import { useDrivePreferences } from './preferences';
 import { useDriveStore } from './store';
 
 export function RecentPage(): React.JSX.Element {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const openPreview = useOpenPreview();
   const me = useMe();
   const recent = useRecent();
   const { view, setView } = useDrivePreferences();
@@ -35,9 +46,7 @@ export function RecentPage(): React.JSX.Element {
   }, [select]);
   const open = (node: DriveNode): void => {
     setActionError(null);
-    void downloadNode(node.id).catch(() => {
-      setActionError(t('drive.errors.downloadFailed'));
-    });
+    openPreview(node);
   };
   const actionsFor = (): NodeAction[] => {
     const [node] = useDriveStore.getState().selected;
@@ -45,11 +54,39 @@ export function RecentPage(): React.JSX.Element {
     return [
       {
         key: 'open',
-        label: t('drive.actions.download'),
-        icon: Download,
+        label: t('preview.open'),
+        icon: Eye,
         shortcut: '↵',
         run: () => {
           open(node);
+        },
+      },
+      {
+        key: 'download',
+        label: t('drive.actions.download'),
+        icon: Download,
+        run: () => {
+          void downloadNode(node.id).catch(() => {
+            setActionError(t('drive.errors.downloadFailed'));
+          });
+        },
+      },
+      {
+        key: 'openInNewTab',
+        label: t('drive.actions.openInNewTab'),
+        icon: ExternalLink,
+        run: () => {
+          window.open(nodeUrl(node), '_blank', 'noopener');
+        },
+      },
+      {
+        key: 'copyLink',
+        label: t('drive.actions.copyLink'),
+        icon: Link,
+        run: () => {
+          void navigator.clipboard.writeText(nodeUrl(node)).catch(() => {
+            setActionError(t('drive.errors.copyFailed'));
+          });
         },
       },
       {
@@ -106,6 +143,9 @@ export function RecentPage(): React.JSX.Element {
           else select(node);
         }}
         onOpen={open}
+        onOpenInNewTab={(node) => {
+          window.open(nodeUrl(node), '_blank', 'noopener');
+        }}
         draggable={false}
         enabled={recent.isSuccess}
         loadingLabel={t('recent.loading')}
@@ -126,6 +166,12 @@ export function RecentPage(): React.JSX.Element {
             description={t('recent.emptyDescription')}
           />
         }
+      />
+      <FileViewer
+        nodes={nodes}
+        hasMore={recent.hasNextPage}
+        loadingMore={recent.isFetchingNextPage}
+        loadMore={() => recent.fetchNextPage()}
       />
     </section>
   );

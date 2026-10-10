@@ -1,6 +1,7 @@
 import type { TFunction } from 'i18next';
 import {
   Download,
+  Eye,
   ExternalLink,
   FolderInput,
   FolderOpen,
@@ -26,7 +27,7 @@ export interface ActionHandlers {
   rename: (node: DriveNode) => void;
   move: (nodes: DriveNode[]) => void;
   info: (node: DriveNode) => void;
-  /** Folders only: each has its own URL (files get theirs with the viewer, M3). */
+  /** Independent URLs for files and folders. */
   openInNewTab: (node: DriveNode) => void;
   copyLink: (node: DriveNode) => void;
 }
@@ -58,31 +59,39 @@ export function nodeActions(
     {
       key: 'open',
       label:
-        node.kind === 'folder'
-          ? t('drive.actions.open')
-          : t('drive.actions.download'),
-      icon: node.kind === 'folder' ? FolderOpen : Download,
+        node.kind === 'folder' ? t('drive.actions.open') : t('preview.open'),
+      icon: node.kind === 'folder' ? FolderOpen : Eye,
       shortcut: '↵',
       run: () => {
-        (node.kind === 'folder' ? handlers.open : handlers.download)(node);
+        handlers.open(node);
       },
     },
-    ...(node.kind === 'folder'
+    ...[
+      {
+        key: 'openInNewTab',
+        label: t('drive.actions.openInNewTab'),
+        icon: ExternalLink,
+        run: () => {
+          handlers.openInNewTab(node);
+        },
+      },
+      {
+        key: 'copyLink',
+        label: t('drive.actions.copyLink'),
+        icon: Link,
+        run: () => {
+          handlers.copyLink(node);
+        },
+      },
+    ],
+    ...(node.kind === 'file'
       ? [
           {
-            key: 'openInNewTab',
-            label: t('drive.actions.openInNewTab'),
-            icon: ExternalLink,
+            key: 'download',
+            label: t('drive.actions.download'),
+            icon: Download,
             run: () => {
-              handlers.openInNewTab(node);
-            },
-          },
-          {
-            key: 'copyLink',
-            label: t('drive.actions.copyLink'),
-            icon: Link,
-            run: () => {
-              handlers.copyLink(node);
+              handlers.download(node);
             },
           },
         ]
