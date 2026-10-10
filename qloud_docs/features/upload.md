@@ -96,6 +96,13 @@ M2-08b ([#106](https://github.com/q2kit/qloud/issues/106)):
 - Hành động: tạm dừng/tiếp tục tất cả, hủy, thử lại các file lỗi. Khi có upload đang chạy mà người dùng định rời trang thì hiện cảnh báo.
 - Khi xong: file hiện ngay trong folder (invalidate query).
 
+## M2-10 — bổ sung hoàn thiện M2 ([#26](https://github.com/q2kit/qloud/issues/26))
+- Giữ các E2E tạo folder, upload/download và resume từ session seed của M2-07/M2-08; không viết lại các ca đã có.
+- `e2e/upload-interruption.spec.ts` bổ sung hai ca file **100 MiB**, bắt đầu hoàn toàn qua UI trong folder vừa tạo: mất mạng rồi tự tiếp tục và reload rồi chọn lại tệp gốc.
+- Test đợi part đầu tiên thực sự lưu trên S3, giữ các PUT còn lại để ngắt tại thời điểm xác định; chuyển browser context sang offline. API Django và phản hồi S3 đều dùng stack thật.
+- Kiểm tra cùng session và folder đích, không gửi lại part đầu, không hoàn tất khi thiếu part; khi xong chỉ có một file, download khớp toàn bộ byte và file không xuất hiện nhầm ở folder gốc. Chạy trên Chromium desktop và 360px.
+- Ca 100 MiB không thay thế kiểm chứng file 5 GB trong tiêu chí chấp nhận bên dưới. Bug E2E drag/move không ổn định vẫn theo dõi riêng ở [#115](https://github.com/q2kit/qloud/issues/115).
+
 ## Tiêu chí chấp nhận
 - [ ] Upload file 0 byte, 1 KB, 100 MB và 5 GB đều thành công; checksum khớp khi tải về.
 - [ ] Ngắt mạng ở giữa chừng rồi bật lại: upload tự tiếp tục, không phải tải lại các part đã xong.
