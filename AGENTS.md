@@ -30,16 +30,17 @@ File này là **luật làm việc**. Nếu tài liệu khác mâu thuẫn với
 Repo: `q2kit/qloud` trên GitHub, nhánh chính là **`master`**. Mọi thao tác với GitHub dùng **`gh` CLI** (đã đăng nhập sẵn).
 Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue* trong ROADMAP). Mỗi task được giao qua **một Pull Request**.
 
+Các bước lặp lại có lệnh sẵn trong `scripts/workflow.py`, chạy từ gốc repo (`python3 scripts/workflow.py <lệnh> --help`); với Claude Code, skill `qloud-task` bọc các lệnh này.
+
 1. **Định hướng.**
-   - Đọc [qloud_docs/ROADMAP.md](qloud_docs/ROADMAP.md).
-   - Xem trạng thái trên GitHub: `gh pr list`, `gh pr list --state merged --limit 5`, `gh issue list --milestone M<n>` (ví dụ `M1`).
-     Đối chiếu với ROADMAP: PR đã merge mà task vẫn là 🟦 thì phải đồng bộ (xem bước 9). Có PR nào đang mở, đang bị yêu cầu sửa (review) hay CI đỏ thì xử lý trước, rồi mới làm task mới.
+   - Đọc [qloud_docs/ROADMAP.md](qloud_docs/ROADMAP.md); xem `gh pr list` và `gh issue list --milestone M<n>`.
+   - `python3 scripts/workflow.py roadmap-sync --check`: báo task có PR đã merge mà ROADMAP chưa ✅ (đồng bộ: bước 9).
+     Có PR nào đang mở, đang bị yêu cầu sửa (review) hay CI đỏ thì xử lý trước, rồi mới làm task mới.
    - Chọn task tiếp theo: task chưa làm, đứng đầu milestone hiện tại, và không phụ thuộc vào task nào chưa xong.
-2. **Nhận task.**
-   - `gh issue view <n>` để đọc issue.
-   - `gh issue edit <n> --add-assignee @me --add-label status:in-progress`.
-   - Tạo branch từ `master` mới nhất: `git switch master && git pull --ff-only && git switch -c <type>/<task-id>-<slug>`, ví dụ `feat/M2-04-upload-session`.
-   - **Tiếp tục một branch đã có** (làm tiếp task, sửa theo review): kiểm tra base trước khi làm, **chỉ rebase nếu base có commit mới**: `git fetch origin && git merge-base --is-ancestor origin/<base> HEAD || git rebase origin/<base>`.
+2. **Nhận task.** `python3 scripts/workflow.py task-start <issue> --slug <slug>`:
+   tạo branch `<type>/<task-id>-<slug>` từ `master` mới nhất (ví dụ `feat/M2-04-upload-session`), gán issue cho mình và thêm label `status:in-progress`.
+   Gọi lại cho branch đã có (làm tiếp task, sửa theo review) thì script chuyển sang branch đó và **chỉ rebase nếu base có commit mới**.
+   Script cảnh báo khi file feature còn `Nháp`, khi issue bị chặn bởi issue đang mở, hoặc task đã ✅.
 3. **Đọc ngữ cảnh.** Đọc file feature liên quan trong `qloud_docs/features/`, cùng các phần liên quan
    của `architecture.md`, `data-model.md`, `api.md`, `ui-ux.md` và `conventions.md`. Không đọc thừa những gì không cần.
    File feature còn `Nháp` thì chưa code: nhờ duyệt trước, theo từng milestone (xem [qloud_docs/README.md › Trạng thái tài liệu](qloud_docs/README.md#trạng-thái-tài-liệu)).
@@ -53,22 +54,24 @@ Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue*
    - Nếu có quyết định kiến trúc mới thì tạo ADR trong `qloud_docs/adr/`.
    - Câu hỏi cần quyết định thì hỏi trong phiên làm việc, hoặc comment trên issue kèm label `needs:owner-decision`.
      Có câu trả lời thì viết **quyết định** vào đúng tài liệu (feature, architecture, data-model, ADR); không lưu bản hỏi–đáp trong repo.
-8. **Mở PR.**
-   - **Trước khi push hoặc tạo PR, kiểm tra base branch; chỉ rebase nếu base có commit mới**: `git fetch origin && git merge-base --is-ancestor origin/<base> HEAD || git rebase origin/<base>`.
-     Nếu có rebase: giải quyết conflict (nếu có), chạy lại lint và test rồi mới push.
-   - `git push -u origin HEAD` (sau khi rebase một branch đã push thì dùng `git push --force-with-lease`),
-     rồi `gh pr create --base <base> --title "<type>(<scope>): <subject> [<task-id>]" --body-file <file>`.
-   - Body PR theo [.github/pull_request_template.md](.github/pull_request_template.md), và **phải có `Closes #<n>`**.
-   - Theo dõi CI bằng `gh pr checks --watch`. CI đỏ thì sửa cho tới khi xanh.
+8. **Mở PR.** Viết body theo [.github/pull_request_template.md](.github/pull_request_template.md) (**phải có `Closes #<n>`**) ra một file, rồi
+   `python3 scripts/workflow.py pr-open --title "<type>(<scope>): <subject> [<task-id>]" --body-file <file> --watch`
+   (agent thêm `--co-author "<model> <noreply@anthropic.com>"`). Script:
+   - kiểm tra tiêu đề, body và tên branch giống CI;
+   - **chỉ rebase nếu base có commit mới** (conflict thì dừng để mình giải quyết);
+   - đổi task trong ROADMAP sang 🟦 nếu chưa (một commit riêng);
+   - chạy lint, type check và test của phần đã đổi, như mục 8 (`--skip-e2e` chỉ khi không chạy được E2E, và ghi rõ trong body);
+   - push (`--force-with-lease` sau khi rebase một branch đã push), tạo PR với `--base master` (PR đã có thì chỉ push), rồi chờ CI.
+   CI đỏ thì sửa cho tới khi xanh.
 9. **Review và merge.** **Agent không tự merge.** Chỉ merge (`gh pr merge --squash --delete-branch`) khi được yêu cầu rõ ràng cho đúng PR đó.
    Có góp ý review thì đọc bằng `gh pr view <n> --comments`, sửa trên cùng branch, rồi trả lời từng góp ý.
    Đổi trạng thái task trong ROADMAP sang ✅:
-   - **Agent merge** (khi được yêu cầu): push một commit đổi sang ✅ vào chính PR đó, rồi mới merge.
-   - **PR được merge từ bên ngoài phiên:** ở đầu phiên làm việc tiếp theo, agent kiểm tra các PR đã merge (`gh pr list --state merged`).
-     Nếu task tương ứng trong ROADMAP vẫn là 🟦 thì đổi sang ✅ trong PR kế tiếp; nếu chưa có PR nào sắp mở thì mở một PR nhỏ chỉ để làm việc này.
+   - **Agent merge** (khi được yêu cầu): `python3 scripts/workflow.py roadmap-sync --pr <n>`, commit và push vào chính PR đó, CI xanh rồi mới merge.
+   - **PR được merge từ bên ngoài phiên:** ở đầu phiên tiếp theo, `python3 scripts/workflow.py roadmap-sync` đổi các task đó sang ✅;
+     commit vào PR kế tiếp, hoặc mở một PR nhỏ chỉ để làm việc này nếu chưa có PR nào sắp mở.
    - Không để ROADMAP trên `master` lệch với GitHub quá một phiên làm việc.
-   - Issue tự đóng nhờ `Closes #<n>`; gỡ label trạng thái: `gh issue edit <n> --remove-label status:in-progress`.
-     Milestone không còn issue mở thì đóng nó: `gh api -X PATCH repos/q2kit/qloud/milestones/<number> -f state=closed`.
+   - Issue tự đóng nhờ `Closes #<n>`. Sau khi merge, `python3 scripts/workflow.py roadmap-sync --github` gỡ `status:in-progress` khỏi issue đã đóng
+     và đóng milestone **không còn issue mở nào** (kể cả bug).
 10. **Báo cáo.** Tóm tắt: link PR, đã làm gì, đã kiểm tra thế nào, còn tồn đọng gì.
 
 **Các tình huống khác:**
@@ -217,6 +220,7 @@ cd "$(git rev-parse --show-toplevel)/qloud_frontend" && pnpm api:generate
 
 | Việc | Lệnh (từ thư mục tương ứng) |
 |---|---|
+| Quy trình task (mục 3) | gốc repo: `python3 scripts/workflow.py task-start <issue> --slug <slug>` · `pr-open --title ... --body-file ...` · `roadmap-sync [--check \| --pr <n> \| --github]` |
 | Tự sửa format + lint | BE: `uv run ruff check --fix . && uv run ruff format .` · FE: `pnpm format && pnpm lint --fix` |
 | Tạo migration | BE: `uv run python manage.py makemigrations <app>` |
 | Tạo tài khoản admin | BE: `uv run python manage.py createsuperuser` |
