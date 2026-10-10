@@ -26,7 +26,7 @@ import { setMediaQuery } from '@/test/match-media';
 import { DESKTOP_INPUT_QUERY } from './desktop-input';
 
 import { VIRTUALIZE_AFTER } from './components/node-collection';
-import { compactId } from './paths';
+import { compactId, folderPath } from './paths';
 
 const server = setupServer();
 let drive: FakeDrive;
@@ -52,6 +52,70 @@ const names = async () =>
   (await items()).map((item) => item.getAttribute('title'));
 
 describe('Drive (S-05)', () => {
+  it('loads cursor pages to highlight a linked file, focuses it and lets Escape clear it', async () => {
+    const user = userEvent.setup();
+    for (let i = 0; i < 105; i++) drive.file(`a${String(i)}.txt`);
+    const target = drive.file('z-target.txt');
+    renderApp(folderPath(undefined, target.id), testUser);
+    const file = await screen.findByRole('option', { name: target.name });
+    await waitFor(() => expect(file).toHaveAttribute('aria-selected', 'true'));
+    expect(file).toHaveFocus();
+    expect(drive.requests.some((url) => url.searchParams.has('cursor'))).toBe(
+      true,
+    );
+    await user.keyboard('{Escape}');
+    expect(file).toHaveAttribute('aria-selected', 'false');
+    await user.click(
+      screen.getByRole('button', { name: 'More actions for z-target.txt' }),
+    );
+    expect(
+      screen.queryByRole('menuitem', { name: 'Open containing folder' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('keeps the file query when canonicalizing a dashed parent link', async () => {
+    const parent = drive.folder('Nested');
+    const target = drive.file('report.txt', parent.id);
+    const router = renderApp(
+      `/drive/folders/${parent.id}?select=${target.id}`,
+      testUser,
+    );
+    await waitFor(() =>
+      expect(screen.getByRole('option', { name: target.name })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      ),
+    );
+    expect(router.state.location.pathname).toBe(
+      `/drive/folders/${compactId(parent.id)}`,
+    );
+    expect(router.state.location.search).toBe(`?select=${target.id}`);
+  });
+
+  it('rejects missing or moved targets without walking unrelated cursor pages', async () => {
+    const parent = drive.folder('Elsewhere');
+    const target = drive.file('moved.txt', parent.id);
+    for (let i = 0; i < 105; i++) drive.file(`a${String(i)}.txt`);
+    const router = renderApp(folderPath(undefined, target.id), testUser);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'The file is unavailable',
+    );
+    expect(drive.requests.some((url) => url.searchParams.has('cursor'))).toBe(
+      false,
+    );
+    await act(() =>
+      router.navigate('/drive?select=00000000000000000000000000000000'),
+    );
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'The file is unavailable',
+    );
+    expect(
+      (await items()).every(
+        (item) => item.getAttribute('aria-selected') === 'false',
+      ),
+    ).toBe(true);
+  });
+
   it('touch devices ignore double click but keep explicit Open and New folder actions', async () => {
     setMediaQuery(DESKTOP_INPUT_QUERY, false);
     const user = userEvent.setup();

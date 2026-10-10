@@ -200,6 +200,32 @@ describe('rubber-band selection', () => {
 });
 
 describe('item menus', () => {
+  it('waits for the trigger click to finish before changing selection and opening the menu', async () => {
+    const user = userEvent.setup();
+    drive.folder('Photos');
+    drive.file('report.pdf');
+    const router = renderApp('/drive', testUser);
+    await user.click(await screen.findByRole('option', { name: 'report.pdf' }));
+    const trigger = screen.getByRole('button', {
+      name: 'More actions for Photos',
+    });
+    await user.pointer({ keys: '[MouseLeft>]', target: trigger });
+    expect(selectedNames()).toEqual(['report.pdf']);
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    await user.pointer({ keys: '[/MouseLeft]' });
+    expect(screen.getByRole('menu')).toBeVisible();
+    expect(selectedNames()).toEqual(['Photos']);
+    expect(router.state.location.pathname).toBe('/drive');
+    await user.keyboard('{Escape}');
+    trigger.focus();
+    await user.keyboard('{ArrowDown}');
+    expect(screen.getByRole('menu')).toBeVisible();
+    await user.click(screen.getByRole('menuitem', { name: 'Open↵' }));
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Photos' }),
+    ).toBeVisible();
+  });
+
   it('right click selects the item and offers its actions', async () => {
     const user = userEvent.setup();
     drive.folder('A');

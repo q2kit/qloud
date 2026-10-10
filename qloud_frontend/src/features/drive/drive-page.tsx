@@ -1,12 +1,12 @@
-import {
-  FileUp,
-  FolderOpen,
-  FolderPlus,
-  FolderX,
-  RotateCw,
-} from 'lucide-react';
+import { FileUp, FolderOpen, FolderPlus, FolderX } from 'lucide-react';
 import * as React from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,6 @@ import { useUploader } from '@/features/upload/context';
 import { treeFromDrop } from '@/features/upload/drop';
 import { useFolderUploader } from '@/features/upload/folder-context';
 import { ApiError } from '@/lib/api/errors';
-import { useMediaQuery } from '@/lib/use-media-query';
 
 import { nodeActions, type ActionHandlers } from './actions';
 import {
@@ -28,17 +27,13 @@ import {
   type DriveNode,
 } from './api';
 import { DriveBreadcrumb } from './components/drive-breadcrumb';
-import { DriveToolbar } from './components/drive-toolbar';
+import { FileBrowser } from './components/file-browser';
+import { CenteredState, LoadFailed } from './components/browser-states';
 import { MoveDialog } from './components/move-dialog';
 import { NameDialog } from './components/name-dialog';
-import { useMarquee } from './components/use-marquee';
-import {
-  NodeCollection,
-  type SelectModifiers,
-} from './components/node-collection';
+import type { SelectModifiers } from './components/node-collection';
 import { driveErrorMessage } from './errors';
-import { DESKTOP_INPUT_QUERY } from './desktop-input';
-import { compactId, folderPath, folderUrl } from './paths';
+import { compactId, folderPath, folderUrl, uuidFromUrl } from './paths';
 import { useDrivePreferences } from './preferences';
 import { useDriveStore } from './store';
 import { useCurrentFolderId } from './use-current-folder';
@@ -62,6 +57,15 @@ export function DrivePage(): React.JSX.Element {
   const folderId = useCurrentFolderId();
   const { folderId: rawFolderId } = useParams();
   const folder = useNode(folderId);
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const requestedId = searchParams.get('select');
+  const targetId = requestedId ? uuidFromUrl(requestedId) : undefined;
+  const target = useNode(targetId);
+  const appliedLocation = React.useRef<string | null>(null);
+  const [revealedLocation, setRevealedLocation] = React.useState<string | null>(
+    null,
+  );
   const { view, setView, ordering, setOrdering } = useDrivePreferences();
   const children = useChildren(folderId, ordering);
   const store = useDriveStore();
@@ -132,34 +136,77 @@ export function DrivePage(): React.JSX.Element {
     () => children.data?.pages.flatMap((page) => page.results) ?? [],
     [children.data],
   );
+  // Validate the parent before walking cursor pages, including links to stale files.
+  React.useEffect(() => {
+    if (!targetId || appliedLocation.current === location.key || !folder.data)
+      return;
+    if (
+      target.isError ||
+      (target.data &&
+        (target.data.kind !== 'file' || target.data.parent_id !== folderId))
+    ) {
+      appliedLocation.current = location.key;
+      select(null);
+      return;
+    }
+    if (
+      !target.data ||
+      !children.data ||
+      children.isFetching ||
+      children.isError
+    )
+      return;
+    const node = nodes.find((item) => item.id === targetId);
+    if (node) {
+      appliedLocation.current = location.key;
+      select(node);
+    } else if (children.hasNextPage) {
+      void children.fetchNextPage();
+    } else {
+      appliedLocation.current = location.key;
+    }
+  }, [
+    targetId,
+    target.data,
+    target.isError,
+    location.key,
+    folder.data,
+    folderId,
+    children,
+    nodes,
+    select,
+  ]);
+
+  const locationUnavailable =
+    Boolean(targetId) &&
+    (target.isError ||
+      Boolean(
+        target.data &&
+        (target.data.kind !== 'file' || target.data.parent_id !== folderId),
+      ) ||
+      (children.isSuccess &&
+        !children.isFetching &&
+        !children.hasNextPage &&
+        !nodes.some((node) => node.id === targetId)));
+  const revealId =
+    revealedLocation !== location.key &&
+    selected.some((node) => node.id === targetId) &&
+    !locationUnavailable
+      ? targetId
+      : undefined;
+
   const selectedIds = React.useMemo(
     () => new Set(selected.map((node) => node.id)),
     [selected],
   );
-  const contentRef = React.useRef<HTMLDivElement>(null);
-  const desktopInput = useMediaQuery(DESKTOP_INPUT_QUERY);
-  const marquee = useMarquee({
-    containerRef: contentRef,
-    selectedIds,
-    canDoubleClick: desktopInput,
-    enabled: Boolean(folder.data) && children.isSuccess && !folder.isError,
-    onSelect: (ids) => {
-      const chosen = new Set(ids);
-      store.selectAll(nodes.filter((node) => chosen.has(node.id)));
-    },
-    onClear: () => {
-      select(null);
-    },
-    onCreate: () => {
-      store.setCreatingFolder(true);
-    },
-  });
   // Older links carry the dashed UUID: show the compact form (paths.ts).
   React.useEffect(() => {
     if (rawFolderId && rawFolderId !== compactId(rawFolderId)) {
-      void navigate(folderPath(rawFolderId), { replace: true });
+      void navigate(folderPath(rawFolderId) + location.search, {
+        replace: true,
+      });
     }
-  }, [rawFolderId, navigate]);
+  }, [rawFolderId, navigate, location.search]);
 
   const crumbs = folder.data?.breadcrumb;
   const parentCrumb = crumbs?.at(-1);
@@ -169,8 +216,7 @@ export function DrivePage(): React.JSX.Element {
     [parentCrumb, crumbs?.length],
   );
 
-  // Ctrl/⌘+A, Esc and Backspace anywhere on the page, not only inside the list; otherwise the
-  // browser would select all the page's text. Typing, dialogs and menus keep them.
+  // Parent navigation belongs to Drive; selection shortcuts live in FileBrowser.
   React.useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
       const target = event.target instanceof Element ? event.target : null;
@@ -182,12 +228,7 @@ export function DrivePage(): React.JSX.Element {
       ) {
         return;
       }
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a') {
-        event.preventDefault();
-        useDriveStore.getState().selectAll(nodes);
-      } else if (event.key === 'Escape') {
-        useDriveStore.getState().select(null);
-      } else if (
+      if (
         event.key === 'Backspace' &&
         !event.ctrlKey &&
         !event.metaKey &&
@@ -203,7 +244,7 @@ export function DrivePage(): React.JSX.Element {
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [nodes, parent, navigate]);
+  }, [parent, navigate]);
 
   const { fetchNextPage, isFetchingNextPage } = children;
   const loadMore = React.useCallback(() => {
@@ -352,7 +393,12 @@ export function DrivePage(): React.JSX.Element {
         )}
       </div>
       <ResumeUploads />
-      <DriveToolbar
+      <FileBrowser
+        nodes={nodes}
+        revealId={revealId}
+        onRevealed={() => {
+          setRevealedLocation(location.key);
+        }}
         selected={selected}
         view={view}
         ordering={ordering}
@@ -362,37 +408,28 @@ export function DrivePage(): React.JSX.Element {
         onClearSelection={() => {
           select(null);
         }}
-      />
-      {actionError && <FormAlert>{actionError}</FormAlert>}
-      <p className="sr-only" role="status">
-        {announcement}
-      </p>
-
-      <div
-        ref={contentRef}
-        data-testid="folder-content"
-        className="flex min-h-40 flex-1 flex-col"
-        onPointerDown={marquee.onPointerDown}
-        onDoubleClick={marquee.onDoubleClick}
-      >
-        {marquee.box && (
-          <div
-            aria-hidden="true"
-            data-testid="selection-box"
-            className="pointer-events-none fixed z-30 rounded-sm border border-primary bg-primary/10"
-            style={{
-              left: marquee.box.left - window.scrollX,
-              top: marquee.box.top - window.scrollY,
-              width: marquee.box.right - marquee.box.left,
-              height: marquee.box.bottom - marquee.box.top,
-            }}
-          />
-        )}
-        {children.isPending ? (
-          <LoadingSkeleton view={view} />
-        ) : children.isError ? (
-          <LoadFailed onRetry={() => void children.refetch()} />
-        ) : nodes.length === 0 ? (
+        onSelectAll={(items) => {
+          store.selectAll(items);
+        }}
+        onCreate={() => {
+          store.setCreatingFolder(true);
+        }}
+        enabled={Boolean(folder.data) && children.isSuccess && !folder.isError}
+        pending={children.isPending}
+        failed={children.isError}
+        onRetry={() => void children.refetch()}
+        feedback={
+          <>
+            {locationUnavailable && (
+              <FormAlert>{t('drive.errors.locationUnavailable')}</FormAlert>
+            )}
+            {actionError && <FormAlert>{actionError}</FormAlert>}
+            <p className="sr-only" role="status">
+              {announcement}
+            </p>
+          </>
+        }
+        emptyState={
           <EmptyFolder
             onCreate={() => {
               store.setCreatingFolder(true);
@@ -401,39 +438,32 @@ export function DrivePage(): React.JSX.Element {
               if (folderId) uploader.add(files, folderId);
             }}
           />
-        ) : (
-          <NodeCollection
-            nodes={nodes}
-            view={view}
-            selectedIds={selectedIds}
-            hasMore={children.hasNextPage}
-            isLoadingMore={isFetchingNextPage}
-            onLoadMore={loadMore}
-            onSelect={onSelect}
-            onOpen={open}
-            onOpenInNewTab={handlers.openInNewTab}
-            onRename={handlers.rename}
-            // Read the store directly: the menu opens right after the item got selected.
-            actionsFor={() =>
-              nodeActions(useDriveStore.getState().selected, handlers, t)
-            }
-            dragIdsFor={(node) =>
-              selectedIds.has(node.id) ? [...selectedIds] : [node.id]
-            }
-            onDropOnFolder={dropOn}
-            onDropFiles={(target, dataTransfer) => {
-              dragDepth.current = 0;
-              setFileDrag(null);
-              uploadFrom(dataTransfer, target.id);
-            }}
-            onFileDragOverFolder={(target) => {
-              setFileDrag((current) =>
-                current ? { over: target?.name ?? null } : current,
-              );
-            }}
-          />
-        )}
-      </div>
+        }
+        hasMore={children.hasNextPage}
+        isLoadingMore={isFetchingNextPage}
+        onLoadMore={loadMore}
+        onSelect={onSelect}
+        onOpen={open}
+        onOpenInNewTab={handlers.openInNewTab}
+        onRename={handlers.rename}
+        actionsFor={() =>
+          nodeActions(useDriveStore.getState().selected, handlers, t)
+        }
+        dragIdsFor={(node) =>
+          selectedIds.has(node.id) ? [...selectedIds] : [node.id]
+        }
+        onDropOnFolder={dropOn}
+        onDropFiles={(target, dataTransfer) => {
+          dragDepth.current = 0;
+          setFileDrag(null);
+          uploadFrom(dataTransfer, target.id);
+        }}
+        onFileDragOverFolder={(target) => {
+          setFileDrag((current) =>
+            current ? { over: target?.name ?? null } : current,
+          );
+        }}
+      />
 
       <NameDialog
         open={renaming !== null}
@@ -461,64 +491,6 @@ export function DrivePage(): React.JSX.Element {
         }}
       />
     </section>
-  );
-}
-
-function LoadingSkeleton({
-  view,
-}: {
-  view: 'grid' | 'list';
-}): React.JSX.Element {
-  const { t } = useTranslation();
-  return (
-    <div
-      role="status"
-      aria-label={t('drive.loading')}
-      className={
-        view === 'grid'
-          ? 'grid grid-cols-[repeat(auto-fill,minmax(9.5rem,1fr))] gap-3'
-          : 'space-y-2'
-      }
-    >
-      {Array.from({ length: 8 }, (_, index) => (
-        <div
-          key={index}
-          className={
-            view === 'grid'
-              ? 'h-36 animate-pulse rounded-lg bg-secondary'
-              : 'h-11 animate-pulse rounded-md bg-secondary'
-          }
-        />
-      ))}
-    </div>
-  );
-}
-
-function CenteredState({
-  icon,
-  title,
-  description,
-  children,
-}: React.PropsWithChildren<{
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}>): React.JSX.Element {
-  return (
-    <div className="flex flex-1 items-center justify-center py-16">
-      <div className="max-w-md text-center">
-        <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-2xl border border-border bg-card shadow-soft">
-          {icon}
-        </div>
-        <h2 className="text-base font-semibold">{title}</h2>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          {description}
-        </p>
-        {children && (
-          <div className="mt-6 flex justify-center gap-2">{children}</div>
-        )}
-      </div>
-    </div>
   );
 }
 
@@ -561,26 +533,6 @@ function EmptyFolder({
         {t('drive.actions.newFolder')}
       </Button>
     </CenteredState>
-  );
-}
-
-function LoadFailed({ onRetry }: { onRetry: () => void }): React.JSX.Element {
-  const { t } = useTranslation();
-  return (
-    <div role="alert">
-      <CenteredState
-        icon={
-          <RotateCw className="size-6 text-destructive" aria-hidden="true" />
-        }
-        title={t('drive.errors.loadFailed')}
-        description={t('drive.errors.loadFailedDescription')}
-      >
-        <Button variant="outline" onClick={onRetry}>
-          <RotateCw />
-          {t('drive.actions.retry')}
-        </Button>
-      </CenteredState>
-    </div>
   );
 }
 

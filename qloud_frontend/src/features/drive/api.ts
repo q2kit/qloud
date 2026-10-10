@@ -34,6 +34,7 @@ export const PAGE_SIZE = 100;
 
 export const driveKeys = {
   all: ['drive'] as const,
+  recent: ['drive', 'recent'] as const,
   node: (id: string) => [...driveKeys.all, 'node', id] as const,
   children: (id: string) => [...driveKeys.all, 'children', id] as const,
   childrenSorted: (id: string, ordering: Ordering) =>
@@ -79,6 +80,22 @@ export function useChildren(
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (page) => cursorOf(page.next),
     enabled: Boolean(folderId),
+  });
+}
+
+export function useRecent(): UseInfiniteQueryResult<
+  InfiniteData<ChildrenPage, string | undefined>
+> {
+  return useInfiniteQuery({
+    queryKey: driveKeys.recent,
+    queryFn: async ({ pageParam }) =>
+      unwrap(
+        await api.GET('/api/v1/recent', {
+          params: { query: { page_size: 50, cursor: pageParam } },
+        }),
+      ),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (page) => cursorOf(page.next),
   });
 }
 
@@ -169,6 +186,7 @@ export function useRename(): UseMutationResult<
       void queryClient.invalidateQueries({
         queryKey: driveKeys.children(node.parent_id ?? ''),
       });
+      void queryClient.invalidateQueries({ queryKey: driveKeys.recent });
       // Breadcrumbs below a renamed folder show its name.
       void queryClient.invalidateQueries({
         queryKey: [...driveKeys.all, 'node'],
@@ -238,6 +256,7 @@ export function useMove(): UseMutationResult<
       for (const key of [...sourcesOf(nodes), driveKeys.children(targetId)]) {
         void queryClient.invalidateQueries({ queryKey: key });
       }
+      void queryClient.invalidateQueries({ queryKey: driveKeys.recent });
       // Moved folders have a new breadcrumb.
       void queryClient.invalidateQueries({
         queryKey: [...driveKeys.all, 'node'],

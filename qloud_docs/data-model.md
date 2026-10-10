@@ -72,6 +72,8 @@ Gói dung lượng. Đây là cách làm cho giới hạn **thay đổi được
 Mỗi owner có tối đa một node `parent = null`, node này phải là folder (M1-01). M2-01 thêm các trường file/xóa mềm bên dưới và các index.
 Check constraint ở DB: tên hợp lệ (giống `drive.names`); folder có `size = 0`, không có `mime_type`/`current_version`;
 `trashed_at` và `trashed_root` cùng có hoặc cùng trống. `current_version`, `trashed_by` dùng `SET_NULL`.
+M2-09: index partial `node_recent_files` trên `(owner_id, updated_at DESC, id DESC)` cho file còn sống (`kind=file`, `trashed_at IS NULL`), phục vụ top 100 Gần đây. Không thêm bảng hay trường lưu lần mở file.
+
 Truy vấn node luôn đi qua `sharing.permissions` (xem [architecture.md › Phân quyền](architecture.md#phân-quyền)).
 
 | Cột | Kiểu | Ghi chú |

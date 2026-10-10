@@ -23,12 +23,12 @@ const ORDERING_KEYS: Record<Ordering, string> = {
   '-size': 'largest',
 };
 
-interface DriveToolbarProps {
+export interface DriveToolbarProps {
   selected: DriveNode[];
   view: DriveView;
   ordering: Ordering;
   onView: (view: DriveView) => void;
-  onOrdering: (ordering: Ordering) => void;
+  onOrdering?: (ordering: Ordering) => void;
   /** The item menu's actions for the selection, as buttons. */
   actions: NodeAction[];
   onClearSelection: () => void;
@@ -67,7 +67,7 @@ export function DriveToolbar({
             {actions
               // The menu has the rest (new tab, link, info).
               .filter((action) =>
-                ['open', 'rename', 'move'].includes(action.key),
+                ['open', 'rename', 'move', 'location'].includes(action.key),
               )
               .map((action) => (
                 <Button
@@ -84,32 +84,40 @@ export function DriveToolbar({
         )}
       </div>
       <div className="flex items-center gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              <ArrowDownUp />
-              <span className="hidden sm:inline">
-                {t(`drive.sort.${ORDERING_KEYS[ordering]}`)}
-              </span>
-              <span className="sr-only sm:hidden">{t('drive.sort.label')}</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" aria-label={t('drive.sort.label')}>
-            <DropdownMenuRadioGroup
-              value={ordering}
-              onValueChange={(value) => {
-                const next = ORDERINGS.find((option) => option === value);
-                if (next) onOrdering(next);
-              }}
-            >
-              {ORDERINGS.map((option) => (
-                <DropdownMenuRadioItem key={option} value={option}>
-                  {t(`drive.sort.${ORDERING_KEYS[option]}`)}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {onOrdering ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <ArrowDownUp />
+                <span className="hidden sm:inline">
+                  {t(`drive.sort.${ORDERING_KEYS[ordering]}`)}
+                </span>
+                <span className="sr-only sm:hidden">
+                  {t('drive.sort.label')}
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" aria-label={t('drive.sort.label')}>
+              <DropdownMenuRadioGroup
+                value={ordering}
+                onValueChange={(value) => {
+                  const next = ORDERINGS.find((option) => option === value);
+                  if (next) onOrdering(next);
+                }}
+              >
+                {ORDERINGS.map((option) => (
+                  <DropdownMenuRadioItem key={option} value={option}>
+                    {t(`drive.sort.${ORDERING_KEYS[option]}`)}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <span className="text-xs text-muted-foreground">
+            {t(`drive.sort.${ORDERING_KEYS[ordering]}`)}
+          </span>
+        )}
         <div
           className="flex items-center rounded-lg border border-border bg-card p-0.5"
           role="group"

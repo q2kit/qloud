@@ -97,8 +97,14 @@ M2-02 (5 endpoint trên):
 | POST | `/nodes/trash` | Đưa nhiều node vào thùng rác `{node_ids}` |
 | GET | `/nodes/{id}/download` | Trả về `{url, expires_at}` (presigned, 5 phút; folder → 400 `not_a_file`) |
 | GET | `/nodes/{id}/preview` | URL xem trước hoặc thumbnail |
-| GET | `/recent` | Các file mới mở hoặc mới sửa |
+| GET | `/recent` | Tối đa 100 file của mình được cập nhật gần nhất (M2-09) |
 | GET | `/shared-with-me` | Các node người khác đã chia sẻ cho mình |
+
+### Gần đây (M2-09)
+- `GET /recent` yêu cầu đăng nhập, chỉ trả file còn sống thuộc owner hiện tại, đi qua `sharing.permissions.nodes_for`.
+- Schema `{results: Node[], next, previous}` giống children; mặc định `page_size=50`, tối đa 100 mỗi trang. Tổng tập kết quả tối đa 100 file, không phải 100 mỗi trang. Chọn tập 100 mới nhất trước khi áp cursor, không có offset/count query.
+- Thứ tự cố định `-updated_at`, khóa phụ `-id`; `ordering` khác trả 400. Cursor lỗi trả 404; `page_size` không phải số nguyên dương trả 400. Cursor lấy từ link `next`/`previous`.
+- Chưa có lịch sử lần mở/download. Không đưa file chia sẻ vào M2; bổ sung sau theo [quyết định #25](https://github.com/q2kit/qloud/issues/25#issuecomment-6100858060).
 
 ### Upload
 | Method | Path | Mô tả |

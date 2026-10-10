@@ -80,6 +80,13 @@ class Node(BaseModel):
             ),
         ]
         indexes = [
+            models.Index(
+                F("owner"),
+                F("updated_at").desc(),
+                F("id").desc(),
+                condition=Q(kind="file", trashed_at__isnull=True),
+                name="node_recent_files",
+            ),
             # Default listing order: folders first ("folder" > "file"), then name, then id.
             models.Index(F("parent"), F("kind").desc(), F("name"), F("id"), name="node_children"),
             models.Index(fields=["owner", "trashed_at"], name="node_owner_trashed"),

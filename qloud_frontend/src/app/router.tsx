@@ -7,6 +7,7 @@ import { PasswordResetRequestPage } from '@/features/auth/pages/password-reset-r
 import { SignupPage } from '@/features/auth/pages/signup-page';
 import { VerifyEmailPage } from '@/features/auth/pages/verify-email-page';
 import { DrivePage } from '@/features/drive/drive-page';
+import { RecentPage } from '@/features/drive/recent-page';
 import { SettingsPage } from '@/features/settings/settings-page';
 
 import { AppLayout } from './layout';
@@ -14,7 +15,7 @@ import { NotFoundPage, RouteErrorPage, SectionPlaceholderPage } from './pages';
 import { PublicLayout } from './public-layout';
 import type { RouteHandle } from './route-handle';
 
-type Section = 'recent' | 'shared' | 'trash';
+type Section = 'shared' | 'trash';
 
 function sectionPlaceholderRoute(section: Section): RouteObject {
   const handle: RouteHandle = { titleKey: `navigation.${section}` };
@@ -56,7 +57,11 @@ export const appRoutes: RouteObject[] = [
                 Component: DrivePage,
                 handle: { titleKey: 'drive.title' } satisfies RouteHandle,
               },
-              sectionPlaceholderRoute('recent'),
+              {
+                path: 'recent',
+                Component: RecentPage,
+                handle: { titleKey: 'navigation.recent' } satisfies RouteHandle,
+              },
               sectionPlaceholderRoute('shared'),
               sectionPlaceholderRoute('trash'),
               {

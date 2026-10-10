@@ -6,9 +6,11 @@ from .views import (
     NodeDetailView,
     NodeDownloadView,
     NodeMoveView,
+    RecentView,
 )
 
 urlpatterns = [
+    path("recent", RecentView.as_view(), name="recent"),
     path("nodes/move", NodeMoveView.as_view(), name="nodes-move"),
     path("nodes/<uuid:node_id>", NodeDetailView.as_view(), name="node-detail"),
     path("nodes/<uuid:node_id>/children", NodeChildrenView.as_view(), name="node-children"),

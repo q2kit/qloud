@@ -39,7 +39,10 @@ export interface SelectModifiers {
   range: boolean;
 }
 
-interface NodeCollectionProps {
+export interface NodeCollectionProps {
+  draggable?: boolean;
+  revealId?: string;
+  onRevealed?: () => void;
   nodes: DriveNode[];
   view: DriveView;
   selectedIds: ReadonlySet<string>;
@@ -49,17 +52,17 @@ interface NodeCollectionProps {
   onSelect: (node: DriveNode, modifiers: SelectModifiers) => void;
   onOpen: (node: DriveNode) => void;
   /** Folders only: middle click and Ctrl/⌘+Enter. */
-  onOpenInNewTab: (node: DriveNode) => void;
-  onRename: (node: DriveNode) => void;
+  onOpenInNewTab?: (node: DriveNode) => void;
+  onRename?: (node: DriveNode) => void;
   /** The item menu for whatever is selected once `node` is part of the selection. */
   actionsFor: (node: DriveNode) => NodeAction[];
   /** Ids dragged when a drag starts on `node`: the selection if it holds `node`. */
-  dragIdsFor: (node: DriveNode) => string[];
-  onDropOnFolder: (folder: DriveNode, ids: string[]) => void;
+  dragIdsFor?: (node: DriveNode) => string[];
+  onDropOnFolder?: (folder: DriveNode, ids: string[]) => void;
   /** Files dragged in from the computer and dropped on a folder: upload into it. */
-  onDropFiles: (folder: DriveNode, dataTransfer: DataTransfer) => void;
+  onDropFiles?: (folder: DriveNode, dataTransfer: DataTransfer) => void;
   /** The folder files would go into while they are dragged over one (null: none). */
-  onFileDragOverFolder: (folder: DriveNode | null) => void;
+  onFileDragOverFolder?: (folder: DriveNode | null) => void;
 }
 
 interface ItemContext {
@@ -136,11 +139,11 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
       props.onSelect(node, { toggle: true, range: false });
     } else if (event.key === 'Enter') {
       event.preventDefault();
-      if (modifier && node.kind === 'folder') props.onOpenInNewTab(node);
+      if (modifier && node.kind === 'folder') props.onOpenInNewTab?.(node);
       else props.onOpen(node);
     } else if (event.key === 'F2') {
       event.preventDefault();
-      props.onRename(node);
+      props.onRename?.(node);
     }
   };
 
@@ -235,6 +238,13 @@ function VirtualRows({
     overscan: 6,
     scrollMargin,
   });
+  React.useEffect(() => {
+    const index = nodes.findIndex((node) => node.id === props.revealId);
+    if (index >= 0)
+      virtualizer.scrollToIndex(Math.floor(index / perRow), {
+        align: 'center',
+      });
+  }, [nodes, props.revealId, perRow, virtualizer, scrollMargin]);
   const rows = virtualizer.getVirtualItems();
   const last = rows.at(-1);
 
@@ -310,6 +320,7 @@ function NodeItem({
   selectedIds,
   context,
   onSelect,
+  draggable = true,
   onOpen,
   onOpenInNewTab,
   actionsFor,
@@ -317,6 +328,8 @@ function NodeItem({
   onDropOnFolder,
   onDropFiles,
   onFileDragOverFolder,
+  revealId,
+  onRevealed,
 }: NodeCollectionProps & {
   node: DriveNode;
   index: number;
@@ -324,8 +337,20 @@ function NodeItem({
 }): React.JSX.Element {
   const { t, i18n } = useTranslation();
   const selected = selectedIds.has(node.id);
+  const itemRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (revealId !== node.id || !itemRef.current) return;
+    itemRef.current.scrollIntoView({ block: 'center', inline: 'nearest' });
+    itemRef.current.focus({ preventScroll: true });
+    onRevealed?.();
+  }, [revealId, node.id, onRevealed]);
   // Menus act on the selection; opening one on an unselected item selects it first.
   const [actions, setActions] = React.useState<NodeAction[]>([]);
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const changeMenuOpen = (open: boolean): void => {
+    prepareMenu(open);
+    setMenuOpen(open);
+  };
   const prepareMenu = (open: boolean): void => {
     if (!open) return;
     if (!selected) onSelect(node, { toggle: false, range: false });
@@ -346,7 +371,7 @@ function NodeItem({
               event.preventDefault();
               event.dataTransfer.dropEffect = 'copy';
               context.setDropTargetId(node.id);
-              onFileDragOverFolder(node);
+              onFileDragOverFolder?.(node);
               return;
             }
             if (!canReceive || readDraggedIds(event) === null) return;
@@ -356,7 +381,7 @@ function NodeItem({
           },
           onDragLeave: () => {
             if (isDropTarget) context.setDropTargetId(null);
-            onFileDragOverFolder(null);
+            onFileDragOverFolder?.(null);
           },
           onDrop: (event: React.DragEvent) => {
             context.setDropTargetId(null);
@@ -364,14 +389,14 @@ function NodeItem({
               // Into this folder, not the one the page shows.
               event.preventDefault();
               event.stopPropagation();
-              onFileDragOverFolder(null);
-              onDropFiles(node, event.dataTransfer);
+              onFileDragOverFolder?.(null);
+              onDropFiles?.(node, event.dataTransfer);
               return;
             }
             const ids = readDraggedIds(event);
             if (!canReceive || !ids?.length) return;
             event.preventDefault();
-            onDropOnFolder(node, ids);
+            onDropOnFolder?.(node, ids);
           },
         }
       : {};
@@ -389,6 +414,7 @@ function NodeItem({
       }
     };
   const props = {
+    ref: itemRef,
     role: 'option',
     'aria-selected': selected,
     'data-node-id': node.id,
@@ -396,7 +422,7 @@ function NodeItem({
     'aria-label': node.name,
     tabIndex: selected || (selectedIds.size === 0 && index === 0) ? 0 : -1,
     title: node.name,
-    draggable: true,
+    draggable: draggable,
     onClick: own((event: React.MouseEvent) => {
       onSelect(node, {
         toggle: event.ctrlKey || event.metaKey,
@@ -413,13 +439,14 @@ function NodeItem({
     onAuxClick: own((event: React.MouseEvent) => {
       if (event.button !== 1 || node.kind !== 'folder') return;
       event.preventDefault();
-      onOpenInNewTab(node);
+      onOpenInNewTab?.(node);
     }),
     onKeyDown: own((event: React.KeyboardEvent) => {
       context.onKeyDown(event, index);
     }),
     onDragStart: (event: React.DragEvent) => {
-      const ids = dragIdsFor(node);
+      if (!draggable) return;
+      const ids = dragIdsFor?.(node) ?? [node.id];
       if (!selected) onSelect(node, { toggle: false, range: false });
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData(DRAG_TYPE, JSON.stringify(ids));
@@ -437,7 +464,7 @@ function NodeItem({
       ? 'border-primary bg-primary/10 ring-1 ring-primary'
       : 'border-border hover:bg-accent/60';
   const moreButton = (
-    <DropdownMenu onOpenChange={prepareMenu}>
+    <DropdownMenu open={menuOpen} onOpenChange={changeMenuOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
@@ -448,8 +475,14 @@ function NodeItem({
           // A soft overlay rather than the grey accent: it reads on any card, selected
           // (tinted) or not, in light and dark.
           className="size-7 shrink-0 rounded-md text-muted-foreground opacity-100 transition-[opacity,background-color,color] hover:bg-foreground/10 hover:text-foreground focus-visible:opacity-100 focus-visible:shadow-none group-hover:opacity-100 data-[state=open]:bg-foreground/10 data-[state=open]:text-foreground data-[state=open]:opacity-100 [@media(hover:hover)]:opacity-0"
+          // Open on completed click: selection can move the toolbar/anchor, so
+          // pointerup must finish before menu items can receive pointer events.
+          onPointerDown={(event) => {
+            if (event.button === 0 && !event.ctrlKey) event.preventDefault();
+          }}
           onClick={(event) => {
             event.stopPropagation();
+            changeMenuOpen(!menuOpen);
           }}
           onDoubleClick={(event) => {
             event.stopPropagation();
