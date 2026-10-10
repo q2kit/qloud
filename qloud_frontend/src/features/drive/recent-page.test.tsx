@@ -91,7 +91,7 @@ it('loads files across folders newest first, supports pagination and keeps Recen
   ).toBe(true);
 });
 
-it('shares selection, keyboard, info and menus; opens the containing nested folder and clears selection', async () => {
+it('shares selection, keyboard, info and menus; opens the containing nested folder and highlights the file', async () => {
   const user = userEvent.setup();
   const folder = drive.folder('Nested');
   drive.file('report.txt', folder.id);
@@ -118,7 +118,13 @@ it('shares selection, keyboard, info and menus; opens the containing nested fold
       `/drive/folders/${compactId(folder.id)}`,
     );
   });
-  expect(useDriveStore.getState().selected).toEqual([]);
+  await waitFor(() =>
+    expect(screen.getByRole('option', { name: 'report.txt' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    ),
+  );
+  expect(router.state.location.search).toContain('select=');
 });
 
 it('opens root locations, ignores blank-area double click and supports select-all/clear', async () => {

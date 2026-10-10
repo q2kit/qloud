@@ -213,7 +213,13 @@ describe('item menus', () => {
     const menu = within(screen.getByRole('menu'));
     expect(
       menu.getAllByRole('menuitem').map((item) => item.textContent),
-    ).toEqual(['Download↵', 'RenameF2', 'Move…', 'Infoi']);
+    ).toEqual([
+      'Download↵',
+      'Open containing folder',
+      'RenameF2',
+      'Move…',
+      'Infoi',
+    ]);
     expect(selectedNames()).toEqual(['report.pdf']);
     await user.click(menu.getByRole('menuitem', { name: /Info/ }));
     expect(screen.getByRole('dialog', { name: 'Details' })).toBeVisible();

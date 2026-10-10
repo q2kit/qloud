@@ -41,6 +41,8 @@ export interface SelectModifiers {
 
 export interface NodeCollectionProps {
   draggable?: boolean;
+  revealId?: string;
+  onRevealed?: () => void;
   nodes: DriveNode[];
   view: DriveView;
   selectedIds: ReadonlySet<string>;
@@ -236,6 +238,13 @@ function VirtualRows({
     overscan: 6,
     scrollMargin,
   });
+  React.useEffect(() => {
+    const index = nodes.findIndex((node) => node.id === props.revealId);
+    if (index >= 0)
+      virtualizer.scrollToIndex(Math.floor(index / perRow), {
+        align: 'center',
+      });
+  }, [nodes, props.revealId, perRow, virtualizer, scrollMargin]);
   const rows = virtualizer.getVirtualItems();
   const last = rows.at(-1);
 
@@ -319,6 +328,8 @@ function NodeItem({
   onDropOnFolder,
   onDropFiles,
   onFileDragOverFolder,
+  revealId,
+  onRevealed,
 }: NodeCollectionProps & {
   node: DriveNode;
   index: number;
@@ -326,6 +337,13 @@ function NodeItem({
 }): React.JSX.Element {
   const { t, i18n } = useTranslation();
   const selected = selectedIds.has(node.id);
+  const itemRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (revealId !== node.id || !itemRef.current) return;
+    itemRef.current.scrollIntoView({ block: 'center', inline: 'nearest' });
+    itemRef.current.focus({ preventScroll: true });
+    onRevealed?.();
+  }, [revealId, node.id, onRevealed]);
   // Menus act on the selection; opening one on an unselected item selects it first.
   const [actions, setActions] = React.useState<NodeAction[]>([]);
   const prepareMenu = (open: boolean): void => {
@@ -391,6 +409,7 @@ function NodeItem({
       }
     };
   const props = {
+    ref: itemRef,
     role: 'option',
     'aria-selected': selected,
     'data-node-id': node.id,

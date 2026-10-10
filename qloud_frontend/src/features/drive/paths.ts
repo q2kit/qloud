@@ -2,8 +2,14 @@
  * S-05 routes (ui-ux.md): the root folder lives at /drive, others at /drive/folders/:id.
  * URLs carry the UUID without dashes (32 hex digits); the API keeps the standard form.
  */
-export function folderPath(folderId: string | undefined): string {
-  return folderId ? `/drive/folders/${compactId(folderId)}` : '/drive';
+export function folderPath(
+  folderId: string | undefined,
+  fileId?: string,
+): string {
+  const path = folderId ? `/drive/folders/${compactId(folderId)}` : '/drive';
+  return fileId
+    ? `${path}?select=${encodeURIComponent(compactId(fileId))}`
+    : path;
 }
 
 /** The absolute URL of a folder, to open in a new tab or share as a link. */

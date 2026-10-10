@@ -23,6 +23,7 @@ export interface NodeAction {
 export interface ActionHandlers {
   open: (node: DriveNode) => void;
   download: (node: DriveNode) => void;
+  openLocation: (node: DriveNode) => void;
   rename: (node: DriveNode) => void;
   move: (nodes: DriveNode[]) => void;
   info: (node: DriveNode) => void;
@@ -86,7 +87,16 @@ export function nodeActions(
             },
           },
         ]
-      : []),
+      : [
+          {
+            key: 'location',
+            label: t('drive.actions.openLocation'),
+            icon: FolderOpen,
+            run: () => {
+              handlers.openLocation(node);
+            },
+          },
+        ]),
     {
       key: 'rename',
       label: t('drive.actions.rename'),

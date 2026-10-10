@@ -27,3 +27,6 @@ class ResizeObserverMock implements ResizeObserver {
 }
 
 window.ResizeObserver = ResizeObserverMock;
+
+// jsdom has no layout/scrolling; browser tests verify that revealed files are visible.
+HTMLElement.prototype.scrollIntoView = vi.fn();

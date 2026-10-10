@@ -54,7 +54,7 @@ export function RecentPage(): React.JSX.Element {
       },
       {
         key: 'location',
-        label: t('recent.openLocation'),
+        label: t('drive.actions.openLocation'),
         icon: FolderOpen,
         run: () => {
           if (node.parent_id)
@@ -63,6 +63,7 @@ export function RecentPage(): React.JSX.Element {
                 node.parent_id === me.data?.root_folder_id
                   ? undefined
                   : node.parent_id,
+                node.id,
               ),
             );
         },

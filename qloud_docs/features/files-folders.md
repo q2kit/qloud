@@ -87,6 +87,7 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
 - Double click vùng trống không tạo folder; item không kéo để di chuyển và nội dung trang không nhận upload. Menu Tạo mới toàn cục vẫn tạo/upload vào Drive gốc như các route ngoài Drive trước đây.
 - Có skeleton, trạng thái rỗng, lỗi kèm Thử lại; hỗ trợ vi/en, light/dark và 360px. Chuyển vào/ra Gần đây xóa vùng chọn cũ.
 - Upload hoàn tất, đổi tên và di chuyển làm mới cache Gần đây. Danh sách không ghi lịch sử truy cập; mở/download không thay đổi `updated_at`.
+- Mở thư mục chứa tệp từ menu file (Drive/Gần đây) dùng link folder cha với `?select=<UUID-file-không-dấu-gạch>`. Drive kiểm tra file còn ở đúng folder và có quyền, tải tiếp trang cursor tới file, chọn/highlight, cuộn tới và focus item cả khi virtualize. Reload link vẫn chọn file; Esc/click vùng trống bỏ chọn bình thường. Link tới file đã chuyển/xóa/không có quyền báo không tìm thấy, không tự chuyển sang folder khác.
 
 ## Tiêu chí chấp nhận
 ### M2-11, M2-12 và M2-13 — vùng trống và double click của Drive ([#109](https://github.com/q2kit/qloud/issues/109), [#111](https://github.com/q2kit/qloud/issues/111), [#112](https://github.com/q2kit/qloud/issues/112))

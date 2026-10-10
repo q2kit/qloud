@@ -1,6 +1,12 @@
 import { FileUp, FolderOpen, FolderPlus, FolderX } from 'lucide-react';
 import * as React from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -9,6 +15,7 @@ import { ResumeUploads } from '@/features/upload/components/resume-uploads';
 import { useUploader } from '@/features/upload/context';
 import { treeFromDrop } from '@/features/upload/drop';
 import { useFolderUploader } from '@/features/upload/folder-context';
+import { useMe } from '@/features/settings/use-me';
 import { ApiError } from '@/lib/api/errors';
 
 import { nodeActions, type ActionHandlers } from './actions';
@@ -27,7 +34,7 @@ import { MoveDialog } from './components/move-dialog';
 import { NameDialog } from './components/name-dialog';
 import type { SelectModifiers } from './components/node-collection';
 import { driveErrorMessage } from './errors';
-import { compactId, folderPath, folderUrl } from './paths';
+import { compactId, folderPath, folderUrl, uuidFromUrl } from './paths';
 import { useDrivePreferences } from './preferences';
 import { useDriveStore } from './store';
 import { useCurrentFolderId } from './use-current-folder';
@@ -51,6 +58,16 @@ export function DrivePage(): React.JSX.Element {
   const folderId = useCurrentFolderId();
   const { folderId: rawFolderId } = useParams();
   const folder = useNode(folderId);
+  const me = useMe();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const requestedId = searchParams.get('select');
+  const targetId = requestedId ? uuidFromUrl(requestedId) : undefined;
+  const target = useNode(targetId);
+  const appliedLocation = React.useRef<string | null>(null);
+  const [revealedLocation, setRevealedLocation] = React.useState<string | null>(
+    null,
+  );
   const { view, setView, ordering, setOrdering } = useDrivePreferences();
   const children = useChildren(folderId, ordering);
   const store = useDriveStore();
@@ -121,6 +138,65 @@ export function DrivePage(): React.JSX.Element {
     () => children.data?.pages.flatMap((page) => page.results) ?? [],
     [children.data],
   );
+  // Validate the parent before walking cursor pages, including links to stale files.
+  React.useEffect(() => {
+    if (!targetId || appliedLocation.current === location.key || !folder.data)
+      return;
+    if (
+      target.isError ||
+      (target.data &&
+        (target.data.kind !== 'file' || target.data.parent_id !== folderId))
+    ) {
+      appliedLocation.current = location.key;
+      select(null);
+      return;
+    }
+    if (
+      !target.data ||
+      !children.data ||
+      children.isFetching ||
+      children.isError
+    )
+      return;
+    const node = nodes.find((item) => item.id === targetId);
+    if (node) {
+      appliedLocation.current = location.key;
+      select(node);
+    } else if (children.hasNextPage) {
+      void children.fetchNextPage();
+    } else {
+      appliedLocation.current = location.key;
+    }
+  }, [
+    targetId,
+    target.data,
+    target.isError,
+    location.key,
+    folder.data,
+    folderId,
+    children,
+    nodes,
+    select,
+  ]);
+
+  const locationUnavailable =
+    Boolean(targetId) &&
+    (target.isError ||
+      Boolean(
+        target.data &&
+        (target.data.kind !== 'file' || target.data.parent_id !== folderId),
+      ) ||
+      (children.isSuccess &&
+        !children.isFetching &&
+        !children.hasNextPage &&
+        !nodes.some((node) => node.id === targetId)));
+  const revealId =
+    revealedLocation !== location.key &&
+    selected.some((node) => node.id === targetId) &&
+    !locationUnavailable
+      ? targetId
+      : undefined;
+
   const selectedIds = React.useMemo(
     () => new Set(selected.map((node) => node.id)),
     [selected],
@@ -128,9 +204,11 @@ export function DrivePage(): React.JSX.Element {
   // Older links carry the dashed UUID: show the compact form (paths.ts).
   React.useEffect(() => {
     if (rawFolderId && rawFolderId !== compactId(rawFolderId)) {
-      void navigate(folderPath(rawFolderId), { replace: true });
+      void navigate(folderPath(rawFolderId) + location.search, {
+        replace: true,
+      });
     }
-  }, [rawFolderId, navigate]);
+  }, [rawFolderId, navigate, location.search]);
 
   const crumbs = folder.data?.breadcrumb;
   const parentCrumb = crumbs?.at(-1);
@@ -242,6 +320,17 @@ export function DrivePage(): React.JSX.Element {
   const handlers: ActionHandlers = {
     open,
     download: open,
+    openLocation: (node) => {
+      if (node.parent_id)
+        void navigate(
+          folderPath(
+            node.parent_id === me.data?.root_folder_id
+              ? undefined
+              : node.parent_id,
+            node.id,
+          ),
+        );
+    },
     rename: (node) => {
       setRenaming({ node, name: node.name });
     },
@@ -319,6 +408,10 @@ export function DrivePage(): React.JSX.Element {
       <ResumeUploads />
       <FileBrowser
         nodes={nodes}
+        revealId={revealId}
+        onRevealed={() => {
+          setRevealedLocation(location.key);
+        }}
         selected={selected}
         view={view}
         ordering={ordering}
@@ -340,6 +433,9 @@ export function DrivePage(): React.JSX.Element {
         onRetry={() => void children.refetch()}
         feedback={
           <>
+            {locationUnavailable && (
+              <FormAlert>{t('drive.errors.locationUnavailable')}</FormAlert>
+            )}
             {actionError && <FormAlert>{actionError}</FormAlert>}
             <p className="sr-only" role="status">
               {announcement}

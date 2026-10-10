@@ -73,7 +73,8 @@
       "info": "Thông tin",
       "more": "Thao tác khác với {{name}}",
       "openInNewTab": "Mở trong thẻ mới",
-      "copyLink": "Sao chép liên kết"
+      "copyLink": "Sao chép liên kết",
+      "openLocation": "Mở thư mục chứa tệp"
     },
     "errors": {
       "generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
@@ -87,7 +88,8 @@
       "notFoundDescription": "Thư mục không tồn tại, đã bị xóa, hoặc bạn không có quyền xem.",
       "downloadFailed": "Không tải xuống được tệp. Vui lòng thử lại.",
       "invalid_move": "Không thể di chuyển một thư mục vào chính nó hoặc thư mục con của nó.",
-      "copyFailed": "Không sao chép được liên kết."
+      "copyFailed": "Không sao chép được liên kết.",
+      "locationUnavailable": "Không tìm thấy tệp trong thư mục này hoặc bạn không có quyền truy cập."
     },
     "selection": {
       "count_other": "{{count}} mục đã chọn",
@@ -352,7 +354,6 @@
     "description": "100 tệp được cập nhật gần nhất của bạn.",
     "emptyTitle": "Chưa có tệp gần đây",
     "emptyDescription": "Tải tệp lên Drive để xem chúng tại đây.",
-    "openLocation": "Mở thư mục chứa tệp",
     "loading": "Đang tải tệp gần đây",
     "loadFailed": "Không tải được tệp gần đây"
   }

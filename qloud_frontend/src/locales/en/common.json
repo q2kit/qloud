@@ -75,7 +75,8 @@
       "info": "Info",
       "more": "More actions for {{name}}",
       "openInNewTab": "Open in new tab",
-      "copyLink": "Copy link"
+      "copyLink": "Copy link",
+      "openLocation": "Open containing folder"
     },
     "errors": {
       "generic": "Something went wrong. Please try again.",
@@ -89,7 +90,8 @@
       "notFoundDescription": "This folder doesn't exist, was deleted, or you don't have access to it.",
       "downloadFailed": "Couldn't download the file. Please try again.",
       "invalid_move": "A folder can't be moved into itself or one of its subfolders.",
-      "copyFailed": "Couldn't copy the link."
+      "copyFailed": "Couldn't copy the link.",
+      "locationUnavailable": "The file is unavailable in this folder or you do not have access."
     },
     "selection": {
       "count_one": "{{count}} item selected",
@@ -359,7 +361,6 @@
     "description": "Your 100 most recently updated files.",
     "emptyTitle": "No recent files yet",
     "emptyDescription": "Upload files to Drive to see them here.",
-    "openLocation": "Open containing folder",
     "loading": "Loading recent files",
     "loadFailed": "Couldn't load recent files"
   }
