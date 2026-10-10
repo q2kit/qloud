@@ -1,6 +1,6 @@
 # Xác thực và tài khoản (F-AUTH)
 
-**Trạng thái:** Đang làm · **Milestone:** M1 · **Màn hình:** S-01 đến S-04, S-13
+**Trạng thái:** Hoàn thành · **Milestone:** M1 · **Màn hình:** S-01 đến S-04, S-13
 
 Đặc tả M1 và kế hoạch M1-01 đã được [chủ repo duyệt](https://github.com/q2kit/qloud/issues/10#issuecomment-6088713465).
 
