@@ -2,7 +2,8 @@
 
 > Trạng thái: **Nháp**. Mọi bảng đều dùng khóa chính `id UUID` (UUIDv7, sắp xếp được theo thời gian), và có `created_at`, `updated_at`.
 
-Phần User/Plan và nền Node tạo folder gốc được duyệt trong [M1-01](https://github.com/q2kit/qloud/issues/10#issuecomment-6088713465).
+Phần User/Plan và nền Node tạo folder gốc được duyệt trong [M1-01](https://github.com/q2kit/qloud/issues/10#issuecomment-6088713465);
+`drive_node`, `drive_blob`, `drive_file_version` và `uploads_upload_session` được duyệt cùng M2 ([#17](https://github.com/q2kit/qloud/issues/17)).
 Các model/trường của milestone sau vẫn là thiết kế nháp.
 
 ## Sơ đồ quan hệ
@@ -68,9 +69,10 @@ Gói dung lượng. Đây là cách làm cho giới hạn **thay đổi được
 
 ### `drive_node`
 
-M1-01 chỉ có `owner`, `parent`, `kind`, `name` và trường nền UUID/timestamps, để tạo folder gốc.
-Mỗi owner có tối đa một node `parent = null`, node này phải là folder. M2-01 bổ sung các trường file/xóa mềm bên dưới,
-index danh sách và phân quyền; unique tên con hiện áp dụng mọi node, sẽ thêm điều kiện `trashed_at IS NULL` ở M2-01.
+Mỗi owner có tối đa một node `parent = null`, node này phải là folder (M1-01). M2-01 thêm các trường file/xóa mềm bên dưới và các index.
+Check constraint ở DB: tên hợp lệ (giống `drive.names`); folder có `size = 0`, không có `mime_type`/`current_version`;
+`trashed_at` và `trashed_root` cùng có hoặc cùng trống. `current_version`, `trashed_by` dùng `SET_NULL`.
+Truy vấn node luôn đi qua `sharing.permissions` (xem [architecture.md › Phân quyền](architecture.md#phân-quyền)).
 
 | Cột | Kiểu | Ghi chú |
 |---|---|---|
@@ -90,12 +92,15 @@ index danh sách và phân quyền; unique tên con hiện áp dụng mọi node
 **Ràng buộc và index:**
 - Unique `(parent_id, lower(name))` WHERE `trashed_at IS NULL` để tên không trùng trong cùng folder. Khi trùng thì BE tự thêm hậu tố ` (1)`, ` (2)`…
 - Index `(parent_id, kind, name)` cho việc liệt kê; index `(owner_id, trashed_at)`.
-- Index trigram GIN trên `name` (extension `pg_trgm`) cho tìm kiếm.
+- Index trigram GIN trên `name` (extension `pg_trgm`) cho tìm kiếm: thêm ở M6-01, cùng lúc bật extension.
 - Thao tác di chuyển phải chặn trường hợp chuyển node vào chính cây con của nó (kiểm tra bằng recursive CTE).
 
 > Cách lưu cây: **adjacency list (`parent_id`) + recursive CTE**. Nếu đo thấy chậm thì chuyển sang `ltree` hoặc closure table và ghi lại bằng ADR.
 
 ### `drive_blob`
+Xóa `FileVersion` không xóa `Blob`, và Blob đang có version thì không xóa được (`PROTECT`):
+object trên S3 phải được xóa trước, việc này thuộc thùng rác (M4) và dọn phiên bản (M7).
+
 | Cột | Kiểu | Ghi chú |
 |---|---|---|
 | id | uuid | |
@@ -116,6 +121,8 @@ index danh sách và phân quyền; unique tên con hiện áp dụng mọi node
 | uploaded_by_id | uuid → User | |
 | original_name | varchar(255) | tên file lúc upload |
 | keep_forever | bool | không bị chính sách giữ phiên bản tự động dọn |
+
+`version_number` ≥ 1. `uploaded_by` dùng `SET_NULL`.
 
 ### `uploads_upload_session`
 | Cột | Kiểu | Ghi chú |

@@ -1,6 +1,6 @@
 # Quota dung lượng (F-QUOTA)
 
-**Trạng thái:** Đang làm (phần model M1 đã duyệt; phần M2/M8 chờ duyệt ở milestone tương ứng) · **Milestone:** M1 (model Plan), M2 (kiểm tra quota), M8 (giao diện) · **Màn hình:** S-14, thanh dung lượng ở sidebar
+**Trạng thái:** Đang làm (phần model M1 đã duyệt; phần M2 đã duyệt ở [#17](https://github.com/q2kit/qloud/issues/17); phần M8 chờ duyệt) · **Milestone:** M1 (model Plan), M2 (kiểm tra quota), M8 (giao diện) · **Màn hình:** S-14, thanh dung lượng ở sidebar
 Xem thêm [ADR-0005](../adr/0005-storage-plans.md)
 
 Phần User/Plan/quota M1 được [chủ repo duyệt](https://github.com/q2kit/qloud/issues/10#issuecomment-6088713465).

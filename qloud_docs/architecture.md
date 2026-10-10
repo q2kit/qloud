@@ -135,6 +135,13 @@ Quyền của một người trên một node = mức quyền cao nhất trong c
 có `Share` trực tiếp trên node; có `Share` trên một folder tổ tiên (quyền được thừa kế).
 Với share link thì chỉ xét token của link đó và cây con bên dưới node được chia sẻ.
 
+Code: `apps/sharing/permissions.py` (M2-01; app `sharing` chưa có model, Share/ShareLink thêm ở M5).
+- `Role`: `VIEWER < EDITOR < OWNER`. Hiện chỉ owner có quyền.
+- `nodes_for(user, role, trashed=False)`: queryset các node mà user có ít nhất `role`; `trashed=True` chỉ node trong thùng rác, `None` cả hai.
+  Mọi selector và view lấy node từ đây, không dùng `Node.objects` trực tiếp.
+- `get_node_or_404(user, node_id, role)`: không có quyền, không tồn tại hay id sai định dạng đều là cùng một 404.
+- `role_of(user, node)`. User chưa đăng nhập, không active hoặc bị khóa thì không có quyền gì.
+
 ## Triển khai
 
 ### Dev

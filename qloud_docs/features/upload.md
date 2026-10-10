@@ -1,6 +1,8 @@
 # Upload (F-UPLOAD)
 
-**Trạng thái:** Nháp · **Milestone:** M2 · Xem thêm [ADR-0003](../adr/0003-direct-to-s3-multipart-upload.md)
+**Trạng thái:** Đã duyệt · **Milestone:** M2 · Xem thêm [ADR-0003](../adr/0003-direct-to-s3-multipart-upload.md)
+
+Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). Model `Blob`/`FileVersion` có từ M2-01.
 
 ## User stories
 - Tôi muốn kéo thả nhiều file hoặc cả một folder vào trình duyệt để upload.

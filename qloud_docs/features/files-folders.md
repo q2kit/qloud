@@ -1,6 +1,8 @@
 # Folder và file (F-NODE)
 
-**Trạng thái:** Nháp · **Milestone:** M2 · **Màn hình:** S-05, S-06
+**Trạng thái:** Đang làm · **Milestone:** M2 · **Màn hình:** S-05, S-06
+
+Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-01: model `Node` đầy đủ, `drive.names.normalize_name()` cho quy tắc tên, và tầng phân quyền `sharing.permissions` (xem [architecture.md › Phân quyền](../architecture.md#phân-quyền)).
 
 ## User stories
 - Tôi muốn tạo folder lồng nhau để sắp xếp file.
