@@ -195,3 +195,111 @@ msgstr "%(count)d account(s) unsuspended."
 
 msgid "Users and plans"
 msgstr "Users and plans"
+
+# allauth ships no Vietnamese catalog, and Django 6.1 changed some password
+# messages its own catalog has not caught up with; these are served from here.
+
+msgid "This account is currently inactive."
+msgstr "This account is currently inactive."
+
+msgid "You cannot remove your primary email address."
+msgstr "You cannot remove your primary email address."
+
+msgid "This email address is already associated with this account."
+msgstr "This email address is already associated with this account."
+
+msgid "The email address and/or password you specified are not correct."
+msgstr "The email address and/or password you specified are not correct."
+
+msgid "The phone number and/or password you specified are not correct."
+msgstr "The phone number and/or password you specified are not correct."
+
+msgid "A user is already registered with this email address."
+msgstr "A user is already registered with this email address."
+
+msgid "Please type your current password."
+msgstr "Please type your current password."
+
+msgid "Incorrect code."
+msgstr "Incorrect code."
+
+msgid "Incorrect password."
+msgstr "Incorrect password."
+
+msgid "Invalid or expired key."
+msgstr "Invalid or expired key."
+
+msgid "Invalid login."
+msgstr "Invalid login."
+
+msgid "The password reset token was invalid."
+msgstr "The password reset token was invalid."
+
+msgid "A user is already registered with this phone number."
+msgstr "A user is already registered with this phone number."
+
+msgid "Too many failed login attempts. Try again later."
+msgstr "Too many failed login attempts. Try again later."
+
+msgid "The email address is not assigned to any user account."
+msgstr "The email address is not assigned to any user account."
+
+msgid "The phone number is not assigned to any user account."
+msgstr "The phone number is not assigned to any user account."
+
+msgid "Your primary email address must be verified."
+msgstr "Your primary email address must be verified."
+
+msgid "Username can not be used. Please use other username."
+msgstr "Username can not be used. Please use other username."
+
+msgid "The username and/or password you specified are not correct."
+msgstr "The username and/or password you specified are not correct."
+
+msgid "A user with that username already exists."
+msgstr "A user with that username already exists."
+
+msgid "Please select only one."
+msgstr "Please select only one."
+
+msgid "The new value must be different from the current one."
+msgstr "The new value must be different from the current one."
+
+msgid "Be patient, you are sending too many requests."
+msgstr "Be patient, you are sending too many requests."
+
+msgid "Invalid token."
+msgstr "Invalid token."
+
+msgid "Your account has no password set up."
+msgstr "Your account has no password set up."
+
+msgid "Your account has no verified email address."
+msgstr "Your account has no verified email address."
+
+msgid "You cannot disconnect your last remaining third-party account."
+msgstr "You cannot disconnect your last remaining third-party account."
+
+msgid "The third-party account is already connected to a different account."
+msgstr "The third-party account is already connected to a different account."
+
+msgid "You must type the same password each time."
+msgstr "You must type the same password each time."
+
+msgid "You must type the same email each time."
+msgstr "You must type the same email each time."
+
+#, python-format
+msgid "An account already exists with this email address. Please sign in to that account first, then connect your %s account."
+msgstr "An account already exists with this email address. Please sign in to that account first, then connect your %s account."
+
+#, python-format
+msgid "You cannot add more than %d email addresses."
+msgstr "You cannot add more than %d email addresses."
+
+#, python-format
+msgid "This password is too short. It must contain at least %d character."
+msgid_plural "This password is too short. It must contain at least %d characters."
+msgstr[0] "This password is too short. It must contain at least %d character."
+msgstr[1] "This password is too short. It must contain at least %d characters."
+

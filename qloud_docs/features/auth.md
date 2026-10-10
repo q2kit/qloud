@@ -73,6 +73,9 @@ Kiểm tra share link của owner bị khóa sẽ triển khai ở M5 khi có mo
 - **S-04 Quên / đặt lại mật khẩu:** gửi yêu cầu (Turnstile) luôn trả cùng một thông báo; đặt mật khẩu mới từ link, link hỏng thì khóa form và gợi ý gửi lại.
 - Lỗi theo mã của allauth được dịch ở FE (`auth.errors.*`); các lỗi khác (ví dụ quy tắc mật khẩu) dùng thông báo của server,
   vì FE gửi `Accept-Language` theo ngôn ngữ đang chọn. Vượt rate limit (429) có thông báo riêng.
+- allauth không có bản dịch tiếng Việt, và Django 6.1 đổi msgid của "mật khẩu quá ngắn" trước khi catalog `vi` của Django cập nhật.
+  Bản dịch `vi` cho mọi thông báo lỗi của allauth (`error_messages` của adapter account và socialaccount) và cho câu đó nằm trong catalog của `accounts`.
+  `accounts/tests/test_i18n.py` fail nếu một bản nâng cấp làm thông báo nào trong số này quay lại tiếng Anh.
 - Header có menu tài khoản (tên, email, đăng xuất). Đăng xuất xóa toàn bộ cache dữ liệu của user rồi về `/login`.
 - Widget Turnstile lấy site key từ `GET /api/v1/config`. Server chỉ trả site key khi có cả `TURNSTILE_SITE_KEY` và `TURNSTILE_SECRET_KEY` (cùng nằm trong `qloud_backend/.env`),
   nên widget và việc kiểm tra token luôn bật/tắt cùng nhau; đổi key không cần build lại FE. Production từ chối khởi động khi một trong hai key trống hoặc là test key.

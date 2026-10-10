@@ -195,3 +195,110 @@ msgstr "Đã mở khóa %(count)d tài khoản."
 
 msgid "Users and plans"
 msgstr "Người dùng và gói dung lượng"
+
+# allauth ships no Vietnamese catalog, and Django 6.1 changed some password
+# messages its own catalog has not caught up with; these are served from here.
+
+msgid "This account is currently inactive."
+msgstr "Tài khoản này hiện không hoạt động."
+
+msgid "You cannot remove your primary email address."
+msgstr "Không thể xóa địa chỉ email chính."
+
+msgid "This email address is already associated with this account."
+msgstr "Địa chỉ email này đã gắn với tài khoản này."
+
+msgid "The email address and/or password you specified are not correct."
+msgstr "Email hoặc mật khẩu không đúng."
+
+msgid "The phone number and/or password you specified are not correct."
+msgstr "Số điện thoại hoặc mật khẩu không đúng."
+
+msgid "A user is already registered with this email address."
+msgstr "Email này đã được dùng cho một tài khoản khác."
+
+msgid "Please type your current password."
+msgstr "Vui lòng nhập mật khẩu hiện tại."
+
+msgid "Incorrect code."
+msgstr "Mã không đúng."
+
+msgid "Incorrect password."
+msgstr "Mật khẩu không đúng."
+
+msgid "Invalid or expired key."
+msgstr "Liên kết không hợp lệ hoặc đã hết hạn."
+
+msgid "Invalid login."
+msgstr "Đăng nhập không hợp lệ."
+
+msgid "The password reset token was invalid."
+msgstr "Liên kết đặt lại mật khẩu không hợp lệ."
+
+msgid "A user is already registered with this phone number."
+msgstr "Số điện thoại này đã được dùng cho một tài khoản khác."
+
+msgid "Too many failed login attempts. Try again later."
+msgstr "Bạn đã đăng nhập sai quá nhiều lần. Vui lòng thử lại sau."
+
+msgid "The email address is not assigned to any user account."
+msgstr "Email này chưa gắn với tài khoản nào."
+
+msgid "The phone number is not assigned to any user account."
+msgstr "Số điện thoại này chưa gắn với tài khoản nào."
+
+msgid "Your primary email address must be verified."
+msgstr "Địa chỉ email chính phải được xác thực."
+
+msgid "Username can not be used. Please use other username."
+msgstr "Không dùng được tên đăng nhập này. Vui lòng chọn tên khác."
+
+msgid "The username and/or password you specified are not correct."
+msgstr "Tên đăng nhập hoặc mật khẩu không đúng."
+
+msgid "A user with that username already exists."
+msgstr "Tên đăng nhập này đã có người dùng."
+
+msgid "Please select only one."
+msgstr "Vui lòng chỉ chọn một."
+
+msgid "The new value must be different from the current one."
+msgstr "Giá trị mới phải khác giá trị hiện tại."
+
+msgid "Be patient, you are sending too many requests."
+msgstr "Bạn gửi quá nhiều yêu cầu. Vui lòng đợi một lát rồi thử lại."
+
+msgid "Invalid token."
+msgstr "Token không hợp lệ."
+
+msgid "Your account has no password set up."
+msgstr "Tài khoản của bạn chưa có mật khẩu. Hãy đặt mật khẩu trước khi gỡ liên kết này."
+
+msgid "Your account has no verified email address."
+msgstr "Tài khoản của bạn chưa có email đã xác thực."
+
+msgid "You cannot disconnect your last remaining third-party account."
+msgstr "Không thể gỡ tài khoản liên kết cuối cùng."
+
+msgid "The third-party account is already connected to a different account."
+msgstr "Tài khoản này đã được liên kết với một người dùng khác."
+
+msgid "You must type the same password each time."
+msgstr "Hai lần nhập mật khẩu phải giống nhau."
+
+msgid "You must type the same email each time."
+msgstr "Hai lần nhập email phải giống nhau."
+
+#, python-format
+msgid "An account already exists with this email address. Please sign in to that account first, then connect your %s account."
+msgstr "Email này đã có tài khoản. Hãy đăng nhập vào tài khoản đó trước, rồi liên kết tài khoản %s."
+
+#, python-format
+msgid "You cannot add more than %d email addresses."
+msgstr "Không thể thêm quá %d địa chỉ email."
+
+#, python-format
+msgid "This password is too short. It must contain at least %d character."
+msgid_plural "This password is too short. It must contain at least %d characters."
+msgstr[0] "Mật khẩu quá ngắn. Mật khẩu phải có ít nhất %d ký tự."
+
