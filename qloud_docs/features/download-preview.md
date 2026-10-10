@@ -1,6 +1,6 @@
 # Download và xem trước (F-VIEW)
 
-**Trạng thái:** Nháp · **Milestone:** M2 (download), M3 (xem trước) · **Màn hình:** S-10
+**Trạng thái:** Đã duyệt phần download (M2, [#17](https://github.com/q2kit/qloud/issues/17)); phần xem trước chờ duyệt ở M3 · **Milestone:** M2 (download), M3 (xem trước) · **Màn hình:** S-10
 
 ## User stories
 - Tôi muốn tải một file về máy.

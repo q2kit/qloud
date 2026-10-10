@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.github",
     "apps.core",
     "apps.drive",
+    "apps.sharing",
 ]
 
 MIDDLEWARE = [
