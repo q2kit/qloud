@@ -31,8 +31,26 @@ Lệnh: AGENTS.md mục 8 › *Sau khi đổi API*.
 
 ## Danh sách endpoint (tổng quan)
 
-### Auth: `/api/v1/auth/...` (do allauth headless cung cấp)
-Đăng ký, đăng nhập, đăng xuất, xác thực email, quên và đặt lại mật khẩu, OAuth Google/GitHub, lấy session hiện tại.
+### Auth: `/api/auth/browser/v1/...`
+Do allauth headless cung cấp (phiên bản `v1` của allauth). **Ngoại lệ về định dạng:** các endpoint này dùng định dạng của allauth,
+không dùng định dạng lỗi chung ở trên: thành công `{"status", "data", "meta": {"is_authenticated"}}`,
+lỗi `{"status", "errors": [{"code", "message", "param"}]}`. Chưa đăng nhập thì trả 401 kèm `data.flows`.
+Schema riêng ở `/api/auth/openapi.json` (xem tại `/api/auth/openapi.html`), không nằm trong `openapi.yaml`.
+
+| Method | Path | Mô tả |
+|---|---|---|
+| GET | `/config` | Cấu hình auth; cũng đặt cookie `csrftoken` |
+| GET / DELETE | `/auth/session` | Session hiện tại / đăng xuất |
+| POST | `/auth/signup` | `{email, password}` |
+| POST | `/auth/login` | `{email, password, remember?}` |
+| POST | `/auth/email/verify` | `{key}` từ link trong email |
+| POST | `/auth/email/verify/resend` | Gửi lại email xác thực |
+| POST | `/auth/password/request` | `{email}`: gửi email đặt lại mật khẩu |
+| POST | `/auth/password/reset` | `{key, password}` |
+| POST | `/account/password/change` | Đổi mật khẩu khi đã đăng nhập |
+| GET / POST / DELETE | `/account/email` | Quản lý email |
+
+OAuth Google/GitHub được thêm ở M1-03.
 
 ### Tài khoản
 | Method | Path | Mô tả |

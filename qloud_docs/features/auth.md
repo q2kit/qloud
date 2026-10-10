@@ -5,7 +5,7 @@
 Đặc tả M1 và kế hoạch M1-01 đã được [chủ repo duyệt](https://github.com/q2kit/qloud/issues/10#issuecomment-6088713465).
 
 M1-01 triển khai model User/Plan, tạo folder gốc và gán plan nguyên tử khi lưu user mới (qua manager hoặc `save()`),
-cùng Django admin và dịch vụ khóa/mở khóa. API đăng ký, lấy locale từ trình duyệt và allauth thuộc M1-02.
+cùng Django admin và dịch vụ khóa/mở khóa.
 Locale mặc định ở model là `vi`, theme mặc định là `system`; caller truyền locale đã xác định khi tạo user.
 Folder gốc lưu tên kỹ thuật `Drive`; tên hiển thị trên frontend lấy từ i18n.
 
@@ -32,6 +32,23 @@ M1-02 phải chuyển các ValidationError provisioning thành lỗi đăng ký 
 Việc chặn user bị khóa hiện nằm ở `AccountBackend.user_can_authenticate`. Backend của allauth (đăng nhập OAuth, login by code) không đi qua đây,
 nên M1-02 phải dùng backend kế thừa cùng kiểm tra `suspended_at` và chặn trong adapter allauth, có test cho user bị khóa đăng nhập bằng OAuth.
 Kiểm tra share link của owner bị khóa sẽ triển khai ở M5 khi có model ShareLink.
+
+### M1-02: API auth (allauth headless)
+- Endpoint nằm dưới `/api/auth/browser/v1/` (client `browser`, session cookie); danh sách và định dạng xem [api.md](../api.md#auth-apiauthbrowserv1).
+  `HEADLESS_ONLY`: không có trang HTML của allauth, mọi màn hình do SPA đảm nhận.
+- Đăng ký bằng email + một mật khẩu. Đăng ký xong thì đăng nhập luôn và nhận email xác thực (`ACCOUNT_EMAIL_VERIFICATION = "optional"`);
+  cờ `EmailAddress.verified` của allauth là căn cứ để chặn upload/chia sẻ ở M2/M5.
+- `locale` lấy từ `Accept-Language` (qua LocaleMiddleware); ngôn ngữ khác `vi`/`en` thì dùng `vi`.
+- Kiểm tra mật khẩu dùng `AUTH_PASSWORD_VALIDATORS`, kể cả độ giống với email: input đăng ký headless của allauth bỏ qua bước này nên được kế thừa lại (`EmailAwareSignupInput`).
+- Đăng ký bị đóng (403) khi `SIGNUP_ENABLED=false` hoặc chưa có plan mặc định.
+- Login nhận thêm `remember`: có thì session sống `SESSION_COOKIE_AGE` (30 ngày); không có thì cookie hết khi đóng trình duyệt (`SESSION_EXPIRE_AT_BROWSER_CLOSE`). Session tạo lúc đăng ký cũng hết khi đóng trình duyệt.
+- Link trong email trỏ về SPA (`HEADLESS_FRONTEND_URLS`): `/verify-email/{key}`, `/password/reset/{key}`. Key trong link đã được URL-encode; SPA gửi lại key đã decode.
+- Đặt lại mật khẩu đổi hash session nên mọi session cũ mất hiệu lực; không tự đăng nhập sau khi đặt lại.
+- Đăng nhập sai và quên mật khẩu trả cùng một phản hồi dù email có tồn tại hay không.
+  Đăng ký bằng email đã có trả `email_taken`: với xác thực `optional` thì không giấu được, vì đăng ký thành công là đăng nhập luôn. Rate limit ở M1-04 giới hạn việc dò email.
+- User bị khóa: `AccountBackend` (kế thừa backend của allauth) từ chối khi đăng nhập và khi nạp session; đăng nhập đúng mật khẩu chỉ nhận phản hồi 401 chung.
+  `AccountAdapter.pre_login` chặn thêm các luồng không qua `authenticate()` (OAuth ở M1-03, login by code).
+- Email gửi đồng bộ qua `MAILERS` với template mặc định của allauth; M1-04 chuyển sang Celery và template `vi`/`en`. Rate limit mặc định của allauth đang bật, M1-04 chỉnh theo quy tắc ở dưới.
 
 ## User stories
 - Là khách, tôi muốn đăng ký bằng email và mật khẩu, để có Drive riêng.

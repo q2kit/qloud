@@ -30,6 +30,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "drf_spectacular",
+    "allauth",
+    "allauth.account",
+    "allauth.headless",
     "apps.core",
     "apps.accounts",
     "apps.drive",
@@ -44,6 +47,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -95,11 +99,36 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# Sessions end when the browser closes unless the user ticks "remember me" at login,
+# which extends them to SESSION_COOKIE_AGE (see apps.accounts.auth_views).
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
 # The SPA reads the CSRF cookie and sends it back as X-CSRFToken
 CSRF_COOKIE_HTTPONLY = False
+
+# --- allauth (headless; the SPA owns every auth screen) ---
+SIGNUP_ENABLED = env.bool("SIGNUP_ENABLED", default=True)
+ACCOUNT_ADAPTER = "apps.accounts.adapter.AccountAdapter"
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*"]
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_PREVENT_ENUMERATION = True
+# Unverified users may sign in and browse; uploading and sharing check verification later.
+ACCOUNT_EMAIL_VERIFICATION = "optional"
+ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
+HEADLESS_ONLY = True
+HEADLESS_CLIENTS = ("browser",)
+HEADLESS_SERVE_SPECIFICATION = True
+HEADLESS_FRONTEND_URLS = {
+    "account_confirm_email": f"{APP_BASE_URL}/verify-email/{{key}}",
+    "account_reset_password": f"{APP_BASE_URL}/password/reset",
+    "account_reset_password_from_key": f"{APP_BASE_URL}/password/reset/{{key}}",
+    "account_signup": f"{APP_BASE_URL}/signup",
+}
 
 # --- i18n ---
 LANGUAGE_CODE = "vi"

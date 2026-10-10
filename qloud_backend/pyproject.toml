@@ -15,6 +15,7 @@ dependencies = [
     "gunicorn>=26.2.0",
     "argon2-cffi>=25.1.0",
     "django-stubs-ext>=6.1.2",
+    "django-allauth[headless,headless-spec]>=65.19.7",
 ]
 
 [dependency-groups]
@@ -54,8 +55,14 @@ ignore_missing_imports = false
 exclude = ["/migrations/"]
 
 [[tool.mypy.overrides]]
-module = ["environ.*", "factory.*"]
+module = ["environ.*", "factory.*", "allauth.*"]
 ignore_missing_imports = true
+
+# allauth ships no type hints; these modules subclass its classes.
+[[tool.mypy.overrides]]
+module = ["apps.accounts.adapter", "apps.accounts.auth_views", "apps.accounts.backends"]
+disallow_subclassing_any = false
+warn_return_any = false
 
 [[tool.mypy.overrides]]
 module = ["*.tests.*", "conftest"]
