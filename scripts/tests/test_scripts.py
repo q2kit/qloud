@@ -72,6 +72,14 @@ class LicenseTests(unittest.TestCase):
         self.assertEqual(len(problems([("other", "LGPL-3.0-only")])), 1)
         self.assertEqual(len(problems([("psycopg", "GPL-3.0-only")])), 1)
 
+    def test_thumbnail_license_exceptions_are_package_specific(self):
+        self.assertEqual(problems([
+            ("pillow", "MIT-CMU"),
+            ("pypdfium2", "BSD-3-Clause, Apache-2.0, dependency licenses"),
+        ]), [])
+        self.assertEqual(len(problems([("unreviewed", "MIT-CMU")])), 1)
+        self.assertEqual(len(problems([("pypdfium2", "AGPL-3.0")])), 1)
+
 
 class PrTitleTests(unittest.TestCase):
     def test_valid_titles(self):

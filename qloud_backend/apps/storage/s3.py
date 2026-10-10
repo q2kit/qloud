@@ -1,8 +1,8 @@
 """The only module that talks to object storage (architecture.md, ADR-0003).
 
 Works with any S3-compatible service: AWS S3, Cloudflare R2, LocalStack in dev and CI
-differ only in settings. File bytes never pass through here; browsers use the
-presigned URLs directly.
+differ only in settings. Browsers upload/download through presigned URLs directly;
+only background workers read source bytes and write derived thumbnails here.
 """
 
 import functools
@@ -82,6 +82,32 @@ def _error(error: ClientError | BotoCoreError) -> StorageError:
 def new_blob_key() -> str:
     """Keys never contain file names: renames stay metadata-only and names stay private."""
     return f"blobs/{uuid.uuid7()}"
+
+
+def read_object(key: str, *, max_bytes: int) -> bytes:
+    """Bounded worker-only read; close the connection even for oversized input."""
+    try:
+        response = client().get_object(Bucket=_bucket(), Key=key)
+        body = response["Body"]
+        try:
+            if response["ContentLength"] > max_bytes:
+                raise ValueError("source exceeds thumbnail byte limit")
+            data = body.read(max_bytes + 1)
+            if len(data) > max_bytes:
+                raise ValueError("source exceeds thumbnail byte limit")
+            return data
+        finally:
+            body.close()
+    except (ClientError, BotoCoreError) as error:
+        raise _error(error) from error
+
+
+def put_object(key: str, data: bytes, content_type: str) -> None:
+    """Write worker output, never used to proxy a browser upload."""
+    try:
+        client().put_object(Bucket=_bucket(), Key=key, Body=data, ContentType=content_type)
+    except (ClientError, BotoCoreError) as error:
+        raise _error(error) from error
 
 
 def part_size_for(size: int) -> int:

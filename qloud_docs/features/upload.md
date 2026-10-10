@@ -26,7 +26,7 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). Model `Blob`/`FileV
    Nếu fingerprint khớp thì `GET /uploads/{id}` lấy part đã có (S3 `ListParts`), chỉ upload phần còn thiếu; không tạo session hay giữ chỗ quota lần nữa.
    Tệp khác hoặc thời gian chỉnh sửa khác thì báo lỗi, giữ session để chọn lại hoặc hủy. Session cũ từ M2-08a chỉ có fingerprint nhanh, không khớp định dạng mới: cần hủy và upload lại.
 5. **Hoàn tất:** `POST /uploads/{id}/complete`. BE gọi `ListParts` rồi `CompleteMultipartUpload`, kiểm tra tổng kích thước, sau đó trong một transaction:
-   tạo Blob, Node (hoặc version mới), `reserved -= size`, `used += size`. Cuối cùng đẩy task thumbnail.
+   tạo Blob, Node (hoặc version mới), `reserved -= size`, `used += size`. M3-01: enqueue task thumbnail ảnh/PDF qua `transaction.on_commit` sau khi transaction hoàn tất; thumbnail không tính quota. Lỗi enqueue được ghi log, không đổi kết quả upload thành công.
 6. **Hủy / hết hạn:** `AbortMultipartUpload` và trả lại phần quota đã giữ chỗ. Celery beat quét mỗi giờ để dọn các session quá `expires_at` (7 ngày).
    Bucket có thêm lifecycle rule `AbortIncompleteMultipartUpload` sau 8 ngày để dự phòng.
    M2-06: task `uploads.tasks.expire_uploads` (`CELERY_BEAT_SCHEDULE`, mỗi giờ). Mỗi session một transaction, khóa theo cùng thứ tự với `complete`/`abort` (owner rồi session),

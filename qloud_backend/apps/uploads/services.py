@@ -9,6 +9,7 @@ import logging
 import uuid
 from collections.abc import Sequence
 from dataclasses import dataclass
+from functools import partial
 
 from django.conf import settings
 from django.db import transaction
@@ -22,6 +23,8 @@ from apps.drive import selectors as drive_selectors
 from apps.drive.errors import InvalidTarget, NameConflict
 from apps.drive.models import Blob, FileVersion, Node
 from apps.drive.services import available_name
+from apps.drive.tasks import enqueue_thumbnail
+from apps.drive.thumbnails import supported as thumbnail_supported
 from apps.sharing.permissions import Role, get_node_or_404, nodes_for
 from apps.storage import s3
 
@@ -284,10 +287,11 @@ def complete(user: User, session: UploadSession) -> Node:
             )
             session.status, session.node = Status.COMPLETED, node
             session.save(update_fields=["status", "node", "updated_at"])
+            if thumbnail_supported(session.mime_type):
+                transaction.on_commit(partial(enqueue_thumbnail, str(node.current_version.pk)))
     except TargetUnavailable:
         abort(user, session)
         raise
-    # M3: queue the thumbnail task here.
     return node
 
 

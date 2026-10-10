@@ -1,7 +1,9 @@
 import hashlib
 import os
 import urllib.request
+from io import BytesIO
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
 from botocore.stub import ANY, Stubber
@@ -107,6 +109,36 @@ def test_missing_object_is_a_storage_error(key):
     with pytest.raises(s3.StorageError) as error:
         s3.head_object(key)
     assert error.value.code == "404"
+
+
+def test_worker_object_round_trip_and_byte_limit(key):
+    s3.put_object(key, b"thumbnail", "image/webp")
+    assert s3.read_object(key, max_bytes=9) == b"thumbnail"
+    with pytest.raises(ValueError, match="byte limit"):
+        s3.read_object(key, max_bytes=8)
+
+
+@pytest.mark.parametrize(("length", "data"), [(100, b"x"), (1, b"12345")])
+def test_worker_read_bounds_actual_body_and_always_closes(monkeypatch, length, data):
+    body = BytesIO(data)
+    fake = Mock()
+    fake.get_object.return_value = {"Body": body, "ContentLength": length}
+    monkeypatch.setattr(s3, "client", lambda: fake)
+    with pytest.raises(ValueError, match="byte limit"):
+        s3.read_object("k", max_bytes=3)
+    assert body.closed
+
+
+def test_worker_reads_and_writes_wrap_storage_errors(bucket):
+    with Stubber(s3.client()) as stub:
+        stub.add_client_error("get_object", service_error_code="NoSuchKey")
+        with pytest.raises(s3.StorageError) as error:
+            s3.read_object("absent", max_bytes=10)
+        assert error.value.code == "NoSuchKey"
+        stub.add_client_error("put_object", service_error_code="ServiceUnavailable")
+        with pytest.raises(s3.StorageError) as error:
+            s3.put_object("k", b"x", "image/webp")
+        assert error.value.code == "ServiceUnavailable"
 
 
 def test_delete_objects_ignores_missing_keys(key):

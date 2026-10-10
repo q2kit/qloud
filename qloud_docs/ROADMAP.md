@@ -10,7 +10,7 @@
 |---|---|---|
 | M0 | Nền tảng: docs, khung BE/FE, Docker, CI | ✅ |
 | M1 | Xác thực và tài khoản | ✅ |
-| M2 | Folder, file, upload chia chunk, download | ⬜ |
+| M2 | Folder, file, upload chia chunk, download | ✅ |
 | M3 | Xem trước và thumbnail | ⬜ |
 | M4 | Thùng rác | ⬜ |
 | M5 | Chia sẻ (cho người dùng và qua link) | ⬜ |
@@ -47,7 +47,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M2-08a | FE: engine upload + khay upload, upload file (hàng đợi, song song, thử lại, tạm dừng/hủy, kéo thả file). Task con của [#24](https://github.com/q2kit/qloud/issues/24) | [#105](https://github.com/q2kit/qloud/issues/105) | ✅ [PR #107](https://github.com/q2kit/qloud/pull/107) |
 | M2-08b | FE: upload cả folder, tiếp tục sau khi reload; BE `on_conflict` cho `POST /folders`. Task con của [#24](https://github.com/q2kit/qloud/issues/24) | [#106](https://github.com/q2kit/qloud/issues/106) | ✅ [PR #108](https://github.com/q2kit/qloud/pull/108) |
 | M2-09 | API và FE: trang Gần đây (file của mình theo updated_at, core hiển thị file dùng chung) | [#25](https://github.com/q2kit/qloud/issues/25) | ✅ [PR #114](https://github.com/q2kit/qloud/pull/114) |
-| M2-10 | Bổ sung hoàn thiện M2: E2E upload từ UI bị mất mạng/reload, tiếp tục part còn thiếu và kiểm tra download | [#26](https://github.com/q2kit/qloud/issues/26) | 🟦 |
+| M2-10 | Bổ sung hoàn thiện M2: E2E upload từ UI bị mất mạng/reload, tiếp tục part còn thiếu và kiểm tra download | [#26](https://github.com/q2kit/qloud/issues/26) | ✅ [PR #117](https://github.com/q2kit/qloud/pull/117) |
 | M2-11 | FE: double click vùng trống của folder đang mở để mở modal tạo thư mục con (lưới/danh sách, folder gốc và lồng nhau) | [#109](https://github.com/q2kit/qloud/issues/109) | ✅ [PR #113](https://github.com/q2kit/qloud/pull/113) |
 | M2-12 | Fix: vùng tương tác Drive giãn hết chiều cao còn lại để upload, kéo chọn và double click dùng được gần đáy màn hình; làm chung PR với M2-11 theo yêu cầu người dùng | [#111](https://github.com/q2kit/qloud/issues/111) | ✅ [PR #113](https://github.com/q2kit/qloud/pull/113) |
 | M2-13 | FE: chỉ bật double click mở item/tạo thư mục trên desktop có chuột và hover; thiết bị cảm ứng dùng nút/menu hiện có, theo quyết định của owner trong #112 | [#112](https://github.com/q2kit/qloud/issues/112) | ✅ [PR #113](https://github.com/q2kit/qloud/pull/113) |
@@ -55,7 +55,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 ## M3 — Xem trước ([download-preview.md](features/download-preview.md))
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
-| M3-01 | Celery tạo thumbnail cho ảnh và PDF | [#27](https://github.com/q2kit/qloud/issues/27) | ⬜ |
+| M3-01 | Celery tạo thumbnail cho ảnh và PDF | [#27](https://github.com/q2kit/qloud/issues/27) | 🟦 |
 | M3-02 | API preview | [#28](https://github.com/q2kit/qloud/issues/28) | ⬜ |
 | M3-03 | FE: trình xem file (ảnh, PDF, video, nhảy trước/sau, tải về); link riêng cho file như folder (xem download-preview.md › Ghi chú cho M3) | [#29](https://github.com/q2kit/qloud/issues/29) | ⬜ |
 

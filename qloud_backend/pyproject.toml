@@ -17,6 +17,8 @@ dependencies = [
     "django-stubs-ext>=6.1.2",
     "django-allauth[headless,headless-spec,socialaccount]>=65.19.7",
     "boto3>=1.43.111",
+    "pillow>=12.3.0",
+    "pypdfium2>=5.14.0",
 ]
 
 [dependency-groups]
@@ -57,7 +59,7 @@ ignore_missing_imports = false
 exclude = ["/migrations/"]
 
 [[tool.mypy.overrides]]
-module = ["environ.*", "factory.*", "allauth.*"]
+module = ["environ.*", "factory.*", "allauth.*", "pypdfium2.*"]
 ignore_missing_imports = true
 
 # allauth ships no type hints; these modules subclass its classes.
