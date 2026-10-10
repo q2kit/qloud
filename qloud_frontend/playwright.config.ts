@@ -4,10 +4,12 @@ import { defineConfig, devices } from '@playwright/test';
 // compose) and the production frontend build served by `vite preview`, which
 // proxies /api. Google and GitHub are replaced by e2e/oauth-provider.ts.
 // Ports differ from the dev servers (8000/5173) so both can run side by side.
+// PREVIEW_DEV=1 exercises React's development StrictMode effect replay as well.
 const BACKEND_PORT = 8001;
 const FRONTEND_PORT = 4173;
 const OAUTH_PROVIDER_PORT = 8002;
 const isCI = Boolean(process.env.CI);
+const previewDev = process.env.PREVIEW_DEV === '1';
 
 export default defineConfig({
   testDir: './e2e',
@@ -54,7 +56,9 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
-      command: `pnpm build && pnpm preview --port ${String(FRONTEND_PORT)} --strictPort`,
+      command: previewDev
+        ? `pnpm dev --port ${String(FRONTEND_PORT)} --strictPort`
+        : `pnpm build && pnpm preview --port ${String(FRONTEND_PORT)} --strictPort`,
       url: `http://localhost:${String(FRONTEND_PORT)}`,
       env: { QLOUD_API_TARGET: `http://127.0.0.1:${String(BACKEND_PORT)}` },
       reuseExistingServer: !isCI,

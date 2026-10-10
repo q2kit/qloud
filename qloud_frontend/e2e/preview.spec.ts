@@ -210,7 +210,10 @@ test('canonical link follows a moved file; unsafe MIME never renders', async ({
   );
 });
 
-test('video streams metadata and seeks using S3 Range', async ({ page }) => {
+test('video streams metadata and seeks using S3 Range', async ({
+  page,
+  isMobile,
+}) => {
   await signUpVerifiedViaApi(page);
   const parent = await root(page);
   const video = await upload(
@@ -227,6 +230,7 @@ test('video streams metadata and seeks using S3 Range', async ({ page }) => {
   });
   await page.goto(`/drive/files/${compact(video.id)}`);
   const player = page.locator('video');
+  await expect(player).toHaveAttribute('src', /^https?:\/\//);
   await expect
     .poll(() =>
       player.evaluate((element) => (element as HTMLVideoElement).duration),
@@ -246,9 +250,19 @@ test('video streams metadata and seeks using S3 Range', async ({ page }) => {
     ),
   ).toBeGreaterThan(14);
   expect(ranges.length).toBeGreaterThan(0);
+  await player.evaluate((element) => (element as HTMLVideoElement).play());
+  await expect
+    .poll(() =>
+      player.evaluate((element) => (element as HTMLVideoElement).currentTime),
+    )
+    .toBeGreaterThan(15.1);
+  await player.evaluate((element) => {
+    (element as HTMLVideoElement).pause();
+  });
+  await captures(page, 'video', isMobile);
 });
 
-test('audio uses native playback controls', async ({ page }) => {
+test('audio uses native playback controls', async ({ page, isMobile }) => {
   await signUpVerifiedViaApi(page);
   const audio = await upload(
     page,
@@ -259,6 +273,7 @@ test('audio uses native playback controls', async ({ page }) => {
   );
   await page.goto(`/drive/files/${compact(audio.id)}`);
   const player = page.locator('audio');
+  await expect(player).toHaveAttribute('src', /^https?:\/\//);
   await expect(player).toHaveAttribute('controls', '');
   await expect
     .poll(() =>
@@ -271,4 +286,5 @@ test('audio uses native playback controls', async ({ page }) => {
       player.evaluate((element) => (element as HTMLAudioElement).currentTime),
     )
     .toBeGreaterThan(0);
+  await captures(page, 'audio', isMobile);
 });

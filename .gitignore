@@ -32,6 +32,8 @@ coverage/
 # --- Playwright ---
 playwright-report/
 test-results/
+playwright-report-dev/
+test-results-dev/
 blob-report/
 playwright/.cache/
 

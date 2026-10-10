@@ -89,6 +89,8 @@ function MediaPreview({
   const Tag = video ? 'video' : 'audio';
   React.useEffect(() => {
     const element = ref.current;
+    // Setup must restore the source after StrictMode replays cleanup in development.
+    if (element) element.src = url;
     return () => {
       if (element) {
         element.pause();
@@ -96,11 +98,10 @@ function MediaPreview({
         element.load();
       }
     };
-  }, []);
+  }, [url]);
   return (
     <Tag
       ref={ref}
-      src={url}
       controls
       preload="metadata"
       aria-label={name}
