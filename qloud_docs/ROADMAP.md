@@ -29,7 +29,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M1-03 | OAuth Google và GitHub, liên kết tài khoản theo email đã xác thực | [#12](https://github.com/q2kit/qloud/issues/12) | ✅ [PR #85](https://github.com/q2kit/qloud/pull/85) |
 | M1-04 | Rate limit và Cloudflare Turnstile cho auth; gửi email qua SMTP bằng Celery, template email `vi`/`en` | [#13](https://github.com/q2kit/qloud/issues/13) | ✅ [PR #87](https://github.com/q2kit/qloud/pull/87) |
 | M1-05 | FE: màn hình S-01 đến S-04, bảo vệ route | [#14](https://github.com/q2kit/qloud/issues/14) | ✅ [PR #88](https://github.com/q2kit/qloud/pull/88) |
-| M1-06 | FE: cài đặt hồ sơ, ngôn ngữ, giao diện (S-13) | [#15](https://github.com/q2kit/qloud/issues/15) | 🟦 |
+| M1-06 | FE: cài đặt hồ sơ, ngôn ngữ, giao diện (S-13) | [#15](https://github.com/q2kit/qloud/issues/15) | ✅ [PR #89](https://github.com/q2kit/qloud/pull/89) |
 | M1-07 | E2E cho luồng auth | [#16](https://github.com/q2kit/qloud/issues/16) | ⬜ |
 
 ## M2 — Folder, file, upload, download ([files-folders.md](features/files-folders.md), [upload.md](features/upload.md))
