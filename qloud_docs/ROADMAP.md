@@ -48,7 +48,9 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M2-08b | FE: upload cả folder, tiếp tục sau khi reload; BE `on_conflict` cho `POST /folders`. Task con của [#24](https://github.com/q2kit/qloud/issues/24) | [#106](https://github.com/q2kit/qloud/issues/106) | ✅ [PR #108](https://github.com/q2kit/qloud/pull/108) |
 | M2-09 | FE: trang Gần đây | [#25](https://github.com/q2kit/qloud/issues/25) | ⬜ |
 | M2-10 | E2E: tạo folder, upload file lớn, ngắt rồi resume, download | [#26](https://github.com/q2kit/qloud/issues/26) | ⬜ |
-| M2-11 | FE: double click vùng trống của folder đang mở để mở modal tạo thư mục con (lưới/danh sách, folder gốc và lồng nhau) | [#109](https://github.com/q2kit/qloud/issues/109) | ⬜ |
+| M2-11 | FE: double click vùng trống của folder đang mở để mở modal tạo thư mục con (lưới/danh sách, folder gốc và lồng nhau) | [#109](https://github.com/q2kit/qloud/issues/109) | 🟦 |
+| M2-12 | Fix: vùng tương tác Drive giãn hết chiều cao còn lại để upload, kéo chọn và double click dùng được gần đáy màn hình; làm chung PR với M2-11 theo yêu cầu người dùng | [#111](https://github.com/q2kit/qloud/issues/111) | 🟦 |
+| M2-13 | Fix: toolbar xuống dòng ở 360px làm item dịch chuyển giữa hai click, khiến double click folder chưa chọn không mở | [#112](https://github.com/q2kit/qloud/issues/112) | ⬜ |
 
 ## M3 — Xem trước ([download-preview.md](features/download-preview.md))
 | ID | Task | Issue | Trạng thái |

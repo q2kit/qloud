@@ -30,6 +30,7 @@ import { DriveBreadcrumb } from './components/drive-breadcrumb';
 import { DriveToolbar } from './components/drive-toolbar';
 import { MoveDialog } from './components/move-dialog';
 import { NameDialog } from './components/name-dialog';
+import { useMarquee } from './components/use-marquee';
 import {
   NodeCollection,
   type SelectModifiers,
@@ -133,6 +134,22 @@ export function DrivePage(): React.JSX.Element {
     () => new Set(selected.map((node) => node.id)),
     [selected],
   );
+  const contentRef = React.useRef<HTMLDivElement>(null);
+  const marquee = useMarquee({
+    containerRef: contentRef,
+    selectedIds,
+    enabled: Boolean(folder.data) && children.isSuccess && !folder.isError,
+    onSelect: (ids) => {
+      const chosen = new Set(ids);
+      store.selectAll(nodes.filter((node) => chosen.has(node.id)));
+    },
+    onClear: () => {
+      select(null);
+    },
+    onCreate: () => {
+      store.setCreatingFolder(true);
+    },
+  });
   // Older links carry the dashed UUID: show the compact form (paths.ts).
   React.useEffect(() => {
     if (rawFolderId && rawFolderId !== compactId(rawFolderId)) {
@@ -305,7 +322,7 @@ export function DrivePage(): React.JSX.Element {
 
   return (
     <section
-      className="relative mx-auto flex max-w-7xl flex-col gap-4"
+      className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col gap-4"
       {...fileDragHandlers}
     >
       {fileDrag && (
@@ -347,58 +364,72 @@ export function DrivePage(): React.JSX.Element {
         {announcement}
       </p>
 
-      {children.isPending ? (
-        <LoadingSkeleton view={view} />
-      ) : children.isError ? (
-        <LoadFailed onRetry={() => void children.refetch()} />
-      ) : nodes.length === 0 ? (
-        <EmptyFolder
-          onCreate={() => {
-            store.setCreatingFolder(true);
-          }}
-          onUpload={(files) => {
-            if (folderId) uploader.add(files, folderId);
-          }}
-        />
-      ) : (
-        <NodeCollection
-          nodes={nodes}
-          view={view}
-          selectedIds={selectedIds}
-          hasMore={children.hasNextPage}
-          isLoadingMore={isFetchingNextPage}
-          onLoadMore={loadMore}
-          onSelect={onSelect}
-          onOpen={open}
-          onOpenInNewTab={handlers.openInNewTab}
-          onRename={handlers.rename}
-          // Read the store directly: the menu opens right after the item got selected.
-          actionsFor={() =>
-            nodeActions(useDriveStore.getState().selected, handlers, t)
-          }
-          dragIdsFor={(node) =>
-            selectedIds.has(node.id) ? [...selectedIds] : [node.id]
-          }
-          onDropOnFolder={dropOn}
-          onDropFiles={(target, dataTransfer) => {
-            dragDepth.current = 0;
-            setFileDrag(null);
-            uploadFrom(dataTransfer, target.id);
-          }}
-          onFileDragOverFolder={(target) => {
-            setFileDrag((current) =>
-              current ? { over: target?.name ?? null } : current,
-            );
-          }}
-          onMarqueeSelect={(ids) => {
-            const chosen = new Set(ids);
-            store.selectAll(nodes.filter((node) => chosen.has(node.id)));
-          }}
-          onClearSelection={() => {
-            select(null);
-          }}
-        />
-      )}
+      <div
+        ref={contentRef}
+        data-testid="folder-content"
+        className="flex min-h-40 flex-1 flex-col"
+        onPointerDown={marquee.onPointerDown}
+        onDoubleClick={marquee.onDoubleClick}
+      >
+        {marquee.box && (
+          <div
+            aria-hidden="true"
+            data-testid="selection-box"
+            className="pointer-events-none fixed z-30 rounded-sm border border-primary bg-primary/10"
+            style={{
+              left: marquee.box.left - window.scrollX,
+              top: marquee.box.top - window.scrollY,
+              width: marquee.box.right - marquee.box.left,
+              height: marquee.box.bottom - marquee.box.top,
+            }}
+          />
+        )}
+        {children.isPending ? (
+          <LoadingSkeleton view={view} />
+        ) : children.isError ? (
+          <LoadFailed onRetry={() => void children.refetch()} />
+        ) : nodes.length === 0 ? (
+          <EmptyFolder
+            onCreate={() => {
+              store.setCreatingFolder(true);
+            }}
+            onUpload={(files) => {
+              if (folderId) uploader.add(files, folderId);
+            }}
+          />
+        ) : (
+          <NodeCollection
+            nodes={nodes}
+            view={view}
+            selectedIds={selectedIds}
+            hasMore={children.hasNextPage}
+            isLoadingMore={isFetchingNextPage}
+            onLoadMore={loadMore}
+            onSelect={onSelect}
+            onOpen={open}
+            onOpenInNewTab={handlers.openInNewTab}
+            onRename={handlers.rename}
+            // Read the store directly: the menu opens right after the item got selected.
+            actionsFor={() =>
+              nodeActions(useDriveStore.getState().selected, handlers, t)
+            }
+            dragIdsFor={(node) =>
+              selectedIds.has(node.id) ? [...selectedIds] : [node.id]
+            }
+            onDropOnFolder={dropOn}
+            onDropFiles={(target, dataTransfer) => {
+              dragDepth.current = 0;
+              setFileDrag(null);
+              uploadFrom(dataTransfer, target.id);
+            }}
+            onFileDragOverFolder={(target) => {
+              setFileDrag((current) =>
+                current ? { over: target?.name ?? null } : current,
+              );
+            }}
+          />
+        )}
+      </div>
 
       <NameDialog
         open={renaming !== null}

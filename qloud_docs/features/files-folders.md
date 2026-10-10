@@ -81,11 +81,13 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
   - file chưa có link riêng: làm ở M3 cùng trình xem (xem [download-preview.md](download-preview.md)).
 
 ## Tiêu chí chấp nhận
-### Dự kiến ở M2-11 ([#109](https://github.com/q2kit/qloud/issues/109))
+### M2-11 và M2-12 — vùng trống của Drive ([#109](https://github.com/q2kit/qloud/issues/109), [#111](https://github.com/q2kit/qloud/issues/111))
 - Double click vào vùng trống của folder đang mở sẽ mở modal tạo thư mục con hiện có, với parent là folder đang xem; áp dụng cho folder gốc và folder lồng nhau, dạng lưới/danh sách, rỗng/có nội dung.
 - Double click lên item vẫn mở folder/file; click đơn trên vùng trống vẫn bỏ chọn. Kéo vùng chọn, kéo thả di chuyển/upload và các cách tạo folder hiện có vẫn hoạt động.
 - Không kích hoạt từ breadcrumb, toolbar, nút, menu hoặc modal; không mở khi đang có menu/modal hoặc folder đang tải, lỗi, không tồn tại hay không có quyền.
-- Dùng lại focus, validation và xử lý lỗi của modal tạo folder; không đổi API/schema. Đây là hành vi đã thống nhất, **chưa triển khai**.
+- Dùng lại focus, validation và xử lý lỗi của modal tạo folder; không đổi API/schema. Kết thúc thao tác kéo vùng chọn không mở modal.
+- Section của Drive và vùng nội dung bên dưới thanh công cụ giãn hết chiều cao còn lại dưới header (trừ padding của trang). Upload qua drag/drop, kéo vùng chọn và double click hoạt động tới đáy vùng nội dung, kể cả khi ít mục hoặc folder rỗng; không giới hạn ở 50vh.
+- Nội dung dài vẫn cuộn theo cửa sổ, giữ phân trang/virtualization. Drop lên folder con vẫn upload vào folder con; sidebar và header không phải vùng nhận drop.
 
 ### Tiêu chí chung
 - [x] Tạo folder lồng nhau 3 cấp; breadcrumb hiển thị đúng; reload trang vẫn đúng.

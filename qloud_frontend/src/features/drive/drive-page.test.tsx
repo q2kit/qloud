@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { setupServer } from 'msw/node';
 import {
@@ -170,6 +170,100 @@ describe('Drive (S-05)', () => {
       'aria-selected',
       'true',
     );
+  });
+
+  it.each(['grid', 'list'])(
+    'creates a child from empty space in %s view',
+    async (view) => {
+      const user = userEvent.setup();
+      localStorage.setItem('qloud.drive.view', view);
+      const parent = drive.folder('Projects');
+      drive.file('notes.txt', parent.id);
+      renderApp(`/drive/folders/${compactId(parent.id)}`, testUser);
+      await items();
+      await user.dblClick(screen.getByTestId('folder-content'));
+      const dialog = within(screen.getByRole('dialog', { name: 'New folder' }));
+      expect(dialog.getByLabelText('Name')).toHaveFocus();
+      await user.clear(dialog.getByLabelText('Name'));
+      await user.type(dialog.getByLabelText('Name'), 'Reports{Enter}');
+      expect(
+        await screen.findByRole('option', { name: 'Reports' }),
+      ).toBeVisible();
+      expect(
+        [...drive.nodes.values()].find((node) => node.name === 'Reports')
+          ?.parent_id,
+      ).toBe(parent.id);
+    },
+  );
+
+  it('opens from an empty root; cancel creates nothing and repeated double clicks do not stack', async () => {
+    const user = userEvent.setup();
+    renderApp('/drive', testUser);
+    await screen.findByText('This folder is empty');
+    const area = screen.getByTestId('folder-content');
+    await user.dblClick(area);
+    fireEvent.doubleClick(area); // a second event behind the open modal
+    expect(screen.getAllByRole('dialog', { name: 'New folder' })).toHaveLength(
+      1,
+    );
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(drive.nodes.size).toBe(1); // root only
+    await user.dblClick(area);
+    await user.clear(screen.getByLabelText('Name'));
+    await user.type(screen.getByLabelText('Name'), 'Reports{Enter}');
+    expect(
+      await screen.findByRole('option', { name: 'Reports' }),
+    ).toBeVisible();
+    expect(
+      [...drive.nodes.values()].find((node) => node.name === 'Reports')
+        ?.parent_id,
+    ).toBe(ROOT_ID);
+  });
+
+  it('ignores the breadcrumb, view controls and an open item menu', async () => {
+    const user = userEvent.setup();
+    drive.folder('A');
+    renderApp('/drive', testUser);
+    await items();
+    await user.dblClick(screen.getByRole('heading', { level: 1 }));
+    await user.dblClick(screen.getByRole('button', { name: 'List view' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // Use the actual contextmenu event: user-event does not synthesize it.
+    fireEvent.contextMenu(screen.getByRole('option', { name: 'A' }));
+    expect(screen.getByRole('menu')).toBeVisible();
+    fireEvent.doubleClick(screen.getByTestId('folder-content'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('does not create while loading or when the children request fails', async () => {
+    const user = userEvent.setup();
+    drive.failChildren = true;
+    renderApp('/drive', testUser);
+    fireEvent.doubleClick(screen.getByTestId('folder-content'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await screen.findByText("Couldn't load this folder");
+    await user.dblClick(screen.getByTestId('folder-content'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('a double click after drawing a selection box does not create a folder', async () => {
+    drive.folder('A');
+    renderApp('/drive', testUser);
+    await items();
+    const area = screen.getByTestId('folder-content');
+    fireEvent.pointerDown(area, {
+      button: 0,
+      pointerType: 'mouse',
+      clientX: 200,
+      clientY: 300,
+    });
+    fireEvent.pointerMove(window, { clientX: 210, clientY: 310 });
+    fireEvent.pointerUp(window);
+    fireEvent.doubleClick(area);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // A fresh genuine double click works again.
+    await userEvent.setup().dblClick(area);
+    expect(screen.getByRole('dialog', { name: 'New folder' })).toBeVisible();
   });
 
   it('keeps the dialog open with a message when the name is taken', async () => {

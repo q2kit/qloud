@@ -23,7 +23,6 @@ import type { DriveNode } from '../api';
 import { formatBytes, formatDate } from '../format';
 import type { DriveView } from '../preferences';
 import { NodeIcon } from './node-icon';
-import { useMarquee } from './use-marquee';
 
 /** files-folders.md: virtualize once a folder has more than 200 items. */
 export const VIRTUALIZE_AFTER = 200;
@@ -55,13 +54,10 @@ interface NodeCollectionProps {
   /** Ids dragged when a drag starts on `node`: the selection if it holds `node`. */
   dragIdsFor: (node: DriveNode) => string[];
   onDropOnFolder: (folder: DriveNode, ids: string[]) => void;
-  /** Rubber-band selection on empty space (desktop file managers). */
-  onMarqueeSelect: (ids: string[]) => void;
   /** Files dragged in from the computer and dropped on a folder: upload into it. */
   onDropFiles: (folder: DriveNode, dataTransfer: DataTransfer) => void;
   /** The folder files would go into while they are dragged over one (null: none). */
   onFileDragOverFolder: (folder: DriveNode | null) => void;
-  onClearSelection: () => void;
 }
 
 interface ItemContext {
@@ -154,33 +150,8 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
     onKeyDown,
   };
 
-  const marquee = useMarquee({
-    containerRef,
-    selectedIds: props.selectedIds,
-    onSelect: props.onMarqueeSelect,
-    onClear: props.onClearSelection,
-  });
-
   return (
-    // Tall enough to leave empty space below the items for the selection box.
-    <div
-      ref={containerRef}
-      className="min-h-[50vh]"
-      onPointerDown={marquee.onPointerDown}
-    >
-      {marquee.box && (
-        <div
-          aria-hidden="true"
-          data-testid="selection-box"
-          className="pointer-events-none fixed z-30 rounded-sm border border-primary bg-primary/10"
-          style={{
-            left: marquee.box.left - window.scrollX,
-            top: marquee.box.top - window.scrollY,
-            width: marquee.box.right - marquee.box.left,
-            height: marquee.box.bottom - marquee.box.top,
-          }}
-        />
-      )}
+    <div ref={containerRef} className="flex-1">
       {view === 'list' && (
         <div
           aria-hidden="true"
