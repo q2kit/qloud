@@ -132,7 +132,6 @@
     }
   },
   "placeholder": {
-    "recent": "Nội dung Gần đây sẽ được triển khai trong M2-09.",
     "shared": "Nội dung Được chia sẻ sẽ được triển khai trong M5-05.",
     "trash": "Nội dung Thùng rác sẽ được triển khai trong M4-03."
   },
@@ -348,5 +347,13 @@
       "select": "Chọn tệp",
       "cancel": "Hủy"
     }
+  },
+  "recent": {
+    "description": "100 tệp được cập nhật gần nhất của bạn.",
+    "emptyTitle": "Chưa có tệp gần đây",
+    "emptyDescription": "Tải tệp lên Drive để xem chúng tại đây.",
+    "openLocation": "Mở thư mục chứa tệp",
+    "loading": "Đang tải tệp gần đây",
+    "loadFailed": "Không tải được tệp gần đây"
   }
 }

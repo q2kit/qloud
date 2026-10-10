@@ -26,6 +26,7 @@ export function UploadProvider({
           void queryClient.invalidateQueries({
             queryKey: parentId ? driveKeys.children(parentId) : driveKeys.all,
           });
+          void queryClient.invalidateQueries({ queryKey: driveKeys.recent });
           void queryClient.invalidateQueries({ queryKey: uploadKeys.active });
         },
         isOnline: () => navigator.onLine,

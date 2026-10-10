@@ -309,6 +309,43 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: '`name_conflict`.'
+  /api/v1/recent:
+    get:
+      operationId: recent_list
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: Opaque value from `next` or `previous`.
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Newest updated files first; other orderings are not supported.
+        schema:
+          type: string
+          enum:
+          - -updated_at
+          default: -updated_at
+      - name: page_size
+        required: false
+        in: query
+        description: Items per page, at most 100.
+        schema:
+          type: integer
+          default: 50
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNodeList'
+          description: ''
   /api/v1/uploads:
     get:
       operationId: uploads_list

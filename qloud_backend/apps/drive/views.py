@@ -15,7 +15,7 @@ from apps.sharing.permissions import get_node_or_404, nodes_for, role_of
 
 from . import downloads, selectors, services
 from .models import Node
-from .pagination import NodeChildrenPagination
+from .pagination import NodeChildrenPagination, RecentPagination
 from .serializers import (
     CreateFolderSerializer,
     DownloadLinkSerializer,
@@ -132,3 +132,15 @@ class NodeMoveView(APIView):
             serializer.validated_data["target_parent_id"],
         )
         return Response(MoveResultSerializer({"nodes": nodes}).data)
+
+
+class RecentView(generics.ListAPIView[Node]):
+    serializer_class = NodeSerializer
+    pagination_class = RecentPagination
+
+    def get_queryset(self) -> QuerySet[Node]:
+        return selectors.recent_files(_user(self.request))
+
+    @extend_schema(operation_id="recent_list", responses={200: NodeSerializer(many=True)})
+    def get(self, request: Request, *args: object, **kwargs: object) -> Response:
+        return super().get(request, *args, **kwargs)

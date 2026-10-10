@@ -25,7 +25,7 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
 - Mặc định folder xếp trước file, sau đó theo tên (natural sort: "file2" đứng trước "file10").
   Sắp xếp bằng collation ICU `natural` của PostgreSQL (`und-u-kn-true`): số theo giá trị, không phân biệt hoa thường và dấu ở mức đầu (`a, anh, Ảnh, B, File1, file2, file10`).
 - Di chuyển nhiều node chạy trong một transaction và khóa theo owner, nên hai lệnh di chuyển chéo nhau chạy cùng lúc không tạo được vòng.
-- Gần đây: các file do mình sở hữu hoặc được chia sẻ, sắp theo thời điểm sửa hoặc upload gần nhất của mình, tối đa 100 mục.
+- Gần đây (M2-09): chỉ file do mình sở hữu, còn sống, sắp theo `updated_at` giảm dần (UUID giảm dần khi cùng timestamp), tối đa 100 file qua toàn bộ các trang cursor. Không ghi nhận lần mở/download. File mới được chia sẻ và có thể cả file mới mở sẽ được bổ sung sau, theo quyết định của owner ở [#25](https://github.com/q2kit/qloud/issues/25#issuecomment-6100858060).
 
 ## Tương tác UI
 - Chọn: click; Ctrl/⌘+click để chọn thêm; Shift+click để chọn một dải; Ctrl/⌘+A để chọn tất cả.
@@ -79,6 +79,14 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
   - mở trong thẻ mới bằng **middle click**, **Ctrl/⌘+Enter**, hoặc mục "Mở trong thẻ mới" trong menu; menu có thêm "Sao chép liên kết";
   - **Ctrl/⌘+click vẫn là chọn thêm**, không mở thẻ mới;
   - file chưa có link riêng: làm ở M3 cùng trình xem (xem [download-preview.md](download-preview.md)).
+
+## M2-09 — Gần đây ([#25](https://github.com/q2kit/qloud/issues/25))
+- `/recent` lấy file từ tất cả thư mục của mình qua `GET /recent`; thứ tự mới nhất cố định, không thay đổi lựa chọn sắp xếp của Drive.
+- Drive và Gần đây dùng chung core `FileBrowser` (toolbar, loading/rỗng/lỗi, kéo vùng chọn, bàn phím) và `NodeCollection` (lưới/danh sách, item/menu, phân trang/virtualization). Được chia sẻ và Thùng rác sẽ dùng cùng core khi triển khai M5/M4; mỗi trang truyền dữ liệu và các action phù hợp, không sao chép giao diện file.
+- Gần đây dùng chung lựa chọn lưới/danh sách, chọn một/nhiều, Shift/Ctrl/⌘ và Ctrl/⌘+A/Esc. Một file có action Tải xuống, Mở thư mục chứa tệp, Thông tin. Enter và double click desktop tải file cho tới M3; thiết bị cảm ứng dùng nút/menu. Không đổi tên/di chuyển trực tiếp ở Gần đây; mở thư mục chứa file để dùng các thao tác Drive.
+- Double click vùng trống không tạo folder; item không kéo để di chuyển và nội dung trang không nhận upload. Menu Tạo mới toàn cục vẫn tạo/upload vào Drive gốc như các route ngoài Drive trước đây.
+- Có skeleton, trạng thái rỗng, lỗi kèm Thử lại; hỗ trợ vi/en, light/dark và 360px. Chuyển vào/ra Gần đây xóa vùng chọn cũ.
+- Upload hoàn tất, đổi tên và di chuyển làm mới cache Gần đây. Danh sách không ghi lịch sử truy cập; mở/download không thay đổi `updated_at`.
 
 ## Tiêu chí chấp nhận
 ### M2-11, M2-12 và M2-13 — vùng trống và double click của Drive ([#109](https://github.com/q2kit/qloud/issues/109), [#111](https://github.com/q2kit/qloud/issues/111), [#112](https://github.com/q2kit/qloud/issues/112))

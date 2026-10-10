@@ -91,3 +91,8 @@ Mỗi màn hình được mô tả chi tiết (trạng thái rỗng, đang tải
 - Dùng class `dark` của Tailwind kết hợp CSS variable. Mọi màu phải đi qua token, không viết mã màu trực tiếp.
 - `<meta name="theme-color">` (màu thanh trình duyệt trên mobile) theo theme đã phân giải, đặt ngay từ script chạy trước khi vẽ trang. Đây là chỗ duy nhất phải lặp mã màu (`--background`), vì thẻ meta không đọc được CSS variable.
 - Đổi theme ở một tab thì các tab khác đang mở cũng đổi theo (sự kiện `storage`).
+
+### S-06 — Gần đây (M2-09)
+- Dùng chung `FileBrowser`/`NodeCollection` với S-05; Được chia sẻ và Thùng rác sẽ dùng cùng core khi triển khai. Trang cấp dữ liệu và action theo ngữ cảnh.
+- File của mình cập nhật gần nhất từ mọi folder, tối đa 100, thứ tự mới nhất cố định. Lưới/danh sách nhớ chung với Drive; chọn và bàn phím như Drive, double click chỉ desktop có chuột/hover.
+- Một file: Tải xuống, Mở thư mục chứa tệp, Thông tin. Loading/rỗng/lỗi và Thử lại dùng chung core. Không tạo folder bằng double click vùng trống, không kéo item để di chuyển/nhận drop upload tại nội dung Gần đây. Header Tạo mới vẫn trỏ Drive gốc.

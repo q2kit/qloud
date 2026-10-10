@@ -41,6 +41,9 @@ def _decode(field: str, value: Any) -> Any:
 
 
 class NodeChildrenPagination(BasePagination):
+    ordering_description = "Folders always come before files."
+    default_ordering = DEFAULT_ORDERING
+    orderings: tuple[str, ...] = ORDERINGS
     page_size = 50
     max_page_size = 200
     cursor_query_param = "cursor"
@@ -51,9 +54,11 @@ class NodeChildrenPagination(BasePagination):
         self, queryset: QuerySet[Node], request: Request, view: APIView | None = None
     ) -> list[Node]:
         self.request = request
-        ordering = request.query_params.get(self.ordering_query_param, DEFAULT_ORDERING)
-        if ordering not in ORDERINGS:
-            raise ValidationError({self.ordering_query_param: [f"One of {', '.join(ORDERINGS)}."]})
+        ordering = request.query_params.get(self.ordering_query_param, self.default_ordering)
+        if ordering not in self.orderings:
+            raise ValidationError(
+                {self.ordering_query_param: [f"One of {', '.join(self.orderings)}."]}
+            )
         self.field = ordering.lstrip("-")
         self.descending = ordering.startswith("-")
         self.size = self._page_size(request)
@@ -181,7 +186,18 @@ class NodeChildrenPagination(BasePagination):
                 "name": self.ordering_query_param,
                 "required": False,
                 "in": "query",
-                "description": "Folders always come before files.",
-                "schema": {"type": "string", "enum": list(ORDERINGS), "default": DEFAULT_ORDERING},
+                "description": self.ordering_description,
+                "schema": {
+                    "type": "string",
+                    "enum": list(self.orderings),
+                    "default": self.default_ordering,
+                },
             },
         ]
+
+
+class RecentPagination(NodeChildrenPagination):
+    ordering_description = "Newest updated files first; other orderings are not supported."
+    default_ordering = "-updated_at"
+    orderings = ("-updated_at",)
+    max_page_size = 100

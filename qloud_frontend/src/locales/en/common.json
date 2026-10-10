@@ -136,7 +136,6 @@
     }
   },
   "placeholder": {
-    "recent": "Recent content will be implemented in M2-09.",
     "shared": "Shared content will be implemented in M5-05.",
     "trash": "Trash content will be implemented in M4-03."
   },
@@ -355,5 +354,13 @@
       "select": "Select file",
       "cancel": "Cancel"
     }
+  },
+  "recent": {
+    "description": "Your 100 most recently updated files.",
+    "emptyTitle": "No recent files yet",
+    "emptyDescription": "Upload files to Drive to see them here.",
+    "openLocation": "Open containing folder",
+    "loading": "Loading recent files",
+    "loadFailed": "Couldn't load recent files"
   }
 }

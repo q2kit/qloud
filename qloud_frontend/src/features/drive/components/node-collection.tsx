@@ -39,7 +39,8 @@ export interface SelectModifiers {
   range: boolean;
 }
 
-interface NodeCollectionProps {
+export interface NodeCollectionProps {
+  draggable?: boolean;
   nodes: DriveNode[];
   view: DriveView;
   selectedIds: ReadonlySet<string>;
@@ -49,17 +50,17 @@ interface NodeCollectionProps {
   onSelect: (node: DriveNode, modifiers: SelectModifiers) => void;
   onOpen: (node: DriveNode) => void;
   /** Folders only: middle click and Ctrl/⌘+Enter. */
-  onOpenInNewTab: (node: DriveNode) => void;
-  onRename: (node: DriveNode) => void;
+  onOpenInNewTab?: (node: DriveNode) => void;
+  onRename?: (node: DriveNode) => void;
   /** The item menu for whatever is selected once `node` is part of the selection. */
   actionsFor: (node: DriveNode) => NodeAction[];
   /** Ids dragged when a drag starts on `node`: the selection if it holds `node`. */
-  dragIdsFor: (node: DriveNode) => string[];
-  onDropOnFolder: (folder: DriveNode, ids: string[]) => void;
+  dragIdsFor?: (node: DriveNode) => string[];
+  onDropOnFolder?: (folder: DriveNode, ids: string[]) => void;
   /** Files dragged in from the computer and dropped on a folder: upload into it. */
-  onDropFiles: (folder: DriveNode, dataTransfer: DataTransfer) => void;
+  onDropFiles?: (folder: DriveNode, dataTransfer: DataTransfer) => void;
   /** The folder files would go into while they are dragged over one (null: none). */
-  onFileDragOverFolder: (folder: DriveNode | null) => void;
+  onFileDragOverFolder?: (folder: DriveNode | null) => void;
 }
 
 interface ItemContext {
@@ -136,11 +137,11 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
       props.onSelect(node, { toggle: true, range: false });
     } else if (event.key === 'Enter') {
       event.preventDefault();
-      if (modifier && node.kind === 'folder') props.onOpenInNewTab(node);
+      if (modifier && node.kind === 'folder') props.onOpenInNewTab?.(node);
       else props.onOpen(node);
     } else if (event.key === 'F2') {
       event.preventDefault();
-      props.onRename(node);
+      props.onRename?.(node);
     }
   };
 
@@ -310,6 +311,7 @@ function NodeItem({
   selectedIds,
   context,
   onSelect,
+  draggable = true,
   onOpen,
   onOpenInNewTab,
   actionsFor,
@@ -346,7 +348,7 @@ function NodeItem({
               event.preventDefault();
               event.dataTransfer.dropEffect = 'copy';
               context.setDropTargetId(node.id);
-              onFileDragOverFolder(node);
+              onFileDragOverFolder?.(node);
               return;
             }
             if (!canReceive || readDraggedIds(event) === null) return;
@@ -356,7 +358,7 @@ function NodeItem({
           },
           onDragLeave: () => {
             if (isDropTarget) context.setDropTargetId(null);
-            onFileDragOverFolder(null);
+            onFileDragOverFolder?.(null);
           },
           onDrop: (event: React.DragEvent) => {
             context.setDropTargetId(null);
@@ -364,14 +366,14 @@ function NodeItem({
               // Into this folder, not the one the page shows.
               event.preventDefault();
               event.stopPropagation();
-              onFileDragOverFolder(null);
-              onDropFiles(node, event.dataTransfer);
+              onFileDragOverFolder?.(null);
+              onDropFiles?.(node, event.dataTransfer);
               return;
             }
             const ids = readDraggedIds(event);
             if (!canReceive || !ids?.length) return;
             event.preventDefault();
-            onDropOnFolder(node, ids);
+            onDropOnFolder?.(node, ids);
           },
         }
       : {};
@@ -396,7 +398,7 @@ function NodeItem({
     'aria-label': node.name,
     tabIndex: selected || (selectedIds.size === 0 && index === 0) ? 0 : -1,
     title: node.name,
-    draggable: true,
+    draggable: draggable,
     onClick: own((event: React.MouseEvent) => {
       onSelect(node, {
         toggle: event.ctrlKey || event.metaKey,
@@ -413,13 +415,14 @@ function NodeItem({
     onAuxClick: own((event: React.MouseEvent) => {
       if (event.button !== 1 || node.kind !== 'folder') return;
       event.preventDefault();
-      onOpenInNewTab(node);
+      onOpenInNewTab?.(node);
     }),
     onKeyDown: own((event: React.KeyboardEvent) => {
       context.onKeyDown(event, index);
     }),
     onDragStart: (event: React.DragEvent) => {
-      const ids = dragIdsFor(node);
+      if (!draggable) return;
+      const ids = dragIdsFor?.(node) ?? [node.id];
       if (!selected) onSelect(node, { toggle: false, range: false });
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData(DRAG_TYPE, JSON.stringify(ids));
