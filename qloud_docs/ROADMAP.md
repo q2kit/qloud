@@ -37,7 +37,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 |---|---|---|---|
 | M2-00 | (Làm đầu M2, sau khi M1 xong) Script quy trình `task-start`, `pr-open`, `roadmap-sync` + skill Claude Code bọc script; rút gọn AGENTS.md mục 3 | [#62](https://github.com/q2kit/qloud/issues/62) | ✅ [PR #91](https://github.com/q2kit/qloud/pull/91) |
 | M2-01 | Hoàn thiện model Node (nền folder gốc ở M1-01), Blob, FileVersion; dịch vụ phân quyền (lúc này mới có owner) | [#17](https://github.com/q2kit/qloud/issues/17) | ✅ [PR #92](https://github.com/q2kit/qloud/pull/92) |
-| M2-02 | API: tạo folder, liệt kê con, chi tiết node và breadcrumb, đổi tên, di chuyển | [#18](https://github.com/q2kit/qloud/issues/18) | ⬜ |
+| M2-02 | API: tạo folder, liệt kê con, chi tiết node và breadcrumb, đổi tên, di chuyển | [#18](https://github.com/q2kit/qloud/issues/18) | ✅ [PR #94](https://github.com/q2kit/qloud/pull/94) |
 | M2-03 | Wrapper S3 (`storage`): presign, multipart | [#19](https://github.com/q2kit/qloud/issues/19) | ⬜ |
 | M2-04 | API upload session: tạo, lấy part URL, lấy trạng thái, hoàn tất, hủy; giữ chỗ quota | [#20](https://github.com/q2kit/qloud/issues/20) | ⬜ |
 | M2-05 | API download (presigned GET) | [#21](https://github.com/q2kit/qloud/issues/21) | ⬜ |
@@ -93,3 +93,4 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M8-03 | Dockerfile production, Compose production, nginx (Origin Certificate, phục vụ FE tĩnh, proxy `/api`, real IP từ Cloudflare), hướng dẫn cấu hình Cloudflare và ufw | [#47](https://github.com/q2kit/qloud/issues/47) | ⬜ |
 | M8-04 | Deploy tự động qua GitHub Actions lên VPS | [#48](https://github.com/q2kit/qloud/issues/48) | ⬜ |
 | M8-05 | Backup Postgres hằng ngày, Sentry, log có cấu trúc | [#49](https://github.com/q2kit/qloud/issues/49) | ⬜ |
+| M8-06 | Rate limit chung cho API (600 req/phút/user, tạo upload 60) | [#93](https://github.com/q2kit/qloud/issues/93) | ⬜ |

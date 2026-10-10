@@ -77,6 +77,14 @@ Callback của provider (không gọi trực tiếp): `/api/auth/oauth/<provider
 | POST | `/folders` | Tạo folder `{parent_id, name}` |
 | PATCH | `/nodes/{id}` | Đổi tên `{name}` |
 | POST | `/nodes/move` | Di chuyển nhiều node `{node_ids, target_parent_id}` |
+
+M2-02 (5 endpoint trên):
+- Node trả về `id, kind, name, parent_id, is_root, size, mime_type, created_at, updated_at`. Folder gốc có `is_root: true`; tên lưu là `Drive`, FE hiển thị tên đã dịch.
+- Chi tiết thêm `breadcrumb` (`[{id, name}]` từ folder gốc tới folder cha) và `capabilities` (`can_edit`: đổi tên, di chuyển, tạo bên trong; `can_trash`; `can_share`). Folder gốc có cả ba là `false`.
+- `children`: phân trang keyset (`apps/drive/pagination.py`), cùng dạng `{results, next, previous}`. `ordering` mặc định `name`; cursor chỉ dùng được với đúng `ordering` đã tạo ra nó, sai thì 404 `not_found`.
+  File không có con: trả trang rỗng.
+- `move`: 1–1000 id, một transaction; trả `{nodes: [...]}` sau khi chuyển (tên có thể đã thêm hậu tố). Một id không thấy hoặc không có quyền thì 404 và không chuyển gì.
+- Mã lỗi: `name_conflict` (409), `invalid_target` (400: đích không phải folder), `invalid_move` (400: vào chính nó/cây con, hoặc sang Drive của người khác), `root_folder` (400: đổi tên/di chuyển folder gốc).
 | POST | `/nodes/trash` | Đưa nhiều node vào thùng rác `{node_ids}` |
 | GET | `/nodes/{id}/download` | Trả về `{url, expires_at}` (presigned) |
 | GET | `/nodes/{id}/preview` | URL xem trước hoặc thumbnail |

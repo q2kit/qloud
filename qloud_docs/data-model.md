@@ -80,7 +80,7 @@ Truy vấn node luôn đi qua `sharing.permissions` (xem [architecture.md › Ph
 | owner_id | uuid → User | |
 | parent_id | uuid → Node, null | chỉ folder gốc có giá trị null |
 | kind | enum(`folder`,`file`) | |
-| name | varchar(255) | không chứa `/`; khác rỗng |
+| name | varchar(255), collation `natural` | không chứa `/`; khác rỗng. Collation ICU `und-u-kn-true` (M2-02) cho natural sort; so sánh của cursor dùng cùng collation |
 | mime_type | varchar(255), null | chỉ dùng cho file |
 | size | bigint | dung lượng của current version (file); 0 với folder |
 | current_version_id | uuid → FileVersion, null | |
@@ -91,7 +91,7 @@ Truy vấn node luôn đi qua `sharing.permissions` (xem [architecture.md › Ph
 
 **Ràng buộc và index:**
 - Unique `(parent_id, lower(name))` WHERE `trashed_at IS NULL` để tên không trùng trong cùng folder. Khi trùng thì BE tự thêm hậu tố ` (1)`, ` (2)`…
-- Index `(parent_id, kind, name)` cho việc liệt kê; index `(owner_id, trashed_at)`.
+- Index `(parent_id, kind DESC, name, id)` khớp thứ tự liệt kê mặc định (folder trước); index `(owner_id, trashed_at)`.
 - Index trigram GIN trên `name` (extension `pg_trgm`) cho tìm kiếm: thêm ở M6-01, cùng lúc bật extension.
 - Thao tác di chuyển phải chặn trường hợp chuyển node vào chính cây con của nó (kiểm tra bằng recursive CTE).
 
