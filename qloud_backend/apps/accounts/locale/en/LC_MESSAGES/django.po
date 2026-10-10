@@ -1,0 +1,136 @@
+msgid ""
+msgstr ""
+"Language: en\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "No default signup plan is configured."
+msgstr "No default signup plan is configured."
+
+msgid "The selected plan no longer exists."
+msgstr "The selected plan no longer exists."
+
+msgid "You cannot suspend your own account."
+msgstr "You cannot suspend your own account."
+
+msgid "At least one active superuser must remain."
+msgstr "At least one active superuser must remain."
+
+msgid "Use this plan for new accounts"
+msgstr "Use this plan for new accounts"
+
+msgid "Select exactly one active plan."
+msgstr "Select exactly one active plan."
+
+msgid "Suspend selected accounts"
+msgstr "Suspend selected accounts"
+
+msgid "Unsuspend selected accounts"
+msgstr "Unsuspend selected accounts"
+
+msgid "The selected plan is inactive."
+msgstr "The selected plan is inactive."
+
+msgid "The default signup plan must be active."
+msgstr "The default signup plan must be active."
+
+msgid "Code"
+msgstr "Code"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Storage quota (bytes)"
+msgstr "Storage quota (bytes)"
+
+msgid "Maximum file size (bytes)"
+msgstr "Maximum file size (bytes)"
+
+msgid "Maximum old versions per file"
+msgstr "Maximum old versions per file"
+
+msgid "Version retention (days)"
+msgstr "Version retention (days)"
+
+msgid "Trash retention (days)"
+msgstr "Trash retention (days)"
+
+msgid "Default for signup"
+msgstr "Default for signup"
+
+msgid "Active"
+msgstr "Active"
+
+msgid "Plan"
+msgstr "Plan"
+
+msgid "Plans"
+msgstr "Plans"
+
+msgid "Vietnamese"
+msgstr "Vietnamese"
+
+msgid "English"
+msgstr "English"
+
+msgid "System"
+msgstr "System"
+
+msgid "Light"
+msgstr "Light"
+
+msgid "Dark"
+msgstr "Dark"
+
+msgid "Display name"
+msgstr "Display name"
+
+msgid "Staff"
+msgstr "Staff"
+
+msgid "Avatar URL"
+msgstr "Avatar URL"
+
+msgid "Language"
+msgstr "Language"
+
+msgid "Theme"
+msgstr "Theme"
+
+msgid "Quota override (bytes)"
+msgstr "Quota override (bytes)"
+
+msgid "Used storage (bytes)"
+msgstr "Used storage (bytes)"
+
+msgid "Reserved storage (bytes)"
+msgstr "Reserved storage (bytes)"
+
+msgid "Root folder"
+msgstr "Root folder"
+
+msgid "Suspended at"
+msgstr "Suspended at"
+
+msgid "Suspension reason"
+msgstr "Suspension reason"
+
+msgid "User"
+msgstr "User"
+
+msgid "Users"
+msgstr "Users"
+
+msgid "Accounts"
+msgstr "Accounts"
+
+msgid "Account state changes require explicit update_fields."
+msgstr "Account state changes require explicit update_fields."
+
+#, python-format
+msgid ""
+"%(count)d selected account(s) were already suspended; their original "
+"suspension was kept."
+msgstr ""
+"%(count)d selected account(s) were already suspended; their original "
+"suspension was kept."

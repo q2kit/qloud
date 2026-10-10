@@ -1,6 +1,37 @@
 # Xác thực và tài khoản (F-AUTH)
 
-**Trạng thái:** Nháp · **Milestone:** M1 · **Màn hình:** S-01 đến S-04, S-13
+**Trạng thái:** Đang làm · **Milestone:** M1 · **Màn hình:** S-01 đến S-04, S-13
+
+Đặc tả M1 và kế hoạch M1-01 đã được [chủ repo duyệt](https://github.com/q2kit/qloud/issues/10#issuecomment-6088713465).
+
+M1-01 triển khai model User/Plan, tạo folder gốc và gán plan nguyên tử khi lưu user mới (qua manager hoặc `save()`),
+cùng Django admin và dịch vụ khóa/mở khóa. API đăng ký, lấy locale từ trình duyệt và allauth thuộc M1-02.
+Locale mặc định ở model là `vi`, theme mặc định là `system`; caller truyền locale đã xác định khi tạo user.
+Folder gốc lưu tên kỹ thuật `Drive`; tên hiển thị trên frontend lấy từ i18n.
+
+Khóa user qua `suspend_user(user, reason=...)` ghi thời điểm/lý do và tăng `session_version`.
+Hash xác thực session phụ thuộc mật khẩu và bộ đếm này, nên mọi session cũ mất hiệu lực, không cần quét bảng session.
+Session được xóa khi truy cập lần tiếp theo với hash cũ; cơ chế hoạt động với DB, cached_db và cache session engine.
+Backend xác thực chặn cả đăng nhập mới và sử dụng session của user đang khóa; mở khóa không giảm bộ đếm nên không phục hồi session cũ.
+Trong admin dùng action khóa/mở khóa; trường khóa chỉ đọc để mọi thao tác đi qua dịch vụ.
+Admin không xóa được user (xóa tài khoản nằm ngoài phạm vi, và xóa sẽ vượt qua kiểm tra superuser cuối cùng); thay vào đó thì khóa.
+Action từ chối toàn bộ lô nếu chứa chính admin đang thao tác hoặc khiến không còn superuser active/staff/chưa bị khóa.
+Dịch vụ khóa dòng user đích cùng toàn bộ superuser theo thứ tự UUID, để vẫn còn người quản trị và tránh deadlock; superuser ít và thao tác hiếm nên khóa cả nhóm không đáng kể.
+Khóa lại user đã bị khóa không đổi thời điểm, lý do hay bộ đếm session; action báo số tài khoản được giữ nguyên.
+Form admin chỉ kiểm tra superuser cuối cùng khi bỏ một cờ `is_active`/`is_staff`/`is_superuser`, trong transaction giữ khóa tới khi lưu;
+sửa các trường khác không khóa nhóm superuser. Trường quyền không có trên form được coi là giữ nguyên.
+`User.save()` không có `update_fields` chỉ ghi các trường đã thay đổi từ lúc load/lưu (so với snapshot cập nhật khi load, `refresh_from_db` và lưu);
+đổi trực tiếp suspension, session version, counter hoặc cờ quyền sẽ báo ValidationError.
+Password không thuộc nhóm này: `set_password()` rồi `save()` là luồng chuẩn của Django và allauth, và bản cũ không ghi đè được vì chỉ trường đổi mới được ghi.
+Không dùng fetch mode `FETCH_PEERS` cho User: Django nạp trường deferred cho các instance cùng nhóm mà không qua `refresh_from_db`, nên snapshot coi trường đó là đã đổi.
+Các đường ghi trạng thái phải dùng `update_fields` rõ ràng; counter phải cập nhật trong transaction có khóa hoặc `F()`.
+Admin chỉ ghi trường thực sự đổi; service khóa/mở khóa dùng khóa dòng và danh sách trường rõ ràng.
+Việc đổi từ ModelBackend sang AccountBackend và hash session mới khiến session trước M1-01 phải đăng nhập lại; chưa có production.
+Lỗi thiếu plan/inactive có mã ổn định và thông báo gettext `vi`/`en`; `createsuperuser` chuyển lỗi thành CommandError.
+M1-02 phải chuyển các ValidationError provisioning thành lỗi đăng ký trong adapter/API allauth, thay vì để trả 500.
+Việc chặn user bị khóa hiện nằm ở `AccountBackend.user_can_authenticate`. Backend của allauth (đăng nhập OAuth, login by code) không đi qua đây,
+nên M1-02 phải dùng backend kế thừa cùng kiểm tra `suspended_at` và chặn trong adapter allauth, có test cho user bị khóa đăng nhập bằng OAuth.
+Kiểm tra share link của owner bị khóa sẽ triển khai ở M5 khi có model ShareLink.
 
 ## User stories
 - Là khách, tôi muốn đăng ký bằng email và mật khẩu, để có Drive riêng.

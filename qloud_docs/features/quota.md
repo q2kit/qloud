@@ -1,7 +1,19 @@
 # Quota dung lượng (F-QUOTA)
 
-**Trạng thái:** Nháp · **Milestone:** M1 (model Plan), M2 (kiểm tra quota), M8 (giao diện) · **Màn hình:** S-14, thanh dung lượng ở sidebar
+**Trạng thái:** Đang làm (phần model M1 đã duyệt; phần M2/M8 chờ duyệt ở milestone tương ứng) · **Milestone:** M1 (model Plan), M2 (kiểm tra quota), M8 (giao diện) · **Màn hình:** S-14, thanh dung lượng ở sidebar
 Xem thêm [ADR-0005](../adr/0005-storage-plans.md)
+
+Phần User/Plan/quota M1 được [chủ repo duyệt](https://github.com/q2kit/qloud/issues/10#issuecomment-6088713465).
+M1-01 cung cấp `accounts.selectors.get_limits(user)` trả quota, kích thước file tối đa và chính sách giữ phiên bản/thùng rác.
+Hàm đọc lại user và plan trong một truy vấn, nên thay đổi của admin có hiệu lực ngay, kể cả quota override bằng 0.
+Chưa có API upload hay giao diện quota ở M1-01.
+
+Django admin đổi mặc định bằng action "Dùng gói này cho tài khoản đăng ký mới", chọn đúng một plan active.
+Tạo user đọc plan mặc định không khóa dòng: `set_default_plan()` đổi mặc định trong một transaction, nên lượt đăng ký thấy trạng thái trước hoặc sau khi đổi, không thấy trạng thái giữa chừng.
+Khi insert user, kiểm tra foreign key của PostgreSQL tự lấy [`FOR KEY SHARE`](https://www.postgresql.org/docs/18/explicit-locking.html#LOCKING-ROWS) trên plan, nên plan không bị xóa trong lúc tạo user.
+`set_default_plan()` khóa các plan bằng `FOR NO KEY UPDATE` theo thứ tự UUID: hai lượt đổi mặc định chạy lần lượt, còn đăng ký không phải chờ.
+Không xóa plan mặc định hoặc plan đã được gán cho user; plan inactive vẫn giữ giới hạn cho user cũ.
+Đơn vị seed: 1 GB = 1.000.000.000 byte.
 
 ## User stories
 - Tôi muốn biết mình đã dùng bao nhiêu dung lượng và phần nào chiếm nhiều nhất.

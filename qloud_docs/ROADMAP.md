@@ -9,7 +9,7 @@
 | Milestone | Mục tiêu | Trạng thái |
 |---|---|---|
 | M0 | Nền tảng: docs, khung BE/FE, Docker, CI | ✅ |
-| M1 | Xác thực và tài khoản | ⬜ |
+| M1 | Xác thực và tài khoản | 🟨 |
 | M2 | Folder, file, upload chia chunk, download | ⬜ |
 | M3 | Xem trước và thumbnail | ⬜ |
 | M4 | Thùng rác | ⬜ |
@@ -24,7 +24,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 ## M1 — Xác thực ([auth.md](features/auth.md))
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
-| M1-01 | Model User và Plan (seed `free-2026`, `plus-2026`), khóa user, `get_limits()`, tạo folder gốc và gán plan khi đăng ký, Django admin cho plan/user | [#10](https://github.com/q2kit/qloud/issues/10) | ⬜ |
+| M1-01 | Model User và Plan (seed `free-2026`, `plus-2026`), khóa user, `get_limits()`, tạo folder gốc và gán plan khi đăng ký, Django admin cho plan/user | [#10](https://github.com/q2kit/qloud/issues/10) | ✅ [PR #82](https://github.com/q2kit/qloud/pull/82) |
 | M1-02 | allauth headless: đăng ký, đăng nhập, đăng xuất, xác thực email, quên mật khẩu | [#11](https://github.com/q2kit/qloud/issues/11) | ⬜ |
 | M1-03 | OAuth Google và GitHub, liên kết tài khoản theo email đã xác thực | [#12](https://github.com/q2kit/qloud/issues/12) | ⬜ |
 | M1-04 | Rate limit và Cloudflare Turnstile cho auth; gửi email qua SMTP bằng Celery, template email `vi`/`en` | [#13](https://github.com/q2kit/qloud/issues/13) | ⬜ |
@@ -36,7 +36,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
 | M2-00 | (Làm đầu M2, sau khi M1 xong) Script quy trình `task-start`, `pr-open`, `roadmap-sync` + skill Claude Code bọc script; rút gọn AGENTS.md mục 3 | [#62](https://github.com/q2kit/qloud/issues/62) | ⬜ |
-| M2-01 | Model Node, Blob, FileVersion; dịch vụ phân quyền (lúc này mới có owner) | [#17](https://github.com/q2kit/qloud/issues/17) | ⬜ |
+| M2-01 | Hoàn thiện model Node (nền folder gốc ở M1-01), Blob, FileVersion; dịch vụ phân quyền (lúc này mới có owner) | [#17](https://github.com/q2kit/qloud/issues/17) | ⬜ |
 | M2-02 | API: tạo folder, liệt kê con, chi tiết node và breadcrumb, đổi tên, di chuyển | [#18](https://github.com/q2kit/qloud/issues/18) | ⬜ |
 | M2-03 | Wrapper S3 (`storage`): presign, multipart | [#19](https://github.com/q2kit/qloud/issues/19) | ⬜ |
 | M2-04 | API upload session: tạo, lấy part URL, lấy trạng thái, hoàn tất, hủy; giữ chỗ quota | [#20](https://github.com/q2kit/qloud/issues/20) | ⬜ |
