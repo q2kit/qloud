@@ -11,8 +11,10 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { FormAlert } from '@/features/auth/components/form-field';
+import { ResumeUploads } from '@/features/upload/components/resume-uploads';
 import { useUploader } from '@/features/upload/context';
-import { filesFromDrop } from '@/features/upload/drop';
+import { treeFromDrop } from '@/features/upload/drop';
+import { useFolderUploader } from '@/features/upload/folder-context';
 import { ApiError } from '@/lib/api/errors';
 
 import { nodeActions, type ActionHandlers } from './actions';
@@ -68,6 +70,7 @@ export function DrivePage(): React.JSX.Element {
   const [actionError, setActionError] = React.useState<string | null>(null);
   const [announcement, setAnnouncement] = React.useState('');
   const uploader = useUploader();
+  const folderUploader = useFolderUploader();
   // Files dragged in from the computer (ui-ux.md: "Kéo file vào đây để upload").
   const [fileDrag, setFileDrag] = React.useState<{
     over: string | null;
@@ -77,11 +80,20 @@ export function DrivePage(): React.JSX.Element {
     dataTransfer: DataTransfer,
     parentId: string | undefined,
   ): void => {
-    const { files, folders } = filesFromDrop(dataTransfer);
-    setActionError(
-      folders > 0 ? t('upload.errors.folders_not_supported') : null,
-    );
-    if (parentId && files.length > 0) uploader.add(files, parentId);
+    if (!parentId) return;
+    setActionError(null);
+    void treeFromDrop(dataTransfer)
+      .then((tree) => {
+        if (tree.directories.length) folderUploader.addTree(tree, parentId);
+        else
+          uploader.add(
+            tree.files.map(({ file }) => file),
+            parentId,
+          );
+      })
+      .catch(() => {
+        setActionError(t('upload.errors.folder_failed'));
+      });
   };
   const fileDragHandlers = {
     onDragEnter: (event: React.DragEvent) => {
@@ -318,6 +330,7 @@ export function DrivePage(): React.JSX.Element {
           />
         )}
       </div>
+      <ResumeUploads />
       <DriveToolbar
         selected={selected}
         view={view}

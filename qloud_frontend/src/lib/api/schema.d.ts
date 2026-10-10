@@ -223,6 +223,8 @@ export interface components {
             /** Format: uuid */
             parent_id: string;
             name: string;
+            /** @default fail */
+            on_conflict: components["schemas"]["FolderConflictEnum"];
         };
         CreateUploadRequest: {
             /** Format: uuid */
@@ -257,6 +259,13 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        /**
+         * @description * `fail` - fail
+         *     * `rename` - rename
+         *     * `reuse` - reuse
+         * @enum {string}
+         */
+        FolderConflictEnum: "fail" | "rename" | "reuse";
         Health: {
             status: components["schemas"]["HealthStatusEnum"];
             checks: {

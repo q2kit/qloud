@@ -74,9 +74,18 @@ Callback của provider (không gọi trực tiếp): `/api/auth/oauth/<provider
 |---|---|---|
 | GET | `/nodes/{id}` | Chi tiết node, breadcrumb, quyền của mình (`capabilities`) |
 | GET | `/nodes/{id}/children` | Liệt kê con (phân trang, sắp xếp) |
-| POST | `/folders` | Tạo folder `{parent_id, name}` |
+| POST | `/folders` | Tạo folder `{parent_id, name, on_conflict?}` |
 | PATCH | `/nodes/{id}` | Đổi tên `{name}` |
 | POST | `/nodes/move` | Di chuyển nhiều node `{node_ids, target_parent_id}` |
+
+**M2-08b — xung đột khi tạo folder:**
+`POST /folders` thêm `on_conflict`: `fail` (mặc định, 409 `name_conflict` như cũ),
+`rename` (tên trống tiếp theo với hậu tố ` (n)`), `reuse` (trả folder cùng tên không phân biệt hoa/thường).
+Cả tạo mới và dùng lại trả 201 cùng schema Node. `reuse` chỉ dùng folder đang sống;
+trùng với file vẫn trả 409, folder trong thùng rác không được dùng lại. Quyền editor trên parent
+được kiểm tra trước mọi lựa chọn; không có quyền trả 404. Lựa chọn được tuần tự hóa bằng khóa owner
+trong transaction để các lần tạo/giữ cả hai/gộp đồng thời không sinh bản sao ngoài ý muốn.
+
 
 M2-02 (5 endpoint trên):
 - Node trả về `id, kind, name, parent_id, is_root, size, mime_type, created_at, updated_at`. Folder gốc có `is_root: true`; tên lưu là `Drive`, FE hiển thị tên đã dịch.

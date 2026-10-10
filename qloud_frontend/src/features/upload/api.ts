@@ -68,7 +68,26 @@ export const uploadApi: UploadApi = {
   },
 };
 
-/** Name, size and modification time: enough to tell the file again (M2-08b adds a hash). */
-export function quickFingerprint(file: File): string {
-  return `${file.name}:${String(file.size)}:${String(file.lastModified)}`;
+export const uploadKeys = { active: ['uploads', 'active'] as const };
+
+export async function activeUploads(cursor?: string) {
+  return unwrap(
+    await api.GET('/api/v1/uploads', {
+      params: { query: { status: 'active', cursor } },
+    }),
+  );
+}
+
+export type FolderConflictChoice = 'rename' | 'reuse' | 'skip';
+
+export async function createUploadFolder(
+  parentId: string,
+  name: string,
+  onConflict: 'fail' | 'rename' | 'reuse',
+): Promise<UploadedNode> {
+  return unwrap(
+    await api.POST('/api/v1/folders', {
+      body: { parent_id: parentId, name, on_conflict: onConflict },
+    }),
+  );
 }

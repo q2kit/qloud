@@ -50,7 +50,7 @@ function fileDrop(entries: { file?: File; directory?: boolean }[]) {
     items: entries.map((entry) => ({
       kind: 'file',
       getAsFile: () => entry.file ?? null,
-      webkitGetAsEntry: () => ({ isDirectory: Boolean(entry.directory) }),
+      webkitGetAsEntry: () => null,
     })),
   };
 }
@@ -89,21 +89,16 @@ describe('starting uploads (M2-08a)', () => {
     fireEvent.dragOver(folder, { dataTransfer: fileDrop([{ file: a }]) });
     expect(screen.getByText('Drop to upload to "Target"')).toBeInTheDocument();
     fireEvent.drop(folder, { dataTransfer: fileDrop([{ file: a }]) });
-    expect(add).toHaveBeenLastCalledWith([a], target.id);
+    await waitFor(() => {
+      expect(add).toHaveBeenLastCalledWith([a], target.id);
+    });
     expect(screen.queryByText(/Drop to upload/)).not.toBeInTheDocument();
 
     const b = new File(['b'], 'b.txt');
     fireEvent.dragEnter(page, { dataTransfer: fileDrop([{ file: b }]) });
-    fireEvent.drop(page, {
-      dataTransfer: fileDrop([{ file: b }, { directory: true }]),
-    });
-    expect(add).toHaveBeenLastCalledWith([b], ROOT_ID);
+    fireEvent.drop(page, { dataTransfer: fileDrop([{ file: b }]) });
     await waitFor(() => {
-      expect(
-        screen.getByText(
-          "Dropping whole folders isn't supported yet; the files were uploaded.",
-        ),
-      ).toBeVisible();
+      expect(add).toHaveBeenLastCalledWith([b], ROOT_ID);
     });
   });
 
@@ -115,9 +110,30 @@ describe('starting uploads (M2-08a)', () => {
       screen.getAllByRole('button', { name: 'Upload files' })[0],
     ).toBeVisible();
     const input =
-      document.querySelectorAll<HTMLInputElement>('input[type="file"]')[1];
+      document.querySelectorAll<HTMLInputElement>('input[type="file"]')[2];
     if (!input) throw new Error('no picker');
     await user.upload(input, new File(['c'], 'c.txt'));
     expect(add).toHaveBeenCalledWith([expect.any(File)], ROOT_ID);
   });
+});
+
+it('the folder picker creates a nested tree and queues files for the resolved child', async () => {
+  const user = userEvent.setup();
+  renderApp('/drive', testUser);
+  await screen.findByText('This folder is empty');
+  const file = new File(['x'], 'a.txt');
+  Object.defineProperty(file, 'webkitRelativePath', {
+    value: 'Docs/Nested/a.txt',
+  });
+  await user.upload(screen.getByTestId('upload-folder-input'), file);
+  await waitFor(() => {
+    expect(add).toHaveBeenCalled();
+  });
+  const nested = [...drive.nodes.values()].find(
+    (node) => node.name === 'Nested',
+  );
+  expect(add).toHaveBeenCalledWith([file], nested?.id);
+  expect([...drive.nodes.values()].some((node) => node.name === 'Docs')).toBe(
+    true,
+  );
 });

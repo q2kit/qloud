@@ -135,6 +135,7 @@ qloud_frontend/src/
 ## Các luồng chính
 
 ### Upload
+M2-08b: resume dùng fingerprint lưu trên server, không dùng IndexedDB. FE đọc session active qua TanStack Query và chỉ gắn File vào engine sau khi chọn lại đúng fingerprint; upload folder tạo cây từ trên xuống rồi ánh xạ đường dẫn sang ID.
 Xem [features/upload.md](features/upload.md) và [ADR-0003](adr/0003-direct-to-s3-multipart-upload.md).
 
 ### Download / xem trước

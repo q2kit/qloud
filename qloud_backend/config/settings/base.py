@@ -263,7 +263,11 @@ SPECTACULAR_SETTINGS = {
     "COMPONENT_SPLIT_REQUEST": True,
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
     # Several components have a `status` field with different choices.
-    "ENUM_NAME_OVERRIDES": {"UploadStatusEnum": "apps.uploads.models.UploadSession.Status"},
+    "ENUM_NAME_OVERRIDES": {
+        "UploadStatusEnum": "apps.uploads.models.UploadSession.Status",
+        "FolderConflictEnum": ["fail", "rename", "reuse"],
+        "OnConflictEnum": "apps.uploads.models.UploadSession.OnConflict",
+    },
 }
 
 # --- Logging ---

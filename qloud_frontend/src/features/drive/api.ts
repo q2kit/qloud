@@ -92,7 +92,7 @@ export function useCreateFolder(): UseMutationResult<
     mutationFn: async ({ parentId, name }) =>
       unwrap(
         await api.POST('/api/v1/folders', {
-          body: { parent_id: parentId, name },
+          body: { parent_id: parentId, name, on_conflict: 'fail' },
         }),
       ),
     onSuccess: (folder) => {

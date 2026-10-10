@@ -602,6 +602,10 @@ components:
           type: string
           minLength: 1
           maxLength: 255
+        on_conflict:
+          allOf:
+          - $ref: '#/components/schemas/FolderConflictEnum'
+          default: fail
       required:
       - name
       - parent_id
@@ -672,6 +676,16 @@ components:
       - code
       - details
       - message
+    FolderConflictEnum:
+      enum:
+      - fail
+      - rename
+      - reuse
+      type: string
+      description: |-
+        * `fail` - fail
+        * `rename` - rename
+        * `reuse` - reuse
     Health:
       type: object
       properties:

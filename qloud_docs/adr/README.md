@@ -25,3 +25,4 @@ nếu quyết định thay đổi thì tạo ADR mới, và đánh dấu ADR cũ
 | [0005](0005-storage-plans.md) | Giới hạn theo plan, gán cố định cho user lúc đăng ký | Chấp nhận |
 | [0006](0006-cloudflare-proxy-nginx.md) | Cloudflare proxy (Full strict + Origin Certificate) và nginx trên VPS | Chấp nhận |
 | [0007](0007-localstack-for-s3-dev.md) | LocalStack để giả lập S3 cho dev và CI | Chấp nhận |
+| [0008](0008-server-upload-fingerprints.md) | Tiếp tục upload bằng fingerprint lưu trên server | Chấp nhận |

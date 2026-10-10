@@ -20,9 +20,11 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). Model `Blob`/`FileV
    Ví dụ file 50 GiB thì part 8 MiB × 6.400 part; 80 GiB thì 9 MiB; 5 TiB thì 525 MiB.
 3. **Upload part:** FE xin presigned URL theo lô 20 part, rồi `PUT` song song tối đa 4 part.
    Part lỗi được thử lại với backoff lũy thừa (tối đa 5 lần). URL hết hạn thì xin URL mới.
-4. **Resume:** FE lưu `{fingerprint → session_id}` vào IndexedDB, với fingerprint = tên + kích thước + lastModified + hash của 1 MB đầu.
-   Khi mở lại trang, FE gọi `GET /uploads?status=active`, rồi yêu cầu người dùng **chọn lại file** (trình duyệt không cho tự đọc lại file).
-   Nếu fingerprint khớp thì `GET /uploads/{id}` để lấy danh sách part đã có (BE đọc từ S3 `ListParts`) và chỉ upload phần còn thiếu.
+4. **Resume:** fingerprint lưu trên session ở server; không dùng IndexedDB (quyết định M2-08b, [ADR-0008](../adr/0008-server-upload-fingerprints.md), [kế hoạch #24](https://github.com/q2kit/qloud/issues/24#issuecomment-6098540092)).
+   Fingerprint là SHA-256 của JSON `[tên, kích thước, lastModified, SHA-256 của 1 MiB đầu]`, dạng hex 64 ký tự để tên dài vẫn vừa giới hạn API.
+   Khi mở lại Drive, FE gọi `GET /uploads?status=active` (cursor pagination) và yêu cầu người dùng **chọn lại file** cho từng session.
+   Nếu fingerprint khớp thì `GET /uploads/{id}` lấy part đã có (S3 `ListParts`), chỉ upload phần còn thiếu; không tạo session hay giữ chỗ quota lần nữa.
+   Tệp khác hoặc thời gian chỉnh sửa khác thì báo lỗi, giữ session để chọn lại hoặc hủy. Session cũ từ M2-08a chỉ có fingerprint nhanh, không khớp định dạng mới: cần hủy và upload lại.
 5. **Hoàn tất:** `POST /uploads/{id}/complete`. BE gọi `ListParts` rồi `CompleteMultipartUpload`, kiểm tra tổng kích thước, sau đó trong một transaction:
    tạo Blob, Node (hoặc version mới), `reserved -= size`, `used += size`. Cuối cùng đẩy task thumbnail.
 6. **Hủy / hết hạn:** `AbortMultipartUpload` và trả lại phần quota đã giữ chỗ. Celery beat quét mỗi giờ để dọn các session quá `expires_at` (7 ngày).
@@ -59,7 +61,7 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). Model `Blob`/`FileV
 - **Lối vào:**
   - menu "Tạo mới › Tải tệp lên", hoặc nút "Tải tệp lên" ở trạng thái rỗng;
   - kéo file từ máy vào trang Drive (upload vào folder đang mở; trang hiện vùng thả "Thả để tải lên vào …") hoặc thả lên một folder trong danh sách (upload vào folder đó);
-  - kéo cả folder: chưa hỗ trợ ở M2-08a, các file lẻ vẫn được upload và trang báo một dòng.
+  - kéo cả folder được bổ sung ở M2-08b (xem bên dưới).
 - **Engine** (`qloud_frontend/src/features/upload/engine.ts`, ngoài React; store `zustand` cho khay):
   - **song song:** tối đa **4 part đang chạy trên toàn hàng đợi**, file lấy part theo thứ tự; tạo trước tối đa 2 session để file kế tiếp sẵn sàng;
   - **URL part:** xin theo lô 20; các part bắt đầu cùng lúc dùng chung một request; URL được coi là hết hạn sau 55 phút;
@@ -80,7 +82,14 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). Model `Blob`/`FileV
 - **E2E:** bucket `qloud-e2e` (CORS cho `http://localhost:4173`) do `infra/localstack/init-s3.sh` tạo; healthcheck của LocalStack chờ CORS của bucket này.
 
 ## Upload cả folder
-FE đọc cấu trúc thư mục (qua `webkitdirectory` hoặc DataTransfer items), gọi API để tạo các folder theo thứ tự từ trên xuống, rồi upload file vào đúng folder.
+M2-08b ([#106](https://github.com/q2kit/qloud/issues/106)):
+- Menu "Tạo mới › Tải thư mục lên" dùng `webkitdirectory`; kéo thả folder dùng `webkitGetAsEntry`. Các entry được lấy ngay trong sự kiện drop, trước khi trình duyệt đóng quyền đọc drag data.
+- Đọc hết các lô của `readEntries` và duyệt cả cây. Folder rỗng được giữ khi kéo thả; picker `webkitdirectory` chỉ trả file nên không biểu diễn folder hoàn toàn rỗng.
+- Tạo folder từ trên xuống bằng `POST /folders`; ánh xạ đường dẫn gốc sang ID trả về, kể cả khi server đổi tên. File lẻ và các file trong cây được đưa vào hàng đợi upload hiện có, đúng folder đích.
+- Folder trùng tên: hỏi "Gộp" (`reuse`), "Giữ cả hai" (`rename`) hoặc "Bỏ qua" (bỏ cả cây con). Gộp chỉ dùng folder đang sống, không dùng file hay folder trong thùng rác. File trùng tên trong folder gộp vẫn dùng hộp thoại của engine.
+- Báo trạng thái chuẩn bị folder và lỗi đọc/tạo folder; không upload file vào folder sai khi tạo cây thất bại. Các lần chọn/kéo folder được xử lý lần lượt; cảnh báo rời trang trong lúc chuẩn bị cây.
+- Trên Drive có vùng "Tệp tải lên dở dang", lấy từ server qua TanStack Query, có nút xem thêm, chọn lại tệp gốc và hủy (trả quota). Session đã gắn vào khay không hiện lần nữa trong vùng này.
+- E2E dùng stack thật: chọn folder lồng nhau, Gộp/Giữ cả hai; seed session và part qua API/S3, reload, từ chối file không khớp, tiếp tục chỉ part thiếu, tải về so nội dung.
 
 ## UI — khay upload
 - Hiển thị: tổng tiến độ, tốc độ, thời gian còn lại; từng file có trạng thái (đang chờ, đang upload, tạm dừng, lỗi, xong).

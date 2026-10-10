@@ -413,3 +413,61 @@ def test_move_dedupes_and_skips_nodes_already_there(client, root):
     assert response.status_code == 200
     assert sorted(node["name"] for node in response.json()["nodes"]) == ["inside", "outside"]
     assert Node.objects.get(pk=outside.pk).parent_id == target.pk
+
+
+@pytest.mark.parametrize("choice", ["fail", "rename", "reuse"])
+def test_folder_conflict_choices_require_parent_permission(stranger_client, root, choice):
+    response = stranger_client.post(
+        FOLDERS, {"parent_id": str(root.pk), "name": "Docs", "on_conflict": choice}, format="json"
+    )
+    assert response.status_code == 404
+
+
+def test_folder_reuse_returns_same_live_folder_case_insensitively(client, root):
+    existing = folder(root, "Docs")
+    response = client.post(
+        FOLDERS, {"parent_id": str(root.pk), "name": "docs", "on_conflict": "reuse"}, format="json"
+    )
+    assert response.status_code == 201
+    assert response.json()["id"] == str(existing.pk)
+    assert Node.objects.filter(parent=root).count() == 1
+
+
+def test_folder_rename_chooses_next_suffix(client, root):
+    folder(root, "Docs")
+    folder(root, "Docs (1)")
+    response = client.post(
+        FOLDERS, {"parent_id": str(root.pk), "name": "DOCS", "on_conflict": "rename"}, format="json"
+    )
+    assert response.status_code == 201
+    assert response.json()["name"] == "DOCS (2)"
+
+
+def test_folder_reuse_never_reuses_a_file(client, root, make_file):
+    make_file("Docs")
+    response = client.post(
+        FOLDERS, {"parent_id": str(root.pk), "name": "Docs", "on_conflict": "reuse"}, format="json"
+    )
+    assert response.status_code == 409
+    assert error(response) == "name_conflict"
+
+
+def test_folder_reuse_ignores_trashed_folder(client, root):
+    existing = folder(root, "Docs")
+    existing.trashed_at = timezone.now()
+    existing.trashed_root = existing
+    existing.save()
+    response = client.post(
+        FOLDERS, {"parent_id": str(root.pk), "name": "Docs", "on_conflict": "reuse"}, format="json"
+    )
+    assert response.status_code == 201
+    assert response.json()["id"] != str(existing.pk)
+
+
+def test_folder_invalid_conflict_choice(client, root):
+    response = client.post(
+        FOLDERS,
+        {"parent_id": str(root.pk), "name": "Docs", "on_conflict": "replace"},
+        format="json",
+    )
+    assert response.status_code == 400
