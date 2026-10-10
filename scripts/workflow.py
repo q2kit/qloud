@@ -389,7 +389,8 @@ def roadmap_sync(args: argparse.Namespace) -> None:
         raise WorkflowError(f"{ROADMAP} is out of date: run roadmap-sync")
     else:
         write_roadmap(root, text)
-        print(f"✔ updated {ROADMAP}; commit it in the next PR (AGENTS.md mục 3, bước 9)")
+        where = f"PR #{args.pr}, then merge it" if args.pr else "the next PR"
+        print(f"✔ updated {ROADMAP}; commit it to {where} (AGENTS.md mục 3, bước 9)")
 
     if args.github:
         sync_github()

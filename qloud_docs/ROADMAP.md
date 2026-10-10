@@ -35,7 +35,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 ## M2 — Folder, file, upload, download ([files-folders.md](features/files-folders.md), [upload.md](features/upload.md))
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
-| M2-00 | (Làm đầu M2, sau khi M1 xong) Script quy trình `task-start`, `pr-open`, `roadmap-sync` + skill Claude Code bọc script; rút gọn AGENTS.md mục 3 | [#62](https://github.com/q2kit/qloud/issues/62) | 🟦 |
+| M2-00 | (Làm đầu M2, sau khi M1 xong) Script quy trình `task-start`, `pr-open`, `roadmap-sync` + skill Claude Code bọc script; rút gọn AGENTS.md mục 3 | [#62](https://github.com/q2kit/qloud/issues/62) | ✅ [PR #91](https://github.com/q2kit/qloud/pull/91) |
 | M2-01 | Hoàn thiện model Node (nền folder gốc ở M1-01), Blob, FileVersion; dịch vụ phân quyền (lúc này mới có owner) | [#17](https://github.com/q2kit/qloud/issues/17) | ⬜ |
 | M2-02 | API: tạo folder, liệt kê con, chi tiết node và breadcrumb, đổi tên, di chuyển | [#18](https://github.com/q2kit/qloud/issues/18) | ⬜ |
 | M2-03 | Wrapper S3 (`storage`): presign, multipart | [#19](https://github.com/q2kit/qloud/issues/19) | ⬜ |
