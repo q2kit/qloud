@@ -60,10 +60,6 @@
     "trash": "Trash content will be implemented in M4-03.",
     "settings": "Settings content will be implemented in M1-06."
   },
-  "login": {
-    "title": "Log in",
-    "description": "The login flow will be built in the authentication milestone."
-  },
   "notFound": {
     "title": "Page not found",
     "description": "This address does not exist or has moved."
@@ -89,5 +85,85 @@
     "system": "System",
     "light": "Light",
     "dark": "Dark"
+  },
+  "auth": {
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "newPassword": "New password"
+    },
+    "login": {
+      "title": "Sign in",
+      "description": "Sign in to open your Drive.",
+      "remember": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "noAccount": "No account yet?",
+      "signupLink": "Sign up"
+    },
+    "signup": {
+      "title": "Create an account",
+      "description": "Sign up for free to store and share files.",
+      "passwordHint": "At least 8 characters, not too similar to your email.",
+      "submit": "Sign up",
+      "submitting": "Creating account…",
+      "haveAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "successTitle": "Check your inbox",
+      "successDescription": "We sent a verification email to {{email}}. You can use Drive right away; some features, such as uploading, need a verified email.",
+      "continue": "Go to Drive"
+    },
+    "verify": {
+      "pendingTitle": "Verifying your email",
+      "pending": "Please wait a moment…",
+      "successTitle": "Email verified",
+      "successDescription": "Thank you! Your email address is verified.",
+      "errorTitle": "Could not verify your email",
+      "toDrive": "Go to Drive",
+      "toLogin": "Sign in"
+    },
+    "reset": {
+      "requestTitle": "Forgot password",
+      "requestDescription": "Enter the email of your account and we will send you a link to reset your password.",
+      "send": "Send link",
+      "sending": "Sending…",
+      "sentTitle": "Check your inbox",
+      "sentDescription": "If {{email}} has a Qloud account, a password reset link will arrive in a few minutes.",
+      "backToLogin": "Back to sign in",
+      "newPasswordTitle": "Choose a new password",
+      "newPasswordDescription": "Choose a new password for your Qloud account.",
+      "save": "Save password",
+      "saving": "Saving…",
+      "requestAgain": "Send a new link",
+      "doneTitle": "Password changed",
+      "doneDescription": "Your password is updated and every earlier session was signed out.",
+      "toLogin": "Sign in"
+    },
+    "oauth": {
+      "divider": "or",
+      "continueWith": "Continue with {{provider}}",
+      "failed": "Could not sign in with this account. Please try again.",
+      "emailInUse": "This email already has a Qloud account. Sign in with your password, then link the account in Settings."
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "invalidCredentials": "The email or password is incorrect.",
+      "emailTaken": "This email is already used by another account.",
+      "captchaInvalid": "Bot verification failed. Please try again.",
+      "rateLimited": "Too many attempts. Please wait a minute and try again.",
+      "signupClosed": "Sign-up is not open at the moment.",
+      "accountUnavailable": "This account cannot be signed in to.",
+      "invalidLink": "This link is invalid or has expired. Please request a new one."
+    },
+    "sessionError": {
+      "title": "Cannot reach the server",
+      "description": "Your session could not be checked. Check your connection and try again.",
+      "retry": "Try again"
+    }
+  },
+  "account": {
+    "menu": "Account",
+    "logout": "Sign out"
   }
 }

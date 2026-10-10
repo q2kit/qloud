@@ -1,10 +1,12 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { describe, expect, it } from 'vitest';
 
 import { setMediaQuery } from '@/test/match-media';
+
+import { createTestQueryClient } from '@/test/auth';
 
 import { ThemeProvider } from './theme-provider';
 import { appRoutes } from './router';
@@ -13,9 +15,7 @@ const DESKTOP_PANEL_QUERY = '(min-width: 1280px)';
 
 function renderDrive(path = '/'): void {
   const router = createMemoryRouter(appRoutes, { initialEntries: [path] });
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
+  const queryClient = createTestQueryClient();
 
   render(
     <QueryClientProvider client={queryClient}>

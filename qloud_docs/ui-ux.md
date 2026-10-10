@@ -41,11 +41,11 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
 ### Hành vi responsive của application shell
 
 - Từ breakpoint `lg`, sidebar rộng 256px cố định bên trái; trên màn hình nhỏ hơn, sidebar mở thành drawer có lớp nền che.
-- Header luôn nằm trên cùng, gồm tiêu đề/breadcrumb, tìm kiếm hoặc command palette, hành động tạo mới và nút bật panel chi tiết.
+- Header luôn nằm trên cùng, gồm tiêu đề/breadcrumb, tìm kiếm hoặc command palette, hành động tạo mới, nút bật panel chi tiết và menu tài khoản (đăng xuất).
   Tiêu đề header lấy theo route đang mở (`handle.titleKey` của route, ví dụ Drive, Gần đây, Thùng rác, 404).
 - Panel chi tiết rộng 320px ở desktop lớn (`xl`); trên màn hình nhỏ hơn hiển thị dạng bottom sheet.
 - Phím `i` bật/tắt panel chi tiết. Phím bị bỏ qua khi focus nằm trong ô nhập liệu, trong menu hoặc listbox (dùng chữ cái để nhảy tới mục), trong một hộp thoại khác (ví dụ drawer điều hướng), khi giữ phím (auto-repeat) hoặc khi sự kiện đã được xử lý. Trong bottom sheet chi tiết, `i` đóng sheet.
-- Màn hình đăng nhập và các trang công khai dùng layout riêng, không hiển thị application shell.
+- Màn hình đăng nhập và các trang công khai dùng layout riêng, không hiển thị application shell. Các màn hình auth (S-01 đến S-04) là một card ở giữa, rộng tối đa 384px.
 - Lỗi khi hiển thị bất kỳ route nào: trang lỗi đã dịch (`routeError.*`), có nút tải lại trang và nút về Drive, thay cho màn hình lỗi tiếng Anh mặc định của React Router.
 
 ## Danh sách màn hình

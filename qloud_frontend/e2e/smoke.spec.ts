@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { signUpViaApi } from './auth';
+
 // Runs in both the desktop and the 360px mobile project. On mobile the sidebar
 // (with the language and theme switchers) lives in the navigation drawer.
 async function openNavigationIfMobile(
@@ -21,6 +23,10 @@ async function expectNoHorizontalScroll(page: Page): Promise<void> {
 }
 
 test.describe('application shell', () => {
+  test.beforeEach(async ({ page }) => {
+    await signUpViaApi(page);
+  });
+
   test('renders navigation and reports the real backend as healthy', async ({
     page,
     isMobile,
@@ -69,6 +75,10 @@ test.describe('application shell', () => {
 });
 
 test.describe('preferences', () => {
+  test.beforeEach(async ({ page }) => {
+    await signUpViaApi(page);
+  });
+
   test('language choice applies immediately and survives a reload', async ({
     page,
     isMobile,
@@ -112,6 +122,9 @@ test.describe('preferences', () => {
 
 test.describe('mobile layout (360px)', () => {
   test.skip(({ isMobile }) => !isMobile, 'Mobile project only');
+  test.beforeEach(async ({ page }) => {
+    await signUpViaApi(page);
+  });
 
   test('opens the navigation drawer and the details bottom sheet', async ({
     page,
