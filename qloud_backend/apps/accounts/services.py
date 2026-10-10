@@ -21,7 +21,9 @@ def _signup_plan(*, using: str, plan_id: UUID | None) -> Plan:
             "SELECT * FROM accounts_plan WHERE id = %s FOR SHARE", [plan_id]
         )
         plan = next(iter(plans), None)
-        if plan is None or not plan.is_active:
+        if plan is None:
+            raise ValidationError(_("The selected plan no longer exists."), code="missing_plan")
+        if not plan.is_active:
             raise ValidationError(_("The selected plan is inactive."), code="inactive_plan")
         return plan
     while True:
@@ -70,28 +72,68 @@ def suspend_users(user_ids: Iterable[UUID], *, reason: str, actor: User | None =
     ids = set(user_ids)
     if actor is not None and actor.pk in ids:
         raise ValidationError(_("You cannot suspend your own account."), code="self_suspension")
-    # Serialize concurrent suspensions of superusers so two administrators cannot
-    # each observe the other as the last available administrator.
+    # Lock the administrator group only when a target is a superuser. If an
+    # ordinary target was promoted while we waited, release its lock and retry
+    # with the entire group in the same deterministic order.
+    include_admins = User.objects.filter(pk__in=ids, is_superuser=True).exists()
+    while True:
+        try:
+            with transaction.atomic():
+                selection = Q(pk__in=ids)
+                if include_admins:
+                    selection |= Q(is_superuser=True)
+                users = list(User.objects.select_for_update().filter(selection).order_by("pk"))
+                if not include_admins and any(user.is_superuser for user in users):
+                    raise _RetryAdminLocks
+                admins = [user for user in users if _available_admin(user)]
+                if any(user.pk in ids for user in admins) and not any(
+                    user.pk not in ids for user in admins
+                ):
+                    raise ValidationError(
+                        _("At least one active superuser must remain."), code="last_superuser"
+                    )
+                for current in users:
+                    if current.pk in ids and current.suspended_at is None:
+                        current.suspended_at = timezone.now()
+                        current.suspended_reason = reason
+                        current.session_version += 1
+                        current.save(
+                            update_fields=[
+                                "suspended_at",
+                                "suspended_reason",
+                                "session_version",
+                                "updated_at",
+                            ]
+                        )
+            return
+        except _RetryAdminLocks:
+            include_admins = True
+
+
+class _RetryAdminLocks(Exception):
+    pass
+
+
+def _available_admin(user: User) -> bool:
+    return user.is_superuser and user.is_staff and user.is_active and user.suspended_at is None
+
+
+def validate_admin_access(user: User, *, active: bool, staff: bool, superuser: bool) -> None:
+    # The admin change form runs inside a transaction; retain these locks until
+    # its save, sharing the same lock order as superuser suspension.
     users = list(
-        User.objects.select_for_update().filter(Q(is_superuser=True) | Q(pk__in=ids)).order_by("pk")
+        User.objects.select_for_update().filter(Q(is_superuser=True) | Q(pk=user.pk)).order_by("pk")
     )
-    admins = [
-        user
-        for user in users
-        if user.is_superuser and user.is_staff and user.is_active and user.suspended_at is None
-    ]
-    if any(user.pk in ids for user in admins) and not any(user.pk not in ids for user in admins):
+    current = next((item for item in users if item.pk == user.pk), None)
+    if (
+        current is not None
+        and _available_admin(current)
+        and not (active and staff and superuser)
+        and not any(item.pk != user.pk and _available_admin(item) for item in users)
+    ):
         raise ValidationError(
             _("At least one active superuser must remain."), code="last_superuser"
         )
-    for current in users:
-        if current.pk in ids:
-            current.suspended_at = timezone.now()
-            current.suspended_reason = reason
-            current.session_version += 1
-            current.save(
-                update_fields=["suspended_at", "suspended_reason", "session_version", "updated_at"]
-            )
 
 
 def suspend_user(user: User, *, reason: str, actor: User | None = None) -> None:

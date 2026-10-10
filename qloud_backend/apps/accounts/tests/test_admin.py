@@ -87,6 +87,7 @@ def test_admin_handles_plan_deleted_between_selection_and_action(admin_client):
             follow=True,
         )
     assert response.status_code == 200
+    assert "Gói đã chọn không còn tồn tại." in response.content.decode()
     assert Plan.objects.get(is_default_for_signup=True).code == "free-2026"
 
 
@@ -109,6 +110,10 @@ def test_admin_rejects_invalid_default(admin_client, selection):
     )
     assert response.status_code == 200
     assert Plan.objects.get(is_default_for_signup=True).code == "free-2026"
+    if selection == "inactive":
+        from django.utils.translation import gettext
+
+        assert gettext("The default signup plan must be active.") in response.content.decode()
 
 
 def test_admin_suspension_actions(admin_client):
@@ -217,3 +222,46 @@ def test_user_without_permissions_cannot_change_plans_or_suspend(client, staff):
     user.refresh_from_db()
     assert user.suspended_at is None
     assert Plan.objects.get(is_default_for_signup=True).code == "free-2026"
+
+
+@pytest.mark.parametrize("field", ["is_active", "is_staff", "is_superuser"])
+def test_change_form_cannot_remove_last_admin(admin_client, field):
+    admin = User.objects.get(email="admin@example.com")
+    data = {
+        "email": admin.email,
+        "locale": "vi",
+        "theme": "system",
+        "plan": str(admin.plan_id),
+        "is_active": "on",
+        "is_staff": "on",
+        "is_superuser": "on",
+        "_save": "Save",
+    }
+    del data[field]
+    response = admin_client.post(reverse("admin:accounts_user_change", args=[admin.pk]), data)
+    assert response.status_code == 200
+    assert "Phải còn ít nhất một superuser hoạt động." in response.content.decode()
+    admin.refresh_from_db()
+    assert admin.is_active
+    assert admin.is_staff
+    assert admin.is_superuser
+
+
+def test_change_form_can_demote_admin_when_backup_exists(admin_client):
+    admin = User.objects.get(email="admin@example.com")
+    User.objects.create_superuser("backup@example.com")
+    response = admin_client.post(
+        reverse("admin:accounts_user_change", args=[admin.pk]),
+        {
+            "email": admin.email,
+            "locale": "vi",
+            "theme": "system",
+            "plan": str(admin.plan_id),
+            "is_active": "on",
+            "is_staff": "on",
+            "_save": "Save",
+        },
+    )
+    assert response.status_code == 302
+    admin.refresh_from_db()
+    assert not admin.is_superuser

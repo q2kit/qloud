@@ -132,3 +132,64 @@ def test_simultaneous_suspensions_keep_one_superuser_available():
         results = list(pool.map(suspend, admins))
     assert sorted(results) == ["last_superuser", "suspended"]
     assert User.objects.filter(is_superuser=True, suspended_at__isnull=True).count() == 1
+
+
+def test_ordinary_suspension_does_not_lock_admin():
+    admin = User.objects.create_superuser("admin@example.com")
+    user = User.objects.create_user("alice@example.com")
+
+    def suspend():
+        try:
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    cursor.execute("SET LOCAL lock_timeout = '300ms'")
+                suspend_user(user, reason="Review test")
+        finally:
+            connections.close_all()
+
+    with ThreadPoolExecutor(1) as pool, transaction.atomic():
+        User.objects.select_for_update().get(pk=admin.pk)
+        pool.submit(suspend).result(timeout=5)
+    user.refresh_from_db()
+    assert user.suspended_at is not None
+
+
+def test_suspension_retries_group_lock_if_target_became_superuser():
+    user = User.objects.create_superuser("last@example.com")
+    original = QuerySet.exists
+
+    def outdated_probe(queryset):
+        if queryset.model is User:
+            return False
+        return original(queryset)
+
+    with patch.object(QuerySet, "exists", outdated_probe), pytest.raises(ValidationError) as error:
+        suspend_user(user, reason="Review test")
+    assert error.value.code == "last_superuser"
+    user.refresh_from_db()
+    assert user.suspended_at is None
+
+
+def test_simultaneous_admin_demotions_keep_one_available():
+    from apps.accounts.services import validate_admin_access
+
+    admins = [User.objects.create_superuser(f"admin{i}@example.com") for i in range(2)]
+    start = Barrier(2, timeout=5)
+
+    def demote(admin):
+        try:
+            start.wait()
+            with transaction.atomic():
+                validate_admin_access(admin, active=True, staff=True, superuser=False)
+                admin.is_superuser = False
+                admin.save(update_fields=["is_superuser"])
+            return "demoted"
+        except ValidationError as error:
+            return error.code
+        finally:
+            connections.close_all()
+
+    with ThreadPoolExecutor(2) as pool:
+        results = list(pool.map(demote, admins))
+    assert sorted(results) == ["demoted", "last_superuser"]
+    assert User.objects.filter(is_superuser=True, is_staff=True, is_active=True).count() == 1

@@ -123,3 +123,6 @@ msgstr "Người dùng"
 
 msgid "Accounts"
 msgstr "Tài khoản"
+
+msgid "Account state changes require explicit update_fields."
+msgstr "Thay đổi trạng thái tài khoản cần chỉ định update_fields rõ ràng."

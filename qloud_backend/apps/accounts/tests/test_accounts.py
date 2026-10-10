@@ -160,7 +160,7 @@ def test_suspend_revokes_sessions_after_unsuspension_without_scanning(
     other_client = Client()
     other_client.force_login(other)
     # The query count is independent of the number of sessions in the system.
-    with django_assert_num_queries(4):
+    with django_assert_num_queries(7):
         suspend_user(user, reason="Abuse")
     user.refresh_from_db()
     assert user.suspended_at is not None
@@ -233,3 +233,115 @@ def test_validation_rejects_switch_to_inactive_plan_but_keeps_existing_assignmen
     assert "plan" in error.value.message_dict
     User.objects.filter(pk=user.pk).update(plan=plus)
     user.clean()
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("session_version", 1),
+        ("suspended_at", timezone.now()),
+        ("suspended_reason", "Changed"),
+        ("used_bytes", 600),
+        ("reserved_bytes", 50),
+        ("password", "new-hash"),
+        ("is_active", False),
+        ("is_staff", True),
+        ("is_superuser", True),
+    ],
+)
+def test_state_assignment_requires_explicit_fields(field, value):
+    user = User.objects.create_user("alice@example.com")
+    setattr(user, field, value)
+    with pytest.raises(ValidationError) as error:
+        user.save()
+    assert error.value.code == "explicit_account_state"
+    assert getattr(User.objects.get(pk=user.pk), field) != value
+
+
+def test_stale_profile_preserves_quota_password_and_access_state():
+    user = User.objects.create_user("alice@example.com", "old-password")
+    current = User.objects.get(pk=user.pk)
+    current.set_password("new-password")
+    current.used_bytes = 600
+    current.reserved_bytes = 50
+    current.is_active = False
+    current.save(update_fields=["password", "used_bytes", "reserved_bytes", "is_active"])
+    user.display_name = "Alice"
+    user.save()
+    user.refresh_from_db()
+    assert user.used_bytes == 600
+    assert user.reserved_bytes == 50
+    assert not user.is_active
+    assert user.check_password("new-password")
+    assert user.display_name == "Alice"
+    user.display_name = "Alice 2"
+    user.save()
+
+
+def test_repeat_suspension_preserves_original_audit_and_revision():
+    user = User.objects.create_user("alice@example.com")
+    suspend_user(user, reason="Original")
+    user.refresh_from_db()
+    original = (user.suspended_at, user.suspended_reason, user.session_version)
+    suspend_user(user, reason="Replacement")
+    user.refresh_from_db()
+    assert (user.suspended_at, user.suspended_reason, user.session_version) == original
+
+
+def test_signup_with_missing_explicit_plan_reports_missing_plan():
+    import uuid
+
+    with pytest.raises(ValidationError) as error:
+        User.objects.create_user("alice@example.com", plan_id=uuid.uuid7())
+    assert error.value.code == "missing_plan"
+    assert not User.objects.exists()
+
+
+@pytest.mark.parametrize("engine", ["db", "cached_db", "cache"])
+@pytest.mark.parametrize("restore", [False, True])
+def test_real_login_session_is_rejected_after_suspension(client, settings, engine, restore):
+    from django.urls import reverse
+
+    settings.SESSION_ENGINE = f"django.contrib.sessions.backends.{engine}"
+    settings.CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+    user = User.objects.create_superuser("admin@example.com", "password-123")
+    User.objects.create_superuser("backup@example.com")
+    assert client.login(email=user.email, password="password-123")
+    assert client.get(reverse("admin:index")).wsgi_request.user.is_authenticated
+    suspend_user(user, reason="Abuse")
+    if restore:
+        unsuspend_user(user)
+    response = client.get(reverse("admin:index"))
+    assert response.status_code == 302
+    assert response.wsgi_request.user.is_anonymous
+
+
+def test_explicit_partial_save_does_not_hide_unsaved_state_change():
+    user = User.objects.create_user("alice@example.com")
+    user.session_version = 1
+    user.display_name = "Alice"
+    user.save(update_fields=["display_name"])
+    with pytest.raises(ValidationError, match="update_fields"):
+        user.save()
+
+
+def test_deferred_profile_save_keeps_concurrent_state():
+    user = User.objects.create_user("alice@example.com")
+    profile = User.objects.only("display_name").get(pk=user.pk)
+    User.objects.filter(pk=user.pk).update(used_bytes=600, is_active=False)
+    profile.display_name = "Alice"
+    profile.save()
+    user.refresh_from_db()
+    assert user.used_bytes == 600
+    assert not user.is_active
+    assert user.display_name == "Alice"
+
+
+def test_deferred_state_assignment_cannot_be_silently_ignored():
+    user = User.objects.create_user("alice@example.com")
+    suspend_user(user, reason="Original")
+    profile = User.objects.only("display_name").get(pk=user.pk)
+    profile.suspended_at = None
+    with pytest.raises(ValidationError, match="update_fields"):
+        profile.save()
+    assert User.objects.get(pk=user.pk).suspended_at is not None

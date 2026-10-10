@@ -15,7 +15,14 @@ Session được xóa khi truy cập lần tiếp theo với hash cũ; cơ chế
 Backend xác thực chặn cả đăng nhập mới và sử dụng session của user đang khóa; mở khóa không giảm bộ đếm nên không phục hồi session cũ.
 Trong admin dùng action khóa/mở khóa; trường khóa chỉ đọc để mọi thao tác đi qua dịch vụ.
 Action từ chối toàn bộ lô nếu chứa chính admin đang thao tác hoặc khiến không còn superuser active/staff/chưa bị khóa.
-Các lượt khóa đồng thời khóa dòng superuser theo cùng thứ tự để bảo đảm vẫn còn người quản trị truy cập được admin.
+Chỉ khóa nhóm superuser khi lô có superuser; khóa theo thứ tự UUID để vẫn còn người quản trị và tránh deadlock.
+Nếu user thường được nâng quyền trong lúc chờ khóa, giải phóng khóa đích rồi thử lại với cả nhóm.
+Khóa lại user đã bị khóa không đổi thời điểm, lý do hay bộ đếm session.
+Form admin cũng kiểm tra superuser cuối cùng trong transaction giữ khóa tới khi lưu.
+`User.save()` không có `update_fields` chỉ ghi các trường đã thay đổi từ lúc load/lưu;
+đổi trực tiếp suspension, session version, password, counter hoặc cờ quyền sẽ báo ValidationError.
+Các đường ghi trạng thái phải dùng `update_fields` rõ ràng; counter phải cập nhật trong transaction có khóa hoặc `F()`.
+Admin chỉ ghi trường thực sự đổi; service khóa/mở khóa dùng khóa dòng và danh sách trường rõ ràng.
 Việc đổi từ ModelBackend sang AccountBackend và hash session mới khiến session trước M1-01 phải đăng nhập lại; chưa có production.
 Lỗi thiếu plan/inactive có mã ổn định và thông báo gettext `vi`/`en`; `createsuperuser` chuyển lỗi thành CommandError.
 M1-02 phải chuyển các ValidationError provisioning thành lỗi đăng ký trong adapter/API allauth, thay vì để trả 500.

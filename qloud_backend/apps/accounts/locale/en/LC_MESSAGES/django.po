@@ -123,3 +123,6 @@ msgstr "Users"
 
 msgid "Accounts"
 msgstr "Accounts"
+
+msgid "Account state changes require explicit update_fields."
+msgstr "Account state changes require explicit update_fields."

@@ -126,6 +126,26 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
             ),
         ]
 
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._saved_values = self._field_values()
+
+    def _field_values(self) -> dict[str, Any]:
+        return {
+            field.attname: self.__dict__[field.attname]
+            for field in self._meta.concrete_fields
+            if field.attname in self.__dict__
+        }
+
+    def refresh_from_db(self, *args: Any, **kwargs: Any) -> None:
+        super().refresh_from_db(*args, **kwargs)
+        fields = kwargs.get("fields")
+        for field in self._meta.concrete_fields:
+            if (
+                fields is None or field.name in fields or field.attname in fields
+            ) and field.attname in self.__dict__:
+                self._saved_values[field.attname] = self.__dict__[field.attname]
+
     def __str__(self) -> str:
         return self.email
 
@@ -152,13 +172,42 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
             from .services import save_new_user
 
             save_new_user(self, *args, **kwargs)
+            self._saved_values = self._field_values()
             return
         if kwargs.get("update_fields") is None:
-            # A stale profile save must not undo suspension or session revocation.
-            protected = {"session_version", "suspended_at", "suspended_reason"}
-            kwargs["update_fields"] = [
+            changed = {
                 field.name
                 for field in self._meta.concrete_fields
-                if not field.primary_key and field.name not in protected
-            ]
+                if not field.primary_key
+                and field.attname in self.__dict__
+                and (
+                    field.attname not in self._saved_values
+                    or self.__dict__[field.attname] != self._saved_values[field.attname]
+                )
+            }
+            protected = {
+                "session_version",
+                "suspended_at",
+                "suspended_reason",
+                "used_bytes",
+                "reserved_bytes",
+                "password",
+                "is_active",
+                "is_staff",
+                "is_superuser",
+            }
+            if changed & protected:
+                raise ValidationError(
+                    _("Account state changes require explicit update_fields."),
+                    code="explicit_account_state",
+                )
+            kwargs["update_fields"] = changed | {"updated_at"}
+        if kwargs.get("update_fields") is not None:
+            kwargs["update_fields"] = tuple(kwargs["update_fields"])
         super().save(*args, **kwargs)
+        saved_fields = kwargs.get("update_fields")
+        for field in self._meta.concrete_fields:
+            if (
+                saved_fields is None or field.name in saved_fields or field.attname in saved_fields
+            ) and field.attname in self.__dict__:
+                self._saved_values[field.attname] = self.__dict__[field.attname]
