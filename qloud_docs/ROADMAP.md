@@ -93,3 +93,4 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M8-03 | Dockerfile production, Compose production, nginx (Origin Certificate, phục vụ FE tĩnh, proxy `/api`, real IP từ Cloudflare), hướng dẫn cấu hình Cloudflare và ufw | [#47](https://github.com/q2kit/qloud/issues/47) | ⬜ |
 | M8-04 | Deploy tự động qua GitHub Actions lên VPS | [#48](https://github.com/q2kit/qloud/issues/48) | ⬜ |
 | M8-05 | Backup Postgres hằng ngày, Sentry, log có cấu trúc | [#49](https://github.com/q2kit/qloud/issues/49) | ⬜ |
+| M8-06 | Rate limit chung cho API (600 req/phút/user, tạo upload 60) | [#93](https://github.com/q2kit/qloud/issues/93) | ⬜ |

@@ -9,10 +9,22 @@ from typing import Any
 
 from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
 from django.http import Http404
-from rest_framework import exceptions, status
+from rest_framework import exceptions, serializers, status
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler as drf_exception_handler
+
+
+class ErrorBodySerializer(serializers.Serializer[dict[str, Any]]):
+    code = serializers.CharField(help_text="Stable identifier, e.g. `name_conflict`.")
+    message = serializers.CharField()
+    details = serializers.DictField(help_text="`fields` for `validation_error`.")
+
+
+class ErrorSerializer(serializers.Serializer[dict[str, Any]]):
+    """Schema of every error response, for `@extend_schema(responses=...)`."""
+
+    error = ErrorBodySerializer()
 
 
 class AppError(exceptions.APIException):

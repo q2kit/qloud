@@ -26,6 +26,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/folders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["folders_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -60,16 +76,99 @@ export interface paths {
         patch: operations["me_partial_update"];
         trace?: never;
     };
+    "/api/v1/nodes/{node_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["nodes_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["nodes_rename"];
+        trace?: never;
+    };
+    "/api/v1/nodes/{node_id}/children": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["nodes_children_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/nodes/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["nodes_move"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        Breadcrumb: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+        };
+        Capabilities: {
+            /** @description Rename, move; create inside a folder. */
+            can_edit: boolean;
+            can_trash: boolean;
+            can_share: boolean;
+        };
+        CreateFolderRequest: {
+            /** Format: uuid */
+            parent_id: string;
+            name: string;
+        };
+        /** @description Schema of every error response, for `@extend_schema(responses=...)`. */
+        Error: {
+            error: components["schemas"]["ErrorBody"];
+        };
+        ErrorBody: {
+            /** @description Stable identifier, e.g. `name_conflict`. */
+            code: string;
+            message: string;
+            /** @description `fields` for `validation_error`. */
+            details: {
+                [key: string]: unknown;
+            };
+        };
         Health: {
             status: components["schemas"]["StatusEnum"];
             checks: {
                 [key: string]: "ok" | "error";
             };
         };
+        /**
+         * @description * `folder` - Folder
+         *     * `file` - File
+         * @enum {string}
+         */
+        KindEnum: "folder" | "file";
         /**
          * @description * `vi` - Tiếng Việt
          *     * `en` - Tiếng Anh
@@ -90,6 +189,53 @@ export interface components {
             /** Giao diện */
             theme?: components["schemas"]["ThemeEnum"];
         };
+        MoveRequest: {
+            node_ids: string[];
+            /** Format: uuid */
+            target_parent_id: string;
+        };
+        MoveResult: {
+            nodes: components["schemas"]["Node"][];
+        };
+        Node: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly kind: components["schemas"]["KindEnum"];
+            readonly name: string;
+            /** Format: uuid */
+            readonly parent_id: string | null;
+            readonly is_root: boolean;
+            readonly size: number;
+            readonly mime_type: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        NodeDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly kind: components["schemas"]["KindEnum"];
+            readonly name: string;
+            /** Format: uuid */
+            readonly parent_id: string | null;
+            readonly is_root: boolean;
+            readonly size: number;
+            readonly mime_type: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            readonly breadcrumb: components["schemas"]["Breadcrumb"][];
+            readonly capabilities: components["schemas"]["Capabilities"];
+        };
+        PaginatedNodeList: {
+            /** Format: uri */
+            next: string | null;
+            /** Format: uri */
+            previous: string | null;
+            results: components["schemas"]["Node"][];
+        };
         PatchedMeRequest: {
             /** Tên hiển thị */
             display_name?: string;
@@ -97,6 +243,9 @@ export interface components {
             locale?: components["schemas"]["LocaleEnum"];
             /** Giao diện */
             theme?: components["schemas"]["ThemeEnum"];
+        };
+        PatchedRenameRequest: {
+            name?: string;
         };
         PublicConfig: {
             /** @description Cloudflare Turnstile site key; null when the server does not check it. */
@@ -139,6 +288,56 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PublicConfig"];
+                };
+            };
+        };
+    };
+    folders_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateFolderRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Node"];
+                };
+            };
+            /** @description Invalid input or operation. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such node, or no access to it. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `name_conflict`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -208,6 +407,175 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    nodes_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                node_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NodeDetail"];
+                };
+            };
+            /** @description No such node, or no access to it. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    nodes_rename: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                node_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedRenameRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NodeDetail"];
+                };
+            };
+            /** @description Invalid input or operation. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such node, or no access to it. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `name_conflict`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    nodes_children_list: {
+        parameters: {
+            query?: {
+                /** @description Opaque value from `next` or `previous`. */
+                cursor?: string;
+                /** @description Folders always come before files. */
+                ordering?: "name" | "-name" | "updated_at" | "-updated_at" | "size" | "-size";
+                /** @description Items per page, at most 200. */
+                page_size?: number;
+            };
+            header?: never;
+            path: {
+                node_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedNodeList"];
+                };
+            };
+            /** @description No such node, or no access to it. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    nodes_move: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MoveRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MoveResult"];
+                };
+            };
+            /** @description Invalid input or operation. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such node, or no access to it. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description `name_conflict`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };

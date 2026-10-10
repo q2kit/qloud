@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
+from django.db.models import F, Q
 from django.db.models.functions import Lower
 
 from apps.core.models import BaseModel
@@ -25,7 +25,9 @@ class Node(BaseModel):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     parent = models.ForeignKey("self", null=True, blank=True, on_delete=models.CASCADE)
     kind = models.CharField(max_length=6, choices=Kind, default=Kind.FOLDER)
-    name = models.CharField(max_length=255, validators=[validate_name])
+    # ICU "natural" collation (migration 0003): file2 sorts before file10, accents and
+    # case group together; cursor comparisons use the same collation as ORDER BY.
+    name = models.CharField(max_length=255, db_collation="natural", validators=[validate_name])
     # File only: mirror the current version so listings need no join.
     mime_type = models.CharField(max_length=255, null=True, blank=True)  # noqa: DJ001
     size = models.PositiveBigIntegerField(default=0)
@@ -78,7 +80,8 @@ class Node(BaseModel):
             ),
         ]
         indexes = [
-            models.Index(fields=["parent", "kind", "name"], name="node_children"),
+            # Default listing order: folders first ("folder" > "file"), then name, then id.
+            models.Index(F("parent"), F("kind").desc(), F("name"), F("id"), name="node_children"),
             models.Index(fields=["owner", "trashed_at"], name="node_owner_trashed"),
         ]
 
