@@ -237,6 +237,10 @@ CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_TASK_TIME_LIMIT = 15 * 60
 CELERY_TIMEZONE = TIME_ZONE
+# `celery -A config beat`: one beat process per deployment (architecture.md).
+CELERY_BEAT_SCHEDULE = {
+    "expire-uploads": {"task": "apps.uploads.tasks.expire_uploads", "schedule": 60 * 60},
+}
 
 # --- DRF / OpenAPI ---
 REST_FRAMEWORK = {

@@ -41,7 +41,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M2-03 | Wrapper S3 (`storage`): presign, multipart | [#19](https://github.com/q2kit/qloud/issues/19) | ✅ [PR #96](https://github.com/q2kit/qloud/pull/96) |
 | M2-04 | API upload session: tạo, lấy part URL, lấy trạng thái, hoàn tất, hủy; giữ chỗ quota | [#20](https://github.com/q2kit/qloud/issues/20) | ✅ [PR #97](https://github.com/q2kit/qloud/pull/97) |
 | M2-05 | API download (presigned GET) | [#21](https://github.com/q2kit/qloud/issues/21) | ✅ [PR #98](https://github.com/q2kit/qloud/pull/98) |
-| M2-06 | Celery: dọn upload hết hạn, abort multipart | [#22](https://github.com/q2kit/qloud/issues/22) | ⬜ |
+| M2-06 | Celery: dọn upload hết hạn, abort multipart | [#22](https://github.com/q2kit/qloud/issues/22) | ✅ [PR #99](https://github.com/q2kit/qloud/pull/99) |
 | M2-07 | FE: màn hình Drive (lưới/danh sách, sắp xếp, chọn nhiều, menu chuột phải, kéo thả để di chuyển) | [#23](https://github.com/q2kit/qloud/issues/23) | ⬜ |
 | M2-08 | FE: trình quản lý upload (hàng đợi, song song, thử lại, resume sau khi reload, khay upload, kéo thả upload cả folder) | [#24](https://github.com/q2kit/qloud/issues/24) | ⬜ |
 | M2-09 | FE: trang Gần đây | [#25](https://github.com/q2kit/qloud/issues/25) | ⬜ |
