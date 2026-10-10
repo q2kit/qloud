@@ -1,10 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// E2E runs the real stack: Django (with Postgres + Redis from docker compose) and
-// the production frontend build served by `vite preview`, which proxies /api.
+// E2E runs the real stack: Django (with Postgres, Redis and Mailpit from docker
+// compose) and the production frontend build served by `vite preview`, which
+// proxies /api. Google and GitHub are replaced by e2e/oauth-provider.ts.
 // Ports differ from the dev servers (8000/5173) so both can run side by side.
 const BACKEND_PORT = 8001;
 const FRONTEND_PORT = 4173;
+const OAUTH_PROVIDER_PORT = 8002;
 const isCI = Boolean(process.env.CI);
 
 export default defineConfig({
@@ -33,10 +35,21 @@ export default defineConfig({
   ],
   webServer: [
     {
+      command: 'node e2e/oauth-provider.ts',
+      url: `http://127.0.0.1:${String(OAUTH_PROVIDER_PORT)}/health`,
+      env: { PORT: String(OAUTH_PROVIDER_PORT) },
+      reuseExistingServer: !isCI,
+    },
+    {
       cwd: '../qloud_backend',
       command: `uv run --frozen python manage.py migrate --noinput && uv run --frozen python manage.py runserver 127.0.0.1:${String(BACKEND_PORT)} --noreload`,
       url: `http://127.0.0.1:${String(BACKEND_PORT)}/api/v1/health`,
-      env: { DJANGO_SETTINGS_MODULE: 'config.settings.test' },
+      env: {
+        DJANGO_SETTINGS_MODULE: 'config.settings.e2e',
+        // Links in emails lead back to the frontend below.
+        APP_BASE_URL: `http://localhost:${String(FRONTEND_PORT)}`,
+        E2E_OAUTH_URL: `http://127.0.0.1:${String(OAUTH_PROVIDER_PORT)}`,
+      },
       reuseExistingServer: !isCI,
       timeout: 120_000,
     },

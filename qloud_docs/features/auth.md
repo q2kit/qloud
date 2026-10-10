@@ -105,6 +105,13 @@ Kiểm tra share link của owner bị khóa sẽ triển khai ở M5 khi có mo
 - Gỡ liên kết qua `DELETE /api/auth/browser/v1/account/providers`; allauth từ chối nếu đó là phương thức đăng nhập cuối cùng (chưa đặt mật khẩu và không còn provider khác).
 - Không lưu token của provider (`SOCIALACCOUNT_STORE_TOKENS` mặc định tắt). Google dùng PKCE và `access_type=online`.
 
+### M1-07: E2E cho luồng auth
+- `e2e/auth.spec.ts`: chặn route và `next`, đăng ký, đăng xuất, đăng nhập lại; các màn hình auth ở 360px. `e2e/settings.spec.ts`: ngôn ngữ, giao diện, tên hiển thị.
+- `e2e/auth-flows.spec.ts`: link xác thực email (và link hỏng); quên mật khẩu → email → mật khẩu mới, link chỉ dùng một lần, mật khẩu cũ bị từ chối, phiên ở trình duyệt khác bị đăng xuất;
+  OAuth: tài khoản mới qua GitHub, Google tự liên kết vào tài khoản có email đã xác thực ở provider, email chưa xác thực thì không liên kết; liên kết và gỡ liên kết GitHub trong Cài đặt; thông báo khi vượt rate limit.
+- Email và OAuth chạy trên stack thật (Mailpit, provider OAuth giả; xem [architecture.md › E2E](../architecture.md#e2e)).
+- **Ngoại lệ "không mock API":** test rate limit trả 429 giả cho request đăng nhập (`page.route`). Mọi test E2E gửi từ cùng một IP và dùng chung Redis,
+  nên bật rate limit thật sẽ làm các test chạy song song fail ngẫu nhiên; 429 thật ở server đã có test backend (M1-04).
 
 ## User stories
 - Là khách, tôi muốn đăng ký bằng email và mật khẩu, để có Drive riêng.
@@ -164,12 +171,12 @@ Vite proxy ở dev cấu hình `changeOrigin: false` để giữ nguyên `Host: 
 Lỗi `redirect_uri_mismatch` (Google) hoặc *redirect_uri is not associated* (GitHub) nghĩa là callback URL đăng ký không khớp với URL ở bảng trên.
 
 ## Tiêu chí chấp nhận
-- [ ] Đăng ký → nhận email xác thực → bấm link → tài khoản được xác thực.
-- [ ] Đăng nhập, đăng xuất. Truy cập route cần đăng nhập khi chưa đăng nhập thì bị chuyển về `/login?next=...`.
-- [ ] Đăng nhập qua Google và GitHub thành công, kể cả khi liên kết vào tài khoản đã có.
-- [ ] Quên mật khẩu → email → đặt mật khẩu mới → mọi session cũ bị hủy.
-- [ ] Đổi ngôn ngữ hoặc giao diện thì UI áp dụng ngay và vẫn giữ sau khi reload.
-- [ ] Vượt rate limit thì nhận 429 và UI hiện thông báo thân thiện.
+- [x] Đăng ký → nhận email xác thực → bấm link → tài khoản được xác thực.
+- [x] Đăng nhập, đăng xuất. Truy cập route cần đăng nhập khi chưa đăng nhập thì bị chuyển về `/login?next=...`.
+- [x] Đăng nhập qua Google và GitHub thành công, kể cả khi liên kết vào tài khoản đã có.
+- [x] Quên mật khẩu → email → đặt mật khẩu mới → mọi session cũ bị hủy.
+- [x] Đổi ngôn ngữ hoặc giao diện thì UI áp dụng ngay và vẫn giữ sau khi reload.
+- [x] Vượt rate limit thì nhận 429 và UI hiện thông báo thân thiện.
 
 ## Ngoài phạm vi
 2FA, xóa tài khoản (để sau, nhưng phải tính tới khi thiết kế), SSO doanh nghiệp.
