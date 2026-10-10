@@ -445,7 +445,9 @@ function NodeItem({
           // Mouse and touch only: from the keyboard the item's own menu (Shift+F10) opens.
           tabIndex={-1}
           aria-label={t('drive.actions.more', { name: node.name })}
-          className="size-8 shrink-0 opacity-100 transition-opacity focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:hover)]:opacity-0 data-[state=open]:opacity-100"
+          // A soft overlay rather than the grey accent: it reads on any card, selected
+          // (tinted) or not, in light and dark.
+          className="size-7 shrink-0 rounded-md text-muted-foreground opacity-100 transition-[opacity,background-color,color] hover:bg-foreground/10 hover:text-foreground focus-visible:opacity-100 focus-visible:shadow-none group-hover:opacity-100 data-[state=open]:bg-foreground/10 data-[state=open]:text-foreground data-[state=open]:opacity-100 [@media(hover:hover)]:opacity-0"
           onClick={(event) => {
             event.stopPropagation();
           }}
@@ -473,7 +475,7 @@ function NodeItem({
       <div
         {...props}
         className={cn(
-          'group relative flex cursor-default select-none flex-col gap-3 rounded-lg border bg-card p-3 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
+          'group relative flex select-none flex-col gap-3 rounded-lg border bg-card p-3 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
           state,
         )}
       >
@@ -496,7 +498,7 @@ function NodeItem({
       <div
         {...props}
         className={cn(
-          'group grid cursor-default select-none grid-cols-[minmax(0,1fr)_auto_2.25rem] items-center gap-4 rounded-md border border-transparent px-3 py-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring sm:grid-cols-[minmax(0,1fr)_12rem_6rem_2.25rem]',
+          'group grid select-none grid-cols-[minmax(0,1fr)_auto_2.25rem] items-center gap-4 rounded-md border border-transparent px-3 py-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring sm:grid-cols-[minmax(0,1fr)_12rem_6rem_2.25rem]',
           selected || isDropTarget ? state : 'hover:bg-accent/60',
         )}
       >

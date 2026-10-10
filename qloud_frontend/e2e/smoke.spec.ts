@@ -171,3 +171,35 @@ test.describe('mobile layout (360px)', () => {
     }
   });
 });
+
+test('clickable things show the hand cursor', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'No mouse cursor on touch screens');
+  await signUpViaApi(page);
+  await page.goto('/drive');
+  const cursor = (locator: ReturnType<Page['locator']>) =>
+    locator.evaluate((element) => getComputedStyle(element).cursor);
+
+  expect(await cursor(page.getByRole('button', { name: 'Tạo mới' }))).toBe(
+    'pointer',
+  );
+  expect(
+    await cursor(
+      page
+        .getByRole('navigation', { name: 'Điều hướng chính' })
+        .getByRole('link', { name: 'Gần đây' }),
+    ),
+  ).toBe('pointer');
+  await page.getByRole('button', { name: 'Tạo mới' }).click();
+  expect(
+    await cursor(page.getByRole('menuitem', { name: 'Thư mục mới' })),
+  ).toBe('pointer');
+  await page.getByRole('menuitem', { name: 'Thư mục mới' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Thư mục mới' });
+  expect(await cursor(dialog.getByLabel('Tên'))).toBe('text');
+  await dialog.getByRole('button', { name: 'Tạo' }).click();
+  expect(await cursor(page.getByRole('option').first())).toBe('pointer');
+  // The command palette trigger stays disabled until M6.
+  expect(
+    await cursor(page.getByRole('button', { name: /Tìm kiếm và chạy lệnh/ })),
+  ).toBe('not-allowed');
+});
