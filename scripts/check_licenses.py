@@ -36,6 +36,11 @@ ALIASES = {
 # Licenses allowed for one package only, with the exact license string and the reason.
 # A package changing its license must be reviewed again.
 EXCEPTIONS = {
+    "pillow": ("MIT-CMU", "permissive PIL/Pillow license, architecture.md M3-01"),
+    "pypdfium2": (
+        "BSD-3-Clause, Apache-2.0, dependency licenses",
+        "permissive PDFium bundle; BSD/Apache and bundled notices, architecture.md M3-01",
+    ),
     "psycopg": ("LGPL-3.0-only", "dynamically linked database driver"),
     "psycopg-binary": ("LGPL-3.0-only", "binary build of psycopg"),
     "caniuse-lite": ("CC-BY-4.0", "browser support data used at build time"),

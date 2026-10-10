@@ -199,6 +199,12 @@ S3_ADDRESSING_STYLE = env("S3_ADDRESSING_STYLE", default="virtual")
 S3_UPLOAD_PART_URL_SECONDS = 60 * 60
 S3_DOWNLOAD_URL_SECONDS = 5 * 60
 
+# --- Background thumbnails (M3-01) ---
+THUMBNAIL_MAX_SOURCE_BYTES = env.int("THUMBNAIL_MAX_SOURCE_BYTES", default=100 * 1024 * 1024)
+THUMBNAIL_MAX_PIXELS = env.int("THUMBNAIL_MAX_PIXELS", default=40_000_000)
+THUMBNAIL_SOFT_TIME_LIMIT = env.int("THUMBNAIL_SOFT_TIME_LIMIT", default=60)
+THUMBNAIL_TIME_LIMIT = env.int("THUMBNAIL_TIME_LIMIT", default=90)
+
 # --- Cloudflare Turnstile (empty secret disables the check; prod requires it) ---
 # The SPA reads the site key from GET /api/v1/config, so both keys live here.
 TURNSTILE_SITE_KEY = env("TURNSTILE_SITE_KEY", default="")

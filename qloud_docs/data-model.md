@@ -89,7 +89,7 @@ Truy vấn node luôn đi qua `sharing.permissions` (xem [architecture.md › Ph
 | trashed_at | timestamptz, null | thời điểm xóa mềm |
 | trashed_root_id | uuid → Node, null | node mà người dùng đã bấm xóa (dùng để khôi phục theo nhóm) |
 | trashed_by_id | uuid → User, null | |
-| thumbnail_key | text, null | |
+| thumbnail_key | text, null | M3-01: key `thumbs/{current_version_id}/256.webp`, chỉ ghi sau khi đủ bản 256px và 1024px; bản 1024px có cùng prefix. Null khi chưa có/lỗi/không hỗ trợ thumbnail |
 
 **Ràng buộc và index:**
 - Unique `(parent_id, lower(name))` WHERE `trashed_at IS NULL` để tên không trùng trong cùng folder. Khi trùng thì BE tự thêm hậu tố ` (1)`, ` (2)`…

@@ -1,6 +1,6 @@
 # Download và xem trước (F-VIEW)
 
-**Trạng thái:** Đã duyệt phần download (M2, [#17](https://github.com/q2kit/qloud/issues/17)); phần xem trước chờ duyệt ở M3 · **Milestone:** M2 (download), M3 (xem trước) · **Màn hình:** S-10
+**Trạng thái:** Đang làm · Download M2 đã hoàn thành; phần xem trước M3 và kế hoạch M3-01 được duyệt tại [#27](https://github.com/q2kit/qloud/issues/27#issuecomment-6101912543) · **Milestone:** M2 (download), M3 (xem trước) · **Màn hình:** S-10
 
 ## User stories
 - Tôi muốn tải một file về máy.
@@ -26,6 +26,16 @@
 - Tải nhiều file hoặc tải cả folder dạng zip: **chưa có trong MVP** (cần worker riêng để nén). Ghi chú để làm sau.
 
 ## Ghi chú cho M3
+### M3-01 — thumbnail ảnh/PDF
+- Task `drive.tasks.generate_thumbnail` được enqueue qua `transaction.on_commit` sau upload của loại được hỗ trợ; nguồn chỉ được đọc bởi worker Celery, upload/download của người dùng vẫn đi thẳng tới S3.
+- Pillow xử lý JPEG, PNG, GIF, WebP, AVIF; chỉ frame đầu ảnh động, sửa hướng EXIF, giữ tỷ lệ và không phóng to ảnh nhỏ. pypdfium2 render trang đầu PDF trực tiếp ở độ phân giải cạnh dài 1024px.
+- Hai WebP được ghi vào `thumbs/{version_id}/1024.webp` và `thumbs/{version_id}/256.webp`. Chỉ sau khi ghi đủ cả hai, cập nhật `Node.thumbnail_key` thành key 256px nếu version vẫn hiện hành và node chưa vào thùng rác. Không đổi quota hoặc `updated_at` của file (không làm xáo trộn Gần đây).
+- Gọi lại an toàn: key cố định theo version, task bỏ qua version đã có thumbnail, đã mất, đã thay thế hoặc trong thùng rác. Lỗi S3 tạm thời retry tối đa 3 lần với backoff, tối đa 60 giây; lỗi giải mã, file không hỗ trợ/PDF mã hóa dùng icon dự phòng. Ghi S3 dở dang không được công bố, có thể được ghi lại khi retry.
+- Giới hạn được owner duyệt: `THUMBNAIL_MAX_SOURCE_BYTES=104857600` (100 MiB), `THUMBNAIL_MAX_PIXELS=40000000`, `THUMBNAIL_SOFT_TIME_LIMIT=60`, `THUMBNAIL_TIME_LIMIT=90` (giây). Nguồn quá giới hạn thì bỏ thumbnail; S3 read kiểm tra cả Content-Length và số byte thực đọc. PDF chỉ render trang đầu theo kích thước đầu ra. Celery prefork thực thi timeout; eager test không mô phỏng hard timeout.
+- Broker không nhận task thì ghi log và giữ upload thành công, dùng icon dự phòng; không hứa tự tạo lại thumbnail cho trường hợp chưa enqueue được. Task có thể được enqueue lại theo version id khi vận hành.
+- M3-02 cấp URL preview/thumbnail; M3-03 hiển thị thumbnail và trình xem. M3-01 chưa đổi API hoặc UI.
+
+### Link riêng cho file
 - **Link riêng cho file**, giống folder (M2-07b):
   - lưu lại hoặc mở ở tab khác thì ra đúng file đó trong trình xem;
   - middle click, Ctrl/⌘+Enter và mục "Mở trong thẻ mới"/"Sao chép liên kết" trong menu cũng áp dụng cho file;
