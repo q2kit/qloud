@@ -46,7 +46,7 @@ def session_status(client: Client) -> int:
     return status
 
 
-def test_signup_provisions_account_and_sends_verification(client):
+def test_signup_provisions_account_and_sends_verification(client, settings):
     response = signup(client, email="Alice@Example.com", HTTP_ACCEPT_LANGUAGE="en")
     assert response.status_code == 200
     assert response.json()["meta"]["is_authenticated"]
@@ -57,7 +57,7 @@ def test_signup_provisions_account_and_sends_verification(client):
     assert user.check_password(PASSWORD)
     assert not EmailAddress.objects.get(user=user).verified
     assert len(mail.outbox) == 1
-    assert "http://localhost:5173/verify-email/" in mail.outbox[0].body
+    assert f"{settings.APP_BASE_URL}/verify-email/" in mail.outbox[0].body
 
 
 def test_signup_defaults_to_vietnamese_locale(client):
@@ -141,13 +141,13 @@ def test_email_verification_rejects_invalid_key(client):
     assert not EmailAddress.objects.get(email="alice@example.com").verified
 
 
-def test_password_reset_revokes_existing_sessions(client):
+def test_password_reset_revokes_existing_sessions(client, settings):
     User.objects.create_user("alice@example.com", PASSWORD)
     old_session = Client()
     assert login(old_session).status_code == 200
     assert post(client, "/auth/password/request", {"email": "alice@example.com"}).status_code == 200
     key = emailed_key("password/reset")
-    assert "http://localhost:5173/password/reset/" in mail.outbox[-1].body
+    assert f"{settings.APP_BASE_URL}/password/reset/" in mail.outbox[-1].body
     response = post(client, "/auth/password/reset", {"key": key, "password": "qloud-new-password"})
     assert response.status_code in {200, 401}
     assert User.objects.get().check_password("qloud-new-password")
