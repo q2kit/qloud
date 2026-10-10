@@ -51,19 +51,18 @@ jobs:
       run:
         working-directory: qloud_backend
     env:
-      # Required by docker-compose.yml interpolation even when LocalStack is not started.
-      # Dependabot PRs get no Actions secrets, hence the placeholder; jobs that start
-      # LocalStack (M2-03) need the token added as a Dependabot secret as well.
+      # LocalStack (S3 tests) needs the token. Dependabot PRs get no Actions secrets, so
+      # the placeholder makes LocalStack exit there until the token is also a Dependabot
+      # secret (#95).
       LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN || 'not-used' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
-      - name: Start Postgres and Redis
+      - name: Start Postgres, Redis and LocalStack
         working-directory: .
-        # LocalStack joins when the first S3 tests land (M2-03).
-        run: docker compose up -d --wait postgres redis
+        run: docker compose up -d --wait postgres redis localstack
       - run: uv sync --frozen
       - name: Convention script tests
         run: python3 -m unittest discover -s ../scripts/tests
@@ -83,6 +82,9 @@ jobs:
           # Placeholder: production settings refuse an empty or Cloudflare test key.
           TURNSTILE_SECRET_KEY: ci-placeholder-not-a-real-key
           TURNSTILE_SITE_KEY: ci-placeholder-site-key
+          S3_BUCKET: qloud-ci
+          S3_ACCESS_KEY_ID: ci-placeholder
+          S3_SECRET_ACCESS_KEY: ci-placeholder
         run: |
           DJANGO_SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))') \
             uv run python manage.py check --deploy --fail-level WARNING

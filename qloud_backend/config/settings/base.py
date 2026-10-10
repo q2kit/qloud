@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.drive",
     "apps.sharing",
+    "apps.storage",
 ]
 
 MIDDLEWARE = [
@@ -184,6 +185,18 @@ SOCIALACCOUNT_PROVIDERS = {
     for name, (prefix, options) in _OAUTH_PROVIDERS.items()
     if env(f"{prefix}_CLIENT_ID", default="")
 }
+
+# --- Object storage (S3-compatible: AWS S3, Cloudflare R2; LocalStack in dev/CI) ---
+# Only apps.storage reads these. Empty endpoint means AWS S3.
+S3_ENDPOINT_URL = env("S3_ENDPOINT_URL", default="") or None
+S3_REGION = env("S3_REGION", default="us-east-1")
+S3_BUCKET = env("S3_BUCKET")
+S3_ACCESS_KEY_ID = env("S3_ACCESS_KEY_ID")
+S3_SECRET_ACCESS_KEY = env("S3_SECRET_ACCESS_KEY")
+S3_ADDRESSING_STYLE = env("S3_ADDRESSING_STYLE", default="virtual")
+# Presigned URL lifetimes (architecture.md): parts are re-requested when they expire.
+S3_UPLOAD_PART_URL_SECONDS = 60 * 60
+S3_DOWNLOAD_URL_SECONDS = 5 * 60
 
 # --- Cloudflare Turnstile (empty secret disables the check; prod requires it) ---
 # The SPA reads the site key from GET /api/v1/config, so both keys live here.
