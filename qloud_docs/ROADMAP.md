@@ -42,8 +42,8 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M2-04 | API upload session: tạo, lấy part URL, lấy trạng thái, hoàn tất, hủy; giữ chỗ quota | [#20](https://github.com/q2kit/qloud/issues/20) | ✅ [PR #97](https://github.com/q2kit/qloud/pull/97) |
 | M2-05 | API download (presigned GET) | [#21](https://github.com/q2kit/qloud/issues/21) | ✅ [PR #98](https://github.com/q2kit/qloud/pull/98) |
 | M2-06 | Celery: dọn upload hết hạn, abort multipart | [#22](https://github.com/q2kit/qloud/issues/22) | ✅ [PR #99](https://github.com/q2kit/qloud/pull/99) |
-| M2-07a | FE: màn hình Drive — duyệt (lưới/danh sách, sắp xếp, cuộn vô hạn, tạo folder, đổi tên, chi tiết). Task con của [#23](https://github.com/q2kit/qloud/issues/23) | [#100](https://github.com/q2kit/qloud/issues/100) | 🟦 |
-| M2-07b | FE: màn hình Drive — chọn nhiều, menu chuột phải, kéo thả để di chuyển. Task con của [#23](https://github.com/q2kit/qloud/issues/23) | [#101](https://github.com/q2kit/qloud/issues/101) | ⬜ |
+| M2-07a | FE: màn hình Drive — duyệt (lưới/danh sách, sắp xếp, cuộn vô hạn, tạo folder, đổi tên, chi tiết). Task con của [#23](https://github.com/q2kit/qloud/issues/23) | [#100](https://github.com/q2kit/qloud/issues/100) | ✅ [PR #102](https://github.com/q2kit/qloud/pull/102) |
+| M2-07b | FE: màn hình Drive — chọn nhiều, menu chuột phải, kéo thả để di chuyển. Task con của [#23](https://github.com/q2kit/qloud/issues/23) | [#101](https://github.com/q2kit/qloud/issues/101) | ✅ [PR #104](https://github.com/q2kit/qloud/pull/104) |
 | M2-08 | FE: trình quản lý upload (hàng đợi, song song, thử lại, resume sau khi reload, khay upload, kéo thả upload cả folder) | [#24](https://github.com/q2kit/qloud/issues/24) | ⬜ |
 | M2-09 | FE: trang Gần đây | [#25](https://github.com/q2kit/qloud/issues/25) | ⬜ |
 | M2-10 | E2E: tạo folder, upload file lớn, ngắt rồi resume, download | [#26](https://github.com/q2kit/qloud/issues/26) | ⬜ |
@@ -53,7 +53,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 |---|---|---|---|
 | M3-01 | Celery tạo thumbnail cho ảnh và PDF | [#27](https://github.com/q2kit/qloud/issues/27) | ⬜ |
 | M3-02 | API preview | [#28](https://github.com/q2kit/qloud/issues/28) | ⬜ |
-| M3-03 | FE: trình xem file (ảnh, PDF, video, nhảy trước/sau, tải về) | [#29](https://github.com/q2kit/qloud/issues/29) | ⬜ |
+| M3-03 | FE: trình xem file (ảnh, PDF, video, nhảy trước/sau, tải về); link riêng cho file như folder (xem download-preview.md › Ghi chú cho M3) | [#29](https://github.com/q2kit/qloud/issues/29) | ⬜ |
 
 ## M4 — Thùng rác ([trash.md](features/trash.md))
 | ID | Task | Issue | Trạng thái |

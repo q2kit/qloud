@@ -25,6 +25,12 @@
   Thumbnail **không tính vào quota**. Nếu tạo lỗi thì hiện icon theo loại file.
 - Tải nhiều file hoặc tải cả folder dạng zip: **chưa có trong MVP** (cần worker riêng để nén). Ghi chú để làm sau.
 
+## Ghi chú cho M3
+- **Link riêng cho file**, giống folder (M2-07b):
+  - lưu lại hoặc mở ở tab khác thì ra đúng file đó trong trình xem;
+  - middle click, Ctrl/⌘+Enter và mục "Mở trong thẻ mới"/"Sao chép liên kết" trong menu cũng áp dụng cho file;
+  - link nên theo id của file, không theo folder chứa nó, để vẫn đúng sau khi file bị di chuyển.
+
 ## Tiêu chí chấp nhận
 - [x] Tải file có tên tiếng Việt có dấu thì giữ đúng tên.
 - [ ] Mở trình xem: dùng được phím ←/→ để chuyển file, Esc để đóng, nút Tải xuống.

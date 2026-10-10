@@ -46,3 +46,34 @@ export function NodeDetails({ node }: { node: DriveNode }): React.JSX.Element {
     </div>
   );
 }
+
+/** Several items selected: how many, and how much the files weigh. */
+export function SelectionSummary({
+  nodes,
+}: {
+  nodes: DriveNode[];
+}): React.JSX.Element {
+  const { t, i18n } = useTranslation();
+  const files = nodes.filter((node) => node.kind === 'file');
+  const folders = nodes.length - files.length;
+  const bytes = files.reduce((total, node) => total + node.size, 0);
+  return (
+    <div className="flex-1 overflow-y-auto px-5 py-6">
+      <p className="mb-6 text-center text-sm font-medium">
+        {t('drive.selection.count', { count: nodes.length })}
+      </p>
+      <dl className="space-y-3 text-sm">
+        <div className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-3">
+          <dt className="text-muted-foreground">{t('drive.kind.folder')}</dt>
+          <dd className="tabular-nums">{folders}</dd>
+        </div>
+        <div className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-3">
+          <dt className="text-muted-foreground">{t('drive.kind.file')}</dt>
+          <dd className="tabular-nums">
+            {files.length} · {formatBytes(bytes, i18n.language)}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  );
+}

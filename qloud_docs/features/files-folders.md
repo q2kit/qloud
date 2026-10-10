@@ -50,9 +50,39 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
   - với file, phần mở rộng không được chọn sẵn.
 - **Trạng thái:** đang tải (skeleton), rỗng, lỗi kèm "Thử lại", và folder không tồn tại hoặc không có quyền.
 
+## Đã làm ở M2-07b ([#101](https://github.com/q2kit/qloud/issues/101))
+- **Chọn:**
+  - click (một mục), Ctrl/⌘+click (thêm/bớt), Shift+click hoặc Shift+mũi tên (cả dải từ mục làm mốc);
+  - Ctrl/⌘+A (tất cả mục đã tải) và Esc (bỏ chọn) dùng được ở mọi chỗ trên trang Drive, trừ khi đang gõ hoặc đang mở hộp thoại/menu;
+  - thanh công cụ ghi số mục đã chọn; panel chi tiết tóm tắt số folder, số file và tổng dung lượng;
+  - **vùng chọn** như trình quản lý file trên desktop:
+    - nhấn chuột trên chỗ trống rồi kéo thì hiện khung, mục nào chạm khung thì được chọn;
+    - giữ Ctrl/⌘ thì cộng thêm vào vùng chọn sẵn có; kéo gần mép trên/dưới cửa sổ thì trang tự cuộn;
+    - nhấn trên chỗ trống mà không kéo thì bỏ chọn;
+    - chỉ cho chuột (trên cảm ứng, kéo là cuộn); nhấn trên một mục vẫn là chọn hoặc kéo để di chuyển.
+- **Backspace** về folder cha, trừ khi đang gõ hoặc đang mở hộp thoại/menu; ở folder gốc thì không làm gì.
+- **Menu của mục:**
+  - chuột phải, nút "⋯" trên từng mục (luôn hiện trên màn hình cảm ứng), hoặc Shift+F10 từ bàn phím;
+  - một mục: Mở/Tải xuống, Đổi tên, Di chuyển, Thông tin; nhiều mục: Di chuyển;
+  - mở menu trên một mục chưa chọn thì chọn mục đó trước;
+  - khi menu đang mở, phím và click trong menu chỉ tác động lên menu, không đổi mục đang chọn phía sau (menu nằm trong portal nhưng sự kiện React vẫn nổi bọt về mục, nên mục bỏ qua sự kiện không xảy ra bên trong nó).
+- **Di chuyển:**
+  - hộp thoại duyệt folder; không vào được folder đang di chuyển; "Di chuyển tới đây" tắt khi đích là chỗ hiện tại;
+  - kéo thả (HTML5) vào một folder hoặc một mục của breadcrumb, đích sáng lên khi kéo qua; màn hình cảm ứng dùng hộp thoại;
+  - mọi cách đều gửi **một** request cho cả vùng chọn;
+  - lạc quan: mục rời folder ngay, API từ chối (ví dụ `invalid_move`) thì quay lại kèm thông báo;
+  - kết quả được đọc cho trình đọc màn hình ("Đã di chuyển 2 mục tới …").
+- **Link riêng của folder:**
+  - mỗi folder có URL `/drive/folders/:id` (folder gốc là `/drive`); lưu lại hoặc mở ở tab khác vẫn ra đúng folder, vì folder và breadcrumb được tải theo id từ server;
+  - id trên URL là UUID **bỏ dấu gạch** (32 ký tự hex); FE thêm lại dấu gạch trước khi gọi API. Link có dấu gạch (hoặc chữ hoa) vẫn mở được và được thay bằng dạng gọn;
+  - id là UUID nên không đoán được, và người không có quyền nhận 404;
+  - mở trong thẻ mới bằng **middle click**, **Ctrl/⌘+Enter**, hoặc mục "Mở trong thẻ mới" trong menu; menu có thêm "Sao chép liên kết";
+  - **Ctrl/⌘+click vẫn là chọn thêm**, không mở thẻ mới;
+  - file chưa có link riêng: làm ở M3 cùng trình xem (xem [download-preview.md](download-preview.md)).
+
 ## Tiêu chí chấp nhận
 - [x] Tạo folder lồng nhau 3 cấp; breadcrumb hiển thị đúng; reload trang vẫn đúng.
-- [ ] Đổi tên trùng thì báo lỗi; di chuyển vào cây con thì bị chặn.
-- [ ] Di chuyển 50 mục cùng lúc chỉ tốn một request, và UI cập nhật kiểu lạc quan.
+- [x] Đổi tên trùng thì báo lỗi; di chuyển vào cây con thì bị chặn.
+- [x] Di chuyển 50 mục cùng lúc chỉ tốn một request, và UI cập nhật kiểu lạc quan.
 - [ ] Folder 10.000 mục vẫn cuộn mượt; API đạt NF-01.
 - [ ] Người không có quyền nhận 404 với mọi endpoint của node.

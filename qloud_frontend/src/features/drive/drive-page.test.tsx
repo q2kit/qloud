@@ -18,7 +18,7 @@ import { FakeDrive, ROOT_ID } from '@/test/drive-server';
 import { renderApp } from '@/test/render-app';
 
 import { VIRTUALIZE_AFTER } from './components/node-collection';
-import { useDriveStore } from './store';
+import { compactId } from './paths';
 
 const server = setupServer();
 let drive: FakeDrive;
@@ -29,7 +29,6 @@ beforeAll(() => {
 beforeEach(async () => {
   drive = new FakeDrive();
   server.use(...drive.handlers());
-  useDriveStore.setState({ selected: null, isCreatingFolder: false });
   await i18n.changeLanguage('en');
 });
 afterEach(() => {
@@ -76,7 +75,9 @@ describe('Drive (S-05)', () => {
       await screen.findByRole('option', { name: /Projects/ }),
     );
     await user.dblClick(await screen.findByRole('option', { name: /Design/ }));
-    expect(router.state.location.pathname).toBe(`/drive/folders/${design.id}`);
+    expect(router.state.location.pathname).toBe(
+      `/drive/folders/${compactId(design.id)}`,
+    );
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Design' }),
     ).toBeVisible();
@@ -87,9 +88,36 @@ describe('Drive (S-05)', () => {
     );
     expect(crumbs.getByRole('link', { name: 'Projects' })).toHaveAttribute(
       'href',
-      `/drive/folders/${projects.id}`,
+      `/drive/folders/${compactId(projects.id)}`,
     );
     await user.click(crumbs.getByRole('link', { name: 'My Drive' }));
+    expect(router.state.location.pathname).toBe('/drive');
+  });
+
+  it('links use the compact id; dashed links still open, then show it', async () => {
+    const user = userEvent.setup();
+    const projects = drive.folder('Projects');
+    drive.folder('Design', projects.id);
+    const router = renderApp(
+      `/drive/folders/${projects.id.toUpperCase()}`,
+      testUser,
+    );
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Projects' }),
+    ).toBeVisible();
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe(
+        `/drive/folders/${projects.id.replaceAll('-', '')}`,
+      );
+    });
+    // Backspace goes up to the parent, here the root.
+    await user.keyboard('{Backspace}');
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'My Drive' }),
+    ).toBeVisible();
+    expect(router.state.location.pathname).toBe('/drive');
+    await user.keyboard('{Backspace}'); // nothing above the root
     expect(router.state.location.pathname).toBe('/drive');
   });
 

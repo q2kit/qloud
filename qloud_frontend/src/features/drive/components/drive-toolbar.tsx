@@ -1,4 +1,4 @@
-import { ArrowDownUp, Download, LayoutGrid, List, Pencil } from 'lucide-react';
+import { ArrowDownUp, LayoutGrid, List, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+import type { NodeAction } from '../actions';
 import { ORDERINGS, type DriveNode, type Ordering } from '../api';
 import type { DriveView } from '../preferences';
 
@@ -23,13 +24,14 @@ const ORDERING_KEYS: Record<Ordering, string> = {
 };
 
 interface DriveToolbarProps {
-  selected: DriveNode | null;
+  selected: DriveNode[];
   view: DriveView;
   ordering: Ordering;
   onView: (view: DriveView) => void;
   onOrdering: (ordering: Ordering) => void;
-  onRename: (node: DriveNode) => void;
-  onDownload: (node: DriveNode) => void;
+  /** The item menu's actions for the selection, as buttons. */
+  actions: NodeAction[];
+  onClearSelection: () => void;
 }
 
 export function DriveToolbar({
@@ -38,41 +40,46 @@ export function DriveToolbar({
   ordering,
   onView,
   onOrdering,
-  onRename,
-  onDownload,
+  actions,
+  onClearSelection,
 }: DriveToolbarProps): React.JSX.Element {
   const { t } = useTranslation();
   return (
     <div className="flex min-h-10 flex-wrap items-center justify-between gap-2">
       <div
-        className="flex items-center gap-1"
+        className="flex min-w-0 flex-wrap items-center gap-1"
         role="group"
         aria-label={t('drive.selectionActions')}
       >
-        {selected && (
+        {selected.length > 0 && (
           <>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => {
-                onRename(selected);
-              }}
+              aria-label={t('drive.selection.clear')}
+              onClick={onClearSelection}
             >
-              <Pencil />
-              {t('drive.actions.rename')}
+              <X />
+              <span aria-live="polite">
+                {t('drive.selection.count', { count: selected.length })}
+              </span>
             </Button>
-            {selected.kind === 'file' && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  onDownload(selected);
-                }}
-              >
-                <Download />
-                {t('drive.actions.download')}
-              </Button>
-            )}
+            {actions
+              // The menu has the rest (new tab, link, info).
+              .filter((action) =>
+                ['open', 'rename', 'move'].includes(action.key),
+              )
+              .map((action) => (
+                <Button
+                  key={action.key}
+                  variant="ghost"
+                  size="sm"
+                  onClick={action.run}
+                >
+                  <action.icon />
+                  {action.label}
+                </Button>
+              ))}
           </>
         )}
       </div>

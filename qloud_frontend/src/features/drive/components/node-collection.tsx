@@ -1,14 +1,29 @@
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
+import { MoreHorizontal } from 'lucide-react';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
+import { DRAG_TYPE, readDraggedIds, type NodeAction } from '../actions';
 import type { DriveNode } from '../api';
 import { formatBytes, formatDate } from '../format';
 import type { DriveView } from '../preferences';
 import { NodeIcon } from './node-icon';
+import { useMarquee } from './use-marquee';
 
 /** files-folders.md: virtualize once a folder has more than 200 items. */
 export const VIRTUALIZE_AFTER = 200;
@@ -16,16 +31,41 @@ const GRID_MIN_WIDTH = 168;
 const GRID_ROW_HEIGHT = 152;
 const LIST_ROW_HEIGHT = 52;
 
+export interface SelectModifiers {
+  /** Ctrl or ⌘: add or remove one item. */
+  toggle: boolean;
+  /** Shift: a range from the anchor. */
+  range: boolean;
+}
+
 interface NodeCollectionProps {
   nodes: DriveNode[];
   view: DriveView;
-  selectedId: string | null;
+  selectedIds: ReadonlySet<string>;
   hasMore: boolean;
   isLoadingMore: boolean;
   onLoadMore: () => void;
-  onSelect: (node: DriveNode) => void;
+  onSelect: (node: DriveNode, modifiers: SelectModifiers) => void;
   onOpen: (node: DriveNode) => void;
+  /** Folders only: middle click and Ctrl/⌘+Enter. */
+  onOpenInNewTab: (node: DriveNode) => void;
   onRename: (node: DriveNode) => void;
+  /** The item menu for whatever is selected once `node` is part of the selection. */
+  actionsFor: (node: DriveNode) => NodeAction[];
+  /** Ids dragged when a drag starts on `node`: the selection if it holds `node`. */
+  dragIdsFor: (node: DriveNode) => string[];
+  onDropOnFolder: (folder: DriveNode, ids: string[]) => void;
+  /** Rubber-band selection on empty space (desktop file managers). */
+  onMarqueeSelect: (ids: string[]) => void;
+  onClearSelection: () => void;
+}
+
+interface ItemContext {
+  dragging: ReadonlySet<string>;
+  dropTargetId: string | null;
+  setDragging: (ids: string[]) => void;
+  setDropTargetId: (id: string | null) => void;
+  onKeyDown: (event: React.KeyboardEvent, index: number) => void;
 }
 
 function useColumns(
@@ -58,11 +98,21 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const columns = useColumns(containerRef, view);
   const virtual = nodes.length > VIRTUALIZE_AFTER;
+  const [dragging, setDraggingState] = React.useState<ReadonlySet<string>>(
+    new Set(),
+  );
+  const [dropTargetId, setDropTargetId] = React.useState<string | null>(null);
 
-  // Keyboard: arrows move between items (a row is `columns` items in the grid).
+  const focusNode = (node: DriveNode): void => {
+    containerRef.current
+      ?.querySelector<HTMLElement>(`[data-node-id="${node.id}"]`)
+      ?.focus();
+  };
+
   const onKeyDown = (event: React.KeyboardEvent, index: number): void => {
     const node = nodes[index];
     if (!node) return;
+    const modifier = event.ctrlKey || event.metaKey;
     const step = {
       ArrowRight: 1,
       ArrowLeft: -1,
@@ -73,38 +123,80 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
       event.preventDefault();
       const next = nodes[Math.min(nodes.length - 1, Math.max(0, index + step))];
       if (next) {
-        props.onSelect(next);
-        containerRef.current
-          ?.querySelector<HTMLElement>(`[data-node-id="${next.id}"]`)
-          ?.focus();
+        // Shift+arrows grow the range from the anchor, like Shift+click.
+        props.onSelect(next, { toggle: false, range: event.shiftKey });
+        focusNode(next);
       }
+    } else if (event.key === ' ' && modifier) {
+      event.preventDefault();
+      props.onSelect(node, { toggle: true, range: false });
     } else if (event.key === 'Enter') {
       event.preventDefault();
-      props.onOpen(node);
+      if (modifier && node.kind === 'folder') props.onOpenInNewTab(node);
+      else props.onOpen(node);
     } else if (event.key === 'F2') {
       event.preventDefault();
       props.onRename(node);
     }
   };
 
+  const context: ItemContext = {
+    dragging,
+    dropTargetId,
+    setDragging: (ids) => {
+      setDraggingState(new Set(ids));
+    },
+    setDropTargetId,
+    onKeyDown,
+  };
+
+  const marquee = useMarquee({
+    containerRef,
+    selectedIds: props.selectedIds,
+    onSelect: props.onMarqueeSelect,
+    onClear: props.onClearSelection,
+  });
+
   return (
-    <div ref={containerRef}>
+    // Tall enough to leave empty space below the items for the selection box.
+    <div
+      ref={containerRef}
+      className="min-h-[50vh]"
+      onPointerDown={marquee.onPointerDown}
+    >
+      {marquee.box && (
+        <div
+          aria-hidden="true"
+          data-testid="selection-box"
+          className="pointer-events-none fixed z-30 rounded-sm border border-primary bg-primary/10"
+          style={{
+            left: marquee.box.left - window.scrollX,
+            top: marquee.box.top - window.scrollY,
+            width: marquee.box.right - marquee.box.left,
+            height: marquee.box.bottom - marquee.box.top,
+          }}
+        />
+      )}
       {view === 'list' && (
         <div
           aria-hidden="true"
-          className="hidden grid-cols-[minmax(0,1fr)_12rem_6rem] gap-4 border-b border-border px-3 pb-2 text-xs font-medium text-muted-foreground sm:grid"
+          className="hidden grid-cols-[minmax(0,1fr)_12rem_6rem_2.25rem] gap-4 border-b border-border px-3 pb-2 text-xs font-medium text-muted-foreground sm:grid"
         >
           <span>{t('drive.columns.name')}</span>
           <span>{t('drive.columns.modified')}</span>
           <span className="text-right">{t('drive.columns.size')}</span>
         </div>
       )}
-      <div role="listbox" aria-label={t('drive.items')}>
+      <div
+        role="listbox"
+        aria-label={t('drive.items')}
+        aria-multiselectable="true"
+      >
         {virtual ? (
           <VirtualRows
             {...props}
             columns={columns}
-            onKeyDown={onKeyDown}
+            context={context}
             containerRef={containerRef}
           />
         ) : (
@@ -119,7 +211,7 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
                 {...props}
                 node={node}
                 index={index}
-                onKeyDown={onKeyDown}
+                context={context}
               />
             ))}
           </div>
@@ -142,12 +234,12 @@ const gridClassName =
 function VirtualRows({
   columns,
   containerRef,
-  onKeyDown,
+  context,
   ...props
 }: NodeCollectionProps & {
   columns: number;
   containerRef: React.RefObject<HTMLDivElement | null>;
-  onKeyDown: (event: React.KeyboardEvent, index: number) => void;
+  context: ItemContext;
 }): React.JSX.Element {
   const { nodes, view, hasMore, isLoadingMore, onLoadMore } = props;
   const perRow = view === 'grid' ? columns : 1;
@@ -198,7 +290,7 @@ function VirtualRows({
                 {...props}
                 node={node}
                 index={row.index * perRow + offset}
-                onKeyDown={onKeyDown}
+                context={context}
               />
             ))}
         </div>
@@ -207,87 +299,230 @@ function VirtualRows({
   );
 }
 
+function MenuItems({
+  actions,
+  Item,
+}: {
+  actions: NodeAction[];
+  Item: typeof ContextMenuItem | typeof DropdownMenuItem;
+}): React.JSX.Element {
+  return (
+    <>
+      {actions.map((action) => (
+        <Item key={action.key} onSelect={action.run}>
+          <action.icon />
+          <span className="flex-1">{action.label}</span>
+          {action.shortcut && (
+            <kbd className="font-sans text-xs text-muted-foreground">
+              {action.shortcut}
+            </kbd>
+          )}
+        </Item>
+      ))}
+    </>
+  );
+}
+
 function NodeItem({
   node,
   index,
   view,
-  selectedId,
+  selectedIds,
+  context,
   onSelect,
   onOpen,
-  onKeyDown,
+  onOpenInNewTab,
+  actionsFor,
+  dragIdsFor,
+  onDropOnFolder,
 }: NodeCollectionProps & {
   node: DriveNode;
   index: number;
-  onKeyDown: (event: React.KeyboardEvent, index: number) => void;
+  context: ItemContext;
 }): React.JSX.Element {
   const { t, i18n } = useTranslation();
-  const selected = node.id === selectedId;
+  const selected = selectedIds.has(node.id);
+  // Menus act on the selection; opening one on an unselected item selects it first.
+  const [actions, setActions] = React.useState<NodeAction[]>([]);
+  const prepareMenu = (open: boolean): void => {
+    if (!open) return;
+    if (!selected) onSelect(node, { toggle: false, range: false });
+    setActions(actionsFor(node));
+  };
   const size =
     node.kind === 'folder' ? '—' : formatBytes(node.size, i18n.language);
-  const common = {
+  const isDropTarget = context.dropTargetId === node.id;
+  const canReceive = node.kind === 'folder' && !context.dragging.has(node.id);
+
+  const dropHandlers =
+    node.kind === 'folder'
+      ? {
+          onDragOver: (event: React.DragEvent) => {
+            if (!canReceive || readDraggedIds(event) === null) return;
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+            context.setDropTargetId(node.id);
+          },
+          onDragLeave: () => {
+            if (isDropTarget) context.setDropTargetId(null);
+          },
+          onDrop: (event: React.DragEvent) => {
+            const ids = readDraggedIds(event);
+            context.setDropTargetId(null);
+            if (!canReceive || !ids?.length) return;
+            event.preventDefault();
+            onDropOnFolder(node, ids);
+          },
+        }
+      : {};
+
+  // Menus render in portals, but React events still bubble up the component tree to
+  // this item: only handle what really happens inside it (not keys or clicks in a menu).
+  const own =
+    <E extends React.SyntheticEvent>(handler: (event: E) => void) =>
+    (event: E): void => {
+      if (
+        event.target instanceof Node &&
+        event.currentTarget.contains(event.target)
+      ) {
+        handler(event);
+      }
+    };
+  const props = {
     role: 'option',
     'aria-selected': selected,
     'data-node-id': node.id,
     // The name alone: the size or kind line under it is not part of it.
     'aria-label': node.name,
-    tabIndex: selected || (selectedId === null && index === 0) ? 0 : -1,
+    tabIndex: selected || (selectedIds.size === 0 && index === 0) ? 0 : -1,
     title: node.name,
-    onClick: () => {
-      onSelect(node);
-    },
-    onDoubleClick: () => {
+    draggable: true,
+    onClick: own((event: React.MouseEvent) => {
+      onSelect(node, {
+        toggle: event.ctrlKey || event.metaKey,
+        range: event.shiftKey,
+      });
+    }),
+    onDoubleClick: own(() => {
       onOpen(node);
+    }),
+    // Middle click: a folder in a new tab, like a link (Ctrl/⌘+click selects instead).
+    onMouseDown: own((event: React.MouseEvent) => {
+      if (event.button === 1 && node.kind === 'folder') event.preventDefault(); // no autoscroll
+    }),
+    onAuxClick: own((event: React.MouseEvent) => {
+      if (event.button !== 1 || node.kind !== 'folder') return;
+      event.preventDefault();
+      onOpenInNewTab(node);
+    }),
+    onKeyDown: own((event: React.KeyboardEvent) => {
+      context.onKeyDown(event, index);
+    }),
+    onDragStart: (event: React.DragEvent) => {
+      const ids = dragIdsFor(node);
+      if (!selected) onSelect(node, { toggle: false, range: false });
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData(DRAG_TYPE, JSON.stringify(ids));
+      context.setDragging(ids);
     },
-    onKeyDown: (event: React.KeyboardEvent) => {
-      onKeyDown(event, index);
+    onDragEnd: () => {
+      context.setDragging([]);
+      context.setDropTargetId(null);
     },
+    ...dropHandlers,
   } as const;
-  const state = selected
-    ? 'border-primary bg-primary/10 ring-1 ring-primary'
-    : 'border-border hover:bg-accent/60';
+  const state = isDropTarget
+    ? 'border-primary bg-primary/15 ring-2 ring-primary'
+    : selected
+      ? 'border-primary bg-primary/10 ring-1 ring-primary'
+      : 'border-border hover:bg-accent/60';
+  const moreButton = (
+    <DropdownMenu onOpenChange={prepareMenu}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          // Mouse and touch only: from the keyboard the item's own menu (Shift+F10) opens.
+          tabIndex={-1}
+          aria-label={t('drive.actions.more', { name: node.name })}
+          // A soft overlay rather than the grey accent: it reads on any card, selected
+          // (tinted) or not, in light and dark.
+          className="size-7 shrink-0 rounded-md text-muted-foreground opacity-100 transition-[opacity,background-color,color] hover:bg-foreground/10 hover:text-foreground focus-visible:opacity-100 focus-visible:shadow-none group-hover:opacity-100 data-[state=open]:bg-foreground/10 data-[state=open]:text-foreground data-[state=open]:opacity-100 [@media(hover:hover)]:opacity-0"
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
+          onDoubleClick={(event) => {
+            event.stopPropagation();
+          }}
+        >
+          <MoreHorizontal />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        // Focus stays on the item rather than the hidden-until-hover button.
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+        }}
+      >
+        <MenuItems actions={actions} Item={DropdownMenuItem} />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
-  if (view === 'grid') {
-    return (
+  const item =
+    view === 'grid' ? (
       <div
-        {...common}
+        {...props}
         className={cn(
-          'flex cursor-default select-none flex-col gap-3 rounded-lg border bg-card p-3 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
+          'group relative flex select-none flex-col gap-3 rounded-lg border bg-card p-3 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring',
           state,
         )}
       >
         <span className="flex h-20 items-center justify-center rounded-md bg-secondary">
           <NodeIcon node={node} className="size-9" />
         </span>
-        <span className="min-w-0">
-          <span className="block truncate text-sm font-medium">
-            {node.name}
+        <span className="flex min-w-0 items-end gap-1">
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-medium">
+              {node.name}
+            </span>
+            <span className="block truncate text-xs text-muted-foreground tabular-nums">
+              {node.kind === 'folder' ? t('drive.kind.folder') : size}
+            </span>
           </span>
-          <span className="block truncate text-xs text-muted-foreground tabular-nums">
-            {node.kind === 'folder' ? t('drive.kind.folder') : size}
-          </span>
+          {moreButton}
         </span>
       </div>
+    ) : (
+      <div
+        {...props}
+        className={cn(
+          'group grid select-none grid-cols-[minmax(0,1fr)_auto_2.25rem] items-center gap-4 rounded-md border border-transparent px-3 py-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring sm:grid-cols-[minmax(0,1fr)_12rem_6rem_2.25rem]',
+          selected || isDropTarget ? state : 'hover:bg-accent/60',
+        )}
+      >
+        <span className="flex min-w-0 items-center gap-3">
+          <NodeIcon node={node} className="size-5" />
+          <span className="truncate text-sm font-medium">{node.name}</span>
+        </span>
+        <span className="hidden truncate text-sm text-muted-foreground tabular-nums sm:block">
+          {formatDate(node.updated_at, i18n.language)}
+        </span>
+        <span className="text-right text-sm text-muted-foreground tabular-nums">
+          {size}
+        </span>
+        {moreButton}
+      </div>
     );
-  }
+
   return (
-    <div
-      {...common}
-      className={cn(
-        'grid cursor-default select-none grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-md border border-transparent px-3 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring sm:grid-cols-[minmax(0,1fr)_12rem_6rem]',
-        selected ? state : 'hover:bg-accent/60',
-      )}
-    >
-      <span className="flex min-w-0 items-center gap-3">
-        <NodeIcon node={node} className="size-5" />
-        <span className="truncate text-sm font-medium">{node.name}</span>
-      </span>
-      <span className="hidden truncate text-sm text-muted-foreground tabular-nums sm:block">
-        {formatDate(node.updated_at, i18n.language)}
-      </span>
-      <span className="text-right text-sm text-muted-foreground tabular-nums">
-        {size}
-      </span>
-    </div>
+    <ContextMenu onOpenChange={prepareMenu}>
+      <ContextMenuTrigger asChild>{item}</ContextMenuTrigger>
+      <ContextMenuContent>
+        <MenuItems actions={actions} Item={ContextMenuItem} />
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 

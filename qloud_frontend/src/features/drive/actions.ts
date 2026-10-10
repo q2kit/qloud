@@ -1,0 +1,127 @@
+import type { TFunction } from 'i18next';
+import {
+  Download,
+  ExternalLink,
+  FolderInput,
+  FolderOpen,
+  Info,
+  Link,
+  Pencil,
+  type LucideIcon,
+} from 'lucide-react';
+
+import type { DriveNode } from './api';
+
+export interface NodeAction {
+  key: string;
+  label: string;
+  icon: LucideIcon;
+  shortcut?: string;
+  run: () => void;
+}
+
+export interface ActionHandlers {
+  open: (node: DriveNode) => void;
+  download: (node: DriveNode) => void;
+  rename: (node: DriveNode) => void;
+  move: (nodes: DriveNode[]) => void;
+  info: (node: DriveNode) => void;
+  /** Folders only: each has its own URL (files get theirs with the viewer, M3). */
+  openInNewTab: (node: DriveNode) => void;
+  copyLink: (node: DriveNode) => void;
+}
+
+/**
+ * The item menu (right click, "⋯") for a selection. Only actions with an API so far:
+ * Preview (M3), Share (M5) and Delete (M4) join later.
+ */
+export function nodeActions(
+  selection: DriveNode[],
+  handlers: ActionHandlers,
+  t: TFunction,
+): NodeAction[] {
+  const [node] = selection;
+  if (!node) return [];
+  const move: NodeAction = {
+    key: 'move',
+    label:
+      selection.length > 1
+        ? t('drive.actions.moveCount', { count: selection.length })
+        : t('drive.actions.move'),
+    icon: FolderInput,
+    run: () => {
+      handlers.move(selection);
+    },
+  };
+  if (selection.length > 1) return [move];
+  return [
+    {
+      key: 'open',
+      label:
+        node.kind === 'folder'
+          ? t('drive.actions.open')
+          : t('drive.actions.download'),
+      icon: node.kind === 'folder' ? FolderOpen : Download,
+      shortcut: '↵',
+      run: () => {
+        (node.kind === 'folder' ? handlers.open : handlers.download)(node);
+      },
+    },
+    ...(node.kind === 'folder'
+      ? [
+          {
+            key: 'openInNewTab',
+            label: t('drive.actions.openInNewTab'),
+            icon: ExternalLink,
+            run: () => {
+              handlers.openInNewTab(node);
+            },
+          },
+          {
+            key: 'copyLink',
+            label: t('drive.actions.copyLink'),
+            icon: Link,
+            run: () => {
+              handlers.copyLink(node);
+            },
+          },
+        ]
+      : []),
+    {
+      key: 'rename',
+      label: t('drive.actions.rename'),
+      icon: Pencil,
+      shortcut: 'F2',
+      run: () => {
+        handlers.rename(node);
+      },
+    },
+    move,
+    {
+      key: 'info',
+      label: t('drive.actions.info'),
+      icon: Info,
+      shortcut: 'i',
+      run: () => {
+        handlers.info(node);
+      },
+    },
+  ];
+}
+
+/** Drag-and-drop payload: the ids being moved (files-folders.md › Tương tác UI). */
+export const DRAG_TYPE = 'application/x-qloud-nodes';
+
+export function readDraggedIds(event: React.DragEvent): string[] | null {
+  if (!event.dataTransfer.types.includes(DRAG_TYPE)) return null;
+  try {
+    const ids: unknown = JSON.parse(
+      event.dataTransfer.getData(DRAG_TYPE) || '[]',
+    );
+    return Array.isArray(ids)
+      ? ids.filter((id): id is string => typeof id === 'string')
+      : [];
+  } catch {
+    return [];
+  }
+}

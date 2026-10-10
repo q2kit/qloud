@@ -111,6 +111,7 @@ commit cả `.po` và `.mo` để runtime/CI không phụ thuộc gettext CLI. K
 | Dữ liệu từ server | TanStack Query; API client sinh từ OpenAPI (openapi-typescript + openapi-fetch) |
 | Trạng thái client | Zustand (hàng đợi upload, lựa chọn nhiều mục) |
 | Danh sách dài | @tanstack/react-virtual (virtualization khi folder có hơn 200 mục) |
+| Menu chuột phải | @radix-ui/react-context-menu (cùng họ Radix với shadcn/ui) |
 | UI | Tailwind CSS, shadcn/ui (Radix), lucide-react (icon) |
 | Form | react-hook-form + zod |
 | i18n | i18next + react-i18next |

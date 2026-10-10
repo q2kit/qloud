@@ -3,7 +3,10 @@ import { FileText, Info, Share2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
-import { NodeDetails } from '@/features/drive/components/node-details';
+import {
+  NodeDetails,
+  SelectionSummary,
+} from '@/features/drive/components/node-details';
 import { useDriveStore } from '@/features/drive/store';
 import { useMediaQuery } from '@/lib/use-media-query';
 
@@ -93,8 +96,10 @@ function PanelContent({
           <X />
         </Button>
       </div>
-      {selected ? (
-        <NodeDetails node={selected} />
+      {selected.length > 1 ? (
+        <SelectionSummary nodes={selected} />
+      ) : selected[0] ? (
+        <NodeDetails node={selected[0]} />
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center px-6 py-10 text-center">
           <span className="mb-4 flex size-12 items-center justify-center rounded-xl bg-secondary text-muted-foreground">

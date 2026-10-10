@@ -50,7 +50,8 @@
     },
     "dialogs": {
       "newFolder": "Thư mục mới",
-      "rename": "Đổi tên"
+      "rename": "Đổi tên",
+      "move_other": "Di chuyển {{count}} mục"
     },
     "empty": {
       "title": "Thư mục này đang trống",
@@ -64,7 +65,15 @@
       "save": "Lưu",
       "cancel": "Hủy",
       "download": "Tải xuống",
-      "retry": "Thử lại"
+      "retry": "Thử lại",
+      "open": "Mở",
+      "move": "Di chuyển…",
+      "moveCount_other": "Di chuyển {{count}} mục…",
+      "moveHere": "Di chuyển tới đây",
+      "info": "Thông tin",
+      "more": "Thao tác khác với {{name}}",
+      "openInNewTab": "Mở trong thẻ mới",
+      "copyLink": "Sao chép liên kết"
     },
     "errors": {
       "generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
@@ -76,8 +85,21 @@
       "loadFailedDescription": "Kiểm tra kết nối mạng rồi thử lại.",
       "notFoundTitle": "Không tìm thấy thư mục",
       "notFoundDescription": "Thư mục không tồn tại, đã bị xóa, hoặc bạn không có quyền xem.",
-      "downloadFailed": "Không tải xuống được tệp. Vui lòng thử lại."
-    }
+      "downloadFailed": "Không tải xuống được tệp. Vui lòng thử lại.",
+      "invalid_move": "Không thể di chuyển một thư mục vào chính nó hoặc thư mục con của nó.",
+      "copyFailed": "Không sao chép được liên kết."
+    },
+    "selection": {
+      "count_other": "{{count}} mục đã chọn",
+      "clear": "Bỏ chọn"
+    },
+    "move": {
+      "description": "Chọn thư mục đích rồi bấm \"Di chuyển tới đây\".",
+      "noFolders": "Không có thư mục con.",
+      "folders": "Các thư mục con",
+      "done_other": "Đã di chuyển {{count}} mục tới \"{{target}}\"."
+    },
+    "linkCopied": "Đã sao chép liên kết tới \"{{name}}\"."
   },
   "shell": {
     "openNavigation": "Mở điều hướng",

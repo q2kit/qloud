@@ -137,6 +137,30 @@
     outline: none;
   }
 
+  /* Cursors for the whole app. Tailwind 4 resets buttons to the default arrow, and
+     Radix menus and our listboxes are not native controls: show the hand on anything
+     that does something when clicked. Links get it from the browser. */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  [role='menuitem']:not([data-disabled]),
+  [role='menuitemradio']:not([data-disabled]),
+  [role='menuitemcheckbox']:not([data-disabled]),
+  [role='option']:not([aria-disabled='true']),
+  [role='tab'],
+  summary,
+  select,
+  input[type='checkbox'],
+  input[type='radio'],
+  label:has(> input[type='checkbox'], > input[type='radio']) {
+    cursor: pointer;
+  }
+
+  :disabled,
+  [aria-disabled='true'],
+  [data-disabled] {
+    cursor: not-allowed;
+  }
+
   button:focus-visible,
   a:focus-visible {
     box-shadow:
