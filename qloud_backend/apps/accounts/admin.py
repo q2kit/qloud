@@ -58,12 +58,19 @@ class UserAdminForm(forms.ModelForm[User]):
         data = super().clean()
         if data is None:
             return {}
-        if not self.instance._state.adding:
+        flags = {
+            name: bool(data.get(name, getattr(self.instance, name)))
+            for name in ("is_active", "is_staff", "is_superuser")
+        }
+        # save_model writes only changed_data, so only clearing a flag can remove an
+        # administrator; other edits skip the superuser locks entirely.
+        demoting = any(name in self.changed_data and not value for name, value in flags.items())
+        if not self.instance._state.adding and demoting:
             validate_admin_access(
                 self.instance,
-                active=bool(data.get("is_active")),
-                staff=bool(data.get("is_staff")),
-                superuser=bool(data.get("is_superuser")),
+                active=flags["is_active"],
+                staff=flags["is_staff"],
+                superuser=flags["is_superuser"],
             )
         return data
 
@@ -109,14 +116,22 @@ class UserAdmin(admin.ModelAdmin[User]):
     def suspend_accounts(self, request: HttpRequest, queryset: QuerySet[User]) -> None:
         if not isinstance(request.user, User):
             raise PermissionDenied
+        ids = list(queryset.values_list("pk", flat=True))
         try:
-            suspend_users(
-                queryset.values_list("pk", flat=True),
-                reason="Suspended by administrator.",
-                actor=request.user,
-            )
+            suspended = suspend_users(ids, reason="Suspended by administrator.", actor=request.user)
         except ValidationError as error:
             self.message_user(request, error.messages[0], level="error")
+            return
+        if skipped := len(ids) - suspended:
+            self.message_user(
+                request,
+                _(
+                    "%(count)d selected account(s) were already suspended; "
+                    "their original suspension was kept."
+                )
+                % {"count": skipped},
+                level="warning",
+            )
 
     @admin.action(description=_("Unsuspend selected accounts"), permissions=["change"])
     def unsuspend_accounts(self, request: HttpRequest, queryset: QuerySet[User]) -> None:

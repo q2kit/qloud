@@ -14,31 +14,23 @@ from .models import Plan, User
 
 
 def _signup_plan(*, using: str, plan_id: UUID | None) -> Plan:
-    # Django exposes exclusive row locks; PostgreSQL FOR SHARE lets signups coexist
-    # while still preventing a selected plan from being edited or deleted.
-    if plan_id is not None:
-        plans = Plan.objects.using(using).raw(
-            "SELECT * FROM accounts_plan WHERE id = %s FOR SHARE", [plan_id]
-        )
-        plan = next(iter(plans), None)
+    # No row lock is needed: set_default_plan commits the switch atomically, so a
+    # signup sees either the old or the new default, and the FK check on insert
+    # takes FOR KEY SHARE on the plan, which already blocks deleting it.
+    plans = Plan.objects.using(using)
+    if plan_id is None:
+        plan = plans.filter(is_default_for_signup=True).first()
         if plan is None:
-            raise ValidationError(_("The selected plan no longer exists."), code="missing_plan")
-        if not plan.is_active:
-            raise ValidationError(_("The selected plan is inactive."), code="inactive_plan")
-        return plan
-    while True:
-        plans = Plan.objects.using(using).raw(
-            "SELECT * FROM accounts_plan WHERE is_default_for_signup AND is_active FOR SHARE"
-        )
-        plan = next(iter(plans), None)
-        if plan is not None:
-            return plan
-        # A concurrent switch may have changed the row after this statement's
-        # snapshot. Retry with a fresh snapshot instead of reporting a missing plan.
-        if not Plan.objects.using(using).filter(is_default_for_signup=True).exists():
             raise ValidationError(
                 _("No default signup plan is configured."), code="no_default_plan"
             )
+        return plan
+    plan = plans.filter(pk=plan_id).first()
+    if plan is None:
+        raise ValidationError(_("The selected plan no longer exists."), code="missing_plan")
+    if not plan.is_active:
+        raise ValidationError(_("The selected plan is inactive."), code="inactive_plan")
+    return plan
 
 
 def save_new_user(user: User, *args: Any, **kwargs: Any) -> None:
@@ -56,7 +48,9 @@ def save_new_user(user: User, *args: Any, **kwargs: Any) -> None:
 
 @transaction.atomic
 def set_default_plan(plan: Plan) -> None:
-    plans = list(Plan.objects.select_for_update().order_by("pk"))
+    # FOR NO KEY UPDATE serializes default switches without blocking the FK check
+    # (FOR KEY SHARE) of signups inserting a user on one of these plans.
+    plans = list(Plan.objects.select_for_update(no_key=True).order_by("pk"))
     selected = next((item for item in plans if item.pk == plan.pk), None)
     if selected is None:
         raise ValidationError(_("The selected plan no longer exists."), code="missing_plan")
@@ -68,50 +62,35 @@ def set_default_plan(plan: Plan) -> None:
 
 
 @transaction.atomic
-def suspend_users(user_ids: Iterable[UUID], *, reason: str, actor: User | None = None) -> None:
+def suspend_users(user_ids: Iterable[UUID], *, reason: str, actor: User | None = None) -> int:
+    """Suspend the given accounts and return how many were newly suspended."""
     ids = set(user_ids)
     if actor is not None and actor.pk in ids:
         raise ValidationError(_("You cannot suspend your own account."), code="self_suspension")
-    # Lock the administrator group only when a target is a superuser. If an
-    # ordinary target was promoted while we waited, release its lock and retry
-    # with the entire group in the same deterministic order.
-    include_admins = User.objects.filter(pk__in=ids, is_superuser=True).exists()
-    while True:
-        try:
-            with transaction.atomic():
-                selection = Q(pk__in=ids)
-                if include_admins:
-                    selection |= Q(is_superuser=True)
-                users = list(User.objects.select_for_update().filter(selection).order_by("pk"))
-                if not include_admins and any(user.is_superuser for user in users):
-                    raise _RetryAdminLocks
-                admins = [user for user in users if _available_admin(user)]
-                if any(user.pk in ids for user in admins) and not any(
-                    user.pk not in ids for user in admins
-                ):
-                    raise ValidationError(
-                        _("At least one active superuser must remain."), code="last_superuser"
-                    )
-                for current in users:
-                    if current.pk in ids and current.suspended_at is None:
-                        current.suspended_at = timezone.now()
-                        current.suspended_reason = reason
-                        current.session_version += 1
-                        current.save(
-                            update_fields=[
-                                "suspended_at",
-                                "suspended_reason",
-                                "session_version",
-                                "updated_at",
-                            ]
-                        )
-            return
-        except _RetryAdminLocks:
-            include_admins = True
+    users = _lock_with_admins(Q(pk__in=ids))
+    admins = [user for user in users if _available_admin(user)]
+    if any(user.pk in ids for user in admins) and not any(user.pk not in ids for user in admins):
+        raise ValidationError(
+            _("At least one active superuser must remain."), code="last_superuser"
+        )
+    now = timezone.now()
+    targets = [user for user in users if user.pk in ids and user.suspended_at is None]
+    for current in targets:
+        current.suspended_at = now
+        current.suspended_reason = reason
+        current.session_version += 1
+        current.save(
+            update_fields=["suspended_at", "suspended_reason", "session_version", "updated_at"]
+        )
+    return len(targets)
 
 
-class _RetryAdminLocks(Exception):
-    pass
+def _lock_with_admins(targets: Q) -> list[User]:
+    # Superusers are few and these are rare admin operations, so always lock the whole
+    # group together with the targets, in one deterministic order to avoid deadlocks.
+    return list(
+        User.objects.select_for_update().filter(targets | Q(is_superuser=True)).order_by("pk")
+    )
 
 
 def _available_admin(user: User) -> bool:
@@ -119,11 +98,9 @@ def _available_admin(user: User) -> bool:
 
 
 def validate_admin_access(user: User, *, active: bool, staff: bool, superuser: bool) -> None:
-    # The admin change form runs inside a transaction; retain these locks until
-    # its save, sharing the same lock order as superuser suspension.
-    users = list(
-        User.objects.select_for_update().filter(Q(is_superuser=True) | Q(pk=user.pk)).order_by("pk")
-    )
+    # The admin change form runs inside a transaction, so these locks are held until
+    # its save.
+    users = _lock_with_admins(Q(pk=user.pk))
     current = next((item for item in users if item.pk == user.pk), None)
     if (
         current is not None

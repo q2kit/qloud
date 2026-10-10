@@ -5,6 +5,7 @@ from django.db.models.query import QuerySet
 from django.urls import reverse
 
 from apps.accounts.models import Plan, User
+from apps.accounts.services import suspend_user
 
 pytestmark = pytest.mark.django_db
 
@@ -265,3 +266,65 @@ def test_change_form_can_demote_admin_when_backup_exists(admin_client):
     assert response.status_code == 302
     admin.refresh_from_db()
     assert not admin.is_superuser
+
+
+def test_repeat_suspension_action_reports_kept_suspension(admin_client):
+    user = User.objects.create_user("alice@example.com")
+    other = User.objects.create_user("bob@example.com")
+    suspend_user(user, reason="Original")
+    response = admin_client.post(
+        reverse("admin:accounts_user_changelist"),
+        {"action": "suspend_accounts", "_selected_action": [str(user.pk), str(other.pk)]},
+        follow=True,
+    )
+    assert "1 tài khoản đã chọn đang bị khóa từ trước" in response.content.decode()
+    user.refresh_from_db()
+    other.refresh_from_db()
+    assert user.suspended_reason == "Original"
+    assert other.suspended_at is not None
+
+
+def change_form_data(user: User, **overrides: str | None) -> dict[str, str]:
+    data: dict[str, str | None] = {
+        "email": user.email,
+        "display_name": user.display_name,
+        "locale": user.locale,
+        "theme": user.theme,
+        "plan": str(user.plan_id),
+        "_save": "Save",
+    }
+    for name in ("is_active", "is_staff", "is_superuser"):
+        if getattr(user, name):
+            data[name] = "on"
+    data.update(overrides)
+    return {key: value for key, value in data.items() if value is not None}
+
+
+@pytest.mark.parametrize("target", ["ordinary", "admin"])
+def test_change_form_skips_admin_locks_unless_a_flag_is_cleared(admin_client, target):
+    user = (
+        User.objects.create_user("alice@example.com")
+        if target == "ordinary"
+        else User.objects.get(email="admin@example.com")
+    )
+    with patch("apps.accounts.admin.validate_admin_access") as validate:
+        response = admin_client.post(
+            reverse("admin:accounts_user_change", args=[user.pk]),
+            change_form_data(user, display_name="Renamed"),
+        )
+    assert response.status_code == 302
+    validate.assert_not_called()
+    user.refresh_from_db()
+    assert user.display_name == "Renamed"
+
+
+def test_change_form_validates_when_clearing_a_flag(admin_client):
+    user = User.objects.create_user("alice@example.com", is_staff=True)
+    with patch("apps.accounts.admin.validate_admin_access") as validate:
+        response = admin_client.post(
+            reverse("admin:accounts_user_change", args=[user.pk]),
+            change_form_data(user, is_staff=None),
+        )
+    assert response.status_code == 302
+    validate.assert_called_once()
+    assert validate.call_args.kwargs == {"active": True, "staff": False, "superuser": False}

@@ -85,7 +85,7 @@ mọi selector của node đều phải đi qua đây.
 M1-01: `accounts.services` xử lý tạo user/Drive nguyên tử, đổi plan mặc định và khóa user;
 `accounts.selectors.get_limits()` cung cấp giới hạn hiện tại. `drive.Node` mới có nền folder gốc, được hoàn thiện ở M2-01.
 Auth backend `accounts.backends.AccountBackend` kế thừa ModelBackend và chặn user bị khóa, gồm session đang có.
-Hash session gồm mật khẩu và `session_version`; khóa user tăng bộ đếm để thu hồi session độc lập session engine, kể cả khi mở khóa sau đó.
+Hash session (`get_session_auth_hash` và bản fallback cho `SECRET_KEY_FALLBACKS`) gồm mật khẩu và `session_version`; khóa user tăng bộ đếm để thu hồi session độc lập session engine, kể cả khi mở khóa sau đó.
 Không quét/giải mã toàn bộ session. Session dùng ModelBackend/hash cũ trước M1-01 phải đăng nhập lại sau nâng cấp.
 Allauth sẽ tích hợp cùng quy tắc này ở M1-02. Action Django admin dùng gettext, catalog `vi` và `en` nằm trong `accounts/locale`;
 commit cả `.po` và `.mo` để runtime/CI không phụ thuộc gettext CLI. Khi sửa bản dịch, chạy

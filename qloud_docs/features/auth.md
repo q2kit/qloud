@@ -15,12 +15,14 @@ Session được xóa khi truy cập lần tiếp theo với hash cũ; cơ chế
 Backend xác thực chặn cả đăng nhập mới và sử dụng session của user đang khóa; mở khóa không giảm bộ đếm nên không phục hồi session cũ.
 Trong admin dùng action khóa/mở khóa; trường khóa chỉ đọc để mọi thao tác đi qua dịch vụ.
 Action từ chối toàn bộ lô nếu chứa chính admin đang thao tác hoặc khiến không còn superuser active/staff/chưa bị khóa.
-Chỉ khóa nhóm superuser khi lô có superuser; khóa theo thứ tự UUID để vẫn còn người quản trị và tránh deadlock.
-Nếu user thường được nâng quyền trong lúc chờ khóa, giải phóng khóa đích rồi thử lại với cả nhóm.
-Khóa lại user đã bị khóa không đổi thời điểm, lý do hay bộ đếm session.
-Form admin cũng kiểm tra superuser cuối cùng trong transaction giữ khóa tới khi lưu.
-`User.save()` không có `update_fields` chỉ ghi các trường đã thay đổi từ lúc load/lưu;
-đổi trực tiếp suspension, session version, password, counter hoặc cờ quyền sẽ báo ValidationError.
+Dịch vụ khóa dòng user đích cùng toàn bộ superuser theo thứ tự UUID, để vẫn còn người quản trị và tránh deadlock; superuser ít và thao tác hiếm nên khóa cả nhóm không đáng kể.
+Khóa lại user đã bị khóa không đổi thời điểm, lý do hay bộ đếm session; action báo số tài khoản được giữ nguyên.
+Form admin chỉ kiểm tra superuser cuối cùng khi bỏ một cờ `is_active`/`is_staff`/`is_superuser`, trong transaction giữ khóa tới khi lưu;
+sửa các trường khác không khóa nhóm superuser. Trường quyền không có trên form được coi là giữ nguyên.
+`User.save()` không có `update_fields` chỉ ghi các trường đã thay đổi từ lúc load/lưu (so với snapshot cập nhật khi load, `refresh_from_db` và lưu);
+đổi trực tiếp suspension, session version, counter hoặc cờ quyền sẽ báo ValidationError.
+Password không thuộc nhóm này: `set_password()` rồi `save()` là luồng chuẩn của Django và allauth, và bản cũ không ghi đè được vì chỉ trường đổi mới được ghi.
+Không dùng fetch mode `FETCH_PEERS` cho User: Django nạp trường deferred cho các instance cùng nhóm mà không qua `refresh_from_db`, nên snapshot coi trường đó là đã đổi.
 Các đường ghi trạng thái phải dùng `update_fields` rõ ràng; counter phải cập nhật trong transaction có khóa hoặc `F()`.
 Admin chỉ ghi trường thực sự đổi; service khóa/mở khóa dùng khóa dòng và danh sách trường rõ ràng.
 Việc đổi từ ModelBackend sang AccountBackend và hash session mới khiến session trước M1-01 phải đăng nhập lại; chưa có production.

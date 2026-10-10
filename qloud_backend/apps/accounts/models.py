@@ -1,5 +1,7 @@
+from collections.abc import Iterable, Iterator
 from typing import Any, ClassVar
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -137,19 +139,44 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
             if field.attname in self.__dict__
         }
 
-    def refresh_from_db(self, *args: Any, **kwargs: Any) -> None:
-        super().refresh_from_db(*args, **kwargs)
-        fields = kwargs.get("fields")
-        for field in self._meta.concrete_fields:
-            if (
-                fields is None or field.name in fields or field.attname in fields
-            ) and field.attname in self.__dict__:
-                self._saved_values[field.attname] = self.__dict__[field.attname]
+    def refresh_from_db(
+        self,
+        using: str | None = None,
+        fields: Iterable[str] | None = None,
+        from_queryset: models.QuerySet[Any] | None = None,
+    ) -> None:
+        # Materialize once: Django consumes the iterable, and so does the snapshot below.
+        fields = None if fields is None else list(fields)
+        super().refresh_from_db(using=using, fields=fields, from_queryset=from_queryset)
+        self._mark_saved(fields)
+
+    def _mark_saved(self, names: Iterable[str] | None) -> None:
+        # Rebind instead of mutating, so a copy.copy() of this user keeps its own baseline.
+        names = None if names is None else set(names)
+        self._saved_values = {
+            **self._saved_values,
+            **{
+                field.attname: self.__dict__[field.attname]
+                for field in self._meta.concrete_fields
+                if field.attname in self.__dict__
+                and (names is None or field.name in names or field.attname in names)
+            },
+        }
 
     def __str__(self) -> str:
         return self.email
 
-    def _get_session_auth_hash(self, secret: str | None = None) -> str:
+    # Including session_version lets suspension revoke every session on any session
+    # engine without scanning them. Both public hooks are overridden so rotated
+    # SECRET_KEY_FALLBACKS keep working.
+    def get_session_auth_hash(self) -> str:
+        return self._session_hash(None)
+
+    def get_session_auth_fallback_hash(self) -> Iterator[str]:
+        for secret in settings.SECRET_KEY_FALLBACKS:
+            yield self._session_hash(secret)
+
+    def _session_hash(self, secret: str | bytes | None) -> str:
         return salted_hmac(
             "apps.accounts.User.session_auth_hash",
             f"{self.password}:{self.session_version}",
@@ -185,13 +212,14 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
                     or self.__dict__[field.attname] != self._saved_values[field.attname]
                 )
             }
+            # Password is left out: set_password() + save() is the standard Django and
+            # allauth flow, and only changed fields are written, so stale copies are safe.
             protected = {
                 "session_version",
                 "suspended_at",
                 "suspended_reason",
                 "used_bytes",
                 "reserved_bytes",
-                "password",
                 "is_active",
                 "is_staff",
                 "is_superuser",
@@ -205,9 +233,4 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
         if kwargs.get("update_fields") is not None:
             kwargs["update_fields"] = tuple(kwargs["update_fields"])
         super().save(*args, **kwargs)
-        saved_fields = kwargs.get("update_fields")
-        for field in self._meta.concrete_fields:
-            if (
-                saved_fields is None or field.name in saved_fields or field.attname in saved_fields
-            ) and field.attname in self.__dict__:
-                self._saved_values[field.attname] = self.__dict__[field.attname]
+        self._mark_saved(kwargs.get("update_fields"))

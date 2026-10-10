@@ -126,3 +126,11 @@ msgstr "Accounts"
 
 msgid "Account state changes require explicit update_fields."
 msgstr "Account state changes require explicit update_fields."
+
+#, python-format
+msgid ""
+"%(count)d selected account(s) were already suspended; their original "
+"suspension was kept."
+msgstr ""
+"%(count)d selected account(s) were already suspended; their original "
+"suspension was kept."

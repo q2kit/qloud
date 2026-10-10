@@ -160,7 +160,7 @@ def test_suspend_revokes_sessions_after_unsuspension_without_scanning(
     other_client = Client()
     other_client.force_login(other)
     # The query count is independent of the number of sessions in the system.
-    with django_assert_num_queries(7):
+    with django_assert_num_queries(4):
         suspend_user(user, reason="Abuse")
     user.refresh_from_db()
     assert user.suspended_at is not None
@@ -243,7 +243,6 @@ def test_validation_rejects_switch_to_inactive_plan_but_keeps_existing_assignmen
         ("suspended_reason", "Changed"),
         ("used_bytes", 600),
         ("reserved_bytes", 50),
-        ("password", "new-hash"),
         ("is_active", False),
         ("is_staff", True),
         ("is_superuser", True),
@@ -345,3 +344,63 @@ def test_deferred_state_assignment_cannot_be_silently_ignored():
     with pytest.raises(ValidationError, match="update_fields"):
         profile.save()
     assert User.objects.get(pk=user.pk).suspended_at is not None
+
+
+def test_standard_password_flows_save_without_update_fields():
+    from django.contrib.auth.forms import SetPasswordForm
+
+    user = User.objects.create_user("alice@example.com", "old-password")
+    user.set_password("direct-password")
+    user.save()
+    assert User.objects.get(pk=user.pk).check_password("direct-password")
+    form = SetPasswordForm(
+        user, {"new_password1": "Form-pass-9137", "new_password2": "Form-pass-9137"}
+    )
+    assert form.is_valid(), form.errors
+    form.save()
+    assert User.objects.get(pk=user.pk).check_password("Form-pass-9137")
+
+
+def test_changepassword_command_updates_password():
+    from django.core.management import call_command
+
+    user = User.objects.create_user("alice@example.com", "old-password")
+    with patch("getpass.getpass", return_value="Command-pass-9137"):
+        call_command("changepassword", user.email, stdout=None)
+    assert User.objects.get(pk=user.pk).check_password("Command-pass-9137")
+
+
+@pytest.mark.parametrize("positional", [False, True])
+def test_refresh_from_db_snapshot_accepts_positional_and_generator_fields(positional):
+    user = User.objects.create_user("alice@example.com")
+    User.objects.filter(pk=user.pk).update(display_name="Remote")
+    user.session_version = 1
+    fields = (name for name in ["display_name"])
+    if positional:
+        user.refresh_from_db(None, fields)
+    else:
+        user.refresh_from_db(fields=fields)
+    assert user.display_name == "Remote"
+    # The unrefreshed local change must still be detected, not absorbed by the snapshot.
+    with pytest.raises(ValidationError, match="update_fields"):
+        user.save()
+    user.session_version = 0
+    user.display_name = "Local"
+    user.save()
+    assert User.objects.get(pk=user.pk).display_name == "Local"
+
+
+def test_session_survives_secret_rotation_until_suspension(client, settings):
+    user = User.objects.create_user("alice@example.com")
+    client.force_login(user)
+    session = client.session
+    settings.SECRET_KEY_FALLBACKS = [settings.SECRET_KEY]
+    settings.SECRET_KEY = "rotated-" + settings.SECRET_KEY
+    request = RequestFactory().get("/")
+    request.session = session
+    assert get_user(request) == user
+    suspend_user(user, reason="Abuse")
+    unsuspend_user(user)
+    request = RequestFactory().get("/")
+    request.session = session
+    assert get_user(request).is_anonymous

@@ -126,3 +126,11 @@ msgstr "Tài khoản"
 
 msgid "Account state changes require explicit update_fields."
 msgstr "Thay đổi trạng thái tài khoản cần chỉ định update_fields rõ ràng."
+
+#, python-format
+msgid ""
+"%(count)d selected account(s) were already suspended; their original "
+"suspension was kept."
+msgstr ""
+"%(count)d tài khoản đã chọn đang bị khóa từ trước; giữ nguyên thông tin "
+"khóa ban đầu."

@@ -1,12 +1,10 @@
 from concurrent.futures import ThreadPoolExecutor
-from queue import Queue
-from threading import Barrier, Event
-from time import monotonic, sleep
+from threading import Barrier
 from unittest.mock import patch
 
 import pytest
 from django.core.exceptions import ValidationError
-from django.db import OperationalError, connection, connections, transaction
+from django.db import connection, connections, transaction
 from django.db.models.query import QuerySet
 
 from apps.accounts.models import Plan, User
@@ -50,68 +48,17 @@ def test_signup_does_not_lock_unrelated_plan():
     assert user.plan.code == "free-2026"
 
 
-def test_default_switch_waits_for_inflight_signup():
-    entered_root, release_root = Event(), Event()
-    original = QuerySet.create
+def test_signup_is_not_blocked_by_default_switch_in_progress():
     plus = Plan.objects.get(code="plus-2026")
-
-    def create_root(queryset, **kwargs):
-        if queryset.model is Node:
-            entered_root.set()
-            assert release_root.wait(timeout=5)
-        return original(queryset, **kwargs)
-
-    with ThreadPoolExecutor(1) as pool, patch.object(QuerySet, "create", create_root):
-        future = pool.submit(create_user_in_thread, "old@example.com")
-        try:
-            assert entered_root.wait(timeout=5)
-            with transaction.atomic():
-                with connection.cursor() as cursor:
-                    cursor.execute("SET LOCAL lock_timeout = '200ms'")
-                with pytest.raises(OperationalError, match="lock timeout"):
-                    set_default_plan(plus)
-        finally:
-            release_root.set()
-        old = future.result(timeout=5)
-    set_default_plan(plus)
-    new = User.objects.create_user("new@example.com")
-    assert old.plan.code == "free-2026"
-    assert new.plan_id == plus.pk
-
-
-def test_signup_waiting_during_default_switch_retries_with_new_plan():
-    free = Plan.objects.get(code="free-2026")
-    plus = Plan.objects.get(code="plus-2026")
-    backend_pid = Queue[int]()
-
-    def signup():
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT pg_backend_pid()")
-                backend_pid.put(cursor.fetchone()[0])
-            return create_user_in_thread("waiting@example.com")
-        finally:
-            connections.close_all()
-
     with ThreadPoolExecutor(1) as pool:
         with transaction.atomic():
-            Plan.objects.select_for_update().get(pk=free.pk)
-            future = pool.submit(signup)
-            pid = backend_pid.get(timeout=5)
-            deadline = monotonic() + 3
-            while monotonic() < deadline:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "SELECT wait_event_type FROM pg_stat_activity WHERE pid = %s", [pid]
-                    )
-                    if cursor.fetchone()[0] == "Lock":
-                        break
-                sleep(0.01)
-            else:
-                pytest.fail("Signup did not reach the shared plan lock")
+            # Hold the same locks as set_default_plan while a signup runs.
+            list(Plan.objects.select_for_update(no_key=True))
+            during = pool.submit(create_user_in_thread, "during@example.com").result(timeout=5)
             set_default_plan(plus)
-        user = future.result(timeout=5)
-    assert user.plan_id == plus.pk
+        after = pool.submit(create_user_in_thread, "after@example.com").result(timeout=5)
+    assert during.plan.code == "free-2026"
+    assert after.plan_id == plus.pk
 
 
 def test_simultaneous_suspensions_keep_one_superuser_available():
@@ -132,42 +79,6 @@ def test_simultaneous_suspensions_keep_one_superuser_available():
         results = list(pool.map(suspend, admins))
     assert sorted(results) == ["last_superuser", "suspended"]
     assert User.objects.filter(is_superuser=True, suspended_at__isnull=True).count() == 1
-
-
-def test_ordinary_suspension_does_not_lock_admin():
-    admin = User.objects.create_superuser("admin@example.com")
-    user = User.objects.create_user("alice@example.com")
-
-    def suspend():
-        try:
-            with transaction.atomic():
-                with connection.cursor() as cursor:
-                    cursor.execute("SET LOCAL lock_timeout = '300ms'")
-                suspend_user(user, reason="Review test")
-        finally:
-            connections.close_all()
-
-    with ThreadPoolExecutor(1) as pool, transaction.atomic():
-        User.objects.select_for_update().get(pk=admin.pk)
-        pool.submit(suspend).result(timeout=5)
-    user.refresh_from_db()
-    assert user.suspended_at is not None
-
-
-def test_suspension_retries_group_lock_if_target_became_superuser():
-    user = User.objects.create_superuser("last@example.com")
-    original = QuerySet.exists
-
-    def outdated_probe(queryset):
-        if queryset.model is User:
-            return False
-        return original(queryset)
-
-    with patch.object(QuerySet, "exists", outdated_probe), pytest.raises(ValidationError) as error:
-        suspend_user(user, reason="Review test")
-    assert error.value.code == "last_superuser"
-    user.refresh_from_db()
-    assert user.suspended_at is None
 
 
 def test_simultaneous_admin_demotions_keep_one_available():
