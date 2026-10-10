@@ -89,7 +89,8 @@ Hash session (`get_session_auth_hash` và bản fallback cho `SECRET_KEY_FALLBAC
 Không quét/giải mã toàn bộ session. Session dùng ModelBackend/hash cũ trước M1-01 phải đăng nhập lại sau nâng cấp.
 M1-02: allauth headless gắn ở `/api/auth/` (`config/urls.py`); `accounts.adapter.AccountAdapter` và `accounts.auth_views` tùy biến
 đăng ký/đăng nhập (xem auth.md). M1-04: `core.turnstile` kiểm tra token Turnstile bằng thư viện chuẩn (`urllib`), không thêm dependency;
-email auth gửi qua task Celery `accounts.tasks.send_email`, template ở `accounts/templates/account/email/`. allauth không có type hint: `pyproject.toml` bỏ qua import của `allauth.*` và cho phép kế thừa trong ba module tích hợp.
+email auth gửi qua task Celery `accounts.tasks.send_email`, template ở `accounts/templates/account/email/`.
+M1-06: `GET /api/v1/config` (`core.views.ConfigView`) cấp cấu hình công khai lúc chạy cho SPA; `GET/PATCH /api/v1/me` (`accounts.views.MeView`) cho hồ sơ và tùy chọn. allauth không có type hint: `pyproject.toml` bỏ qua import của `allauth.*` và cho phép kế thừa trong ba module tích hợp.
 Action Django admin dùng gettext, catalog `vi` và `en` nằm trong `accounts/locale`;
 commit cả `.po` và `.mo` để runtime/CI không phụ thuộc gettext CLI. Khi sửa bản dịch, chạy
 `cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run --frozen python manage.py compilemessages -l vi -l en --ignore .venv`
@@ -145,7 +146,7 @@ Với share link thì chỉ xét token của link đó và cây con bên dưới
   |---|---|---|
   | `.env` (gốc repo) | docker compose | Postgres, Redis, LocalStack token, Mailpit, CORS của bucket |
   | `qloud_backend/.env` | Django, Celery | Secret key, `APP_DOMAIN`, DB/Redis URL, S3, SMTP, OAuth, Turnstile, Sentry |
-  | `qloud_frontend/.env` | Vite (`VITE_*`) | Chỉ giá trị công khai, ví dụ Turnstile site key |
+  | `qloud_frontend/.env` | Vite (`VITE_*`) | Chỉ giá trị công khai; hiện chưa cần biến nào. Cấu hình lúc chạy (ví dụ Turnstile site key) lấy từ `GET /api/v1/config` |
 
 ### Production
 - Một VPS chạy Docker Compose: nginx, api (gunicorn), worker, beat, postgres, redis; phía trước là Cloudflare proxy

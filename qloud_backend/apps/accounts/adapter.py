@@ -15,6 +15,11 @@ from .models import Plan, User
 from .tasks import send_email
 
 
+def user_display(user: User) -> str:
+    """How allauth names the user (session `display`, emails): the profile name."""
+    return user.display_name.strip() or user.email
+
+
 def apply_request_locale(request: HttpRequest, user: User) -> None:
     # LocaleMiddleware has already resolved Accept-Language to a supported language.
     language = getattr(request, "LANGUAGE_CODE", "")

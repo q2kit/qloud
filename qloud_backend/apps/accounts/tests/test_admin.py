@@ -340,3 +340,22 @@ def test_admin_cannot_delete_users(admin_client):
     changelist = admin_client.get(reverse("admin:accounts_user_changelist"))
     assert "delete_selected" not in changelist.content.decode()
     assert User.objects.filter(pk__in=[admin.pk, other.pk]).count() == 2
+
+
+def test_suspension_actions_confirm_what_changed(admin_client):
+    users = [User.objects.create_user(f"user{i}@example.com") for i in range(2)]
+    url = reverse("admin:accounts_user_changelist")
+    selected = [str(user.pk) for user in users]
+    response = admin_client.post(
+        url, {"action": "suspend_accounts", "_selected_action": selected}, follow=True
+    )
+    assert "Đã khóa 2 tài khoản" in response.content.decode()
+    response = admin_client.post(
+        url, {"action": "unsuspend_accounts", "_selected_action": selected}, follow=True
+    )
+    assert "Đã mở khóa 2 tài khoản." in response.content.decode()
+
+
+def test_admin_app_section_does_not_clash_with_allauth(admin_client):
+    page = admin_client.get(reverse("admin:index")).content.decode()
+    assert "Người dùng và gói dung lượng" in page

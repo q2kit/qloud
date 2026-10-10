@@ -3,8 +3,6 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/app/theme-provider';
 
-import { turnstileSiteKey } from './turnstile-config';
-
 const SCRIPT_URL =
   'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
@@ -58,16 +56,18 @@ export interface TurnstileHandle {
 }
 
 interface TurnstileProps {
+  /** Public site key from GET /api/v1/config; `null` renders nothing. */
+  siteKey: string | null;
   /** Receives the token, or `''` once it expires or the check fails. */
   onToken: (token: string) => void;
 }
 
 /**
  * Cloudflare Turnstile widget (bot check on signup and password reset).
- * Renders nothing when no site key is configured.
+ * Renders nothing when the server does not check tokens.
  */
 export const Turnstile = React.forwardRef<TurnstileHandle, TurnstileProps>(
-  function Turnstile({ onToken }, ref) {
+  function Turnstile({ siteKey, onToken }, ref) {
     const { i18n } = useTranslation();
     const { theme } = useTheme();
     const containerRef = React.useRef<HTMLDivElement>(null);
@@ -84,7 +84,7 @@ export const Turnstile = React.forwardRef<TurnstileHandle, TurnstileProps>(
     }));
 
     React.useEffect(() => {
-      if (!turnstileSiteKey || !containerRef.current) return;
+      if (!siteKey || !containerRef.current) return;
       const container = containerRef.current;
       let cancelled = false;
       // `theme` may be "system"; the resolved one is the class on <html>.
@@ -95,7 +95,7 @@ export const Turnstile = React.forwardRef<TurnstileHandle, TurnstileProps>(
         (turnstile) => {
           if (cancelled) return;
           widgetRef.current = turnstile.render(container, {
-            sitekey: turnstileSiteKey,
+            sitekey: siteKey,
             theme: resolvedTheme,
             // The normal widget needs 300px; narrow phones get the compact one.
             size:
@@ -124,9 +124,9 @@ export const Turnstile = React.forwardRef<TurnstileHandle, TurnstileProps>(
         widgetRef.current = undefined;
         onTokenRef.current('');
       };
-    }, [language, theme]);
+    }, [siteKey, language, theme]);
 
-    if (!turnstileSiteKey) return null;
+    if (!siteKey) return null;
     return <div ref={containerRef} className="min-h-[65px]" />;
   },
 );

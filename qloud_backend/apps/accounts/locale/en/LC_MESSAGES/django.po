@@ -184,3 +184,14 @@ msgstr "Someone tried to sign up for Qloud with %(email)s, but an account with t
 
 msgid "If you forgot your password, you can reset it here:"
 msgstr "If you forgot your password, you can reset it here:"
+
+#, python-format
+msgid "%(count)d account(s) suspended; their sessions were signed out."
+msgstr "%(count)d account(s) suspended; their sessions were signed out."
+
+#, python-format
+msgid "%(count)d account(s) unsuspended."
+msgstr "%(count)d account(s) unsuspended."
+
+msgid "Users and plans"
+msgstr "Users and plans"

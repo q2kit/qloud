@@ -184,3 +184,14 @@ msgstr "Có người đã thử đăng ký Qloud bằng %(email)s, nhưng đã c
 
 msgid "If you forgot your password, you can reset it here:"
 msgstr "Nếu bạn quên mật khẩu, bạn có thể đặt lại tại đây:"
+
+#, python-format
+msgid "%(count)d account(s) suspended; their sessions were signed out."
+msgstr "Đã khóa %(count)d tài khoản; các phiên đăng nhập của họ đã bị đăng xuất."
+
+#, python-format
+msgid "%(count)d account(s) unsuspended."
+msgstr "Đã mở khóa %(count)d tài khoản."
+
+msgid "Users and plans"
+msgstr "Người dùng và gói dung lượng"

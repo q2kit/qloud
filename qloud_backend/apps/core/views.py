@@ -56,3 +56,30 @@ class HealthView(APIView):
             },
             status=status.HTTP_200_OK if healthy else status.HTTP_503_SERVICE_UNAVAILABLE,
         )
+
+
+CONFIG = inline_serializer(
+    "PublicConfig",
+    fields={
+        "turnstile_site_key": serializers.CharField(
+            allow_null=True,
+            help_text="Cloudflare Turnstile site key; null when the server does not check it.",
+        ),
+    },
+)
+
+
+class ConfigView(APIView):
+    """Runtime settings the SPA needs before anyone signs in.
+
+    Served by the backend so the Turnstile site key always matches the secret
+    the server verifies with, without rebuilding the frontend.
+    """
+
+    authentication_classes = ()
+    permission_classes = (AllowAny,)
+
+    @extend_schema(operation_id="config_retrieve", responses={200: CONFIG})
+    def get(self, request: Request) -> Response:
+        enabled = bool(settings.TURNSTILE_SECRET_KEY and settings.TURNSTILE_SITE_KEY)
+        return Response({"turnstile_site_key": settings.TURNSTILE_SITE_KEY if enabled else None})

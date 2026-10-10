@@ -15,6 +15,7 @@ PROD_ENV = {
     "REDIS_URL": "redis://localhost:6379/0",
     "CELERY_BROKER_URL": "redis://localhost:6379/1",
     "TURNSTILE_SECRET_KEY": "0x4AAAAAAA" + "s" * 25,
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAA" + "k" * 12,
 }
 
 
@@ -66,6 +67,14 @@ def test_wsgi_defaults_to_production_settings():
                 "TURNSTILE_SECRET_KEY": "1x0000000000000000000000000000000AA",
             },
             "TURNSTILE_SECRET_KEY",
+        ),
+        (
+            {
+                "DJANGO_SECRET_KEY": PROD_SECRET,
+                "APP_DOMAIN": "qloud.example.com",
+                "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+            },
+            "TURNSTILE_SITE_KEY",
         ),
     ],
 )

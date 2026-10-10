@@ -4,13 +4,13 @@ import { Link, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { useAppConfig } from '@/lib/use-app-config';
 
 import { authErrorMessages, safeNextPath } from '../auth-errors';
 import { AuthCard } from '../components/auth-card';
 import { FormAlert, FormField } from '../components/form-field';
 import { OAuthButtons } from '../components/oauth-buttons';
 import { Turnstile, type TurnstileHandle } from '../components/turnstile';
-import { turnstileSiteKey } from '../components/turnstile-config';
 import { useSetSession, useSignup } from '../use-auth';
 
 /** S-02. */
@@ -25,6 +25,8 @@ export function SignupPage(): React.JSX.Element {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [turnstileToken, setTurnstileToken] = React.useState('');
+  const config = useAppConfig();
+  const siteKey = config.data?.turnstile_site_key ?? null;
 
   if (signup.isSuccess) {
     return (
@@ -51,7 +53,9 @@ export function SignupPage(): React.JSX.Element {
   const errors = signup.isError
     ? authErrorMessages(signup.error, t)
     : { fields: {}, codes: [] };
-  const waitingForTurnstile = Boolean(turnstileSiteKey) && !turnstileToken;
+  // Until the config arrives we do not know whether a token is needed.
+  const waitingForTurnstile =
+    config.isPending || (Boolean(siteKey) && !turnstileToken);
 
   return (
     <AuthCard
@@ -112,7 +116,11 @@ export function SignupPage(): React.JSX.Element {
             setPassword(event.target.value);
           }}
         />
-        <Turnstile ref={turnstileRef} onToken={setTurnstileToken} />
+        <Turnstile
+          ref={turnstileRef}
+          siteKey={siteKey}
+          onToken={setTurnstileToken}
+        />
         <Button
           className="w-full"
           type="submit"

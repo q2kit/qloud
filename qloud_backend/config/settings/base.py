@@ -116,6 +116,7 @@ CSRF_COOKIE_HTTPONLY = False
 # --- allauth (headless; the SPA owns every auth screen) ---
 SIGNUP_ENABLED = env.bool("SIGNUP_ENABLED", default=True)
 ACCOUNT_ADAPTER = "apps.accounts.adapter.AccountAdapter"
+ACCOUNT_USER_DISPLAY = "apps.accounts.adapter.user_display"
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*"]
@@ -123,7 +124,8 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_PREVENT_ENUMERATION = True
 # Unverified users may sign in and browse; uploading and sharing check verification later.
 ACCOUNT_EMAIL_VERIFICATION = "optional"
-ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
+# Changing the password keeps this session; the new hash still signs out all others.
+ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = False
 # Adds the Turnstile token to both the email signup and the OAuth "complete signup" forms.
 ACCOUNT_SIGNUP_FORM_CLASS = "apps.accounts.forms.TurnstileSignupForm"
 ACCOUNT_EMAIL_SUBJECT_PREFIX = ""
@@ -183,6 +185,8 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 # --- Cloudflare Turnstile (empty secret disables the check; prod requires it) ---
+# The SPA reads the site key from GET /api/v1/config, so both keys live here.
+TURNSTILE_SITE_KEY = env("TURNSTILE_SITE_KEY", default="")
 TURNSTILE_SECRET_KEY = env("TURNSTILE_SECRET_KEY", default="")
 
 # --- i18n ---

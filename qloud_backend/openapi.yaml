@@ -3,6 +3,25 @@ info:
   title: Qloud API
   version: 1.0.0
 paths:
+  /api/v1/config:
+    get:
+      operationId: config_retrieve
+      description: |-
+        Runtime settings the SPA needs before anyone signs in.
+
+        Served by the backend so the Turnstile site key always matches the secret
+        the server verifies with, without rebuilding the frontend.
+      tags:
+      - v1
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicConfig'
+          description: ''
   /api/v1/health:
     get:
       operationId: health_retrieve
@@ -22,6 +41,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Health'
+          description: ''
+  /api/v1/me:
+    get:
+      operationId: me_retrieve
+      description: The signed-in user's profile and preferences (S-13).
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+    patch:
+      operationId: me_partial_update
+      description: The signed-in user's profile and preferences (S-13).
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMeRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
           description: ''
 components:
   schemas:
@@ -43,6 +96,71 @@ components:
       required:
       - checks
       - status
+    LocaleEnum:
+      enum:
+      - vi
+      - en
+      type: string
+      description: |-
+        * `vi` - Tiếng Việt
+        * `en` - Tiếng Anh
+    Me:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        display_name:
+          type: string
+          title: Tên hiển thị
+          maxLength: 100
+        avatar_url:
+          type: string
+          readOnly: true
+          nullable: true
+          title: URL ảnh đại diện
+        locale:
+          allOf:
+          - $ref: '#/components/schemas/LocaleEnum'
+          title: Ngôn ngữ
+        theme:
+          allOf:
+          - $ref: '#/components/schemas/ThemeEnum'
+          title: Giao diện
+      required:
+      - avatar_url
+      - email
+      - id
+    PatchedMeRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+          title: Tên hiển thị
+          maxLength: 100
+        locale:
+          allOf:
+          - $ref: '#/components/schemas/LocaleEnum'
+          title: Ngôn ngữ
+        theme:
+          allOf:
+          - $ref: '#/components/schemas/ThemeEnum'
+          title: Giao diện
+    PublicConfig:
+      type: object
+      properties:
+        turnstile_site_key:
+          type: string
+          nullable: true
+          description: Cloudflare Turnstile site key; null when the server does not
+            check it.
+      required:
+      - turnstile_site_key
     StatusEnum:
       enum:
       - ok
@@ -51,3 +169,18 @@ components:
       description: |-
         * `ok` - ok
         * `error` - error
+    ThemeEnum:
+      enum:
+      - system
+      - light
+      - dark
+      type: string
+      description: |-
+        * `system` - Theo hệ thống
+        * `light` - Sáng
+        * `dark` - Tối
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

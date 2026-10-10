@@ -204,12 +204,14 @@ export async function resetPassword(
 }
 
 /**
- * Start an OAuth login: allauth expects a regular form POST and redirects the
- * browser to the provider, then back to `callbackUrl` (with `?error=` on failure).
+ * Start OAuth: allauth expects a regular form POST and redirects the browser to
+ * the provider, then back to `callbackUrl` (with `?error=` on failure).
+ * `connect` links the provider to the signed-in account instead of signing in.
  */
 export async function redirectToProvider(
   provider: string,
   callbackUrl: string,
+  process: 'login' | 'connect' = 'login',
 ): Promise<void> {
   await ensureCsrfCookie();
   const form = document.createElement('form');
@@ -218,7 +220,7 @@ export async function redirectToProvider(
   const fields = {
     provider,
     callback_url: callbackUrl,
-    process: 'login',
+    process,
     csrfmiddlewaretoken: getCookie('csrftoken') ?? '',
   };
   for (const [name, value] of Object.entries(fields)) {
@@ -230,4 +232,41 @@ export async function redirectToProvider(
   }
   document.body.append(form);
   form.submit();
+}
+
+export interface ProviderAccount {
+  uid: string;
+  display: string;
+  provider: AuthProvider;
+}
+
+export async function fetchProviderAccounts(): Promise<ProviderAccount[]> {
+  const result = await request('GET', '/account/providers');
+  if (result.status !== 200) {
+    throw new AuthApiError(result.status, result.body.errors ?? []);
+  }
+  return (result.body.data as unknown as ProviderAccount[] | undefined) ?? [];
+}
+
+export async function disconnectProvider(
+  account: ProviderAccount,
+): Promise<void> {
+  await mutate('DELETE', '/account/providers', {
+    provider: account.provider.id,
+    account: account.uid,
+  });
+}
+
+/** Change the password, or set one when the account only signs in with OAuth. */
+export async function changePassword(
+  newPassword: string,
+  currentPassword?: string,
+): Promise<AuthSession> {
+  const body = await mutate('POST', '/account/password/change', {
+    new_password: newPassword,
+    ...(currentPassword === undefined
+      ? {}
+      : { current_password: currentPassword }),
+  });
+  return toSession(body);
 }

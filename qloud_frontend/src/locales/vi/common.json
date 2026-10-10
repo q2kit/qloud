@@ -57,8 +57,7 @@
   "placeholder": {
     "recent": "Nội dung Gần đây sẽ được triển khai trong M2-09.",
     "shared": "Nội dung Được chia sẻ sẽ được triển khai trong M5-05.",
-    "trash": "Nội dung Thùng rác sẽ được triển khai trong M4-03.",
-    "settings": "Nội dung Cài đặt sẽ được triển khai trong M1-06."
+    "trash": "Nội dung Thùng rác sẽ được triển khai trong M4-03."
   },
   "notFound": {
     "title": "Không tìm thấy trang",
@@ -121,7 +120,8 @@
       "successDescription": "Cảm ơn bạn! Địa chỉ email của bạn đã được xác thực.",
       "errorTitle": "Không thể xác thực email",
       "toDrive": "Vào Drive",
-      "toLogin": "Đăng nhập"
+      "toLogin": "Đăng nhập",
+      "errorDescription": "Liên kết không hợp lệ, đã được dùng hoặc đã hết hạn. Nếu bạn đã xác thực email trước đó thì không cần làm gì thêm."
     },
     "reset": {
       "requestTitle": "Quên mật khẩu",
@@ -165,5 +165,41 @@
   "account": {
     "menu": "Tài khoản",
     "logout": "Đăng xuất"
+  },
+  "settings": {
+    "save": "Lưu",
+    "saving": "Đang lưu…",
+    "saved": "Đã lưu.",
+    "loadFailed": "Không tải được cài đặt.",
+    "profile": {
+      "title": "Hồ sơ",
+      "displayName": "Tên hiển thị",
+      "displayNameHint": "Hiện cho những người bạn chia sẻ file.",
+      "saveFailed": "Không lưu được tên hiển thị. Vui lòng thử lại."
+    },
+    "preferences": {
+      "title": "Ngôn ngữ và giao diện",
+      "description": "Áp dụng ngay và theo tài khoản của bạn sang mọi trình duyệt."
+    },
+    "password": {
+      "changeTitle": "Đổi mật khẩu",
+      "changeDescription": "Các phiên đăng nhập khác sẽ bị đăng xuất; phiên này vẫn giữ.",
+      "setTitle": "Đặt mật khẩu",
+      "setDescription": "Tài khoản của bạn đang đăng nhập bằng Google/GitHub. Đặt mật khẩu để đăng nhập bằng email, và để có thể gỡ liên kết.",
+      "current": "Mật khẩu hiện tại",
+      "wrongCurrent": "Mật khẩu hiện tại không đúng.",
+      "submit": "Lưu mật khẩu",
+      "changed": "Đã cập nhật mật khẩu."
+    },
+    "linked": {
+      "title": "Tài khoản liên kết",
+      "description": "Đăng nhập nhanh bằng Google hoặc GitHub.",
+      "none": "Hiện chưa bật đăng nhập bằng Google hoặc GitHub.",
+      "notLinked": "Chưa liên kết",
+      "connect": "Liên kết",
+      "disconnect": "Gỡ liên kết",
+      "connectFailed": "Không liên kết được tài khoản. Có thể tài khoản này đã liên kết với người dùng khác.",
+      "loadFailed": "Không tải được danh sách tài khoản liên kết."
+    }
   }
 }

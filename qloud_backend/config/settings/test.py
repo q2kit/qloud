@@ -30,4 +30,5 @@ CELERY_TASK_EAGER_PROPAGATES = True
 # counters left in the shared Redis cache.
 ACCOUNT_RATE_LIMITS = False
 # Turnstile is exercised with a faked Cloudflare response in its own tests.
+TURNSTILE_SITE_KEY = ""
 TURNSTILE_SECRET_KEY = ""

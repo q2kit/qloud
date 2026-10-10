@@ -1,5 +1,5 @@
-import { LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router';
+import { LogOut, Settings } from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -46,6 +46,12 @@ export function AccountMenu(): React.JSX.Element | null {
           )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/settings">
+            <Settings />
+            {t('navigation.settings')}
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem
           disabled={logout.isPending}
           onSelect={() => {

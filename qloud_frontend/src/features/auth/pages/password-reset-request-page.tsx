@@ -4,12 +4,12 @@ import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { useAppConfig } from '@/lib/use-app-config';
 
 import { authErrorMessages } from '../auth-errors';
 import { AuthCard } from '../components/auth-card';
 import { FormAlert, FormField } from '../components/form-field';
 import { Turnstile, type TurnstileHandle } from '../components/turnstile';
-import { turnstileSiteKey } from '../components/turnstile-config';
 import { useRequestPasswordReset } from '../use-auth';
 
 /** S-04, first step: ask for a reset link. */
@@ -19,6 +19,8 @@ export function PasswordResetRequestPage(): React.JSX.Element {
   const turnstileRef = React.useRef<TurnstileHandle>(null);
   const [email, setEmail] = React.useState('');
   const [turnstileToken, setTurnstileToken] = React.useState('');
+  const config = useAppConfig();
+  const siteKey = config.data?.turnstile_site_key ?? null;
   const backToLogin = (
     <Link className="font-medium text-primary hover:underline" to="/login">
       {t('auth.reset.backToLogin')}
@@ -78,13 +80,18 @@ export function PasswordResetRequestPage(): React.JSX.Element {
             setEmail(event.target.value);
           }}
         />
-        <Turnstile ref={turnstileRef} onToken={setTurnstileToken} />
+        <Turnstile
+          ref={turnstileRef}
+          siteKey={siteKey}
+          onToken={setTurnstileToken}
+        />
         <Button
           className="w-full"
           type="submit"
           disabled={
             requestReset.isPending ||
-            (Boolean(turnstileSiteKey) && !turnstileToken)
+            config.isPending ||
+            (Boolean(siteKey) && !turnstileToken)
           }
         >
           {requestReset.isPending

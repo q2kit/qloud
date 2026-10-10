@@ -6,6 +6,7 @@ import { PasswordResetPage } from '@/features/auth/pages/password-reset-page';
 import { PasswordResetRequestPage } from '@/features/auth/pages/password-reset-request-page';
 import { SignupPage } from '@/features/auth/pages/signup-page';
 import { VerifyEmailPage } from '@/features/auth/pages/verify-email-page';
+import { SettingsPage } from '@/features/settings/settings-page';
 
 import { AppLayout } from './layout';
 import {
@@ -17,7 +18,7 @@ import {
 import { PublicLayout } from './public-layout';
 import type { RouteHandle } from './route-handle';
 
-type Section = 'recent' | 'shared' | 'trash' | 'settings';
+type Section = 'recent' | 'shared' | 'trash';
 
 function sectionPlaceholderRoute(section: Section): RouteObject {
   const handle: RouteHandle = { titleKey: `navigation.${section}` };
@@ -58,7 +59,13 @@ export const appRoutes: RouteObject[] = [
               sectionPlaceholderRoute('recent'),
               sectionPlaceholderRoute('shared'),
               sectionPlaceholderRoute('trash'),
-              sectionPlaceholderRoute('settings'),
+              {
+                path: 'settings',
+                Component: SettingsPage,
+                handle: {
+                  titleKey: 'navigation.settings',
+                } satisfies RouteHandle,
+              },
               {
                 path: '*',
                 Component: NotFoundPage,

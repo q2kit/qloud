@@ -58,10 +58,15 @@ module này gửi cookie, `X-CSRFToken` và `Accept-Language`, và là nơi duy 
 
 Callback của provider (không gọi trực tiếp): `/api/auth/oauth/<provider>/login/callback/`.
 
+### Cấu hình
+| Method | Path | Mô tả |
+|---|---|---|
+| GET | `/config` | Công khai, không cần đăng nhập: `turnstile_site_key` (null khi server không kiểm tra Turnstile) |
+
 ### Tài khoản
 | Method | Path | Mô tả |
 |---|---|---|
-| GET/PATCH | `/me` | Thông tin cá nhân, locale, theme |
+| GET/PATCH | `/me` | Hồ sơ và tùy chọn: `display_name`, `locale` (`vi`/`en`), `theme` (`system`/`light`/`dark`) sửa được; `id`, `email`, `avatar_url` chỉ đọc. PATCH chỉ ghi các trường được gửi |
 | GET | `/me/storage` | Quota, dung lượng đã dùng, chia theo loại file |
 
 ### Node

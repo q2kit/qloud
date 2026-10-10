@@ -23,6 +23,10 @@ const server = setupServer(
   http.get('/api/v1/health', () =>
     HttpResponse.json({ status: 'ok', checks: {} }),
   ),
+  // Turnstile off, as when the backend has no secret key.
+  http.get('/api/v1/config', () =>
+    HttpResponse.json({ turnstile_site_key: null }),
+  ),
   http.get(`${AUTH_BASE}/config`, () =>
     HttpResponse.json({
       status: 200,
@@ -264,7 +268,7 @@ describe('email verification (S-03)', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        'This link is invalid or has expired. Please request a new one.',
+        /already used, or expired\. If you verified your email before/,
       ),
     ).toBeInTheDocument();
     expect(
