@@ -19,6 +19,9 @@ urlpatterns = [
         name="auth-signup",
     ),
     path("api/auth/", include("allauth.headless.urls")),
+    # With HEADLESS_ONLY this only adds the OAuth provider callbacks, e.g.
+    # /api/auth/oauth/google/login/callback/ (register it at the provider).
+    path("api/auth/oauth/", include("allauth.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="api-docs"),
 ]

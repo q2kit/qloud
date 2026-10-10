@@ -15,7 +15,7 @@ dependencies = [
     "gunicorn>=26.2.0",
     "argon2-cffi>=25.1.0",
     "django-stubs-ext>=6.1.2",
-    "django-allauth[headless,headless-spec]>=65.19.7",
+    "django-allauth[headless,headless-spec,socialaccount]>=65.19.7",
 ]
 
 [dependency-groups]

@@ -49,8 +49,10 @@ Schema riêng ở `/api/auth/openapi.json` (xem tại `/api/auth/openapi.html`),
 | POST | `/auth/password/reset` | `{key, password}` |
 | POST | `/account/password/change` | Đổi mật khẩu khi đã đăng nhập |
 | GET / POST / DELETE | `/account/email` | Quản lý email |
+| POST (form) | `/auth/provider/redirect` | `provider`, `callback_url`, `process` (`login`/`connect`): chuyển sang Google/GitHub |
+| GET / DELETE | `/account/providers` | Provider đã liên kết / gỡ liên kết `{provider, account}` |
 
-OAuth Google/GitHub được thêm ở M1-03.
+Callback của provider (không gọi trực tiếp): `/api/auth/oauth/<provider>/login/callback/`.
 
 ### Tài khoản
 | Method | Path | Mô tả |

@@ -33,6 +33,9 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.headless",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.github",
     "apps.core",
     "apps.accounts",
     "apps.drive",
@@ -128,6 +131,41 @@ HEADLESS_FRONTEND_URLS = {
     "account_reset_password": f"{APP_BASE_URL}/password/reset",
     "account_reset_password_from_key": f"{APP_BASE_URL}/password/reset/{{key}}",
     "account_signup": f"{APP_BASE_URL}/signup",
+    # allauth appends ?error=... when the provider handshake fails.
+    "socialaccount_login_error": f"{APP_BASE_URL}/login",
+}
+
+# --- OAuth (Google, GitHub) ---
+# Credentials come from .env; a provider without a client id is left out entirely,
+# so /api/auth/browser/v1/config only lists providers that can actually be used.
+SOCIALACCOUNT_ADAPTER = "apps.accounts.adapter.SocialAccountAdapter"
+# Both providers verify email ownership, so a verified provider email signs into the
+# local account with that email and links the provider to it.
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+_OAUTH_PROVIDERS: dict[str, tuple[str, dict[str, object]]] = {
+    "google": (
+        "GOOGLE",
+        {
+            "SCOPE": ["openid", "profile", "email"],
+            "AUTH_PARAMS": {"access_type": "online"},
+            "OAUTH_PKCE_ENABLED": True,
+        },
+    ),
+    "github": ("GITHUB", {"SCOPE": ["read:user", "user:email"]}),
+}
+SOCIALACCOUNT_PROVIDERS = {
+    name: {
+        "APPS": [
+            {
+                "client_id": env(f"{prefix}_CLIENT_ID"),
+                "secret": env(f"{prefix}_CLIENT_SECRET", default=""),
+            }
+        ],
+        **options,
+    }
+    for name, (prefix, options) in _OAUTH_PROVIDERS.items()
+    if env(f"{prefix}_CLIENT_ID", default="")
 }
 
 # --- i18n ---
