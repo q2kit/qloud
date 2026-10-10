@@ -1,0 +1,12 @@
+{% load i18n %}{% autoescape off %}{% translate "Hello," %}
+
+{% blocktranslate %}Someone asked to reset the Qloud password for {{ email }}, but there is no Qloud account with this email address.{% endblocktranslate %}
+
+{% translate "If it was you, you can create an account here:" %}
+
+{{ signup_url }}
+
+{% translate "Otherwise, you can ignore this email." %}
+
+{% translate "The Qloud team" %}
+{% endautoescape %}

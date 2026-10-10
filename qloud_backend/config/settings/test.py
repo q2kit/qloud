@@ -29,3 +29,5 @@ CELERY_TASK_EAGER_PROPAGATES = True
 # Auth rate limits are configured and tested in M1-04; keep tests independent of
 # counters left in the shared Redis cache.
 ACCOUNT_RATE_LIMITS = False
+# Turnstile is exercised with a faked Cloudflare response in its own tests.
+TURNSTILE_SECRET_KEY = ""

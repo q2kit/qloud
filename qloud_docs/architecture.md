@@ -88,7 +88,8 @@ Auth backend `accounts.backends.AccountBackend` kế thừa backend email của 
 Hash session (`get_session_auth_hash` và bản fallback cho `SECRET_KEY_FALLBACKS`) gồm mật khẩu và `session_version`; khóa user tăng bộ đếm để thu hồi session độc lập session engine, kể cả khi mở khóa sau đó.
 Không quét/giải mã toàn bộ session. Session dùng ModelBackend/hash cũ trước M1-01 phải đăng nhập lại sau nâng cấp.
 M1-02: allauth headless gắn ở `/api/auth/` (`config/urls.py`); `accounts.adapter.AccountAdapter` và `accounts.auth_views` tùy biến
-đăng ký/đăng nhập (xem auth.md). allauth không có type hint: `pyproject.toml` bỏ qua import của `allauth.*` và cho phép kế thừa trong ba module tích hợp.
+đăng ký/đăng nhập (xem auth.md). M1-04: `core.turnstile` kiểm tra token Turnstile bằng thư viện chuẩn (`urllib`), không thêm dependency;
+email auth gửi qua task Celery `accounts.tasks.send_email`, template ở `accounts/templates/account/email/`. allauth không có type hint: `pyproject.toml` bỏ qua import của `allauth.*` và cho phép kế thừa trong ba module tích hợp.
 Action Django admin dùng gettext, catalog `vi` và `en` nằm trong `accounts/locale`;
 commit cả `.po` và `.mo` để runtime/CI không phụ thuộc gettext CLI. Khi sửa bản dịch, chạy
 `cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run --frozen python manage.py compilemessages -l vi -l en --ignore .venv`

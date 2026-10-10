@@ -76,6 +76,7 @@ django_settings_module = "config.settings.test"
 DJANGO_SETTINGS_MODULE = "config.settings.test"
 addopts = "-ra --strict-markers --reuse-db"
 python_files = ["test_*.py"]
+markers = ["real_on_commit: keep transaction.on_commit deferred (see apps/accounts/tests/conftest.py)"]
 # Fail on Django deprecations so code keeps up with the current Django version
 filterwarnings = ["error::django.utils.deprecation.RemovedAfterNextVersionWarning", "error:::django"]
 

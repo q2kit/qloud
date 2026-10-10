@@ -48,6 +48,19 @@ Kiểm tra share link của owner bị khóa sẽ triển khai ở M5 khi có mo
   Đăng ký bằng email đã có trả `email_taken`: với xác thực `optional` thì không giấu được, vì đăng ký thành công là đăng nhập luôn. Rate limit ở M1-04 giới hạn việc dò email.
 - User bị khóa: `AccountBackend` (kế thừa backend của allauth) từ chối khi đăng nhập và khi nạp session; đăng nhập đúng mật khẩu chỉ nhận phản hồi 401 chung.
   `AccountAdapter.pre_login` chặn thêm các luồng không qua `authenticate()` (OAuth ở M1-03, login by code).
+### M1-04: rate limit, Turnstile, email
+- **Rate limit** (allauth, đếm trong cache Redis nên đúng khi chạy nhiều instance): đăng nhập 10 lần/phút/IP và 5 lần sai/phút/email;
+  đăng ký 10/phút/IP; quên mật khẩu 10/phút/IP và 5/phút/email; đặt lại mật khẩu bằng key 10/phút/IP.
+  Vượt giới hạn trả **429** (`{"status": 429}`), kể cả khóa theo email khi đăng nhập sai (allauth trả 400 `too_many_login_attempts`, view đăng nhập đổi thành 429).
+- **IP của client:** `TRUSTED_CLIENT_IP_HEADER` (→ `ALLAUTH_TRUSTED_CLIENT_IP_HEADER`). Production mặc định `CF-Connecting-IP`: firewall chỉ cho Cloudflare vào (ADR-0006) nên header này tin được. Dev để trống, dùng `REMOTE_ADDR`.
+- **Turnstile:** đăng ký (email, và bước hoàn tất đăng ký OAuth nếu có) và quên mật khẩu nhận thêm `turnstile_token`; server gọi `siteverify` của Cloudflare kèm IP client.
+  Token sai, thiếu, hoặc không gọi được Cloudflare thì trả 400 `captcha_invalid` ở trường `turnstile_token`. Đăng nhập không cần Turnstile (đã có rate limit).
+  `TURNSTILE_SECRET_KEY` trống thì bỏ qua kiểm tra (test); production từ chối khởi động khi key trống hoặc là test key của Cloudflare. Dev dùng test key trong `.env.example`: luôn qua, cần mạng.
+- **Email:** adapter render email trong request (ngôn ngữ = `locale` của user nếu đã có, nếu không thì ngôn ngữ của request), rồi đẩy task Celery `accounts.tasks.send_email`
+  sau khi transaction commit. Lỗi SMTP được thử lại tối đa 5 lần, backoff tới 10 phút. Không có worker thì email không được gửi; worker dev trên macOS: xem [#86](https://github.com/q2kit/qloud/issues/86).
+- **Template** `vi`/`en` ở `accounts/templates/account/email/` (dạng text): xác thực email, đặt lại mật khẩu, yêu cầu đặt lại cho email chưa có tài khoản, đăng ký trùng email.
+  Chuỗi dịch nằm trong catalog của `accounts`; app `accounts` đứng trước allauth trong `INSTALLED_APPS` để template và bản dịch này được ưu tiên.
+
 ### M1-03: OAuth Google và GitHub
 - Luồng: SPA gửi form `POST /api/auth/browser/v1/auth/provider/redirect` (`provider`, `callback_url`, `process` = `login` hoặc `connect`) → provider → callback
   `/api/auth/oauth/<provider>/login/callback/` → redirect về `callback_url` của SPA. Lỗi thì về `/login?error=...`.
@@ -62,7 +75,6 @@ Kiểm tra share link của owner bị khóa sẽ triển khai ở M5 khi có mo
 - Gỡ liên kết qua `DELETE /api/auth/browser/v1/account/providers`; allauth từ chối nếu đó là phương thức đăng nhập cuối cùng (chưa đặt mật khẩu và không còn provider khác).
 - Không lưu token của provider (`SOCIALACCOUNT_STORE_TOKENS` mặc định tắt). Google dùng PKCE và `access_type=online`.
 
-- Email gửi đồng bộ qua `MAILERS` với template mặc định của allauth; M1-04 chuyển sang Celery và template `vi`/`en`. Rate limit mặc định của allauth đang bật, M1-04 chỉnh theo quy tắc ở dưới.
 
 ## User stories
 - Là khách, tôi muốn đăng ký bằng email và mật khẩu, để có Drive riêng.

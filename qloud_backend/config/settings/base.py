@@ -30,6 +30,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "drf_spectacular",
+    # Before allauth so our email templates and translations take precedence over its own.
+    "apps.accounts",
     "allauth",
     "allauth.account",
     "allauth.headless",
@@ -37,7 +39,6 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.github",
     "apps.core",
-    "apps.accounts",
     "apps.drive",
 ]
 
@@ -123,6 +124,19 @@ ACCOUNT_PREVENT_ENUMERATION = True
 # Unverified users may sign in and browse; uploading and sharing check verification later.
 ACCOUNT_EMAIL_VERIFICATION = "optional"
 ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
+# Adds the Turnstile token to both the email signup and the OAuth "complete signup" forms.
+ACCOUNT_SIGNUP_FORM_CLASS = "apps.accounts.forms.TurnstileSignupForm"
+ACCOUNT_EMAIL_SUBJECT_PREFIX = ""
+# Merged over allauth's defaults. Login: 10 attempts/min per IP, 5 failures/min per email.
+ACCOUNT_RATE_LIMITS: dict[str, str] | bool = {
+    "login": "10/m/ip",
+    "login_failed": "10/m/ip,5/m/key",
+    "signup": "10/m/ip",
+    "reset_password": "10/m/ip,5/m/key",
+    "reset_password_from_key": "10/m/ip",
+}
+# Header carrying the real client IP, set by a proxy we control (empty: use REMOTE_ADDR).
+ALLAUTH_TRUSTED_CLIENT_IP_HEADER = env("TRUSTED_CLIENT_IP_HEADER", default="") or None
 HEADLESS_ONLY = True
 HEADLESS_CLIENTS = ("browser",)
 HEADLESS_SERVE_SPECIFICATION = True
@@ -167,6 +181,9 @@ SOCIALACCOUNT_PROVIDERS = {
     for name, (prefix, options) in _OAUTH_PROVIDERS.items()
     if env(f"{prefix}_CLIENT_ID", default="")
 }
+
+# --- Cloudflare Turnstile (empty secret disables the check; prod requires it) ---
+TURNSTILE_SECRET_KEY = env("TURNSTILE_SECRET_KEY", default="")
 
 # --- i18n ---
 LANGUAGE_CODE = "vi"

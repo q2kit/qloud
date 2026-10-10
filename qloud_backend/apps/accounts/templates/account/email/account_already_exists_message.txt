@@ -1,0 +1,12 @@
+{% load i18n %}{% autoescape off %}{% translate "Hello," %}
+
+{% blocktranslate %}Someone tried to sign up for Qloud with {{ email }}, but an account with this email address already exists.{% endblocktranslate %}
+
+{% translate "If you forgot your password, you can reset it here:" %}
+
+{{ password_reset_url }}
+
+{% translate "Otherwise, you can ignore this email." %}
+
+{% translate "The Qloud team" %}
+{% endautoescape %}

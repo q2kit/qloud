@@ -2,7 +2,11 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from apps.accounts.auth_views import EmailAwareSignupView, RememberLoginView
+from apps.accounts.auth_views import (
+    EmailAwareSignupView,
+    RememberLoginView,
+    TurnstilePasswordResetView,
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -17,6 +21,11 @@ urlpatterns = [
         "api/auth/browser/v1/auth/signup",
         EmailAwareSignupView.as_api_view(client="browser"),
         name="auth-signup",
+    ),
+    path(
+        "api/auth/browser/v1/auth/password/request",
+        TurnstilePasswordResetView.as_api_view(client="browser"),
+        name="auth-password-request",
     ),
     path("api/auth/", include("allauth.headless.urls")),
     # With HEADLESS_ONLY this only adds the OAuth provider callbacks, e.g.

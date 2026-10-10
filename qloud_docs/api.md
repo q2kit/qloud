@@ -36,16 +36,18 @@ Do allauth headless cung cấp (phiên bản `v1` của allauth). **Ngoại lệ
 không dùng định dạng lỗi chung ở trên: thành công `{"status", "data", "meta": {"is_authenticated"}}`,
 lỗi `{"status", "errors": [{"code", "message", "param"}]}`. Chưa đăng nhập thì trả 401 kèm `data.flows`.
 Schema riêng ở `/api/auth/openapi.json` (xem tại `/api/auth/openapi.html`), không nằm trong `openapi.yaml`.
+Schema đó là của allauth nên không có các trường Qloud thêm vào: `remember` (login) và `turnstile_token` (signup, password request, provider signup).
+Vượt rate limit trả 429; Turnstile sai trả 400 với `code: "captcha_invalid"`, `param: "turnstile_token"`.
 
 | Method | Path | Mô tả |
 |---|---|---|
 | GET | `/config` | Cấu hình auth; cũng đặt cookie `csrftoken` |
 | GET / DELETE | `/auth/session` | Session hiện tại / đăng xuất |
-| POST | `/auth/signup` | `{email, password}` |
+| POST | `/auth/signup` | `{email, password, turnstile_token}` |
 | POST | `/auth/login` | `{email, password, remember?}` |
 | POST | `/auth/email/verify` | `{key}` từ link trong email |
 | POST | `/auth/email/verify/resend` | Gửi lại email xác thực |
-| POST | `/auth/password/request` | `{email}`: gửi email đặt lại mật khẩu |
+| POST | `/auth/password/request` | `{email, turnstile_token}`: gửi email đặt lại mật khẩu |
 | POST | `/auth/password/reset` | `{key, password}` |
 | POST | `/account/password/change` | Đổi mật khẩu khi đã đăng nhập |
 | GET / POST / DELETE | `/account/email` | Quản lý email |
