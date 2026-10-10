@@ -41,7 +41,7 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
 ### Hành vi responsive của application shell
 
 - Từ breakpoint `lg`, sidebar rộng 256px cố định bên trái; trên màn hình nhỏ hơn, sidebar mở thành drawer có lớp nền che.
-- Header luôn nằm trên cùng, gồm tiêu đề, tìm kiếm hoặc command palette, menu "Tạo mới" (Thư mục mới; Tải tệp lên từ M2-08), nút bật panel chi tiết và menu tài khoản (đăng xuất).
+- Header luôn nằm trên cùng, gồm tiêu đề, tìm kiếm hoặc command palette, menu "Tạo mới" (Thư mục mới, Tải tệp lên), nút bật panel chi tiết và menu tài khoản (đăng xuất).
   Tiêu đề header lấy theo route đang mở (`handle.titleKey` của route, ví dụ Drive, Gần đây, Thùng rác, 404).
 - Trang Drive (S-05): breadcrumb nằm đầu nội dung trang và là tiêu đề trang, mục cuối (folder hiện tại) là `<h1>`. Trên màn hình hẹp, các folder ở giữa thu thành "…".
   `/` chuyển sang `/drive`. Id trong URL là UUID bỏ dấu gạch (`/drive/folders/01a1261573fd7134b1948c39b526fe9e`).

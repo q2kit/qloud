@@ -185,6 +185,11 @@ export async function verifyEmail(key: string): Promise<void> {
   await mutate('POST', '/auth/email/verify', { key }, [401]);
 }
 
+/** Send the verification email for `email` again (allauth: PUT account/email). */
+export async function resendVerificationEmail(email: string): Promise<void> {
+  await mutate('PUT', '/account/email', { email });
+}
+
 export async function requestPasswordReset(
   email: string,
   turnstileToken: string,

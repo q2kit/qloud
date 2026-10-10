@@ -3,6 +3,7 @@ import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 
 import { useDriveStore } from '@/features/drive/store';
+import { useUploadStore } from '@/features/upload/store';
 
 import { installMatchMedia, resetMediaQueries } from './match-media';
 
@@ -10,6 +11,7 @@ afterEach(() => {
   cleanup();
   // Module-level store: selection and open panels must not leak between tests.
   useDriveStore.setState(useDriveStore.getInitialState(), true);
+  useUploadStore.setState(useUploadStore.getInitialState(), true);
   resetMediaQueries();
   localStorage.clear();
   document.documentElement.className = '';

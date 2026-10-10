@@ -57,6 +57,10 @@ interface NodeCollectionProps {
   onDropOnFolder: (folder: DriveNode, ids: string[]) => void;
   /** Rubber-band selection on empty space (desktop file managers). */
   onMarqueeSelect: (ids: string[]) => void;
+  /** Files dragged in from the computer and dropped on a folder: upload into it. */
+  onDropFiles: (folder: DriveNode, dataTransfer: DataTransfer) => void;
+  /** The folder files would go into while they are dragged over one (null: none). */
+  onFileDragOverFolder: (folder: DriveNode | null) => void;
   onClearSelection: () => void;
 }
 
@@ -335,6 +339,8 @@ function NodeItem({
   actionsFor,
   dragIdsFor,
   onDropOnFolder,
+  onDropFiles,
+  onFileDragOverFolder,
 }: NodeCollectionProps & {
   node: DriveNode;
   index: number;
@@ -354,10 +360,19 @@ function NodeItem({
   const isDropTarget = context.dropTargetId === node.id;
   const canReceive = node.kind === 'folder' && !context.dragging.has(node.id);
 
+  const isFileDrag = (event: React.DragEvent): boolean =>
+    event.dataTransfer.types.includes('Files');
   const dropHandlers =
     node.kind === 'folder'
       ? {
           onDragOver: (event: React.DragEvent) => {
+            if (isFileDrag(event)) {
+              event.preventDefault();
+              event.dataTransfer.dropEffect = 'copy';
+              context.setDropTargetId(node.id);
+              onFileDragOverFolder(node);
+              return;
+            }
             if (!canReceive || readDraggedIds(event) === null) return;
             event.preventDefault();
             event.dataTransfer.dropEffect = 'move';
@@ -365,10 +380,19 @@ function NodeItem({
           },
           onDragLeave: () => {
             if (isDropTarget) context.setDropTargetId(null);
+            onFileDragOverFolder(null);
           },
           onDrop: (event: React.DragEvent) => {
-            const ids = readDraggedIds(event);
             context.setDropTargetId(null);
+            if (isFileDrag(event)) {
+              // Into this folder, not the one the page shows.
+              event.preventDefault();
+              event.stopPropagation();
+              onFileDragOverFolder(null);
+              onDropFiles(node, event.dataTransfer);
+              return;
+            }
+            const ids = readDraggedIds(event);
             if (!canReceive || !ids?.length) return;
             event.preventDefault();
             onDropOnFolder(node, ids);

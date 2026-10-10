@@ -1,10 +1,18 @@
-import { FolderOpen, FolderPlus, FolderX, RotateCw } from 'lucide-react';
+import {
+  FileUp,
+  FolderOpen,
+  FolderPlus,
+  FolderX,
+  RotateCw,
+} from 'lucide-react';
 import * as React from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { FormAlert } from '@/features/auth/components/form-field';
+import { useUploader } from '@/features/upload/context';
+import { filesFromDrop } from '@/features/upload/drop';
 import { ApiError } from '@/lib/api/errors';
 
 import { nodeActions, type ActionHandlers } from './actions';
@@ -59,6 +67,46 @@ export function DrivePage(): React.JSX.Element {
   const [moving, setMoving] = React.useState<Moving | null>(null);
   const [actionError, setActionError] = React.useState<string | null>(null);
   const [announcement, setAnnouncement] = React.useState('');
+  const uploader = useUploader();
+  // Files dragged in from the computer (ui-ux.md: "Kéo file vào đây để upload").
+  const [fileDrag, setFileDrag] = React.useState<{
+    over: string | null;
+  } | null>(null);
+  const dragDepth = React.useRef(0);
+  const uploadFrom = (
+    dataTransfer: DataTransfer,
+    parentId: string | undefined,
+  ): void => {
+    const { files, folders } = filesFromDrop(dataTransfer);
+    setActionError(
+      folders > 0 ? t('upload.errors.folders_not_supported') : null,
+    );
+    if (parentId && files.length > 0) uploader.add(files, parentId);
+  };
+  const fileDragHandlers = {
+    onDragEnter: (event: React.DragEvent) => {
+      if (!event.dataTransfer.types.includes('Files')) return;
+      dragDepth.current += 1;
+      setFileDrag((current) => current ?? { over: null });
+    },
+    onDragLeave: (event: React.DragEvent) => {
+      if (!event.dataTransfer.types.includes('Files')) return;
+      dragDepth.current = Math.max(0, dragDepth.current - 1);
+      if (dragDepth.current === 0) setFileDrag(null);
+    },
+    onDragOver: (event: React.DragEvent) => {
+      if (!event.dataTransfer.types.includes('Files')) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'copy';
+    },
+    onDrop: (event: React.DragEvent) => {
+      dragDepth.current = 0;
+      setFileDrag(null);
+      if (!event.dataTransfer.types.includes('Files')) return;
+      event.preventDefault();
+      uploadFrom(event.dataTransfer, folderId);
+    },
+  };
 
   // A selection from another folder means nothing here (a just-created folder is kept).
   React.useEffect(() => {
@@ -239,8 +287,27 @@ export function DrivePage(): React.JSX.Element {
     );
   }
 
+  const currentName = folder.data?.is_root
+    ? t('shell.breadcrumbRoot')
+    : folder.data?.name;
+
   return (
-    <section className="mx-auto flex max-w-7xl flex-col gap-4">
+    <section
+      className="relative mx-auto flex max-w-7xl flex-col gap-4"
+      {...fileDragHandlers}
+    >
+      {fileDrag && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-3 z-20 flex items-end justify-center rounded-xl border-2 border-dashed border-primary bg-primary/5 pb-6"
+        >
+          <span className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-soft">
+            {t('upload.dropHere', {
+              folder: fileDrag.over ?? currentName ?? '',
+            })}
+          </span>
+        </div>
+      )}
       <div className="flex min-h-9 items-center border-b border-border pb-4">
         {folder.data ? (
           <DriveBreadcrumb folder={folder.data} onDrop={dropOn} />
@@ -276,6 +343,9 @@ export function DrivePage(): React.JSX.Element {
           onCreate={() => {
             store.setCreatingFolder(true);
           }}
+          onUpload={(files) => {
+            if (folderId) uploader.add(files, folderId);
+          }}
         />
       ) : (
         <NodeCollection
@@ -297,6 +367,16 @@ export function DrivePage(): React.JSX.Element {
             selectedIds.has(node.id) ? [...selectedIds] : [node.id]
           }
           onDropOnFolder={dropOn}
+          onDropFiles={(target, dataTransfer) => {
+            dragDepth.current = 0;
+            setFileDrag(null);
+            uploadFrom(dataTransfer, target.id);
+          }}
+          onFileDragOverFolder={(target) => {
+            setFileDrag((current) =>
+              current ? { over: target?.name ?? null } : current,
+            );
+          }}
           onMarqueeSelect={(ids) => {
             const chosen = new Set(ids);
             store.selectAll(nodes.filter((node) => chosen.has(node.id)));
@@ -396,17 +476,39 @@ function CenteredState({
 
 function EmptyFolder({
   onCreate,
+  onUpload,
 }: {
   onCreate: () => void;
+  onUpload: (files: File[]) => void;
 }): React.JSX.Element {
   const { t } = useTranslation();
+  const input = React.useRef<HTMLInputElement>(null);
   return (
     <CenteredState
       icon={<FolderOpen className="size-6 text-primary" aria-hidden="true" />}
       title={t('drive.empty.title')}
       description={t('drive.empty.description')}
     >
-      <Button onClick={onCreate}>
+      <input
+        ref={input}
+        type="file"
+        multiple
+        hidden
+        onChange={(event) => {
+          const files = [...(event.target.files ?? [])];
+          if (files.length > 0) onUpload(files);
+          event.target.value = '';
+        }}
+      />
+      <Button
+        onClick={() => {
+          input.current?.click();
+        }}
+      >
+        <FileUp />
+        {t('drive.actions.upload')}
+      </Button>
+      <Button variant="outline" onClick={onCreate}>
         <FolderPlus />
         {t('drive.actions.newFolder')}
       </Button>

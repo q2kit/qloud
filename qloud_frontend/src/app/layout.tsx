@@ -3,6 +3,9 @@ import { Outlet } from 'react-router';
 
 import { CreateFolderDialog } from '@/features/drive/components/create-folder-dialog';
 import { useDriveStore } from '@/features/drive/store';
+import { ConflictDialog } from '@/features/upload/components/conflict-dialog';
+import { UploadTray } from '@/features/upload/components/upload-tray';
+import { UploadProvider } from '@/features/upload/uploader';
 
 import { AppHeader } from './app-header';
 import { AppSidebar } from './app-sidebar';
@@ -63,42 +66,46 @@ export function AppLayout(): React.JSX.Element {
   }, [setIsDetailOpen]);
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
-      <AppSidebar
-        isOpen={isNavigationOpen}
-        triggerRef={navigationTriggerRef}
-        onClose={() => {
-          setIsNavigationOpen(false);
-        }}
-        onOpenChange={setIsNavigationOpen}
-      />
-      <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
-        <AppHeader
-          isDetailOpen={isDetailOpen}
-          navigationTriggerRef={navigationTriggerRef}
-          detailTriggerRef={detailTriggerRef}
-          onNavigationOpen={() => {
-            setIsNavigationOpen(true);
+    <UploadProvider>
+      <div className="flex min-h-screen bg-background text-foreground">
+        <AppSidebar
+          isOpen={isNavigationOpen}
+          triggerRef={navigationTriggerRef}
+          onClose={() => {
+            setIsNavigationOpen(false);
           }}
-          onDetailToggle={() => {
-            setIsDetailOpen((current) => !current);
-          }}
+          onOpenChange={setIsNavigationOpen}
         />
-        <div className="flex min-h-0 flex-1">
-          <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
-            <Outlet />
-          </main>
-          <DetailPanel
-            isOpen={isDetailOpen}
-            triggerRef={detailTriggerRef}
-            onClose={() => {
-              setIsDetailOpen(false);
+        <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
+          <AppHeader
+            isDetailOpen={isDetailOpen}
+            navigationTriggerRef={navigationTriggerRef}
+            detailTriggerRef={detailTriggerRef}
+            onNavigationOpen={() => {
+              setIsNavigationOpen(true);
             }}
-            onOpenChange={setIsDetailOpen}
+            onDetailToggle={() => {
+              setIsDetailOpen((current) => !current);
+            }}
           />
+          <div className="flex min-h-0 flex-1">
+            <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+              <Outlet />
+            </main>
+            <DetailPanel
+              isOpen={isDetailOpen}
+              triggerRef={detailTriggerRef}
+              onClose={() => {
+                setIsDetailOpen(false);
+              }}
+              onOpenChange={setIsDetailOpen}
+            />
+          </div>
         </div>
+        <CreateFolderDialog />
+        <UploadTray />
+        <ConflictDialog />
       </div>
-      <CreateFolderDialog />
-    </div>
+    </UploadProvider>
   );
 }

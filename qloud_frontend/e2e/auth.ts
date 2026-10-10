@@ -19,3 +19,14 @@ export async function signUpViaApi(page: Page): Promise<string> {
   expect(response.status()).toBe(200);
   return email;
 }
+
+/** Sign up and verify the address through the link in the email (uploads need it). */
+export async function signUpVerifiedViaApi(page: Page): Promise<string> {
+  const email = await signUpViaApi(page);
+  const { linkFromEmail } = await import('./mailpit');
+  await page.goto(await linkFromEmail(email, '/verify-email/'));
+  await expect(
+    page.getByRole('heading', { name: 'Đã xác thực email' }),
+  ).toBeVisible();
+  return email;
+}

@@ -98,6 +98,8 @@ Lỗi S3 gói thành `StorageError` (`code` = mã lỗi S3). Key có dạng `blo
 M2-04: app `uploads` (`UploadSession`, `services.py`): giữ chỗ quota, cấp URL part, hoàn tất (tạo Blob/Node/FileVersion), hủy. Không gọi S3 trong transaction; quota của một owner thay đổi lần lượt nhờ khóa dòng User. Quy tắc: [upload.md](features/upload.md).
 M2-06: celery beat chạy lịch trong `CELERY_BEAT_SCHEDULE` (hiện có `expire-uploads` mỗi giờ). Mỗi deployment chỉ chạy **một** process beat; dev chạy khi cần:
 `cd "$(git rev-parse --show-toplevel)/qloud_backend" && DJANGO_SETTINGS_MODULE=config.settings.dev uv run celery -A config beat -l info` (file lịch `celerybeat-schedule` không commit).
+M2-08a (FE): `features/upload/engine.ts` là engine upload thuần TypeScript (API, XHR, timer, trạng thái mạng được truyền vào để test), chạy trong `UploadProvider` ở layout của app; khay upload đọc store `zustand`. Quy tắc: [upload.md](features/upload.md#đã-làm-ở-m2-08a-105).
+LocalStack có hai bucket: `qloud-dev` (dev, CORS cho Vite) và `qloud-e2e` (Playwright, CORS cho `vite preview`). Đổi `infra/localstack/init-s3.sh` thì phải tạo lại container (`docker compose up -d --force-recreate localstack`), vì bind mount một file vẫn giữ bản cũ.
 Action Django admin dùng gettext, catalog `vi` và `en` nằm trong `accounts/locale`;
 commit cả `.po` và `.mo` để runtime/CI không phụ thuộc gettext CLI. Khi sửa bản dịch, chạy
 `cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run --frozen python manage.py compilemessages -l vi -l en --ignore .venv`
