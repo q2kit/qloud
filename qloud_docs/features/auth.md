@@ -48,6 +48,20 @@ Kiểm tra share link của owner bị khóa sẽ triển khai ở M5 khi có mo
   Đăng ký bằng email đã có trả `email_taken`: với xác thực `optional` thì không giấu được, vì đăng ký thành công là đăng nhập luôn. Rate limit ở M1-04 giới hạn việc dò email.
 - User bị khóa: `AccountBackend` (kế thừa backend của allauth) từ chối khi đăng nhập và khi nạp session; đăng nhập đúng mật khẩu chỉ nhận phản hồi 401 chung.
   `AccountAdapter.pre_login` chặn thêm các luồng không qua `authenticate()` (OAuth ở M1-03, login by code).
+### M1-03: OAuth Google và GitHub
+- Luồng: SPA gửi form `POST /api/auth/browser/v1/auth/provider/redirect` (`provider`, `callback_url`, `process` = `login` hoặc `connect`) → provider → callback
+  `/api/auth/oauth/<provider>/login/callback/` → redirect về `callback_url` của SPA. Lỗi thì về `/login?error=...`.
+- Email đã được provider xác thực trùng với tài khoản có sẵn thì đăng nhập vào tài khoản đó và tự liên kết provider
+  (`SOCIALACCOUNT_EMAIL_AUTHENTICATION` + `_AUTO_CONNECT`). Cả Google và GitHub đều trả cờ xác thực cho từng email.
+  Email chưa được provider xác thực thì không liên kết: người dùng đăng nhập bằng mật khẩu rồi liên kết với `process=connect`.
+- Nếu email của tài khoản có sẵn **chưa xác thực ở Qloud**, allauth xóa mật khẩu của tài khoản đó khi liên kết, để người đăng ký trước bằng email của người khác không còn vào được;
+  đổi mật khẩu làm đổi hash session nên session cũ của họ cũng mất hiệu lực. Tài khoản tạo bằng `createsuperuser` chưa có dòng EmailAddress nên cũng thuộc trường hợp này.
+- Tài khoản mới tạo qua OAuth: email lấy từ provider (đã xác thực thì không gửi email xác thực), không có mật khẩu,
+  `display_name` và `avatar_url` lấy từ provider, `locale` từ `Accept-Language`. Đăng ký đóng (`SIGNUP_ENABLED` hoặc thiếu plan mặc định) thì không tạo tài khoản qua OAuth.
+- User bị khóa không đăng nhập được qua OAuth: `AccountAdapter.pre_login` từ chối trước khi tạo session.
+- Gỡ liên kết qua `DELETE /api/auth/browser/v1/account/providers`; allauth từ chối nếu đó là phương thức đăng nhập cuối cùng (chưa đặt mật khẩu và không còn provider khác).
+- Không lưu token của provider (`SOCIALACCOUNT_STORE_TOKENS` mặc định tắt). Google dùng PKCE và `access_type=online`.
+
 - Email gửi đồng bộ qua `MAILERS` với template mặc định của allauth; M1-04 chuyển sang Celery và template `vi`/`en`. Rate limit mặc định của allauth đang bật, M1-04 chỉnh theo quy tắc ở dưới.
 
 ## User stories
@@ -72,9 +86,40 @@ Kiểm tra share link của owner bị khóa sẽ triển khai ở M5 khi có mo
 - Rate limit: 10 lần thử đăng nhập mỗi phút trên mỗi IP, 5 lần mỗi phút trên mỗi email. Thông báo lỗi không được để lộ email có tồn tại hay không.
 
 ## Cấu hình
-- OAuth: tạo OAuth app trên Google Cloud Console và GitHub Developer Settings, callback URL theo domain đang chạy;
-  client id và secret đặt trong `qloud_backend/.env`. Mỗi môi trường (dev, production) dùng app riêng.
+- OAuth: mỗi môi trường (dev, production) dùng OAuth app riêng; client id và secret đặt trong `qloud_backend/.env`.
+  Provider nào để trống `*_CLIENT_ID` thì bị tắt và không xuất hiện trong `/api/auth/browser/v1/config`. Hướng dẫn chi tiết ở mục dưới.
 - SMTP và Turnstile: xem các quy tắc ở trên; production dùng key thật, dev và test dùng Mailpit và test key của Cloudflare.
+
+### Cấu hình OAuth Google và GitHub
+
+Callback URL có dạng `{APP_BASE_URL}/api/auth/oauth/<provider>/login/callback/`, phải khớp **từng ký tự** (kể cả `/` cuối) với URL đăng ký ở provider:
+
+| Môi trường | Google | GitHub |
+|---|---|---|
+| Dev (qua Vite :5173) | `http://localhost:5173/api/auth/oauth/google/login/callback/` | `http://localhost:5173/api/auth/oauth/github/login/callback/` |
+| Production | `https://<APP_DOMAIN>/api/auth/oauth/google/login/callback/` | `https://<APP_DOMAIN>/api/auth/oauth/github/login/callback/` |
+
+Django dựng callback URL từ request, nên reverse proxy phải giữ nguyên header `Host` và gửi `X-Forwarded-Proto` (production đã bật `SECURE_PROXY_SSL_HEADER`).
+Vite proxy ở dev giữ nguyên `Host: localhost:5173`, nên dùng URL dev ở trên chứ không phải cổng 8000.
+
+**Google** ([Google Cloud Console](https://console.cloud.google.com/)):
+1. Tạo hoặc chọn một project.
+2. Vào **APIs & Services › OAuth consent screen** (Google Auth Platform):
+   - **Branding:** tên ứng dụng, email hỗ trợ, domain ứng dụng (production).
+   - **Audience:** chọn *External*. Khi còn ở trạng thái *Testing* thì chỉ các *Test users* trong danh sách đăng nhập được; chuyển sang *In production* khi mở cho mọi người.
+   - **Data access:** scope `openid`, `.../auth/userinfo.email`, `.../auth/userinfo.profile`. Đây là scope không nhạy cảm, không cần Google thẩm định.
+3. Vào **Clients › Create client**: loại *Web application*; ở **Authorized redirect URIs** thêm callback URL của môi trường đó. Không cần *Authorized JavaScript origins*.
+4. Chép *Client ID* và *Client secret* vào `qloud_backend/.env`: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
+
+**GitHub** (**Settings › Developer settings › OAuth Apps › New OAuth App**; app của tổ chức thì tạo trong settings của tổ chức):
+1. *Application name*: ví dụ `Qloud (dev)`; *Homepage URL*: `APP_BASE_URL`; *Authorization callback URL*: callback URL của môi trường đó.
+   Mỗi OAuth app chỉ có một callback URL, nên dev và production cần hai app. Không bật *Device Flow*.
+2. Sau khi tạo, bấm **Generate a new client secret** (secret chỉ hiện một lần).
+3. Chép vào `qloud_backend/.env`: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`.
+
+**Áp dụng và kiểm tra:** khởi động lại backend (cấu hình provider được đọc lúc khởi động), rồi mở
+`{APP_BASE_URL}/api/auth/browser/v1/config`: `data.socialaccount.providers` phải liệt kê provider vừa cấu hình.
+Lỗi `redirect_uri_mismatch` (Google) hoặc *redirect_uri is not associated* (GitHub) nghĩa là callback URL đăng ký không khớp với URL ở bảng trên.
 
 ## Tiêu chí chấp nhận
 - [ ] Đăng ký → nhận email xác thực → bấm link → tài khoản được xác thực.

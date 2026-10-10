@@ -32,7 +32,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 |---|---|---|
 | Python | 3.14 | |
 | Django / DRF / drf-spectacular | 6.1 / 3.18 / 0.30 | |
-| django-allauth | 65 | Extra `headless` (pyjwt, cryptography) và `headless-spec` (PyYAML) |
+| django-allauth | 65 | Extra `headless` (pyjwt, cryptography), `headless-spec` (PyYAML) và `socialaccount` (requests, oauthlib) |
 | Celery | 5.6 | |
 | psycopg | 3.3 | |
 | mypy | 2.3 | djangorestframework-stubs 3.18 yêu cầu `mypy<2.4` |
