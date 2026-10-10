@@ -1,13 +1,15 @@
 from typing import Any
 
 from allauth.account.adapter import get_adapter
-from allauth.headless.account.inputs import LoginInput, SignupInput
-from allauth.headless.account.views import LoginView, SignupView
+from allauth.headless.account.inputs import LoginInput, RequestPasswordResetInput, SignupInput
+from allauth.headless.account.views import LoginView, RequestPasswordResetView, SignupView
+from allauth.headless.base.response import RateLimitResponse
 from allauth.headless.internal.restkit import inputs
 from django import forms
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 
+from .forms import check_turnstile
 from .models import User
 
 
@@ -24,6 +26,15 @@ class RememberLoginView(LoginView):
 
     input_class = RememberLoginInput
     input: RememberLoginInput
+
+    def handle_invalid_input(self, input: RememberLoginInput) -> HttpResponse:
+        # allauth reports the per-email failed-login limit as a form error (400);
+        # answer 429 like every other rate limit so clients handle them alike.
+        codes = {error.code for errors in input.errors.as_data().values() for error in errors}
+        if "too_many_login_attempts" in codes:
+            return RateLimitResponse(self.request)
+        response: HttpResponse = super().handle_invalid_input(input)
+        return response
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         response = super().post(request, *args, **kwargs)
@@ -52,3 +63,14 @@ class EmailAwareSignupInput(SignupInput):
 
 class EmailAwareSignupView(SignupView):
     input_class = {"POST": EmailAwareSignupInput}
+
+
+class TurnstilePasswordResetInput(RequestPasswordResetInput):
+    turnstile_token = inputs.CharField(required=False)
+
+    def clean_turnstile_token(self) -> str:
+        return check_turnstile(self.cleaned_data.get("turnstile_token", ""))
+
+
+class TurnstilePasswordResetView(RequestPasswordResetView):
+    input_class = TurnstilePasswordResetInput

@@ -18,8 +18,14 @@ if len(SECRET_KEY) < 50 or SECRET_KEY.startswith(("dev-insecure", "test-insecure
         '`python -c "import secrets; print(secrets.token_urlsafe(50))"`.'
     )
 
+# Cloudflare's test secrets (1x…, 2x…, 3x…) accept or reject every token.
+if not TURNSTILE_SECRET_KEY or TURNSTILE_SECRET_KEY.startswith(("1x0000", "2x0000", "3x0000")):
+    raise ImproperlyConfigured("TURNSTILE_SECRET_KEY must be the real secret key in production.")
+
 # Cloudflare → nginx → gunicorn (ADR-0006)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# The firewall only admits Cloudflare, so its client IP header can be trusted (rate limits).
+ALLAUTH_TRUSTED_CLIENT_IP_HEADER = env("TRUSTED_CLIENT_IP_HEADER", default="CF-Connecting-IP")
 SECURE_SSL_REDIRECT = True
 # Lets an internal plain-HTTP health probe reach the app without a redirect.
 SECURE_REDIRECT_EXEMPT = [r"^api/v1/health$"]

@@ -1,0 +1,10 @@
+{% load i18n %}{% autoescape off %}{% translate "Hello," %}
+
+{% translate "Please confirm the email address of your Qloud account by opening this link:" %}
+
+{{ activate_url }}
+
+{% translate "If you did not create a Qloud account, you can ignore this email." %}
+
+{% translate "The Qloud team" %}
+{% endautoescape %}

@@ -134,3 +134,53 @@ msgid ""
 msgstr ""
 "%(count)d tài khoản đã chọn đang bị khóa từ trước; giữ nguyên thông tin "
 "khóa ban đầu."
+
+msgid "Bot verification failed. Please try again."
+msgstr "Xác minh chống bot không thành công. Vui lòng thử lại."
+
+msgid "Confirm your email address for Qloud"
+msgstr "Xác thực địa chỉ email cho Qloud"
+
+msgid "Hello,"
+msgstr "Xin chào,"
+
+msgid "Please confirm the email address of your Qloud account by opening this link:"
+msgstr "Vui lòng xác thực địa chỉ email của tài khoản Qloud bằng cách mở liên kết sau:"
+
+msgid "If you did not create a Qloud account, you can ignore this email."
+msgstr "Nếu bạn không tạo tài khoản Qloud, bạn có thể bỏ qua email này."
+
+msgid "The Qloud team"
+msgstr "Đội ngũ Qloud"
+
+msgid "Reset your Qloud password"
+msgstr "Đặt lại mật khẩu Qloud"
+
+msgid "We received a request to reset the password of your Qloud account. Open this link to choose a new password:"
+msgstr "Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản Qloud của bạn. Mở liên kết sau để chọn mật khẩu mới:"
+
+msgid "If you did not ask for this, you can ignore this email: your password stays the same."
+msgstr "Nếu bạn không yêu cầu việc này, bạn có thể bỏ qua email này: mật khẩu của bạn vẫn giữ nguyên."
+
+msgid "Password reset request for Qloud"
+msgstr "Yêu cầu đặt lại mật khẩu Qloud"
+
+#, python-format
+msgid "Someone asked to reset the Qloud password for %(email)s, but there is no Qloud account with this email address."
+msgstr "Có người yêu cầu đặt lại mật khẩu Qloud cho %(email)s, nhưng không có tài khoản Qloud nào dùng địa chỉ email này."
+
+msgid "If it was you, you can create an account here:"
+msgstr "Nếu đó là bạn, bạn có thể tạo tài khoản tại đây:"
+
+msgid "Otherwise, you can ignore this email."
+msgstr "Nếu không, bạn có thể bỏ qua email này."
+
+msgid "You already have a Qloud account"
+msgstr "Bạn đã có tài khoản Qloud"
+
+#, python-format
+msgid "Someone tried to sign up for Qloud with %(email)s, but an account with this email address already exists."
+msgstr "Có người đã thử đăng ký Qloud bằng %(email)s, nhưng đã có tài khoản dùng địa chỉ email này."
+
+msgid "If you forgot your password, you can reset it here:"
+msgstr "Nếu bạn quên mật khẩu, bạn có thể đặt lại tại đây:"

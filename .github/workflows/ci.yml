@@ -80,6 +80,8 @@ jobs:
           DATABASE_URL: postgres://qloud:qloud@localhost:5432/qloud
           REDIS_URL: redis://localhost:6379/0
           CELERY_BROKER_URL: redis://localhost:6379/1
+          # Placeholder: production settings refuse an empty or Cloudflare test key.
+          TURNSTILE_SECRET_KEY: ci-placeholder-not-a-real-key
         run: |
           DJANGO_SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))') \
             uv run python manage.py check --deploy --fail-level WARNING

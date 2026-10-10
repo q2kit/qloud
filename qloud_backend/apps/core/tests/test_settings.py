@@ -14,6 +14,7 @@ PROD_ENV = {
     "DATABASE_URL": "postgres://qloud:qloud@localhost:5432/qloud",
     "REDIS_URL": "redis://localhost:6379/0",
     "CELERY_BROKER_URL": "redis://localhost:6379/1",
+    "TURNSTILE_SECRET_KEY": "0x4AAAAAAA" + "s" * 25,
 }
 
 
@@ -49,6 +50,22 @@ def test_wsgi_defaults_to_production_settings():
         (
             {"DJANGO_SECRET_KEY": "dev-insecure-change-me", "APP_DOMAIN": "qloud.example.com"},
             "DJANGO_SECRET_KEY",
+        ),
+        (
+            {
+                "DJANGO_SECRET_KEY": PROD_SECRET,
+                "APP_DOMAIN": "qloud.example.com",
+                "TURNSTILE_SECRET_KEY": "",
+            },
+            "TURNSTILE_SECRET_KEY",
+        ),
+        (
+            {
+                "DJANGO_SECRET_KEY": PROD_SECRET,
+                "APP_DOMAIN": "qloud.example.com",
+                "TURNSTILE_SECRET_KEY": "1x0000000000000000000000000000000AA",
+            },
+            "TURNSTILE_SECRET_KEY",
         ),
     ],
 )

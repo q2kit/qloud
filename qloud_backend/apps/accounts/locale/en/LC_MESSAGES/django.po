@@ -134,3 +134,53 @@ msgid ""
 msgstr ""
 "%(count)d selected account(s) were already suspended; their original "
 "suspension was kept."
+
+msgid "Bot verification failed. Please try again."
+msgstr "Bot verification failed. Please try again."
+
+msgid "Confirm your email address for Qloud"
+msgstr "Confirm your email address for Qloud"
+
+msgid "Hello,"
+msgstr "Hello,"
+
+msgid "Please confirm the email address of your Qloud account by opening this link:"
+msgstr "Please confirm the email address of your Qloud account by opening this link:"
+
+msgid "If you did not create a Qloud account, you can ignore this email."
+msgstr "If you did not create a Qloud account, you can ignore this email."
+
+msgid "The Qloud team"
+msgstr "The Qloud team"
+
+msgid "Reset your Qloud password"
+msgstr "Reset your Qloud password"
+
+msgid "We received a request to reset the password of your Qloud account. Open this link to choose a new password:"
+msgstr "We received a request to reset the password of your Qloud account. Open this link to choose a new password:"
+
+msgid "If you did not ask for this, you can ignore this email: your password stays the same."
+msgstr "If you did not ask for this, you can ignore this email: your password stays the same."
+
+msgid "Password reset request for Qloud"
+msgstr "Password reset request for Qloud"
+
+#, python-format
+msgid "Someone asked to reset the Qloud password for %(email)s, but there is no Qloud account with this email address."
+msgstr "Someone asked to reset the Qloud password for %(email)s, but there is no Qloud account with this email address."
+
+msgid "If it was you, you can create an account here:"
+msgstr "If it was you, you can create an account here:"
+
+msgid "Otherwise, you can ignore this email."
+msgstr "Otherwise, you can ignore this email."
+
+msgid "You already have a Qloud account"
+msgstr "You already have a Qloud account"
+
+#, python-format
+msgid "Someone tried to sign up for Qloud with %(email)s, but an account with this email address already exists."
+msgstr "Someone tried to sign up for Qloud with %(email)s, but an account with this email address already exists."
+
+msgid "If you forgot your password, you can reset it here:"
+msgstr "If you forgot your password, you can reset it here:"

@@ -1,13 +1,18 @@
 from typing import Any, cast
 
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.core import context as allauth_context
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.models import SocialLogin
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.sites.shortcuts import get_current_site
+from django.db import transaction
 from django.http import HttpRequest, HttpResponse
+from django.utils import translation
 
 from .models import Plan, User
+from .tasks import send_email
 
 
 def apply_request_locale(request: HttpRequest, user: User) -> None:
@@ -32,6 +37,36 @@ class AccountAdapter(DefaultAccountAdapter):
         if commit:
             user.save()
         return user
+
+    def render_mail(self, template_prefix: str, email: str, context: dict[str, Any]) -> Any:
+        # Write to a known user in their own language; otherwise keep the request's.
+        language = getattr(context.get("user"), "locale", None) or translation.get_language()
+        with translation.override(language):
+            return super().render_mail(template_prefix, email, context)
+
+    def send_mail(self, template_prefix: str, email: str, context: dict[str, Any]) -> None:
+        """Render like allauth does, but deliver through Celery after the commit."""
+        request = allauth_context.request
+        message = self.render_mail(
+            template_prefix,
+            email,
+            {
+                "request": request,
+                "email": email,
+                "current_site": get_current_site(request),
+                **context,
+            },
+        )
+        alternatives = getattr(message, "alternatives", [])
+        html = next((body for body, mimetype in alternatives if mimetype == "text/html"), None)
+        payload = {
+            "subject": message.subject,
+            "body": message.body,
+            "from_email": message.from_email,
+            "to": list(message.to),
+            "html": html,
+        }
+        transaction.on_commit(lambda: send_email.delay(**payload))
 
     def pre_login(
         self, request: HttpRequest, user: AbstractBaseUser, **kwargs: Any
