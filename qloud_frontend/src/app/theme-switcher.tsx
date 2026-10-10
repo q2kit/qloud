@@ -10,13 +10,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-import { type Theme, useTheme } from './theme-provider';
+import { usePreferences } from '@/features/settings/use-preferences';
+
+import type { Theme } from './theme-provider';
 
 const themes: Theme[] = ['system', 'light', 'dark'];
 
 export function ThemeSwitcher(): React.JSX.Element {
   const { t } = useTranslation();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme } = usePreferences();
 
   return (
     <DropdownMenu>

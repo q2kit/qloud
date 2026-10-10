@@ -211,3 +211,11 @@ def test_auth_specification_is_served(client):
     assert response.status_code == 200
     paths = response.json()["paths"]
     assert {f"{AUTH}/auth/login", f"{AUTH}/auth/signup", f"{AUTH}/auth/session"} <= set(paths)
+
+
+def test_session_display_uses_the_profile_name(client):
+    user = User.objects.create_user("alice@example.com", PASSWORD)
+    client.force_login(user)
+    assert client.get(f"{AUTH}/auth/session").json()["data"]["user"]["display"] == user.email
+    User.objects.filter(pk=user.pk).update(display_name="Alice Nguyen")
+    assert client.get(f"{AUTH}/auth/session").json()["data"]["user"]["display"] == "Alice Nguyen"

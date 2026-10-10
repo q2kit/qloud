@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { PreferenceSync } from '@/features/settings/preference-sync';
 
 import { safeNextPath } from './auth-errors';
 import { useSession } from './use-auth';
@@ -52,7 +53,12 @@ export function RequireAuth(): React.JSX.Element {
     const search = next === '/' ? '' : `?next=${encodeURIComponent(next)}`;
     return <Navigate to={`/login${search}`} replace />;
   }
-  return <Outlet />;
+  return (
+    <>
+      <PreferenceSync />
+      <Outlet />
+    </>
+  );
 }
 
 /** Login and signup are for visitors: signed-in users go on to `next`. */

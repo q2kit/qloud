@@ -127,6 +127,13 @@ class UserAdmin(admin.ModelAdmin[User]):
         except ValidationError as error:
             self.message_user(request, error.messages[0], level="error")
             return
+        if suspended:
+            self.message_user(
+                request,
+                _("%(count)d account(s) suspended; their sessions were signed out.")
+                % {"count": suspended},
+                level="success",
+            )
         if skipped := len(ids) - suspended:
             self.message_user(
                 request,
@@ -140,5 +147,11 @@ class UserAdmin(admin.ModelAdmin[User]):
 
     @admin.action(description=_("Unsuspend selected accounts"), permissions=["change"])
     def unsuspend_accounts(self, request: HttpRequest, queryset: QuerySet[User]) -> None:
-        for user in queryset:
+        suspended = list(queryset.filter(suspended_at__isnull=False))
+        for user in suspended:
             unsuspend_user(user)
+        self.message_user(
+            request,
+            _("%(count)d account(s) unsuspended.") % {"count": len(suspended)},
+            level="success",
+        )

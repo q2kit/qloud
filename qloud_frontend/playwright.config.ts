@@ -43,12 +43,7 @@ export default defineConfig({
     {
       command: `pnpm build && pnpm preview --port ${String(FRONTEND_PORT)} --strictPort`,
       url: `http://localhost:${String(FRONTEND_PORT)}`,
-      // No Turnstile widget: the test backend skips the check and E2E must not
-      // depend on Cloudflare being reachable.
-      env: {
-        QLOUD_API_TARGET: `http://127.0.0.1:${String(BACKEND_PORT)}`,
-        VITE_TURNSTILE_SITE_KEY: '',
-      },
+      env: { QLOUD_API_TARGET: `http://127.0.0.1:${String(BACKEND_PORT)}` },
       reuseExistingServer: !isCI,
       timeout: 120_000,
     },

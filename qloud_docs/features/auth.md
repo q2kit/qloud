@@ -44,6 +44,7 @@ Kiểm tra share link của owner bị khóa sẽ triển khai ở M5 khi có mo
 - Login nhận thêm `remember`: có thì session sống `SESSION_COOKIE_AGE` (30 ngày); không có thì cookie hết khi đóng trình duyệt (`SESSION_EXPIRE_AT_BROWSER_CLOSE`). Session tạo lúc đăng ký cũng hết khi đóng trình duyệt.
 - Link trong email trỏ về SPA (`HEADLESS_FRONTEND_URLS`): `/verify-email/{key}`, `/password/reset/{key}`. Key trong link đã được URL-encode; SPA gửi lại key đã decode.
 - Đặt lại mật khẩu đổi hash session nên mọi session cũ mất hiệu lực; không tự đăng nhập sau khi đặt lại.
+  Đổi mật khẩu khi đã đăng nhập (S-13) giữ phiên hiện tại (`ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = False`), các phiên khác mất hiệu lực vì hash đổi.
 - Đăng nhập sai và quên mật khẩu trả cùng một phản hồi dù email có tồn tại hay không.
   Đăng ký bằng email đã có trả `email_taken`: với xác thực `optional` thì không giấu được, vì đăng ký thành công là đăng nhập luôn. Rate limit ở M1-04 giới hạn việc dò email.
 - User bị khóa: `AccountBackend` (kế thừa backend của allauth) từ chối khi đăng nhập và khi nạp session; đăng nhập đúng mật khẩu chỉ nhận phản hồi 401 chung.
@@ -72,10 +73,23 @@ Kiểm tra share link của owner bị khóa sẽ triển khai ở M5 khi có mo
 - **S-04 Quên / đặt lại mật khẩu:** gửi yêu cầu (Turnstile) luôn trả cùng một thông báo; đặt mật khẩu mới từ link, link hỏng thì khóa form và gợi ý gửi lại.
 - Lỗi theo mã của allauth được dịch ở FE (`auth.errors.*`); các lỗi khác (ví dụ quy tắc mật khẩu) dùng thông báo của server,
   vì FE gửi `Accept-Language` theo ngôn ngữ đang chọn. Vượt rate limit (429) có thông báo riêng.
+- allauth không có bản dịch tiếng Việt, và Django 6.1 đổi msgid của "mật khẩu quá ngắn" trước khi catalog `vi` của Django cập nhật.
+  Bản dịch `vi` cho mọi thông báo lỗi của allauth (`error_messages` của adapter account và socialaccount) và cho câu đó nằm trong catalog của `accounts`.
+  `accounts/tests/test_i18n.py` fail nếu một bản nâng cấp làm thông báo nào trong số này quay lại tiếng Anh.
 - Header có menu tài khoản (tên, email, đăng xuất). Đăng xuất xóa toàn bộ cache dữ liệu của user rồi về `/login`.
-- Widget Turnstile lấy site key từ `VITE_TURNSTILE_SITE_KEY` (`qloud_frontend/.env`); để trống thì không hiện widget.
-  Site key ở FE và secret key ở BE phải đi cùng nhau: BE có secret mà FE không có site key thì đăng ký và quên mật khẩu bị từ chối (`captcha_invalid`).
+- Widget Turnstile lấy site key từ `GET /api/v1/config`. Server chỉ trả site key khi có cả `TURNSTILE_SITE_KEY` và `TURNSTILE_SECRET_KEY` (cùng nằm trong `qloud_backend/.env`),
+  nên widget và việc kiểm tra token luôn bật/tắt cùng nhau; đổi key không cần build lại FE. Production từ chối khởi động khi một trong hai key trống hoặc là test key.
   Trên màn hình hẹp hơn 300px widget dùng cỡ `compact`.
+
+### M1-06: cài đặt (S-13)
+- `/settings` gồm: **Hồ sơ** (avatar lấy từ OAuth hoặc chữ cái đầu, email chỉ đọc, tên hiển thị), **Ngôn ngữ và giao diện**,
+  **Mật khẩu** (đổi mật khẩu; tài khoản chỉ có OAuth thì "Đặt mật khẩu", không cần mật khẩu hiện tại), **Tài khoản liên kết** (liên kết qua `process=connect`, quay về `/settings`; gỡ liên kết).
+- Ngôn ngữ và giao diện lưu vào profile (`PATCH /api/v1/me`) mỗi khi đổi, ở trang cài đặt hay ở nút chuyển trên header/sidebar, nếu đang đăng nhập.
+  Khi một phiên bắt đầu, FE áp dụng `locale` và `theme` của profile (ưu tiên hơn lựa chọn cũ của trình duyệt); chưa đăng nhập thì chỉ lưu trong trình duyệt.
+- Tên hiển thị của user (allauth `ACCOUNT_USER_DISPLAY`) là `display_name`, nếu trống thì là email; dùng cho menu tài khoản.
+- Gỡ liên kết bị allauth từ chối khi đó là phương thức đăng nhập cuối (chưa có mật khẩu): trang hiện thông báo của server; đặt mật khẩu trước rồi gỡ.
+- Menu tài khoản có mục Cài đặt. Trong Django admin, app `accounts` hiện là "Người dùng và gói dung lượng" để không trùng mục "Tài khoản" (email) của allauth;
+  khóa/mở khóa báo số tài khoản đã đổi.
 
 ### M1-03: OAuth Google và GitHub
 - Luồng: SPA gửi form `POST /api/auth/browser/v1/auth/provider/redirect` (`provider`, `callback_url`, `process` = `login` hoặc `connect`) → provider → callback

@@ -9,11 +9,12 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { supportedLanguages } from '@/lib/i18n';
+import { usePreferences } from '@/features/settings/use-preferences';
+import { supportedLanguages, type Language } from '@/lib/i18n';
 
 export function LanguageSwitcher(): React.JSX.Element {
-  const { i18n, t } = useTranslation();
-  const currentLanguage = i18n.resolvedLanguage?.split('-')[0] ?? 'vi';
+  const { t } = useTranslation();
+  const { language, setLanguage } = usePreferences();
 
   return (
     <DropdownMenu>
@@ -24,9 +25,9 @@ export function LanguageSwitcher(): React.JSX.Element {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuRadioGroup
-          value={currentLanguage}
+          value={language}
           onValueChange={(value) => {
-            void i18n.changeLanguage(value);
+            setLanguage(value as Language);
           }}
         >
           {supportedLanguages.map((language) => (

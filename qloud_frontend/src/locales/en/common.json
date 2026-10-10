@@ -57,8 +57,7 @@
   "placeholder": {
     "recent": "Recent content will be implemented in M2-09.",
     "shared": "Shared content will be implemented in M5-05.",
-    "trash": "Trash content will be implemented in M4-03.",
-    "settings": "Settings content will be implemented in M1-06."
+    "trash": "Trash content will be implemented in M4-03."
   },
   "notFound": {
     "title": "Page not found",
@@ -121,7 +120,8 @@
       "successDescription": "Thank you! Your email address is verified.",
       "errorTitle": "Could not verify your email",
       "toDrive": "Go to Drive",
-      "toLogin": "Sign in"
+      "toLogin": "Sign in",
+      "errorDescription": "This link is invalid, already used, or expired. If you verified your email before, there is nothing more to do."
     },
     "reset": {
       "requestTitle": "Forgot password",
@@ -165,5 +165,41 @@
   "account": {
     "menu": "Account",
     "logout": "Sign out"
+  },
+  "settings": {
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved.",
+    "loadFailed": "Settings could not be loaded.",
+    "profile": {
+      "title": "Profile",
+      "displayName": "Display name",
+      "displayNameHint": "Shown to people you share files with.",
+      "saveFailed": "The display name could not be saved. Please try again."
+    },
+    "preferences": {
+      "title": "Language and appearance",
+      "description": "Applied at once and follows your account to every browser."
+    },
+    "password": {
+      "changeTitle": "Change password",
+      "changeDescription": "Other sessions will be signed out; this one stays.",
+      "setTitle": "Set a password",
+      "setDescription": "Your account signs in with Google/GitHub. Set a password to sign in with your email, and to be able to unlink accounts.",
+      "current": "Current password",
+      "wrongCurrent": "The current password is incorrect.",
+      "submit": "Save password",
+      "changed": "Your password is updated."
+    },
+    "linked": {
+      "title": "Linked accounts",
+      "description": "Sign in quickly with Google or GitHub.",
+      "none": "Signing in with Google or GitHub is not enabled.",
+      "notLinked": "Not linked",
+      "connect": "Link",
+      "disconnect": "Unlink",
+      "connectFailed": "The account could not be linked. It may already belong to another user.",
+      "loadFailed": "Linked accounts could not be loaded."
+    }
   }
 }

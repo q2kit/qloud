@@ -18,8 +18,6 @@ import { renderApp } from '@/test/render-app';
 
 import { AUTH_BASE } from '../api';
 
-vi.mock('./turnstile-config', () => ({ turnstileSiteKey: 'site-key' }));
-
 interface RenderOptions {
   sitekey: string;
   theme: string;
@@ -39,6 +37,10 @@ const turnstile = {
 const server = setupServer(
   http.get(`${AUTH_BASE}/config`, () =>
     HttpResponse.json({ status: 200, data: {} }),
+  ),
+  // The backend hands out the site key when it checks Turnstile tokens.
+  http.get('/api/v1/config', () =>
+    HttpResponse.json({ turnstile_site_key: 'site-key' }),
   ),
 );
 

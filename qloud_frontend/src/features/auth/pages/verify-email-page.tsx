@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 
+import { AuthApiError } from '../api';
 import { authErrorMessages } from '../auth-errors';
 import { AuthCard } from '../components/auth-card';
 import { useSession, useVerifyEmail } from '../use-auth';
@@ -52,8 +53,11 @@ export function VerifyEmailPage(): React.JSX.Element {
       <AuthCard
         title={t('auth.verify.errorTitle')}
         description={
-          authErrorMessages(verify.error, t).form ??
-          t('auth.errors.invalidLink')
+          // A 400 means the key itself: wrong, used, or expired. Already
+          // verified addresses land here too, hence the reassuring wording.
+          verify.error instanceof AuthApiError && verify.error.status === 400
+            ? t('auth.verify.errorDescription')
+            : authErrorMessages(verify.error, t).form
         }
       >
         <div className="mb-6 flex justify-center">
