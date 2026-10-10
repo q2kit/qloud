@@ -58,6 +58,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M3-01 | Celery tạo thumbnail cho ảnh và PDF | [#27](https://github.com/q2kit/qloud/issues/27) | ✅ [PR #118](https://github.com/q2kit/qloud/pull/118) |
 | M3-02 | API preview | [#28](https://github.com/q2kit/qloud/issues/28) | ✅ [PR #119](https://github.com/q2kit/qloud/pull/119) |
 | M3-03 | FE: trình xem file (ảnh, PDF, video, nhảy trước/sau, tải về); link riêng cho file như folder (xem download-preview.md › Ghi chú cho M3) | [#29](https://github.com/q2kit/qloud/issues/29) | 🟦 |
+| M3-04 | Bổ sung thumbnail cho video MP4 trong worker và grid/list; kế hoạch/dependency đang chờ owner duyệt | [#121](https://github.com/q2kit/qloud/issues/121) | ⬜ |
 
 ## M4 — Thùng rác ([trash.md](features/trash.md))
 | ID | Task | Issue | Trạng thái |
