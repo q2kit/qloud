@@ -48,6 +48,9 @@ Các bước lặp lại có lệnh sẵn trong `scripts/workflow.py`, chạy t�
    thêm label `needs:owner-decision` và báo lại. **Chờ được duyệt** rồi mới code. Task nhỏ, rõ ràng thì làm luôn.
 5. **Thực hiện.** Code + test đi cùng nhau (xem mục 6). Mỗi PR chỉ chứa một task. Commit nhỏ, theo Conventional Commits.
 6. **Kiểm tra trên máy.** Chạy lint, type check và test của phần đã sửa. Không mở PR khi test còn đỏ.
+   Task có thay đổi frontend thì thêm một **live test trên Chromium** với stack thật, dữ liệu tạo qua API:
+   - **trước khi chạy, hỏi người đang làm cùng** muốn xem trực tiếp (headed: cửa sổ trình duyệt hiện trên máy, thao tác chậm lại) hay chạy headless;
+   - chụp ảnh light và dark, desktop và 360px, lưu ở `qloud_docs/assets/`, đưa vào mục "Ảnh chụp màn hình" của PR.
 7. **Cập nhật tài liệu, bắt buộc, trong cùng PR:**
    - Đổi trạng thái task trong `ROADMAP.md` thành 🟦 (chờ duyệt).
    - Nếu hành vi, API, schema hay màn hình thay đổi thì sửa tài liệu tương ứng.
