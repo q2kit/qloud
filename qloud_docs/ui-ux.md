@@ -45,6 +45,7 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
   Tiêu đề header lấy theo route đang mở (`handle.titleKey` của route, ví dụ Drive, Gần đây, Thùng rác, 404).
 - Trang Drive (S-05): breadcrumb nằm đầu nội dung trang và là tiêu đề trang, mục cuối (folder hiện tại) là `<h1>`. Trên màn hình hẹp, các folder ở giữa thu thành "…".
   Vùng nội dung folder giãn hết chiều cao còn lại dưới header (trừ padding trang); vùng trống tới đáy nhận drop upload và kéo chọn. Double click vùng trống bên dưới thanh công cụ mở modal tạo thư mục con trong folder đang xem; double click item vẫn mở item. Có thể tạo folder bằng menu/nút hiện có trên bàn phím và cảm ứng.
+  Nội dung các trang trong app shell giãn theo chiều rộng khả dụng, giữ giới hạn chiều rộng riêng của từng trang; trang Cài đặt không tràn ngang ở 360px khi main dùng flex để giãn chiều cao Drive.
   `/` chuyển sang `/drive`. Id trong URL là UUID bỏ dấu gạch (`/drive/folders/01a1261573fd7134b1948c39b526fe9e`).
 - Panel chi tiết rộng 320px ở desktop lớn (`xl`); trên màn hình nhỏ hơn hiển thị dạng bottom sheet.
 - Phím `i` bật/tắt panel chi tiết. Phím bị bỏ qua khi focus nằm trong ô nhập liệu, trong menu hoặc listbox (dùng chữ cái để nhảy tới mục), trong một hộp thoại khác (ví dụ drawer điều hướng), khi giữ phím (auto-repeat) hoặc khi sự kiện đã được xử lý. Trong bottom sheet chi tiết, `i` đóng sheet.

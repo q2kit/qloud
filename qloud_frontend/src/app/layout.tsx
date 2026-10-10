@@ -90,7 +90,7 @@ export function AppLayout(): React.JSX.Element {
             }}
           />
           <div className="flex min-h-0 flex-1">
-            <main className="flex min-w-0 flex-1 flex-col px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+            <main className="flex min-w-0 flex-1 flex-col px-4 py-5 *:w-full sm:px-6 sm:py-7 lg:px-8">
               <Outlet />
             </main>
             <DetailPanel
