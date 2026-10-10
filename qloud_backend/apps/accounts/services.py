@@ -17,6 +17,8 @@ def _signup_plan(*, using: str, plan_id: UUID | None) -> Plan:
     # No row lock is needed: set_default_plan commits the switch atomically, so a
     # signup sees either the old or the new default, and the FK check on insert
     # takes FOR KEY SHARE on the plan, which already blocks deleting it.
+    # A plan deactivated after this read can still be assigned; that signup simply
+    # counts as having happened before the deactivation.
     plans = Plan.objects.using(using)
     if plan_id is None:
         plan = plans.filter(is_default_for_signup=True).first()
@@ -62,9 +64,10 @@ def set_default_plan(plan: Plan) -> None:
 
 
 @transaction.atomic
-def suspend_users(user_ids: Iterable[UUID], *, reason: str, actor: User | None = None) -> int:
+def suspend_users(user_ids: Iterable[UUID | str], *, reason: str, actor: User | None = None) -> int:
     """Suspend the given accounts and return how many were newly suspended."""
-    ids = set(user_ids)
+    # Normalize so string ids from request data still match the UUID primary keys.
+    ids = {UUID(str(pk)) for pk in user_ids}
     if actor is not None and actor.pk in ids:
         raise ValidationError(_("You cannot suspend your own account."), code="self_suspension")
     users = _lock_with_admins(Q(pk__in=ids))

@@ -328,3 +328,15 @@ def test_change_form_validates_when_clearing_a_flag(admin_client):
     assert response.status_code == 302
     validate.assert_called_once()
     assert validate.call_args.kwargs == {"active": True, "staff": False, "superuser": False}
+
+
+def test_admin_cannot_delete_users(admin_client):
+    admin = User.objects.get(email="admin@example.com")
+    other = User.objects.create_superuser("backup@example.com")
+    response = admin_client.post(
+        reverse("admin:accounts_user_delete", args=[other.pk]), {"post": "yes"}
+    )
+    assert response.status_code == 403
+    changelist = admin_client.get(reverse("admin:accounts_user_changelist"))
+    assert "delete_selected" not in changelist.content.decode()
+    assert User.objects.filter(pk__in=[admin.pk, other.pk]).count() == 2

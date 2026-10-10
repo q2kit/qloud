@@ -14,6 +14,7 @@ Hash xác thực session phụ thuộc mật khẩu và bộ đếm này, nên m
 Session được xóa khi truy cập lần tiếp theo với hash cũ; cơ chế hoạt động với DB, cached_db và cache session engine.
 Backend xác thực chặn cả đăng nhập mới và sử dụng session của user đang khóa; mở khóa không giảm bộ đếm nên không phục hồi session cũ.
 Trong admin dùng action khóa/mở khóa; trường khóa chỉ đọc để mọi thao tác đi qua dịch vụ.
+Admin không xóa được user (xóa tài khoản nằm ngoài phạm vi, và xóa sẽ vượt qua kiểm tra superuser cuối cùng); thay vào đó thì khóa.
 Action từ chối toàn bộ lô nếu chứa chính admin đang thao tác hoặc khiến không còn superuser active/staff/chưa bị khóa.
 Dịch vụ khóa dòng user đích cùng toàn bộ superuser theo thứ tự UUID, để vẫn còn người quản trị và tránh deadlock; superuser ít và thao tác hiếm nên khóa cả nhóm không đáng kể.
 Khóa lại user đã bị khóa không đổi thời điểm, lý do hay bộ đếm session; action báo số tài khoản được giữ nguyên.
@@ -28,6 +29,8 @@ Admin chỉ ghi trường thực sự đổi; service khóa/mở khóa dùng kh�
 Việc đổi từ ModelBackend sang AccountBackend và hash session mới khiến session trước M1-01 phải đăng nhập lại; chưa có production.
 Lỗi thiếu plan/inactive có mã ổn định và thông báo gettext `vi`/`en`; `createsuperuser` chuyển lỗi thành CommandError.
 M1-02 phải chuyển các ValidationError provisioning thành lỗi đăng ký trong adapter/API allauth, thay vì để trả 500.
+Việc chặn user bị khóa hiện nằm ở `AccountBackend.user_can_authenticate`. Backend của allauth (đăng nhập OAuth, login by code) không đi qua đây,
+nên M1-02 phải dùng backend kế thừa cùng kiểm tra `suspended_at` và chặn trong adapter allauth, có test cho user bị khóa đăng nhập bằng OAuth.
 Kiểm tra share link của owner bị khóa sẽ triển khai ở M5 khi có model ShareLink.
 
 ## User stories

@@ -130,14 +130,8 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self._saved_values = self._field_values()
-
-    def _field_values(self) -> dict[str, Any]:
-        return {
-            field.attname: self.__dict__[field.attname]
-            for field in self._meta.concrete_fields
-            if field.attname in self.__dict__
-        }
+        self._saved_values: dict[str, Any] = {}
+        self._mark_saved(None)
 
     def refresh_from_db(
         self,
@@ -199,7 +193,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
             from .services import save_new_user
 
             save_new_user(self, *args, **kwargs)
-            self._saved_values = self._field_values()
+            self._mark_saved(None)
             return
         if kwargs.get("update_fields") is None:
             changed = {

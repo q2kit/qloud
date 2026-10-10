@@ -97,6 +97,11 @@ class UserAdmin(admin.ModelAdmin[User]):
     list_select_related = ("plan",)
     actions = ("suspend_accounts", "unsuspend_accounts")
 
+    def has_delete_permission(self, request: HttpRequest, obj: User | None = None) -> bool:
+        # Account deletion is out of scope until its cleanup (files, sessions) exists;
+        # deleting would also bypass the last-superuser guard. Suspend instead.
+        return False
+
     def save_model(
         self, request: HttpRequest, obj: User, form: forms.ModelForm[User], change: bool
     ) -> None:

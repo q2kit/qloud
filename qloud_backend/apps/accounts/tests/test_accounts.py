@@ -404,3 +404,16 @@ def test_session_survives_secret_rotation_until_suspension(client, settings):
     request = RequestFactory().get("/")
     request.session = session
     assert get_user(request).is_anonymous
+
+
+def test_suspend_users_accepts_string_ids():
+    from apps.accounts.services import suspend_users
+
+    actor = User.objects.create_superuser("admin@example.com")
+    user = User.objects.create_user("alice@example.com")
+    with pytest.raises(ValidationError) as error:
+        suspend_users([str(actor.pk)], reason="Abuse", actor=actor)
+    assert error.value.code == "self_suspension"
+    assert suspend_users([str(user.pk)], reason="Abuse", actor=actor) == 1
+    user.refresh_from_db()
+    assert user.suspended_at is not None
