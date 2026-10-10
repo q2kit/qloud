@@ -68,10 +68,9 @@ describe('Drive (S-05)', () => {
     await user.click(
       screen.getByRole('button', { name: 'More actions for z-target.txt' }),
     );
-    await user.click(
-      screen.getByRole('menuitem', { name: 'Open containing folder' }),
-    );
-    await waitFor(() => expect(file).toHaveAttribute('aria-selected', 'true'));
+    expect(
+      screen.queryByRole('menuitem', { name: 'Open containing folder' }),
+    ).not.toBeInTheDocument();
   });
 
   it('keeps the file query when canonicalizing a dashed parent link', async () => {

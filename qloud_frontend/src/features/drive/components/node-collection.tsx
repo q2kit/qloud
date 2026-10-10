@@ -346,6 +346,11 @@ function NodeItem({
   }, [revealId, node.id, onRevealed]);
   // Menus act on the selection; opening one on an unselected item selects it first.
   const [actions, setActions] = React.useState<NodeAction[]>([]);
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const changeMenuOpen = (open: boolean): void => {
+    prepareMenu(open);
+    setMenuOpen(open);
+  };
   const prepareMenu = (open: boolean): void => {
     if (!open) return;
     if (!selected) onSelect(node, { toggle: false, range: false });
@@ -459,7 +464,7 @@ function NodeItem({
       ? 'border-primary bg-primary/10 ring-1 ring-primary'
       : 'border-border hover:bg-accent/60';
   const moreButton = (
-    <DropdownMenu onOpenChange={prepareMenu}>
+    <DropdownMenu open={menuOpen} onOpenChange={changeMenuOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
@@ -470,8 +475,14 @@ function NodeItem({
           // A soft overlay rather than the grey accent: it reads on any card, selected
           // (tinted) or not, in light and dark.
           className="size-7 shrink-0 rounded-md text-muted-foreground opacity-100 transition-[opacity,background-color,color] hover:bg-foreground/10 hover:text-foreground focus-visible:opacity-100 focus-visible:shadow-none group-hover:opacity-100 data-[state=open]:bg-foreground/10 data-[state=open]:text-foreground data-[state=open]:opacity-100 [@media(hover:hover)]:opacity-0"
+          // Open on completed click: selection can move the toolbar/anchor, so
+          // pointerup must finish before menu items can receive pointer events.
+          onPointerDown={(event) => {
+            if (event.button === 0 && !event.ctrlKey) event.preventDefault();
+          }}
           onClick={(event) => {
             event.stopPropagation();
+            changeMenuOpen(!menuOpen);
           }}
           onDoubleClick={(event) => {
             event.stopPropagation();

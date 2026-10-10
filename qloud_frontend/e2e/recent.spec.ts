@@ -3,6 +3,8 @@ import { signUpVerifiedViaApi } from './auth';
 
 // API-seeded real stack. RECENT_LIVE keeps Chromium visible and records review images.
 test.use({ launchOptions: { slowMo: process.env.RECENT_LIVE ? 250 : 0 } });
+// Limit connection bursts when seeding API data in parallel dev-server runs.
+const SEED_BATCH_SIZE = 2;
 const item = (page: Page, name: string) =>
   page.getByRole('option', { name, exact: true });
 async function csrf(page: Page) {
@@ -199,7 +201,16 @@ test('Recent refreshes after upload, rename and move; empty state and view prefe
   await page.getByRole('button', { name: 'Di chuyển…', exact: true }).click();
   const move = page.getByRole('dialog', { name: 'Di chuyển 1 mục' });
   await move.getByRole('button', { name: 'Đích', exact: true }).click();
+  const moved = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url().endsWith('/api/v1/nodes/move'),
+  );
   await move.getByRole('button', { name: 'Di chuyển tới đây' }).click();
+  expect((await moved).status()).toBe(200);
+  await expect(
+    page.getByRole('status').filter({ hasText: 'Đã di chuyển' }),
+  ).toContainText('Đích');
   await expect(item(page, 'renamed.txt')).toHaveCount(0);
   await navigateRecent(page, isMobile);
   await expect(item(page, 'renamed.txt')).toBeVisible();
@@ -216,10 +227,12 @@ test('Recent cursor pages stop at 100 files', async ({ page }) => {
   test.setTimeout(90_000);
   await signUpVerifiedViaApi(page);
   const parent = await root(page);
-  for (let start = 0; start < 105; start += 5) {
+  for (let start = 0; start < 105; start += SEED_BATCH_SIZE) {
     await Promise.all(
-      Array.from({ length: 5 }, (_, offset) =>
-        file(page, parent, `file-${String(start + offset)}.txt`, ''),
+      Array.from(
+        { length: Math.min(SEED_BATCH_SIZE, 105 - start) },
+        (_, offset) =>
+          file(page, parent, `file-${String(start + offset)}.txt`, ''),
       ),
     );
   }
@@ -238,13 +251,16 @@ test('file location links reveal files beyond cursor pages and virtualized rows'
   page,
   isMobile,
 }) => {
+  test.setTimeout(90_000);
   await signUpVerifiedViaApi(page);
   const rootId = await root(page);
   const parent = await folder(page, rootId, 'Thư mục chứa');
-  for (let start = 0; start < 205; start += 5) {
+  for (let start = 0; start < 205; start += SEED_BATCH_SIZE) {
     await Promise.all(
-      Array.from({ length: Math.min(5, 205 - start) }, (_, offset) =>
-        file(page, parent.id, `a-${String(start + offset)}.txt`, ''),
+      Array.from(
+        { length: Math.min(SEED_BATCH_SIZE, 205 - start) },
+        (_, offset) =>
+          file(page, parent.id, `a-${String(start + offset)}.txt`, ''),
       ),
     );
   }
@@ -289,9 +305,69 @@ test('file location links reveal files beyond cursor pages and virtualized rows'
   await page.reload();
   await expect(selected).toBeInViewport();
   await selected.getByRole('button').click();
-  await page.getByRole('menuitem', { name: 'Mở thư mục chứa tệp' }).click();
+  await expect(
+    page.getByRole('menuitem', { name: 'Mở thư mục chứa tệp' }),
+  ).toHaveCount(0);
+  await page.keyboard.press('Escape');
   await expect(selected).toHaveAttribute('aria-selected', 'true');
   await expect(selected).toBeInViewport();
   await page.goto(`/drive?select=${target.id.replaceAll('-', '')}`);
   await expect(page.getByRole('alert')).toContainText('Không tìm thấy tệp');
+});
+
+test('item menu opens after pointer release without accidentally opening a folder', async ({
+  page,
+  isMobile,
+}) => {
+  await signUpVerifiedViaApi(page);
+  const rootId = await root(page);
+  await folder(page, rootId, 'Dự án');
+  await file(page, rootId, 'ghi-chú.txt');
+  if (!isMobile) await page.setViewportSize({ width: 800, height: 740 });
+  await page.goto('/drive');
+  for (const view of ['Dạng lưới', 'Dạng danh sách']) {
+    await page.getByRole('button', { name: view }).click();
+    await item(page, 'ghi-chú.txt').click();
+    await expect(
+      page.getByRole('button', { name: 'Mở thư mục chứa tệp' }),
+    ).toHaveCount(0);
+    const trigger = item(page, 'Dự án').getByRole('button');
+    const box = await trigger.boundingBox();
+    if (!box) throw new Error('Folder menu trigger is missing');
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await expect(page.getByRole('menu')).toHaveCount(0);
+    await expect(item(page, 'ghi-chú.txt')).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    await page.mouse.up();
+    await expect(page.getByRole('menu')).toBeVisible();
+    await expect(page).toHaveURL(/\/drive$/);
+    await expect(
+      page.locator('[data-node-id][aria-selected="true"]'),
+    ).toHaveAttribute('aria-label', 'Dự án');
+    if (process.env.RECENT_LIVE && view === 'Dạng lưới') {
+      for (const theme of ['light', 'dark']) {
+        await page.evaluate((theme) => {
+          localStorage.setItem('qloud-theme', theme);
+          window.dispatchEvent(
+            new StorageEvent('storage', { key: 'qloud-theme' }),
+          );
+        }, theme);
+        await expect(page.locator('html')).toHaveClass(
+          theme === 'dark' ? /dark/ : /^$/,
+        );
+        await page.screenshot({
+          path: `../qloud_docs/assets/m2-09-menu-${theme}-${isMobile ? '360' : '800'}.png`,
+          animations: 'disabled',
+        });
+      }
+    }
+    await page.keyboard.press('Escape');
+  }
+  if (isMobile) await item(page, 'Dự án').getByRole('button').tap();
+  else await item(page, 'Dự án').getByRole('button').click();
+  await page.getByRole('menuitem', { name: /^Mở\s*↵$/ }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Dự án');
 });

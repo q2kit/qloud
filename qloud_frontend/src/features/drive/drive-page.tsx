@@ -15,7 +15,6 @@ import { ResumeUploads } from '@/features/upload/components/resume-uploads';
 import { useUploader } from '@/features/upload/context';
 import { treeFromDrop } from '@/features/upload/drop';
 import { useFolderUploader } from '@/features/upload/folder-context';
-import { useMe } from '@/features/settings/use-me';
 import { ApiError } from '@/lib/api/errors';
 
 import { nodeActions, type ActionHandlers } from './actions';
@@ -58,7 +57,6 @@ export function DrivePage(): React.JSX.Element {
   const folderId = useCurrentFolderId();
   const { folderId: rawFolderId } = useParams();
   const folder = useNode(folderId);
-  const me = useMe();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const requestedId = searchParams.get('select');
@@ -320,17 +318,6 @@ export function DrivePage(): React.JSX.Element {
   const handlers: ActionHandlers = {
     open,
     download: open,
-    openLocation: (node) => {
-      if (node.parent_id)
-        void navigate(
-          folderPath(
-            node.parent_id === me.data?.root_folder_id
-              ? undefined
-              : node.parent_id,
-            node.id,
-          ),
-        );
-    },
     rename: (node) => {
       setRenaming({ node, name: node.name });
     },

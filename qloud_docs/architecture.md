@@ -174,7 +174,7 @@ Code: `apps/sharing/permissions.py` (M2-01; app `sharing` chưa có model, Share
   test đọc link trong email bằng API của Mailpit; Google và GitHub trỏ tới provider giả (allauth cho đổi URL provider), key OAuth thật trong `.env` không được dùng.
 - Provider giả có trang "authorize" là một form để test chọn email, tên và email đã xác thực hay chưa. Danh tính nằm trong `code`/token, nên server không giữ trạng thái và test chạy song song được.
 
-M2-09: stack E2E tắt persistent DB connections (`CONN_MAX_AGE=0`) để request trong các thread của Django runserver giải phóng kết nối sau khi xong; các bài seed dữ liệu/phân trang chạy song song không tích lũy kết nối vượt giới hạn PostgreSQL. Cấu hình ứng dụng dev/production giữ nguyên.
+M2-09: stack E2E tắt persistent DB connections (`CONN_MAX_AGE=0`) để request trong các thread của Django runserver giải phóng kết nối sau khi xong; các bài seed dữ liệu/phân trang chạy song song không tích lũy kết nối vượt giới hạn PostgreSQL. Cấu hình ứng dụng dev/production giữ nguyên. Seed API cho test Gần đây giới hạn 2 request tạo file đồng thời mỗi test để giảm burst kết nối qua proxy vào runserver khi nhiều worker cùng kiểm tra luồng UI.
 
 ### Production
 - Một VPS chạy Docker Compose: nginx, api (gunicorn), worker, beat, postgres, redis; phía trước là Cloudflare proxy
