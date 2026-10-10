@@ -16,6 +16,7 @@ dependencies = [
     "argon2-cffi>=25.1.0",
     "django-stubs-ext>=6.1.2",
     "django-allauth[headless,headless-spec,socialaccount]>=65.19.7",
+    "boto3>=1.43.111",
 ]
 
 [dependency-groups]
@@ -29,6 +30,7 @@ dev = [
     "django-stubs[compatible-mypy]>=6.1.2",
     "djangorestframework-stubs[compatible-mypy]>=3.18.1",
     "celery-types>=0.26.0",
+    "boto3-stubs[s3]>=1.43.111",
 ]
 
 [tool.uv]

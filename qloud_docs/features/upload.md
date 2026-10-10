@@ -16,8 +16,8 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). Model `Blob`/`FileV
    - quota: `used + reserved + size <= quota` của owner folder đích, rồi **giữ chỗ** (`reserved += size`) trong transaction.
 
    Sau đó BE gọi `CreateMultipartUpload` với key `blobs/{uuid}` và trả về `{id, part_size, part_count}`.
-2. **Chọn `part_size`:** tối thiểu 8 MB, và tăng dần sao cho `part_count <= 10.000` (giới hạn của S3).
-   Ví dụ file 50 GB thì part khoảng 8 MB × 6.400 part.
+2. **Chọn `part_size`:** tối thiểu 8 MiB, tăng theo bội số MiB sao cho `part_count <= 10.000` (giới hạn của S3); `storage.s3.part_size_for()`.
+   Ví dụ file 50 GiB thì part 8 MiB × 6.400 part; 80 GiB thì 9 MiB; 5 TiB thì 525 MiB.
 3. **Upload part:** FE xin presigned URL theo lô 20 part, rồi `PUT` song song tối đa 4 part.
    Part lỗi được thử lại với backoff lũy thừa (tối đa 5 lần). URL hết hạn thì xin URL mới.
 4. **Resume:** FE lưu `{fingerprint → session_id}` vào IndexedDB, với fingerprint = tên + kích thước + lastModified + hash của 1 MB đầu.

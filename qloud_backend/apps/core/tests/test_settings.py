@@ -16,6 +16,9 @@ PROD_ENV = {
     "CELERY_BROKER_URL": "redis://localhost:6379/1",
     "TURNSTILE_SECRET_KEY": "0x4AAAAAAA" + "s" * 25,
     "TURNSTILE_SITE_KEY": "0x4AAAAAAA" + "k" * 12,
+    "S3_BUCKET": "qloud-prod",
+    "S3_ACCESS_KEY_ID": "key",
+    "S3_SECRET_ACCESS_KEY": "secret",
 }
 
 

@@ -35,6 +35,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 | django-allauth | 65 | Extra `headless` (pyjwt, cryptography), `headless-spec` (PyYAML) và `socialaccount` (requests, oauthlib) |
 | Celery | 5.6 | |
 | psycopg | 3.3 | |
+| boto3 | 1.43 | Dev: `boto3-stubs[s3]` (MIT) cho mypy, cùng dòng phiên bản |
 | mypy | 2.3 | djangorestframework-stubs 3.18 yêu cầu `mypy<2.4` |
 | PostgreSQL / Redis | 18 / 8 | |
 | Node.js | 24 | `engines` trong `package.json`; `@types/node` giữ cùng major |
@@ -60,7 +61,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 | Cấu hình | django-environ |
 | Quản lý package | uv |
 | Chất lượng | ruff (lint + format), mypy (strict) + django-stubs + django-stubs-ext |
-| Test | pytest, pytest-django, factory_boy; S3 thật trên LocalStack |
+| Test | pytest, pytest-django, factory_boy; S3 thật trên LocalStack (bucket riêng `qloud-test`) |
 
 **Cấu trúc module (Django apps):**
 ```
@@ -91,6 +92,8 @@ M1-02: allauth headless gắn ở `/api/auth/` (`config/urls.py`); `accounts.ada
 đăng ký/đăng nhập (xem auth.md). M1-04: `core.turnstile` kiểm tra token Turnstile bằng thư viện chuẩn (`urllib`), không thêm dependency;
 email auth gửi qua task Celery `accounts.tasks.send_email`, template ở `accounts/templates/account/email/`.
 M1-06: `GET /api/v1/config` (`core.views.ConfigView`) cấp cấu hình công khai lúc chạy cho SPA; `GET/PATCH /api/v1/me` (`accounts.views.MeView`) cho hồ sơ và tùy chọn. allauth không có type hint: `pyproject.toml` bỏ qua import của `allauth.*` và cho phép kế thừa trong ba module tích hợp.
+M2-03: `storage.s3` là module duy nhất gọi object storage (boto3, client tạo một lần mỗi process). Nó cấp presigned URL cho từng part (hạn 1 giờ) và cho download (5 phút, `Content-Disposition` theo RFC 6266 để giữ tên tiếng Việt), và lo các bước multipart, `list_parts` đọc đủ mọi trang, xóa theo lô 1000 key.
+Lỗi S3 gói thành `StorageError` (`code` = mã lỗi S3). Key có dạng `blobs/{uuid7}`, không chứa tên file. Cấu hình `S3_*` đọc từ env; test và CI chạy trên LocalStack.
 Action Django admin dùng gettext, catalog `vi` và `en` nằm trong `accounts/locale`;
 commit cả `.po` và `.mo` để runtime/CI không phụ thuộc gettext CLI. Khi sửa bản dịch, chạy
 `cd "$(git rev-parse --show-toplevel)/qloud_backend" && uv run --frozen python manage.py compilemessages -l vi -l en --ignore .venv`

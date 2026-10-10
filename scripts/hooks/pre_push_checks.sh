@@ -18,11 +18,11 @@ port_open() { (exec 3<>"/dev/tcp/127.0.0.1/$1") 2>/dev/null; }
 if grep -q '^qloud_backend/' <<<"$changed"; then
   echo "→ backend: mypy"
   (cd "$root/qloud_backend" && uv run --frozen mypy .)
-  if port_open 5432 && port_open 6379; then
+  if port_open 5432 && port_open 6379 && port_open 4566; then
     echo "→ backend: pytest"
     (cd "$root/qloud_backend" && uv run --frozen pytest -q)
   else
-    echo "⚠ backend: Postgres/Redis not running (docker compose up -d --wait) — skipping pytest; CI will run it."
+    echo "⚠ backend: Postgres/Redis/LocalStack not running (docker compose up -d --wait) — skipping pytest; CI will run it."
   fi
 fi
 

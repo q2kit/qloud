@@ -12,6 +12,11 @@ os.environ.setdefault("DJANGO_SECRET_KEY", "test-insecure-secret-key")
 os.environ.setdefault("DATABASE_URL", "postgres://qloud:qloud@localhost:5432/qloud")
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
 os.environ.setdefault("CELERY_BROKER_URL", "redis://localhost:6379/1")
+# LocalStack from docker compose; tests use their own bucket (apps/storage/tests).
+os.environ.setdefault("S3_ENDPOINT_URL", "http://localhost:4566")
+os.environ.setdefault("S3_ACCESS_KEY_ID", "test")
+os.environ.setdefault("S3_SECRET_ACCESS_KEY", "test")
+os.environ.setdefault("S3_ADDRESSING_STYLE", "path")
 
 from .base import *  # noqa: E402
 
@@ -32,3 +37,6 @@ ACCOUNT_RATE_LIMITS = False
 # Turnstile is exercised with a faked Cloudflare response in its own tests.
 TURNSTILE_SITE_KEY = ""
 TURNSTILE_SECRET_KEY = ""
+
+# Never the dev bucket from .env: tests create and empty their own.
+S3_BUCKET = "qloud-test"
