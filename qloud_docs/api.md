@@ -103,7 +103,7 @@ M2-02 (5 endpoint trên):
 ### Xem trước (M3-02)
 - `GET /nodes/{id}/preview`: yêu cầu đăng nhập/quyền viewer, node còn sống; không thấy/không có quyền/trashed → 404, folder → 400 `not_a_file`.
 - Response: `{kind, url, expires_at, thumbnail}`. `kind` là `image | pdf | video | audio | text | unsupported`. `url` và `expires_at` null khi unsupported; FE dùng endpoint download khi đó.
-- `thumbnail`: null khi chưa tạo xong hoặc key không thuộc current version; có thì `{url, large_url, expires_at}` (256/1024px WebP). Tất cả URL inline hạn 5 phút, byte trực tiếp từ S3, hỗ trợ Range.
+- `thumbnail`: null khi chưa tạo xong hoặc key không thuộc current version; có thì `{url, large_url, expires_at}` cho ảnh/PDF/MP4 (cạnh dài tối đa 256/1024px WebP). Tất cả URL inline hạn 5 phút, byte trực tiếp từ S3, hỗ trợ Range.
 - MIME/size lấy từ current version, tên từ node hiện tại. Text trong allowlist nhỏ hơn 1.000.000 byte ép `text/plain`; không cấp URL preview cho loại chạy script hoặc MIME ngoài allowlist. Danh sách cụ thể và quyết định: [download-preview.md](features/download-preview.md#m3-02--api-preview).
 
 ### Gần đây (M2-09)

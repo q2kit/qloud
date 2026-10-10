@@ -91,7 +91,9 @@ def preview_link(node: Node) -> PreviewLink:
     thumbnail = None
     # Only publish the pair belonging to this version, never an old version's key.
     prefix = f"thumbs/{version.pk}"
-    if kind in {"image", "pdf"} and node.thumbnail_key == f"{prefix}/256.webp":
+    if (
+        kind in {"image", "pdf"} or safe_content_type(version.mime_type) == "video/mp4"
+    ) and node.thumbnail_key == f"{prefix}/256.webp":
         thumbnail = ThumbnailLink(
             url=s3.presign_download(
                 node.thumbnail_key, filename="256.webp", content_type="image/webp", inline=True

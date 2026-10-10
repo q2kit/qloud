@@ -15,7 +15,7 @@ export function NodeThumbnail({
   const [visible, setVisible] = React.useState(false);
   const eligible =
     node.kind === 'file' &&
-    /^(image\/(jpeg|png|gif|webp|avif)|application\/pdf)$/i.test(
+    /^(image\/(jpeg|png|gif|webp|avif)|application\/pdf|video\/mp4)$/i.test(
       (node.mime_type ?? '').split(';')[0]?.trim() ?? '',
     );
   React.useEffect(() => {

@@ -63,6 +63,9 @@ jobs:
       - name: Start Postgres, Redis and LocalStack
         working-directory: .
         run: docker compose up -d --wait postgres redis localstack
+      - name: Build LGPL-only thumbnail decoder
+        working-directory: .
+        run: python3 scripts/build_ffmpeg.py
       - run: uv sync --frozen
       - name: Convention script tests
         run: python3 -m unittest discover -s ../scripts/tests
@@ -145,6 +148,9 @@ jobs:
         # Mailpit receives the emails the auth flows read their links from; LocalStack
         # holds the uploads (bucket qloud-e2e, CORS for vite preview).
         run: docker compose up -d --wait postgres redis mailpit localstack
+      - name: Build LGPL-only thumbnail decoder
+        working-directory: .
+        run: python3 scripts/build_ffmpeg.py
       - run: uv sync --frozen
         working-directory: qloud_backend
       - run: pnpm install --frozen-lockfile
@@ -159,7 +165,7 @@ jobs:
       - run: pnpm test:e2e
         working-directory: qloud_frontend
       - name: Preview media in development StrictMode
-        run: pnpm exec playwright test e2e/preview.spec.ts -g 'video streams|audio uses' --output test-results-dev
+        run: pnpm exec playwright test e2e/preview.spec.ts -g 'video streams|audio uses|MP4 thumbnails' --output test-results-dev
         working-directory: qloud_frontend
         env:
           PREVIEW_DEV: "1"

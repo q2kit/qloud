@@ -5,7 +5,7 @@
 ## User stories
 - Tôi muốn tải một file về máy.
 - Tôi muốn xem nhanh ảnh, PDF hoặc video ngay trong trình duyệt, và chuyển sang file trước hoặc sau.
-- Tôi muốn thấy thumbnail của ảnh và PDF ở chế độ lưới.
+- Tôi muốn thấy thumbnail của ảnh, PDF và MP4 ở chế độ lưới/danh sách.
 
 ## Quy tắc
 - Download: BE trả presigned GET URL có hạn 5 phút, với `Content-Disposition: attachment; filename*=UTF-8''...` để giữ đúng tên tiếng Việt.
@@ -21,7 +21,7 @@
   - Video: mp4/webm, phát bằng thẻ `<video>` gốc của trình duyệt, tua được nhờ S3 hỗ trợ Range. Không transcode.
   - Âm thanh: mp3, wav, ogg
   - Văn bản thuần, nhỏ hơn 1 MB: txt, md, json, csv, code — hiển thị dạng text an toàn, không render
-- Thumbnail: Celery tạo ảnh webp, cạnh dài 256px và 1024px, cho ảnh và trang đầu của PDF; lưu tại `thumbs/{version_id}/{size}.webp`.
+- Thumbnail: Celery tạo ảnh webp, cạnh dài tối đa 256px và 1024px, cho ảnh, trang đầu của PDF và video MP4; lưu tại `thumbs/{version_id}/{size}.webp`.
   Thumbnail **không tính vào quota**. Nếu tạo lỗi thì hiện icon theo loại file.
 - Tải nhiều file hoặc tải cả folder dạng zip: **chưa có trong MVP** (cần worker riêng để nén). Ghi chú để làm sau.
 
@@ -47,7 +47,7 @@
 ### M3-03 — trình xem và thumbnail
 - Kế hoạch được duyệt tại [#29](https://github.com/q2kit/qloud/issues/29#issuecomment-6102467202), gồm bổ sung thumbnail ở **cả grid và list children**, áp dụng cho Drive/Gần đây.
 - Double click trên desktop, Enter hoặc nút Xem trước mở overlay toàn màn hình qua `?preview=:id`; nút Tải xuống tách riêng. ←/→ và nút trước/sau đi theo thứ tự danh sách, bỏ folder, tải tiếp cursor khi cần. Phím điều khiển media/PDF/input được giữ cho control đó. Esc/nút đóng, Back/Forward và khôi phục focus được hỗ trợ.
-- Thumbnail chỉ fetch cho ảnh/PDF trong viewport, lazy image; dùng icon nếu chưa có/lỗi. Query chung theo id/updated_at, polling mỗi 5 giây tối đa 6 lần thêm khi chưa có thumbnail; dừng khi rời viewport hoặc hết lượt. URL có thumbnail được refresh trước hạn 30 giây, query stale sau 210 giây.
+- Thumbnail chỉ fetch cho ảnh/PDF/MP4 trong viewport, lazy image; dùng icon nếu chưa có/lỗi. Query chung theo id/updated_at, polling mỗi 5 giây tối đa 6 lần thêm khi chưa có thumbnail; dừng khi rời viewport hoặc hết lượt. URL có thumbnail được refresh trước hạn 30 giây, query stale sau 210 giây.
 - Viewer refresh URL nguồn trước hạn 30 giây; loading/lỗi/thử lại và trạng thái không hỗ trợ có bản dịch vi/en. Ảnh dùng img; video/audio native controls và preload metadata; text đọc trực tiếp S3 và chèn text vào pre, không HTML/Markdown render. Khi đóng/đổi file, source fetch/PDF task/media được hủy hoặc dừng.
 - Lifecycle video/audio gán nguồn trong setup và giải phóng trong cleanup, bao gồm vòng setup/cleanup/setup của React StrictMode ở dev. Test Chromium gồm cả production build và Vite dev (`PREVIEW_DEV=1`), xác minh src, metadata, phát audio/video và tua Range; CI chạy thêm hai luồng media trên Vite dev ở desktop/360px.
 - PDF dùng pdf.js 6.4, canvas từng trang, chọn trang/zoom/fit chiều rộng; không dựng mọi trang cùng lúc. Worker, CMap/font/WASM được build/host trong app, không dùng CDN. Không có annotation/action/scripting layer thực thi script hay liên kết trong PDF.
@@ -65,3 +65,15 @@
 - [x] Video 2 GB tua được ngay, không phải chờ tải hết.
 - [x] File HTML hoặc SVG không bị render inline.
 - [x] URL hết hạn sau 5 phút.
+
+
+### M3-04 — thumbnail MP4
+- Kế hoạch và ngoại lệ FFmpeg LGPL được owner duyệt tại [#121](https://github.com/q2kit/qloud/issues/121#issuecomment-6103108839). FFmpeg/ffprobe chạy **trên host/container Celery worker**; dev worker trên Mac thì binary cũng trên Mac. API Django và trình duyệt không chạy FFmpeg. Không transcode video.
+- Upload mới có MIME `video/mp4` được enqueue sau commit. Worker đọc tối đa 100 MiB từ S3, ghi vào thư mục tạm riêng, ffprobe kiểm tra codec/kích thước trước khi giải mã. Hỗ trợ decoder native H.264, HEVC, MPEG-4; WebM và codec khác giữ icon.
+- Lấy frame khoảng 1 giây; video ngắn hơn hoặc bằng 1 giây dùng frame đầu, nếu seek không ra frame thì thử frame đầu. Giữ tỷ lệ, áp dụng hướng video của FFmpeg, cạnh dài tối đa 1024px, không phóng to; Pillow xuất WebP 256/1024 theo cùng version key và quy tắc quota/publication M3-01.
+- Giới hạn nguồn 100 MiB, nguồn 40 triệu pixel, subprocess dùng chung budget 35 giây và một thread giải mã/encode, nằm trong Celery soft/hard 60/90 giây. Chỉ mở container MOV/MP4, protocol file/pipe; external data references/absolute aliases tắt, không nhận URL hay argv từ người dùng. Process được kill/reap cả khi timeout mềm; file tạm cleanup khi thành công hoặc lỗi (hard kill Celery có thể cần OS/vận hành dọn thư mục tạm).
+- Decoder không cài, build không đúng LGPL, file hỏng, codec/kích thước/timeout quá giới hạn thì thumbnail null và UI dùng icon. File lớn hơn 100 MiB vẫn preview/phát/tua trực tiếp S3. Không tự backfill kho cũ; vận hành có thể enqueue theo version id hiện hành.
+- API giữ nguyên schema, cấp cặp thumbnail MP4 của current version. Grid/list Drive và Gần đây chỉ fetch trong viewport, polling hữu hạn giống ảnh/PDF; viewer video vẫn dùng nguồn MP4.
+- Cài dev: từ gốc repo chạy `python3 scripts/build_ffmpeg.py`, rồi `python3 scripts/build_ffmpeg.py --check`. Cần C compiler và make; không thêm Python/npm package. Deploy build bằng cùng script vào worker image/host trước khi chạy worker; giữ shared libraries/source/license, cấu hình đường dẫn như [architecture.md](../architecture.md).
+
+- Live test worker thật: đặt `E2E_CELERY_EAGER=0 DJANGO_SETTINGS_MODULE=config.settings.e2e`, chạy `uv run celery -A config worker -Q qloud-e2e --concurrency=1 -l info` trong backend; chạy Playwright cùng `E2E_CELERY_EAGER=0`. CI mặc định eager, queue riêng tránh worker dev nhận nhầm task của E2E. Trên macOS/Python 3.14, prefork hiện lỗi trước khi chạy task ([#124](https://github.com/q2kit/qloud/issues/124)); live test dùng thêm `--pool=solo`, không chứng minh timeout Celery. Production Linux dùng prefork; timeout subprocess vẫn hoạt động ở solo.

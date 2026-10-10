@@ -16,6 +16,7 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 from apps.storage import s3
 
 from .models import FileVersion, Node
+from .video_thumbnails import frame
 
 logger = logging.getLogger(__name__)
 SIZES = (256, 1024)
@@ -31,7 +32,7 @@ IMAGE_FORMATS = {
 
 
 def supported(mime_type: str) -> bool:
-    return mime_type in IMAGE_FORMATS or mime_type == "application/pdf"
+    return mime_type in IMAGE_FORMATS or mime_type in {"application/pdf", "video/mp4"}
 
 
 def thumbnail_key(version_id: uuid.UUID, size: int) -> str:
@@ -39,6 +40,8 @@ def thumbnail_key(version_id: uuid.UUID, size: int) -> str:
 
 
 def _image(source: bytes, mime_type: str) -> Image.Image:
+    if mime_type == "video/mp4":
+        return frame(source)
     if mime_type == "application/pdf":
         with _PDFIUM_LOCK, pdfium.PdfDocument(source) as document, closing(document[0]) as page:
             width, height = page.get_size()
@@ -84,6 +87,7 @@ def generate(version_id: uuid.UUID) -> bool:
         OSError,
         ValueError,
         IndexError,
+        TypeError,
     ) as error:
         logger.info("Skipping thumbnail for version %s: %s", version_id, error)
         return False

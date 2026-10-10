@@ -57,7 +57,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 | DB driver | psycopg 3 |
 | S3 | boto3 |
 | Tác vụ nền | Celery + Redis (gồm celery beat cho tác vụ định kỳ) |
-| Ảnh | Pillow (thumbnail ảnh), pypdfium2 (render trang PDF; Apache-2.0/BSD, không cần thư viện hệ thống). Không dùng PyMuPDF vì giấy phép AGPL |
+| Ảnh | Pillow (thumbnail ảnh), pypdfium2 (render trang PDF; Apache-2.0/BSD, không cần thư viện hệ thống). Không dùng PyMuPDF vì giấy phép AGPL. Video MP4: FFmpeg/ffprobe 9.0.2, build LGPL-2.1-or-later riêng cho worker ([ADR 0009](adr/0009-mp4-thumbnails.md)) |
 | Email | SMTP riêng (cấu hình qua `.env`), gửi qua Celery; dev dùng Mailpit. Cấu hình bằng setting `MAILERS` của Django 6.1 (các setting `EMAIL_*` đã bị deprecate) |
 | Cấu hình | django-environ |
 | Quản lý package | uv |
@@ -196,3 +196,8 @@ M2-09: stack E2E tắt persistent DB connections (`CONN_MAX_AGE=0`) để reques
   tài khoản SMTP, OAuth app Google/GitHub cho domain production, Turnstile key. Tất cả nằm trong `.env` của server.
 
 M3-03: frontend dùng query preview theo node id/updated_at, chỉ tải thumbnail khi item hiển thị (grid/list). Viewer PDF lazy-load module, worker và CMap/font/WASM đi từ assets nội bộ; `scripts/copy-pdfjs-assets.mjs` sao chép từ dependency lockfile trước dev/build, thư mục sinh `public/pdfjs` không commit/lint/format. Chọn pdf.js 6.4 sau kiểm tra [release v6.4.299](https://github.com/mozilla/pdf.js/releases/tag/v6.4.299) và [API/examples chính thức](https://mozilla.github.io/pdf.js/examples/); render canvas không gắn scripting/action layer. S3 CORS expose `Accept-Ranges`, `Content-Range`, `Content-Length` cùng `ETag` để pdf.js đọc Range; production bucket cần cùng cấu hình header.
+
+
+M3-04: FFmpeg/ffprobe **chạy trên host/container Celery worker**, dưới dạng subprocess của `drive.video_thumbnails`; không chạy trong trình duyệt hay Django API. Dev chạy worker trực tiếp trên máy thì binary nằm trên máy; production phải build/cài binary và shared libraries vào image hoặc host của worker. Django API chỉ cấp URL S3, không cần FFmpeg. `python3 scripts/build_ffmpeg.py` dùng C compiler + make, tải source 9.0.2 chính thức theo SHA256 ghim, build shared LGPL-2.1-or-later không GPL/nonfree/version3/network, chỉ demux MOV/MP4, decoder native H.264/HEVC/MPEG-4 và xuất PNG. Không dùng FFmpeg Homebrew có GPL. `--check` kiểm tra phiên bản/cấu hình/license; CI build và kiểm tra ở backend/E2E. Thư mục `.tools/ffmpeg` không commit. Khi đóng gói worker, giữ toàn bộ prefix cùng `share/qloud-ffmpeg` (source, license và cấu hình), rồi đặt `THUMBNAIL_FFMPEG`/`THUMBNAIL_FFPROBE` thành đường dẫn tuyệt đối nếu khác mặc định.
+
+Build dùng zlib của hệ thống (giấy phép Zlib, cần header khi compile) và RPATH tới `<prefix>/lib`. Khi build image nhiều stage, dùng `--prefix` đúng đường dẫn cuối trong worker và copy prefix sang cùng đường dẫn; không di chuyển binary/shared libraries sang prefix khác. Ví dụ build `python3 scripts/build_ffmpeg.py --prefix /opt/qloud-ffmpeg`, rồi cấu hình `THUMBNAIL_FFMPEG=/opt/qloud-ffmpeg/bin/ffmpeg` và `THUMBNAIL_FFPROBE=/opt/qloud-ffmpeg/bin/ffprobe`.
