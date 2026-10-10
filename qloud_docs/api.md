@@ -38,6 +38,8 @@ lỗi `{"status", "errors": [{"code", "message", "param"}]}`. Chưa đăng nhậ
 Schema riêng ở `/api/auth/openapi.json` (xem tại `/api/auth/openapi.html`), không nằm trong `openapi.yaml`.
 Schema đó là của allauth nên không có các trường Qloud thêm vào: `remember` (login) và `turnstile_token` (signup, password request, provider signup).
 Vượt rate limit trả 429; Turnstile sai trả 400 với `code: "captcha_invalid"`, `param: "turnstile_token"`.
+FE gọi các endpoint này qua `src/features/auth/api.ts` (không qua `api` của openapi-fetch, vì chúng không có trong `openapi.yaml`);
+module này gửi cookie, `X-CSRFToken` và `Accept-Language`, và là nơi duy nhất làm việc với API auth.
 
 | Method | Path | Mô tả |
 |---|---|---|

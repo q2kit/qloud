@@ -60,10 +60,6 @@
     "trash": "Nội dung Thùng rác sẽ được triển khai trong M4-03.",
     "settings": "Nội dung Cài đặt sẽ được triển khai trong M1-06."
   },
-  "login": {
-    "title": "Đăng nhập",
-    "description": "Luồng đăng nhập sẽ được xây dựng trong milestone xác thực."
-  },
   "notFound": {
     "title": "Không tìm thấy trang",
     "description": "Đường dẫn này không tồn tại hoặc đã được di chuyển."
@@ -89,5 +85,85 @@
     "system": "Theo hệ thống",
     "light": "Sáng",
     "dark": "Tối"
+  },
+  "auth": {
+    "fields": {
+      "email": "Email",
+      "password": "Mật khẩu",
+      "newPassword": "Mật khẩu mới"
+    },
+    "login": {
+      "title": "Đăng nhập",
+      "description": "Đăng nhập để vào Drive của bạn.",
+      "remember": "Ghi nhớ đăng nhập",
+      "forgotPassword": "Quên mật khẩu?",
+      "submit": "Đăng nhập",
+      "submitting": "Đang đăng nhập…",
+      "noAccount": "Chưa có tài khoản?",
+      "signupLink": "Đăng ký"
+    },
+    "signup": {
+      "title": "Tạo tài khoản",
+      "description": "Đăng ký miễn phí để lưu trữ và chia sẻ file.",
+      "passwordHint": "Tối thiểu 8 ký tự, không quá giống email.",
+      "submit": "Đăng ký",
+      "submitting": "Đang tạo tài khoản…",
+      "haveAccount": "Đã có tài khoản?",
+      "loginLink": "Đăng nhập",
+      "successTitle": "Kiểm tra hộp thư của bạn",
+      "successDescription": "Chúng tôi đã gửi email xác thực tới {{email}}. Bạn có thể dùng Drive ngay; một số tính năng như upload cần xác thực email.",
+      "continue": "Vào Drive"
+    },
+    "verify": {
+      "pendingTitle": "Đang xác thực email",
+      "pending": "Vui lòng chờ trong giây lát…",
+      "successTitle": "Đã xác thực email",
+      "successDescription": "Cảm ơn bạn! Địa chỉ email của bạn đã được xác thực.",
+      "errorTitle": "Không thể xác thực email",
+      "toDrive": "Vào Drive",
+      "toLogin": "Đăng nhập"
+    },
+    "reset": {
+      "requestTitle": "Quên mật khẩu",
+      "requestDescription": "Nhập email của tài khoản, chúng tôi sẽ gửi liên kết để đặt lại mật khẩu.",
+      "send": "Gửi liên kết",
+      "sending": "Đang gửi…",
+      "sentTitle": "Kiểm tra hộp thư của bạn",
+      "sentDescription": "Nếu {{email}} có tài khoản Qloud, bạn sẽ nhận được liên kết đặt lại mật khẩu trong vài phút.",
+      "backToLogin": "Quay lại đăng nhập",
+      "newPasswordTitle": "Đặt mật khẩu mới",
+      "newPasswordDescription": "Chọn mật khẩu mới cho tài khoản Qloud của bạn.",
+      "save": "Lưu mật khẩu",
+      "saving": "Đang lưu…",
+      "requestAgain": "Gửi lại liên kết mới",
+      "doneTitle": "Đã đổi mật khẩu",
+      "doneDescription": "Mật khẩu đã được cập nhật và mọi phiên đăng nhập cũ đã bị đăng xuất.",
+      "toLogin": "Đăng nhập"
+    },
+    "oauth": {
+      "divider": "hoặc",
+      "continueWith": "Tiếp tục với {{provider}}",
+      "failed": "Không thể đăng nhập bằng tài khoản này. Vui lòng thử lại.",
+      "emailInUse": "Email này đã có tài khoản Qloud. Hãy đăng nhập bằng mật khẩu, sau đó liên kết tài khoản trong phần Cài đặt."
+    },
+    "errors": {
+      "generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+      "invalidCredentials": "Email hoặc mật khẩu không đúng.",
+      "emailTaken": "Email này đã được dùng cho một tài khoản khác.",
+      "captchaInvalid": "Xác minh chống bot không thành công. Vui lòng thử lại.",
+      "rateLimited": "Bạn đã thử quá nhiều lần. Vui lòng đợi một phút rồi thử lại.",
+      "signupClosed": "Hiện chưa mở đăng ký tài khoản mới.",
+      "accountUnavailable": "Không thể đăng nhập vào tài khoản này.",
+      "invalidLink": "Liên kết không hợp lệ hoặc đã hết hạn. Hãy yêu cầu một liên kết mới."
+    },
+    "sessionError": {
+      "title": "Không kết nối được máy chủ",
+      "description": "Không kiểm tra được phiên đăng nhập. Hãy kiểm tra kết nối mạng rồi thử lại.",
+      "retry": "Thử lại"
+    }
+  },
+  "account": {
+    "menu": "Tài khoản",
+    "logout": "Đăng xuất"
   }
 }

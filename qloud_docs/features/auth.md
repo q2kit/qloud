@@ -61,6 +61,22 @@ Kiểm tra share link của owner bị khóa sẽ triển khai ở M5 khi có mo
 - **Template** `vi`/`en` ở `accounts/templates/account/email/` (dạng text): xác thực email, đặt lại mật khẩu, yêu cầu đặt lại cho email chưa có tài khoản, đăng ký trùng email.
   Chuỗi dịch nằm trong catalog của `accounts`; app `accounts` đứng trước allauth trong `INSTALLED_APPS` để template và bản dịch này được ưu tiên.
 
+### M1-05: màn hình S-01 đến S-04 và bảo vệ route
+- Mọi route trong application shell (kể cả 404) cần đăng nhập: chưa có session thì chuyển tới `/login?next=<đường dẫn>`.
+  `next` chỉ nhận đường dẫn cùng site (bắt đầu bằng một `/`). Đã đăng nhập mà mở `/login` hoặc `/signup` thì đi tiếp tới `next`.
+  `/verify-email/:key` và `/password/reset[/:key]` mở được dù đã đăng nhập hay chưa (đến từ email).
+- **S-01 Đăng nhập:** email, mật khẩu, "Ghi nhớ đăng nhập", link quên mật khẩu và đăng ký, nút OAuth cho provider đang bật.
+  OAuth quay về `/login?next=...`; lỗi từ provider (`?error=`) hoặc email đã có tài khoản mà provider không được tự liên kết thì hiện thông báo.
+- **S-02 Đăng ký:** email, mật khẩu, Turnstile. Thành công thì báo đã gửi email xác thực, bấm "Vào Drive" để vào app (đã đăng nhập sẵn).
+- **S-03 Xác thực email:** gửi key ngay khi mở trang, một lần; báo thành công hoặc link hỏng/hết hạn.
+- **S-04 Quên / đặt lại mật khẩu:** gửi yêu cầu (Turnstile) luôn trả cùng một thông báo; đặt mật khẩu mới từ link, link hỏng thì khóa form và gợi ý gửi lại.
+- Lỗi theo mã của allauth được dịch ở FE (`auth.errors.*`); các lỗi khác (ví dụ quy tắc mật khẩu) dùng thông báo của server,
+  vì FE gửi `Accept-Language` theo ngôn ngữ đang chọn. Vượt rate limit (429) có thông báo riêng.
+- Header có menu tài khoản (tên, email, đăng xuất). Đăng xuất xóa toàn bộ cache dữ liệu của user rồi về `/login`.
+- Widget Turnstile lấy site key từ `VITE_TURNSTILE_SITE_KEY` (`qloud_frontend/.env`); để trống thì không hiện widget.
+  Site key ở FE và secret key ở BE phải đi cùng nhau: BE có secret mà FE không có site key thì đăng ký và quên mật khẩu bị từ chối (`captcha_invalid`).
+  Trên màn hình hẹp hơn 300px widget dùng cỡ `compact`.
+
 ### M1-03: OAuth Google và GitHub
 - Luồng: SPA gửi form `POST /api/auth/browser/v1/auth/provider/redirect` (`provider`, `callback_url`, `process` = `login` hoặc `connect`) → provider → callback
   `/api/auth/oauth/<provider>/login/callback/` → redirect về `callback_url` của SPA. Lỗi thì về `/login?error=...`.

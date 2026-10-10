@@ -97,18 +97,6 @@ export function SectionPlaceholderPage({
   );
 }
 
-export function LoginPage(): React.JSX.Element {
-  const { t } = useTranslation();
-  return (
-    <section className="mx-auto max-w-md space-y-3 rounded-lg border border-border bg-card p-6 shadow-sm">
-      <h1 className="text-2xl font-semibold">{t('login.title')}</h1>
-      <p className="text-sm leading-6 text-muted-foreground">
-        {t('login.description')}
-      </p>
-    </section>
-  );
-}
-
 /**
  * Root route error boundary. Rendered outside the app shell because the shell
  * itself may be what failed; React Router logs the error to the console.
