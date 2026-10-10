@@ -5,7 +5,13 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
-const apiTarget = process.env.QLOUD_API_TARGET ?? 'http://localhost:8000';
+// Keep the browser's Host (changeOrigin: false; Vite's string shorthand would rewrite
+// it), so URLs Django builds from the request, such as OAuth callbacks, point at
+// the dev server the user actually opened.
+const apiTarget = {
+  target: process.env.QLOUD_API_TARGET ?? 'http://localhost:8000',
+  changeOrigin: false,
+};
 const rootDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({

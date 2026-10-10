@@ -16,7 +16,8 @@ os.environ.setdefault("CELERY_BROKER_URL", "redis://localhost:6379/1")
 from .base import *  # noqa: E402
 
 DEBUG = False
-# 127.0.0.1: E2E reaches Django through the vite proxy, which rewrites Host.
+# localhost: E2E reaches Django through the vite proxy, which keeps the browser Host;
+# 127.0.0.1: Playwright polls the backend health check directly.
 ALLOWED_HOSTS = ["testserver", "localhost", "127.0.0.1"]
 
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]

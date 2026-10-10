@@ -100,7 +100,7 @@ Callback URL có dạng `{APP_BASE_URL}/api/auth/oauth/<provider>/login/callback
 | Production | `https://<APP_DOMAIN>/api/auth/oauth/google/login/callback/` | `https://<APP_DOMAIN>/api/auth/oauth/github/login/callback/` |
 
 Django dựng callback URL từ request, nên reverse proxy phải giữ nguyên header `Host` và gửi `X-Forwarded-Proto` (production đã bật `SECURE_PROXY_SSL_HEADER`).
-Vite proxy ở dev giữ nguyên `Host: localhost:5173`, nên dùng URL dev ở trên chứ không phải cổng 8000.
+Vite proxy ở dev cấu hình `changeOrigin: false` để giữ nguyên `Host: localhost:5173`, nên dùng URL dev ở trên chứ không phải cổng 8000.
 
 **Google** ([Google Cloud Console](https://console.cloud.google.com/)):
 1. Tạo hoặc chọn một project.
