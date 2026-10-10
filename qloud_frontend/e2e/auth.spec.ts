@@ -36,7 +36,7 @@ test('a visitor is sent to login, signs up, uses Drive and signs out', async ({
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Mật khẩu').fill('qloud-e2e-password');
   await page.getByRole('button', { name: 'Đăng nhập' }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/drive$/);
 });
 
 test('auth pages fit a 360px screen', async ({ page, isMobile }) => {

@@ -54,7 +54,7 @@ test.describe('email verification', () => {
     });
 
     await page.getByRole('link', { name: 'Vào Drive' }).click();
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/drive$/);
   });
 
   test('a broken link says so', async ({ page }) => {
@@ -111,7 +111,7 @@ test('a password reset signs out every old session', async ({
   ).toBeVisible();
   await otherPage.getByLabel('Mật khẩu').fill('qloud-e2e-new-password');
   await otherPage.getByRole('button', { name: 'Đăng nhập' }).click();
-  await expect(otherPage).toHaveURL(/\/$/);
+  await expect(otherPage).toHaveURL(/\/drive$/);
   await other.close();
 
   // The first browser's session is gone.

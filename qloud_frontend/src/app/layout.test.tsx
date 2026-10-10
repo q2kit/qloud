@@ -27,7 +27,8 @@ function renderDrive(path = '/'): void {
 }
 
 describe('application layout', () => {
-  it('renders the primary navigation and drive actions', () => {
+  it('renders the primary navigation and the create menu', async () => {
+    const user = userEvent.setup();
     renderDrive();
 
     expect(
@@ -35,11 +36,11 @@ describe('application layout', () => {
         name: /Điều hướng chính|Main navigation/,
       }),
     ).toBeInTheDocument();
+    await user.click(
+      screen.getByRole('button', { name: /^(Tạo mới|Create)$/ }),
+    );
     expect(
-      screen.getByRole('button', { name: /Tải tệp lên|Upload files/ }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /Thư mục mới|New folder/ }),
+      screen.getByRole('menuitem', { name: /Thư mục mới|New folder/ }),
     ).toBeInTheDocument();
   });
 
@@ -154,7 +155,6 @@ describe('application layout', () => {
 
     const header = within(screen.getByRole('banner'));
     expect(header.getByText('Drive')).toBeInTheDocument();
-    expect(header.getByText(/Drive của tôi|My Drive/)).toBeInTheDocument();
     // jsdom's user agent is not an Apple platform.
     expect(header.getByText('Ctrl K')).toBeInTheDocument();
   });

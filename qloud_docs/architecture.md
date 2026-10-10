@@ -43,6 +43,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 | TypeScript | 6 | TS 7 chưa tương thích typescript-eslint ([#56](https://github.com/q2kit/qloud/issues/56)) |
 | Vite / Vitest | 8 / 5 | |
 | Tailwind CSS | 4 | |
+| Zustand / TanStack Virtual | 5 / 3 | `@tanstack/react-virtual` (MIT) thêm ở M2-07a cho danh sách folder dài, duyệt ở [#23](https://github.com/q2kit/qloud/issues/23) |
 | MSW | 2 | Vitest 5 chưa khai báo tương thích MSW 3 |
 | openapi-typescript / openapi-fetch | 7 / 0.17 | openapi-typescript khai báo peer `typescript ^5`; đã kiểm tra chạy đúng với TS 6, ngoại lệ ghi trong `pnpm-workspace.yaml` (#56) |
 | Playwright | 1 | |
@@ -109,6 +110,7 @@ commit cả `.po` và `.mo` để runtime/CI không phụ thuộc gettext CLI. K
 | Routing | React Router |
 | Dữ liệu từ server | TanStack Query; API client sinh từ OpenAPI (openapi-typescript + openapi-fetch) |
 | Trạng thái client | Zustand (hàng đợi upload, lựa chọn nhiều mục) |
+| Danh sách dài | @tanstack/react-virtual (virtualization khi folder có hơn 200 mục) |
 | UI | Tailwind CSS, shadcn/ui (Radix), lucide-react (icon) |
 | Form | react-hook-form + zod |
 | i18n | i18next + react-i18next |

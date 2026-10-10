@@ -27,20 +27,23 @@ test.describe('application shell', () => {
     await signUpViaApi(page);
   });
 
-  test('renders navigation and reports the real backend as healthy', async ({
+  test('renders navigation and the Drive from the real backend', async ({
     page,
     isMobile,
   }) => {
     await page.goto('/');
+    await expect(page).toHaveURL(/\/drive$/);
     await openNavigationIfMobile(page, isMobile);
 
     await expect(
       page.getByRole('navigation', { name: 'Điều hướng chính' }),
     ).toBeVisible();
     await page.keyboard.press('Escape');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Drive');
-    // Served by Django through the vite preview proxy, not mocked.
-    await expect(page.getByText('Hoạt động bình thường')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      'Drive của tôi',
+    );
+    // The new account's empty root, served by Django through the vite proxy.
+    await expect(page.getByText('Thư mục này đang trống')).toBeVisible();
   });
 
   test('sidebar navigation stays inside the shell', async ({
@@ -161,7 +164,7 @@ test.describe('mobile layout (360px)', () => {
   });
 
   test('pages do not scroll horizontally', async ({ page }) => {
-    for (const path of ['/', '/recent', '/settings', '/khong-ton-tai']) {
+    for (const path of ['/drive', '/recent', '/settings', '/khong-ton-tai']) {
       await page.goto(path);
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
       await expectNoHorizontalScroll(page);

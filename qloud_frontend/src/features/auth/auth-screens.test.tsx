@@ -90,7 +90,8 @@ describe('route protection', () => {
       testUser,
     );
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/');
+      // `/` itself sends on to the Drive root (S-05).
+      expect(router.state.location.pathname).toBe('/drive');
     });
   });
 });
@@ -182,7 +183,7 @@ describe('signup (S-02)', () => {
 
     await user.click(screen.getByRole('button', { name: 'Go to Drive' }));
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe('/');
+      expect(router.state.location.pathname).toBe('/drive');
     });
   });
 

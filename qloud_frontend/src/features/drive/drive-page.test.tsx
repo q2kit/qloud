@@ -1,0 +1,311 @@
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { setupServer } from 'msw/node';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
+
+import { i18n } from '@/lib/i18n';
+import { testUser } from '@/test/auth';
+import { FakeDrive, ROOT_ID } from '@/test/drive-server';
+import { renderApp } from '@/test/render-app';
+
+import { VIRTUALIZE_AFTER } from './components/node-collection';
+import { useDriveStore } from './store';
+
+const server = setupServer();
+let drive: FakeDrive;
+
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: 'bypass' });
+});
+beforeEach(async () => {
+  drive = new FakeDrive();
+  server.use(...drive.handlers());
+  useDriveStore.setState({ selected: null, isCreatingFolder: false });
+  await i18n.changeLanguage('en');
+});
+afterEach(() => {
+  server.resetHandlers();
+});
+afterAll(() => {
+  server.close();
+});
+
+const items = () => screen.findAllByRole('option');
+const names = async () =>
+  (await items()).map((item) => item.getAttribute('title'));
+
+describe('Drive (S-05)', () => {
+  it('opens the root at /drive: folders first, in natural order', async () => {
+    drive.file('file10.txt');
+    drive.file('file2.txt');
+    drive.folder('Photos');
+    drive.folder('Archive');
+    const router = renderApp('/', testUser);
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/drive');
+    });
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'My Drive' }),
+    ).toBeVisible();
+    expect(await names()).toEqual([
+      'Archive',
+      'Photos',
+      'file2.txt',
+      'file10.txt',
+    ]);
+  });
+
+  it('opens folders and walks back with the breadcrumb', async () => {
+    const user = userEvent.setup();
+    const projects = drive.folder('Projects');
+    const design = drive.folder('Design', projects.id);
+    drive.file('logo.png', design.id, 2048, 'image/png');
+    const router = renderApp('/drive', testUser);
+
+    await user.dblClick(
+      await screen.findByRole('option', { name: /Projects/ }),
+    );
+    await user.dblClick(await screen.findByRole('option', { name: /Design/ }));
+    expect(router.state.location.pathname).toBe(`/drive/folders/${design.id}`);
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Design' }),
+    ).toBeVisible();
+    expect(await names()).toEqual(['logo.png']);
+
+    const crumbs = within(
+      screen.getByRole('navigation', { name: 'Folder path' }),
+    );
+    expect(crumbs.getByRole('link', { name: 'Projects' })).toHaveAttribute(
+      'href',
+      `/drive/folders/${projects.id}`,
+    );
+    await user.click(crumbs.getByRole('link', { name: 'My Drive' }));
+    expect(router.state.location.pathname).toBe('/drive');
+  });
+
+  it('selects with the keyboard, opens with Enter, shows details', async () => {
+    const user = userEvent.setup();
+    drive.folder('A');
+    const b = drive.folder('B');
+    renderApp('/drive', testUser);
+
+    const [first] = await items();
+    first?.focus();
+    await user.keyboard('{ArrowRight}');
+    const second = screen.getByRole('option', { name: /B/ });
+    expect(second).toHaveAttribute('aria-selected', 'true');
+    expect(second).toHaveFocus();
+    await user.click(
+      screen.getByRole('button', { name: 'Open details panel' }),
+    );
+    const panel = within(screen.getByRole('dialog', { name: 'Details' }));
+    expect(panel.getByText('Folder')).toBeVisible();
+    await user.keyboard('{Escape}');
+
+    second.focus();
+    await user.keyboard('{Enter}');
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'B' }),
+    ).toBeVisible();
+    expect(drive.requests.at(-1)?.pathname).toBe(
+      `/api/v1/nodes/${b.id}/children`,
+    );
+  });
+
+  it('creates a folder from the header menu', async () => {
+    const user = userEvent.setup();
+    renderApp('/drive', testUser);
+    expect(await screen.findByText('This folder is empty')).toBeVisible();
+
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+    await user.click(screen.getByRole('menuitem', { name: 'New folder' }));
+    const dialog = within(screen.getByRole('dialog', { name: 'New folder' }));
+    const field = dialog.getByLabelText('Name');
+    expect(field).toHaveValue('Untitled folder');
+    await user.clear(field);
+    await user.type(field, 'Reports');
+    await user.click(dialog.getByRole('button', { name: 'Create' }));
+
+    expect(await names()).toEqual(['Reports']);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /Reports/ })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+  });
+
+  it('keeps the dialog open with a message when the name is taken', async () => {
+    const user = userEvent.setup();
+    drive.folder('Reports');
+    renderApp('/drive', testUser);
+    await items();
+
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+    await user.click(screen.getByRole('menuitem', { name: 'New folder' }));
+    const dialog = within(screen.getByRole('dialog', { name: 'New folder' }));
+    await user.clear(dialog.getByLabelText('Name'));
+    await user.type(dialog.getByLabelText('Name'), 'reports');
+    await user.click(dialog.getByRole('button', { name: 'Create' }));
+
+    expect(
+      await dialog.findByText(
+        'An item with this name already exists in this folder.',
+      ),
+    ).toBeVisible();
+  });
+
+  it('renames optimistically with F2', async () => {
+    const user = userEvent.setup();
+    drive.writeDelay = 200;
+    drive.file('draft.pdf');
+    renderApp('/drive', testUser);
+
+    await user.click(await screen.findByRole('option', { name: /draft\.pdf/ }));
+    await user.keyboard('{F2}');
+    const field = within(
+      screen.getByRole('dialog', { name: 'Rename' }),
+    ).getByLabelText('Name');
+    await user.keyboard('final');
+    expect(field).toHaveValue('final.pdf'); // the extension was not selected
+    await user.keyboard('{Enter}');
+
+    // Before the server answers.
+    expect(screen.getByRole('option', { name: /final\.pdf/ })).toBeVisible();
+    await waitFor(() => {
+      expect(
+        [...drive.nodes.values()].some((node) => node.name === 'final.pdf'),
+      ).toBe(true);
+    });
+  });
+
+  it('puts the old name back and reopens the dialog when a rename fails', async () => {
+    const user = userEvent.setup();
+    drive.folder('Taken');
+    drive.folder('Mine');
+    renderApp('/drive', testUser);
+
+    await user.click(await screen.findByRole('option', { name: /Mine/ }));
+    await user.click(screen.getByRole('button', { name: 'Rename' }));
+    const dialog = within(screen.getByRole('dialog', { name: 'Rename' }));
+    await user.clear(dialog.getByLabelText('Name'));
+    await user.type(dialog.getByLabelText('Name'), 'taken{Enter}');
+
+    const reopened = within(
+      await screen.findByRole('dialog', { name: 'Rename' }),
+    );
+    expect(
+      await reopened.findByText(
+        'An item with this name already exists in this folder.',
+      ),
+    ).toBeVisible();
+    expect(reopened.getByLabelText('Name')).toHaveValue('taken');
+    await user.keyboard('{Escape}');
+    expect(screen.getByRole('option', { name: /Mine/ })).toBeVisible();
+  });
+
+  it('remembers the sort order and the view', async () => {
+    const user = userEvent.setup();
+    drive.file('small.txt', ROOT_ID, 10);
+    drive.file('big.txt', ROOT_ID, 9000);
+    renderApp('/drive', testUser);
+    await items();
+
+    await user.click(screen.getByRole('button', { name: /Name \(A → Z\)/ }));
+    await user.click(
+      screen.getByRole('menuitemradio', { name: 'Largest first' }),
+    );
+    await waitFor(async () => {
+      expect(await names()).toEqual(['big.txt', 'small.txt']);
+    });
+    expect(drive.requests.at(-1)?.searchParams.get('ordering')).toBe('-size');
+    expect(localStorage.getItem('qloud.drive.ordering')).toBe('-size');
+
+    await user.click(screen.getByRole('button', { name: 'List view' }));
+    expect(screen.getByRole('button', { name: 'List view' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(localStorage.getItem('qloud.drive.view')).toBe('list');
+    expect(screen.getByText('Last modified')).toBeInTheDocument();
+  });
+
+  it('loads more pages, then virtualizes long folders', async () => {
+    const user = userEvent.setup();
+    for (let i = 0; i < 250; i += 1) drive.folder(`Folder ${String(i)}`);
+    renderApp('/drive', testUser);
+
+    expect(await items()).toHaveLength(100);
+    await user.click(screen.getByRole('button', { name: 'Load more' }));
+    await waitFor(async () => {
+      expect(await items()).toHaveLength(200);
+    });
+    await user.click(screen.getByRole('button', { name: 'Load more' }));
+    // Past VIRTUALIZE_AFTER items only the rows near the viewport are in the DOM.
+    await waitFor(async () => {
+      expect((await items()).length).toBeLessThan(VIRTUALIZE_AFTER);
+    });
+    expect(
+      screen.queryByRole('button', { name: 'Load more' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('downloads a file on double click', async () => {
+    const user = userEvent.setup();
+    const assign = vi.fn();
+    const original = window.location;
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      // Only what the download path reads; the memory router never touches it.
+      value: { origin: original.origin, href: original.href, assign },
+    });
+    try {
+      const file = drive.file('report.pdf');
+      renderApp('/drive', testUser);
+      await user.dblClick(
+        await screen.findByRole('option', { name: /report\.pdf/ }),
+      );
+      await waitFor(() => {
+        expect(assign).toHaveBeenCalledWith(
+          `https://storage.example/${file.id}?signed`,
+        );
+      });
+    } finally {
+      Object.defineProperty(window, 'location', {
+        configurable: true,
+        value: original,
+      });
+    }
+  });
+
+  it('offers to retry when the folder cannot be loaded', async () => {
+    const user = userEvent.setup();
+    drive.failChildren = true;
+    drive.folder('Back');
+    renderApp('/drive', testUser);
+
+    const alert = await screen.findByRole('alert');
+    expect(within(alert).getByText("Couldn't load this folder")).toBeVisible();
+    drive.failChildren = false;
+    await user.click(within(alert).getByRole('button', { name: 'Try again' }));
+    expect(await names()).toEqual(['Back']);
+  });
+
+  it('says so when a folder does not exist or is not shared', async () => {
+    renderApp('/drive/folders/0190c0de-0000-7000-8000-0000000000ff', testUser);
+    expect(await screen.findByText('Folder not found')).toBeVisible();
+    expect(screen.getByRole('link', { name: 'Back to Drive' })).toHaveAttribute(
+      'href',
+      '/drive',
+    );
+  });
+});

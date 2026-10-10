@@ -15,19 +15,68 @@
   },
   "drive": {
     "title": "Drive",
-    "description": "All your files and folders",
+    "breadcrumb": "Folder path",
+    "items": "Items in this folder",
+    "loading": "Loading folder contents",
+    "loadMore": "Load more",
+    "loadingMore": "Loading…",
+    "selectionActions": "Actions for the selected item",
+    "defaultFolderName": "Untitled folder",
     "view": {
       "label": "View style",
       "grid": "Grid view",
       "list": "List view"
     },
+    "sort": {
+      "label": "Sort",
+      "nameAsc": "Name (A → Z)",
+      "nameDesc": "Name (Z → A)",
+      "newest": "Last modified first",
+      "oldest": "Oldest modified first",
+      "largest": "Largest first",
+      "smallest": "Smallest first"
+    },
+    "columns": {
+      "name": "Name",
+      "modified": "Last modified",
+      "size": "Size"
+    },
+    "kind": {
+      "folder": "Folder",
+      "file": "File"
+    },
+    "fields": {
+      "name": "Name"
+    },
+    "dialogs": {
+      "newFolder": "New folder",
+      "rename": "Rename"
+    },
     "empty": {
-      "title": "Your space is empty",
-      "description": "Upload a file or create your first folder. You can also drag and drop files into this area."
+      "title": "This folder is empty",
+      "description": "Create a folder to organize your files."
     },
     "actions": {
       "upload": "Upload files",
-      "newFolder": "New folder"
+      "newFolder": "New folder",
+      "create": "Create",
+      "rename": "Rename",
+      "save": "Save",
+      "cancel": "Cancel",
+      "download": "Download",
+      "retry": "Try again"
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "name_conflict": "An item with this name already exists in this folder.",
+      "invalid_target": "You can only create items inside a folder.",
+      "root_folder": "The root folder cannot be renamed.",
+      "not_found": "This item could not be found.",
+      "loadFailed": "Couldn't load this folder",
+      "loadFailedDescription": "Check your connection and try again.",
+      "notFoundTitle": "Folder not found",
+      "notFoundDescription": "This folder doesn't exist, was deleted, or you don't have access to it.",
+      "downloadFailed": "Couldn't download the file. Please try again."
     }
   },
   "shell": {
@@ -52,6 +101,12 @@
       "info": "Info",
       "versions": "Versions",
       "sharing": "Sharing"
+    },
+    "fields": {
+      "type": "Type",
+      "size": "Size",
+      "modified": "Modified",
+      "created": "Created"
     }
   },
   "placeholder": {
@@ -67,12 +122,6 @@
     "title": "Something went wrong",
     "description": "An unexpected error occurred while showing this page. Try reloading, or go back to Drive.",
     "reload": "Reload page"
-  },
-  "health": {
-    "label": "Service status",
-    "checking": "Checking…",
-    "ok": "All systems operational",
-    "error": "Unable to connect"
   },
   "language": {
     "label": "Language",

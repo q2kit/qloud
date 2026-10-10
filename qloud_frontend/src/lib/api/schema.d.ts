@@ -294,6 +294,8 @@ export interface components {
             locale?: components["schemas"]["LocaleEnum"];
             /** Giao diện */
             theme?: components["schemas"]["ThemeEnum"];
+            /** Format: uuid */
+            readonly root_folder_id: string;
         };
         MoveRequest: {
             node_ids: string[];

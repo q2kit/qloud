@@ -742,10 +742,15 @@ components:
           allOf:
           - $ref: '#/components/schemas/ThemeEnum'
           title: Giao diện
+        root_folder_id:
+          type: string
+          format: uuid
+          readOnly: true
       required:
       - avatar_url
       - email
       - id
+      - root_folder_id
     MoveRequest:
       type: object
       properties:

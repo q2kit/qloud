@@ -36,7 +36,7 @@ describe('routing', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole('link', { name: /Về Drive|Back to Drive/ }),
-    ).toHaveAttribute('href', '/');
+    ).toHaveAttribute('href', '/drive');
   });
 
   it('renders the localized error page when a route throws', async () => {

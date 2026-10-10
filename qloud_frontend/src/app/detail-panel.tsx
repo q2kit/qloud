@@ -3,6 +3,8 @@ import { FileText, Info, Share2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { NodeDetails } from '@/features/drive/components/node-details';
+import { useDriveStore } from '@/features/drive/store';
 import { useMediaQuery } from '@/lib/use-media-query';
 
 /** Marks the mobile details sheet so shortcuts can tell it from other dialogs. */
@@ -66,6 +68,7 @@ function PanelContent({
   onClose,
 }: PanelContentProps): React.JSX.Element {
   const { t } = useTranslation();
+  const selected = useDriveStore((state) => state.selected);
   const heading = <h2 className="font-semibold">{t('details.title')}</h2>;
 
   return (
@@ -90,15 +93,19 @@ function PanelContent({
           <X />
         </Button>
       </div>
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-10 text-center">
-        <span className="mb-4 flex size-12 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
-          <Info className="size-5" aria-hidden="true" />
-        </span>
-        <p className="text-sm font-medium">{t('details.emptyTitle')}</p>
-        <p className="mt-1 max-w-56 text-sm leading-6 text-muted-foreground">
-          {t('details.emptyDescription')}
-        </p>
-      </div>
+      {selected ? (
+        <NodeDetails node={selected} />
+      ) : (
+        <div className="flex flex-1 flex-col items-center justify-center px-6 py-10 text-center">
+          <span className="mb-4 flex size-12 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
+            <Info className="size-5" aria-hidden="true" />
+          </span>
+          <p className="text-sm font-medium">{t('details.emptyTitle')}</p>
+          <p className="mt-1 max-w-56 text-sm leading-6 text-muted-foreground">
+            {t('details.emptyDescription')}
+          </p>
+        </div>
+      )}
       <div className="grid grid-cols-3 border-t border-border px-3 py-2 text-xs text-muted-foreground">
         <span className="flex flex-col items-center gap-1.5 rounded-md px-2 py-2 text-foreground">
           <Info className="size-4" aria-hidden="true" />

@@ -33,8 +33,25 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
 - Kéo thả node vào một folder hoặc một mục trong breadcrumb để di chuyển.
 - Danh sách cuộn vô hạn (dùng cursor) và dùng virtualization khi có trên 200 mục.
 
+## Đã làm ở M2-07a ([#100](https://github.com/q2kit/qloud/issues/100))
+- **Route và breadcrumb:** `/drive` (folder gốc) và `/drive/folders/:id`; breadcrumb là tiêu đề trang, đường dẫn lấy từ server nên reload vẫn đúng.
+- **Hiển thị:**
+  - lưới hoặc danh sách, sắp xếp theo 6 kiểu của API; cả hai lựa chọn nhớ trong trình duyệt (`qloud.drive.view`, `qloud.drive.ordering`);
+  - cuộn vô hạn theo cursor (trang 100 mục, kèm nút "Tải thêm" dự phòng cho bàn phím);
+  - quá 200 mục thì virtualization theo cuộn của cửa sổ.
+- **Chọn và bàn phím:**
+  - click để chọn một mục (chọn nhiều ở M2-07b); phím mũi tên để di chuyển, Enter để mở, F2 để đổi tên;
+  - mục đang chọn hiện trong panel chi tiết (loại, kích thước, ngày sửa, ngày tạo) và có nút Đổi tên/Tải xuống trên thanh công cụ.
+- **Mở:** bấm đúp hoặc Enter; folder thì vào trong, file thì tải về cho tới khi M3 có trình xem.
+- **Tạo folder:** menu "Tạo mới" ở header hoặc nút ở trạng thái rỗng; tên trùng thì báo ngay trong hộp thoại.
+- **Đổi tên:**
+  - lạc quan (tên mới hiện ngay);
+  - API từ chối thì trả lại tên cũ và mở lại hộp thoại với tên vừa nhập kèm thông báo lỗi;
+  - với file, phần mở rộng không được chọn sẵn.
+- **Trạng thái:** đang tải (skeleton), rỗng, lỗi kèm "Thử lại", và folder không tồn tại hoặc không có quyền.
+
 ## Tiêu chí chấp nhận
-- [ ] Tạo folder lồng nhau 3 cấp; breadcrumb hiển thị đúng; reload trang vẫn đúng.
+- [x] Tạo folder lồng nhau 3 cấp; breadcrumb hiển thị đúng; reload trang vẫn đúng.
 - [ ] Đổi tên trùng thì báo lỗi; di chuyển vào cây con thì bị chặn.
 - [ ] Di chuyển 50 mục cùng lúc chỉ tốn một request, và UI cập nhật kiểu lạc quan.
 - [ ] Folder 10.000 mục vẫn cuộn mượt; API đạt NF-01.
