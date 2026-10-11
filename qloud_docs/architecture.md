@@ -160,6 +160,8 @@ Code: `apps/sharing/permissions.py`; model Share thêm ở M5-01, ShareLink ở 
 - `can_move_within` yêu cầu một grant editor chung bao phủ cả node con và folder đích. Breadcrumb cắt trước tổ tiên không có quyền; editor trash khóa owner thực của node và ghi người thao tác vào `trashed_by`.
 - `role_of(user, node)`. User chưa đăng nhập, không active hoặc bị khóa thì không có quyền gì.
 
+M5-02: `sharing.services` tuần tự hóa mọi thao tác ghi grant bằng khóa user owner thật của node và kiểm tra lại quyền sau khóa, dùng cùng khóa với Drive move/trash. Selector danh sách đi qua `nodes_for`; `shared_with_me` dùng Exists/Case để tính role và select_related owner trong một query, danh sách grant select_related grantee. Grant trực tiếp độc lập với grant đã cấp quyền cho người tạo; thu hồi không cascade theo created_by. API/schema/type cùng được cập nhật; email và UI chia sẻ thuộc M5-04/M5-05.
+
 ## Triển khai
 
 ### Dev

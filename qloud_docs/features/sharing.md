@@ -48,7 +48,7 @@
 
 ## Tiêu chí chấp nhận
 - [ ] Có bộ test ma trận đầy đủ: mỗi role × mỗi thao tác × (node trực tiếp, node con được thừa kế).
-- [ ] Thu hồi share thì người nhận mất quyền ngay ở request tiếp theo.
+- [x] Thu hồi share thì người nhận mất nguồn quyền đó ngay ở request tiếp theo; nếu còn grant khác thì quyền thực tế là mức cao nhất còn lại.
 - [ ] Link hết hạn hoặc đã bị thu hồi thì trả 404 kèm trang thông báo thân thiện.
 - [ ] Gửi báo cáo từ trang link công khai thì admin nhận email, và báo cáo hiện trong admin.
 - [ ] Admin gỡ link thì link ngừng hoạt động ngay; khóa user thì user không đăng nhập được và mọi link của user ngừng hoạt động.
@@ -60,6 +60,14 @@
 - Editor chỉ di chuyển node con trong cùng một folder được cấp editor (không chuyển giữa hai cây được chia sẻ riêng, không di chuyển chính gốc chia sẻ bằng grant trên gốc đó).
 - Editor có thể đưa node vào thùng rác của owner; share ngừng cấp quyền ngay. Khôi phục thùng rác, liệt kê và xóa vĩnh viễn vẫn dành cho owner.
 - API quản lý share/danh sách được chia sẻ, ShareLink, email, UI và bộ ma trận toàn milestone thuộc M5-02…M5-07.
+
+## Tiến độ M5-02
+- API liệt kê/tạo grant trực tiếp, đổi quyền/thu hồi và danh sách được chia sẻ đã triển khai; danh sách đều cursor pagination.
+- Owner/editor quản lý mọi grant trực tiếp trên node còn sống; viewer không xem danh sách người nhận hoặc quản lý grant. Grant thừa kế không được sửa qua node con. `can_share` bật cho editor/owner ở node không phải folder gốc.
+- Người nhận được tra bằng email chính không phân biệt hoa thường, phải có tài khoản active và không bị khóa. Không chia sẻ cho chính người thao tác, cho owner hoặc chia sẻ folder gốc. Tạo grant trùng trả 409; đổi role bằng PATCH.
+- Grant do editor tạo là độc lập: thu hồi quyền editor không tự xóa các grant họ đã tạo; owner quản lý/thu hồi riêng. Quy tắc này và hợp đồng API được owner duyệt trong kế hoạch #34.
+- "Được chia sẻ với tôi" chỉ liệt kê node có grant trực tiếp cho mình, không thuộc sở hữu của mình, còn sống; không bung hậu duệ. Grant trên cha và con thì cả hai xuất hiện. `effective_role` tính cả quyền thừa kế; thông tin owner chỉ id/display_name.
+- Email thông báo thuộc M5-04, UI chia sẻ thuộc M5-05. M5-02 kiểm thử API stack thật và việc duyệt node được chia sẻ qua Drive hiện có.
 
 ## Ngoài phạm vi
 Mật khẩu cho share link, quyền sửa qua share link, mời người chưa có tài khoản (có thể làm sau MVP), chặn thừa kế quyền.

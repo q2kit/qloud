@@ -75,8 +75,8 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 ## M5 — Chia sẻ ([sharing.md](features/sharing.md))
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
-| M5-01 | Model Share, mở rộng dịch vụ phân quyền cho quyền thừa kế | [#33](https://github.com/q2kit/qloud/issues/33) | 🟦 |
-| M5-02 | API chia sẻ cho người dùng, danh sách "Được chia sẻ với tôi" | [#34](https://github.com/q2kit/qloud/issues/34) | ⬜ |
+| M5-01 | Model Share, mở rộng dịch vụ phân quyền cho quyền thừa kế | [#33](https://github.com/q2kit/qloud/issues/33) | ✅ [PR #143](https://github.com/q2kit/qloud/pull/143) |
+| M5-02 | API chia sẻ cho người dùng, danh sách "Được chia sẻ với tôi" | [#34](https://github.com/q2kit/qloud/issues/34) | 🟦 |
 | M5-03 | Model và API ShareLink, endpoint public | [#35](https://github.com/q2kit/qloud/issues/35) | ⬜ |
 | M5-04 | Email thông báo khi được chia sẻ | [#36](https://github.com/q2kit/qloud/issues/36) | ⬜ |
 | M5-05 | FE: hộp thoại chia sẻ, trang Được chia sẻ, trang link công khai | [#37](https://github.com/q2kit/qloud/issues/37) | ⬜ |

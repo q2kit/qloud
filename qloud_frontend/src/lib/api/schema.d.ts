@@ -140,6 +140,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/nodes/{node_id}/shares": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["nodes_shares_list"];
+        put?: never;
+        post: operations["nodes_shares_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/nodes/move": {
         parameters: {
             query?: never;
@@ -186,6 +202,38 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shared-with-me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["shared_with_me_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shares/{share_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["shares_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["shares_update"];
         trace?: never;
     };
     "/api/v1/trash": {
@@ -338,6 +386,11 @@ export interface components {
             /** @default fail */
             on_conflict: components["schemas"]["FolderConflictEnum"];
         };
+        CreateShareRequest: {
+            /** Format: email */
+            email: string;
+            role: components["schemas"]["ShareRoleEnum"];
+        };
         CreateUploadRequest: {
             /** Format: uuid */
             parent_id: string;
@@ -378,6 +431,14 @@ export interface components {
          * @enum {string}
          */
         FolderConflictEnum: "fail" | "rename" | "reuse";
+        Grantee: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: email */
+            readonly email: string;
+            /** Tên hiển thị */
+            readonly display_name: string;
+        };
         Health: {
             status: components["schemas"]["HealthStatusEnum"];
             checks: {
@@ -471,6 +532,26 @@ export interface components {
             previous: string | null;
             results: components["schemas"]["Node"][];
         };
+        PaginatedShareList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["Share"][];
+        };
+        PaginatedSharedNodeList: {
+            /** Format: uri */
+            next: string | null;
+            /** Format: uri */
+            previous: string | null;
+            results: components["schemas"]["SharedNode"][];
+        };
         PaginatedTrashNodeList: {
             /** Format: uri */
             next: string | null;
@@ -520,6 +601,9 @@ export interface components {
         PatchedRenameRequest: {
             name?: string;
         };
+        PatchedUpdateShareRequest: {
+            role?: components["schemas"]["ShareRoleEnum"];
+        };
         /**
          * @description * `image` - image
          *     * `pdf` - pdf
@@ -541,6 +625,49 @@ export interface components {
         PublicConfig: {
             /** @description Cloudflare Turnstile site key; null when the server does not check it. */
             turnstile_site_key: string | null;
+        };
+        Share: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly node_id: string;
+            readonly grantee: components["schemas"]["Grantee"];
+            readonly role: components["schemas"]["ShareRoleEnum"];
+            /** Format: uuid */
+            readonly created_by_id: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /**
+         * @description * `viewer` - Viewer
+         *     * `editor` - Editor
+         * @enum {string}
+         */
+        ShareRoleEnum: "viewer" | "editor";
+        SharedNode: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly kind: components["schemas"]["KindEnum"];
+            readonly name: string;
+            /** Format: uuid */
+            readonly parent_id: string | null;
+            readonly is_root: boolean;
+            readonly size: number;
+            readonly mime_type: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            readonly owner: components["schemas"]["SharedOwner"];
+            readonly effective_role: components["schemas"]["ShareRoleEnum"];
+        };
+        SharedOwner: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Tên hiển thị */
+            readonly display_name: string;
         };
         /**
          * @description * `system` - Theo hệ thống
@@ -979,6 +1106,102 @@ export interface operations {
             };
         };
     };
+    nodes_shares_list: {
+        parameters: {
+            query?: {
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+            };
+            header?: never;
+            path: {
+                node_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedShareList"];
+                };
+            };
+            /** @description Invalid input, recipient or root folder. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such resource, or insufficient access. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    nodes_shares_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                node_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateShareRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Share"];
+                };
+            };
+            /** @description Invalid input, recipient or root folder. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such resource, or insufficient access. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description share_exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     nodes_move: {
         parameters: {
             query?: never;
@@ -1092,6 +1315,131 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedNodeList"];
+                };
+            };
+        };
+    };
+    shared_with_me_list: {
+        parameters: {
+            query?: {
+                /** @description Opaque value from `next` or `previous`. */
+                cursor?: string;
+                /** @description Folders always come before files. */
+                ordering?: "name" | "-name" | "updated_at" | "-updated_at" | "size" | "-size";
+                /** @description Items per page, at most 200. */
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSharedNodeList"];
+                };
+            };
+            /** @description Invalid input, recipient or root folder. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such resource, or insufficient access. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shares_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                share_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input, recipient or root folder. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such resource, or insufficient access. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    shares_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                share_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedUpdateShareRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Share"];
+                };
+            };
+            /** @description Invalid input, recipient or root folder. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such resource, or insufficient access. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };

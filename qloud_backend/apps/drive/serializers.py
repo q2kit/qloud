@@ -52,7 +52,7 @@ def capabilities(node: Node, role: Role) -> dict[str, bool]:
     return {
         "can_edit": role >= Role.EDITOR and not root,
         "can_trash": role >= Role.EDITOR and not root,
-        "can_share": role >= Role.OWNER and not root,
+        "can_share": role >= Role.EDITOR and not root,
     }
 
 

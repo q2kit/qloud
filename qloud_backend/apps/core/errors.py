@@ -72,3 +72,19 @@ def exception_handler(exc: Exception, context: dict[str, Any]) -> Response | Non
 
     response.data = {"error": {"code": code, "message": message, "details": details}}
     return response
+
+
+class InvalidShareRecipient(AppError):
+    default_code = "invalid_share_recipient"
+    default_detail = "No eligible account matches this email."
+
+
+class InvalidShareTarget(AppError):
+    default_code = "invalid_share_target"
+    default_detail = "Sharing with yourself or the node owner is not allowed."
+
+
+class ShareExists(AppError):
+    status_code = status.HTTP_409_CONFLICT
+    default_code = "share_exists"
+    default_detail = "A direct share already exists for this recipient."

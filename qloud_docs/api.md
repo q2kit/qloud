@@ -136,6 +136,14 @@ M2-04: `POST /uploads` trả session `{id, part_size, part_count, expires_at, ..
 | DELETE | `/nodes/{id}/versions/{vid}` | Xóa một phiên bản (không xóa được phiên bản hiện tại) |
 
 ### Chia sẻ
+M5-02 triển khai `/nodes/{id}/shares`, `/shares/{id}` và `/shared-with-me`; các endpoint link/public bên dưới thuộc M5-03.
+- GET/POST danh sách share và PATCH/DELETE share yêu cầu editor hoặc owner trên node còn sống, không phải folder gốc. Viewer/người ngoài/trashed trả 404, folder gốc trả 400 `root_folder`. Kiểm tra quyền trước lookup email.
+- POST `{email, role}` chỉ nhận viewer/editor; tra email chính của tài khoản active, không bị khóa, không phân biệt hoa thường. Không có người nhận hợp lệ: 400 `invalid_share_recipient`; người nhận là chính người thao tác hoặc owner: 400 `invalid_share_target`; grant trực tiếp trùng: 409 `share_exists`.
+- POST trả 201, PATCH `{role}` trả 200 với Share `{id, node_id, grantee: {id, email, display_name}, role, created_by_id, created_at, updated_at}`; DELETE trả 204. Owner/editor có thể sửa/thu hồi mọi grant trực tiếp trên node đó. Grant thừa kế được quản lý ở node nguồn, không qua node con.
+- GET shares trả `{results, next, previous}`, mới nhất trước theo created_at/id, page_size mặc định 50, tối đa 200. Không bao gồm grant ở tổ tiên.
+- GET `/shared-with-me` dùng cursor/ordering như danh sách node, trả Node kèm `owner: {id, display_name}` và `effective_role` viewer/editor. Chỉ gồm grant trực tiếp cho mình trên node còn sống của người khác; node được thừa kế đơn thuần không xuất hiện. Grant trực tiếp trên cả cha và con đều xuất hiện.
+- Thu hồi bỏ một nguồn quyền; grant khác còn hiệu lực tiếp tục cấp mức cao nhất. Grant do editor tạo độc lập với quyền editor, owner thu hồi chúng riêng. Không gửi email ở M5-02.
+
 | Method | Path | Mô tả |
 |---|---|---|
 | GET/POST | `/nodes/{id}/shares` | Danh sách share / chia sẻ cho người khác `{email, role}` |
