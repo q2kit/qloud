@@ -1,0 +1,48 @@
+msgid ""
+msgstr ""
+"Language: vi\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "A new item has been shared with you on Qloud"
+msgstr "Bạn vừa được chia sẻ một mục trên Qloud"
+
+msgid "Hello,"
+msgstr "Xin chào,"
+
+#, python-format
+msgid "%(sharer)s shared an item with you."
+msgstr "%(sharer)s đã chia sẻ một mục với bạn."
+
+msgid "Item:"
+msgstr "Mục:"
+
+msgid "Type:"
+msgstr "Loại:"
+
+msgid "Permission:"
+msgstr "Quyền:"
+
+msgid "Folder"
+msgstr "Thư mục"
+
+msgid "File"
+msgstr "Tệp"
+
+msgid "Can edit"
+msgstr "Có thể chỉnh sửa"
+
+msgid "Can view"
+msgstr "Có thể xem"
+
+msgid "Open the shared item:"
+msgstr "Mở mục được chia sẻ:"
+
+msgid "Open the shared item"
+msgstr "Mở mục được chia sẻ"
+
+msgid "Sign in with the account that received this email. Access depends on your current permissions."
+msgstr "Đăng nhập bằng tài khoản nhận email này. Khả năng truy cập phụ thuộc vào quyền hiện tại của bạn."
+
+msgid "The Qloud team"
+msgstr "Đội ngũ Qloud"

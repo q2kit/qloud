@@ -164,6 +164,8 @@ M5-02: `sharing.services` tuần tự hóa mọi thao tác ghi grant bằng khó
 
 M5-03: `ShareLink` và `sharing.link_services/link_selectors` quản lý link owner-only, cùng khóa owner với Drive. `nodes_for_link` dùng recursive CTE từ đúng root/cùng owner, chỉ đi qua folder còn sống; kiểm tra lại revoked_at/expiry/trash/is_active/suspended_at trong query, độc lập với session và grant người dùng. Public breadcrumb cũng giới hạn CTE này; mọi endpoint public đi qua lớp quyền chung. Public views AllowAny và không dùng session authentication; chỉ GET, quản lý link vẫn session/CSRF như API khác. `storage.s3.presign_download` nhận TTL tùy chọn, Drive download/preview giữ hạn mặc định cho session, public giới hạn cả URL nguồn/thumbnail theo thời gian còn lại của link. Không proxy byte; URL đã cấp không thể thu hồi trước hạn chữ ký. Hợp đồng này và preview public được owner duyệt ở #35.
 
+M5-04: `sharing.notifications.schedule_share_email` render snapshot text/HTML bằng locale người nhận, templates/catalog vi/en trong app sharing. `create_share` đăng ký `transaction.on_commit` để enqueue `accounts.tasks.send_email`; không gửi email trong transaction, không thêm query vào endpoint danh sách hoặc schema/outbox. Payload đã render giữ nguyên khi node/grant/user thay đổi sau commit. HTML autoescape, subject cố định dịch; link theo UUID compact + APP_BASE_URL, không chứa tổ tiên hay presigned URL. SMTP/OSError retry dùng task auth hiện có; delivery không bảo đảm exactly-once. File-link UI khi cha không có quyền đang được theo dõi riêng ở #147.
+
 ## Triển khai
 
 ### Dev

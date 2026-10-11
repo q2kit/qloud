@@ -1,0 +1,15 @@
+{% load i18n %}{% autoescape off %}{% translate "Hello," %}
+
+{% blocktranslate %}{{ sharer }} shared an item with you.{% endblocktranslate %}
+
+{% translate "Item:" %} {{ name }}
+{% translate "Type:" %} {{ kind }}
+{% translate "Permission:" %} {{ role }}
+
+{% translate "Open the shared item:" %}
+{{ url }}
+
+{% translate "Sign in with the account that received this email. Access depends on your current permissions." %}
+
+{% translate "The Qloud team" %}
+{% endautoescape %}

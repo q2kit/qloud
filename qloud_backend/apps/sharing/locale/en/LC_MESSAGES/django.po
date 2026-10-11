@@ -1,0 +1,48 @@
+msgid ""
+msgstr ""
+"Language: en\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "A new item has been shared with you on Qloud"
+msgstr "A new item has been shared with you on Qloud"
+
+msgid "Hello,"
+msgstr "Hello,"
+
+#, python-format
+msgid "%(sharer)s shared an item with you."
+msgstr "%(sharer)s shared an item with you."
+
+msgid "Item:"
+msgstr "Item:"
+
+msgid "Type:"
+msgstr "Type:"
+
+msgid "Permission:"
+msgstr "Permission:"
+
+msgid "Folder"
+msgstr "Folder"
+
+msgid "File"
+msgstr "File"
+
+msgid "Can edit"
+msgstr "Can edit"
+
+msgid "Can view"
+msgstr "Can view"
+
+msgid "Open the shared item:"
+msgstr "Open the shared item:"
+
+msgid "Open the shared item"
+msgstr "Open the shared item"
+
+msgid "Sign in with the account that received this email. Access depends on your current permissions."
+msgstr "Sign in with the account that received this email. Access depends on your current permissions."
+
+msgid "The Qloud team"
+msgstr "The Qloud team"

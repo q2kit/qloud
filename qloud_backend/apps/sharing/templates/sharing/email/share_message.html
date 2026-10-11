@@ -1,0 +1,13 @@
+{% load i18n %}<!doctype html>
+<html lang="{% get_current_language as language %}{{ language }}">
+<body>
+<p>{% translate "Hello," %}</p>
+<p>{% blocktranslate %}{{ sharer }} shared an item with you.{% endblocktranslate %}</p>
+<p><strong>{% translate "Item:" %}</strong> {{ name }}<br>
+<strong>{% translate "Type:" %}</strong> {{ kind }}<br>
+<strong>{% translate "Permission:" %}</strong> {{ role }}</p>
+<p><a href="{{ url }}">{% translate "Open the shared item" %}</a></p>
+<p>{% translate "Sign in with the account that received this email. Access depends on your current permissions." %}</p>
+<p>{% translate "The Qloud team" %}</p>
+</body>
+</html>

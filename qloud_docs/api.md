@@ -142,7 +142,8 @@ M5-02 triển khai API share người dùng; M5-03 triển khai API link/public 
 - POST trả 201, PATCH `{role}` trả 200 với Share `{id, node_id, grantee: {id, email, display_name}, role, created_by_id, created_at, updated_at}`; DELETE trả 204. Owner/editor có thể sửa/thu hồi mọi grant trực tiếp trên node đó. Grant thừa kế được quản lý ở node nguồn, không qua node con.
 - GET shares trả `{results, next, previous}`, mới nhất trước theo created_at/id, page_size mặc định 50, tối đa 200. Không bao gồm grant ở tổ tiên.
 - GET `/shared-with-me` dùng cursor/ordering như danh sách node, trả Node kèm `owner: {id, display_name}` và `effective_role` viewer/editor. Chỉ gồm grant trực tiếp cho mình trên node còn sống của người khác; node được thừa kế đơn thuần không xuất hiện. Grant trực tiếp trên cả cha và con đều xuất hiện.
-- Thu hồi bỏ một nguồn quyền; grant khác còn hiệu lực tiếp tục cấp mức cao nhất. Grant do editor tạo độc lập với quyền editor, owner thu hồi chúng riêng. Không gửi email ở M5-02.
+- M5-04: POST tạo Share thành công xếp email thông báo text/HTML bằng locale người nhận sau commit, dùng SMTP/Celery hiện có. Rollback/lỗi/duplicate/PATCH/DELETE/ShareLink không gửi; tạo lại grant đã thu hồi gửi email mới. Nội dung giữ snapshot lần cấp quyền và link APP_BASE_URL, không kèm presigned URL hoặc byte file. API response/schema không đổi.
+- Thu hồi bỏ một nguồn quyền; grant khác còn hiệu lực tiếp tục cấp mức cao nhất. Grant do editor tạo độc lập với quyền editor, owner thu hồi chúng riêng. M5-02 chưa gửi email; M5-04 bổ sung thông báo khi tạo grant mới.
 
 | Method | Path | Mô tả |
 |---|---|---|

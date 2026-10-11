@@ -8,6 +8,7 @@ from apps.drive.models import Node
 
 from . import selectors
 from .models import Share
+from .notifications import schedule_share_email
 
 
 def _locked_node(user: User, node_id: uuid.UUID) -> Node:
@@ -29,7 +30,9 @@ def create_share(user: User, node_id: uuid.UUID, email: str, role: str) -> Share
         raise InvalidShareTarget
     if Share.objects.filter(node=node, grantee=recipient).exists():
         raise ShareExists
-    return Share.objects.create(node=node, grantee=recipient, role=role, created_by=user)
+    share = Share.objects.create(node=node, grantee=recipient, role=role, created_by=user)
+    schedule_share_email(share)
+    return share
 
 
 @transaction.atomic
