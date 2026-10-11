@@ -206,7 +206,7 @@ User bị khóa thì không đăng nhập được, mọi session cũ bị vô h
 
 ### `drive_objectdeletion` (M4-01)
 
-Hàng đợi bền vững để dọn object S3 sau commit, gồm `id` UUID, `created_at`, `updated_at`
+Theo [ADR-0010](adr/0010-durable-object-deletion.md), hàng đợi bền vững để dọn object S3 sau commit, gồm `id` UUID, `created_at`, `updated_at`
 và `storage_key` text unique. Ý định xóa blob/thumbnail được ghi cùng transaction xóa Node,
 FileVersion và giảm quota. Worker xóa S3 trước, rồi Blob không còn tham chiếu và bản ghi hàng đợi.
 Lỗi S3 giữ lại hàng đợi để thử lại; bảng không chứa byte file và không tính quota.

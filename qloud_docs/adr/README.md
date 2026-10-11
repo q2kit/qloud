@@ -27,3 +27,4 @@ nếu quyết định thay đổi thì tạo ADR mới, và đánh dấu ADR cũ
 | [0007](0007-localstack-for-s3-dev.md) | LocalStack để giả lập S3 cho dev và CI | Chấp nhận |
 | [0008](0008-server-upload-fingerprints.md) | Tiếp tục upload bằng fingerprint lưu trên server | Chấp nhận |
 | [0009](0009-mp4-thumbnails.md) | Thumbnail MP4 bằng FFmpeg trên Celery worker | Chấp nhận |
+| [0010](0010-durable-object-deletion.md) | Lưu ý định dọn object S3 trong database | Chấp nhận |
