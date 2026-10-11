@@ -279,6 +279,7 @@ SPECTACULAR_SETTINGS = {
     # Several components use the same field names with different choices.
     "ENUM_NAME_OVERRIDES": {
         "KindEnum": "apps.drive.models.Node.Kind",
+        "ShareRoleEnum": "apps.sharing.models.Share.Role",
         "PreviewKindEnum": ["image", "pdf", "video", "audio", "text", "unsupported"],
         "UploadStatusEnum": "apps.uploads.models.UploadSession.Status",
         "FolderConflictEnum": ["fail", "rename", "reuse"],

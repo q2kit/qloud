@@ -311,6 +311,95 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: No such node, or no access to it.
+  /api/v1/nodes/{node_id}/shares:
+    get:
+      operationId: nodes_shares_list
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      - in: path
+        name: node_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedShareList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input, recipient or root folder.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such resource, or insufficient access.
+    post:
+      operationId: nodes_shares_create
+      parameters:
+      - in: path
+        name: node_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateShareRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Share'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input, recipient or root folder.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such resource, or insufficient access.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: share_exists
   /api/v1/nodes/move:
     post:
       operationId: nodes_move
@@ -418,6 +507,126 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedNodeList'
           description: ''
+  /api/v1/shared-with-me:
+    get:
+      operationId: shared_with_me_list
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: Opaque value from `next` or `previous`.
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Folders always come before files.
+        schema:
+          type: string
+          enum:
+          - name
+          - -name
+          - updated_at
+          - -updated_at
+          - size
+          - -size
+          default: name
+      - name: page_size
+        required: false
+        in: query
+        description: Items per page, at most 200.
+        schema:
+          type: integer
+          default: 50
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSharedNodeList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input, recipient or root folder.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such resource, or insufficient access.
+  /api/v1/shares/{share_id}:
+    patch:
+      operationId: shares_update
+      parameters:
+      - in: path
+        name: share_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateShareRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Share'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input, recipient or root folder.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such resource, or insufficient access.
+    delete:
+      operationId: shares_destroy
+      parameters:
+      - in: path
+        name: share_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input, recipient or root folder.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such resource, or insufficient access.
   /api/v1/trash:
     get:
       operationId: trash_list
@@ -830,6 +1039,19 @@ components:
       required:
       - name
       - parent_id
+    CreateShareRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        role:
+          $ref: '#/components/schemas/ShareRoleEnum'
+      required:
+      - email
+      - role
     CreateUploadRequest:
       type: object
       properties:
@@ -907,6 +1129,25 @@ components:
         * `fail` - fail
         * `rename` - rename
         * `reuse` - reuse
+    Grantee:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        display_name:
+          type: string
+          readOnly: true
+          title: Tên hiển thị
+      required:
+      - display_name
+      - email
+      - id
     Health:
       type: object
       properties:
@@ -1143,6 +1384,44 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Node'
+    PaginatedShareList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Share'
+    PaginatedSharedNodeList:
+      type: object
+      required:
+      - results
+      - next
+      - previous
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+        previous:
+          type: string
+          nullable: true
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SharedNode'
     PaginatedTrashNodeList:
       type: object
       required:
@@ -1253,6 +1532,11 @@ components:
           type: string
           minLength: 1
           maxLength: 255
+    PatchedUpdateShareRequest:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/ShareRoleEnum'
     PreviewKindEnum:
       enum:
       - image
@@ -1301,6 +1585,124 @@ components:
             check it.
       required:
       - turnstile_site_key
+    Share:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        node_id:
+          type: string
+          format: uuid
+          readOnly: true
+        grantee:
+          allOf:
+          - $ref: '#/components/schemas/Grantee'
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/ShareRoleEnum'
+          readOnly: true
+        created_by_id:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - created_by_id
+      - grantee
+      - id
+      - node_id
+      - role
+      - updated_at
+    ShareRoleEnum:
+      enum:
+      - viewer
+      - editor
+      type: string
+      description: |-
+        * `viewer` - Viewer
+        * `editor` - Editor
+    SharedNode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/KindEnum'
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        parent_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        is_root:
+          type: boolean
+          readOnly: true
+        size:
+          type: integer
+          readOnly: true
+        mime_type:
+          type: string
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        owner:
+          allOf:
+          - $ref: '#/components/schemas/SharedOwner'
+          readOnly: true
+        effective_role:
+          allOf:
+          - $ref: '#/components/schemas/ShareRoleEnum'
+          readOnly: true
+      required:
+      - created_at
+      - effective_role
+      - id
+      - is_root
+      - kind
+      - mime_type
+      - name
+      - owner
+      - parent_id
+      - size
+      - updated_at
+    SharedOwner:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        display_name:
+          type: string
+          readOnly: true
+          title: Tên hiển thị
+      required:
+      - display_name
+      - id
     ThemeEnum:
       enum:
       - system
