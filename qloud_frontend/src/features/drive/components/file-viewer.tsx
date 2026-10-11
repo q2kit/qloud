@@ -17,11 +17,13 @@ export function FileViewer({
   hasMore,
   loadingMore,
   loadMore,
+  standalone,
 }: {
   nodes: DriveNode[];
   hasMore: boolean;
   loadingMore: boolean;
   loadMore: () => Promise<unknown>;
+  standalone?: { fileId: string; onClose: () => void };
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -29,7 +31,7 @@ export function FileViewer({
   const routeState: unknown = location.state;
   const [params, setParams] = useSearchParams();
   const rawId = params.get('preview');
-  const id = rawId ? uuidFromUrl(rawId) : undefined;
+  const id = standalone?.fileId ?? (rawId ? uuidFromUrl(rawId) : undefined);
   const node = useNode(id);
   const preview = usePreview(node.data, Boolean(id));
   const [failedUrl, setFailedUrl] = React.useState<string>();
@@ -97,6 +99,10 @@ export function FileViewer({
     }
   };
   const close = () => {
+    if (standalone) {
+      standalone.onClose();
+      return;
+    }
     if (
       typeof routeState === 'object' &&
       routeState !== null &&
