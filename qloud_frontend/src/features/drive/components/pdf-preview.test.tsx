@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, expect, it, vi } from 'vitest';
 
@@ -110,4 +110,25 @@ it('reports PDF load errors instead of leaving a blank canvas', async () => {
   await waitFor(() => {
     expect(onError).toHaveBeenCalledOnce();
   });
+});
+
+it('keeps the current page for invalid input and accepts valid page numbers', async () => {
+  const onError = vi.fn();
+  render(<PdfPreview url="https://storage.example/pdf" onError={onError} />);
+  await waitFor(() => {
+    expect(mocks.render).toHaveBeenCalledTimes(1);
+  });
+  const input = screen.getByRole('spinbutton', { name: 'Page' });
+  for (const value of ['1.5', '', '0', '-1', '3']) {
+    fireEvent.change(input, { target: { value } });
+    expect(input).toHaveValue(1);
+    expect(mocks.getPage).toHaveBeenCalledTimes(1);
+    expect(onError).not.toHaveBeenCalled();
+  }
+  fireEvent.change(input, { target: { value: '2' } });
+  await waitFor(() => {
+    expect(mocks.getPage).toHaveBeenLastCalledWith(2);
+  });
+  expect(input).toHaveValue(2);
+  expect(onError).not.toHaveBeenCalled();
 });

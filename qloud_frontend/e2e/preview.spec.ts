@@ -440,3 +440,51 @@ test('MP4 thumbnails in grid and list with corrupt fallback and playable source'
     )
     .toBeGreaterThan(0);
 });
+
+test('PDF page input rejects fractional and out-of-range values without losing the preview', async ({
+  page,
+  isMobile,
+}) => {
+  await signUpVerifiedViaApi(page);
+  const pdf = await upload(
+    page,
+    await root(page),
+    'pages.pdf',
+    'application/pdf',
+    await readFile('e2e/fixtures/preview.pdf'),
+  );
+  await page.goto(`/drive/files/${compact(pdf.id)}`);
+  const input = page.getByRole('spinbutton', { name: 'Trang', exact: true });
+  const canvas = page.getByRole('img', { name: 'Trang PDF 1' });
+  await expect
+    .poll(() =>
+      canvas.evaluate((element) => (element as HTMLCanvasElement).width),
+    )
+    .toBeGreaterThan(0);
+  for (const value of ['1.5', '', '0', '-1', '3']) {
+    await input.fill(value);
+    await expect(input).toHaveValue('1');
+    await expect(canvas).toBeVisible();
+    await expect(page.getByRole('alert')).toHaveCount(0);
+  }
+  await input.fill('2');
+  await expect(page.getByRole('img', { name: 'Trang PDF 2' })).toBeVisible();
+  await expect(input).toHaveValue('2');
+  if (process.env.PREVIEW_CAPTURE) {
+    for (const theme of ['light', 'dark']) {
+      await page.evaluate((value) => {
+        localStorage.setItem('qloud-theme', value);
+        window.dispatchEvent(
+          new StorageEvent('storage', { key: 'qloud-theme' }),
+        );
+      }, theme);
+      await expect(page.locator('html')).toHaveClass(
+        theme === 'dark' ? /dark/ : /^$/,
+      );
+      await page.screenshot({
+        path: `../qloud_docs/assets/m3-06-pdf-input-${theme}-${isMobile ? '360' : 'desktop'}.png`,
+        fullPage: true,
+      });
+    }
+  }
+});

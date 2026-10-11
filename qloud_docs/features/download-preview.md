@@ -50,12 +50,12 @@
 - Thumbnail chỉ fetch cho ảnh/PDF/MP4 trong viewport, lazy image; dùng icon nếu chưa có/lỗi. Query chung theo id/updated_at, stale sau 210 giây. Theo quyết định owner ngày 11/10/2026 trong M3-05: **không polling để chờ thumbnail sau upload**, chấp nhận giữ icon cho đến lần tải dữ liệu thông thường tiếp theo. URL đã có thumbnail được refresh trước hạn 30 giây khi item còn trong viewport; viewer đang mở refresh URL nguồn trước hạn 30 giây.
 - Viewer refresh URL nguồn trước hạn 30 giây; loading/lỗi/thử lại và trạng thái không hỗ trợ có bản dịch vi/en. Ảnh dùng img; video/audio native controls và preload metadata; text đọc trực tiếp S3 và chèn text vào pre, không HTML/Markdown render. Khi đóng/đổi file, source fetch/PDF task/media được hủy hoặc dừng.
 - Lifecycle video/audio gán nguồn trong setup và giải phóng trong cleanup, bao gồm vòng setup/cleanup/setup của React StrictMode ở dev. Khi refresh URL, lưu vị trí và giữ trạng thái phát/tạm dừng của người dùng; bỏ qua pause/timeupdate do reset nguồn trong lúc khôi phục, rồi seek và tiếp tục phát nếu trước đó đang phát. Test Chromium gồm cả production build và Vite dev (`PREVIEW_DEV=1`), xác minh src, metadata, phát audio/video và tua Range; thêm regression refresh URL ở cả trạng thái phát/tạm dừng, desktop/360px.
-- PDF dùng pdf.js 6.4, canvas từng trang, chọn trang/zoom/fit chiều rộng; không dựng mọi trang cùng lúc. Worker, CMap/font/WASM được build/host trong app, không dùng CDN. Không có annotation/action/scripting layer thực thi script hay liên kết trong PDF.
+- PDF dùng pdf.js 6.4, canvas từng trang, chọn trang/zoom/fit chiều rộng; không dựng mọi trang cùng lúc. Ô số trang chỉ nhận số nguyên trong `1..numPages`; nhập rỗng, số thập phân hoặc ngoài khoảng thì giữ trang đang xem, không gọi pdf.js với trang không hợp lệ. Worker, CMap/font/WASM được build/host trong app, không dùng CDN. Không có annotation/action/scripting layer thực thi script hay liên kết trong PDF.
 - Link `/drive/files/:id` (UUID compact) resolve node và folder hiện tại, rồi mở overlay ở folder đó, nên vẫn đúng sau khi file di chuyển. Copy link/tab mới/middle click/Ctrl hoặc ⌘+Enter dùng route này cho file. Gần đây dùng cùng viewer và link.
 
-### Lỗi còn tồn tại sau review M3 (11/10/2026)
-- [M3-05 / #126](https://github.com/q2kit/qloud/issues/126): đã bỏ polling chờ thumbnail và giữ trạng thái/vị trí media khi refresh URL; chờ review PR sửa lỗi.
-- [M3-06 / #127](https://github.com/q2kit/qloud/issues/127): ô số trang PDF nhận số thập phân trong khoảng, pdf.js từ chối và viewer báo lỗi toàn bộ. Cần chặn trang không nguyên và giữ preview khi người dùng nhập giá trị chưa hợp lệ.
+### Kết quả review M3 (11/10/2026)
+- [M3-05 / #126](https://github.com/q2kit/qloud/issues/126): đã bỏ polling chờ thumbnail và giữ trạng thái/vị trí media khi refresh URL; đã merge [PR #129](https://github.com/q2kit/qloud/pull/129).
+- [M3-06 / #127](https://github.com/q2kit/qloud/issues/127): đã chặn số trang PDF không nguyên/ngoài khoảng; giá trị không hợp lệ giữ nguyên preview, chờ review PR sửa lỗi.
 
 ### Link riêng cho file
 - **Link riêng cho file**, giống folder (M2-07b):
