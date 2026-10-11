@@ -16,6 +16,8 @@ Tạo report trong transaction, khóa owner và kiểm tra lại link/phạm vi 
 
 Audit là một bản ghi cho mỗi report, chỉ thêm từ service, không có API/Django admin sửa/xóa. FK nullable SET_NULL cùng snapshot UUID/tên giữ lịch sử khi đích bị xóa. Màn hình React `/moderation` và các API chỉ dành cho superuser; `/me.is_superuser` chỉ đọc để hiển thị điều hướng. Django `/admin/` đọc report/audit, các thao tác xử lý thực hiện qua màn hình mới.
 
+Theo kế hoạch bổ sung owner duyệt, mỗi report vẫn độc lập; không tự đóng các report cùng node. Hai count subquery theo `node_uuid` snapshot và index `node_uuid/status` cung cấp tổng/đang mở không phụ thuộc filter/cursor. `subject` là metadata hiện tại nullable qua lớp phân quyền superuser chung, không thêm quyền preview/download. UI phân biệt node bị báo cáo và node gốc link, và hiển thị thay đổi thực tế trong audit khi xử lý một đích đã bị xử lý trước đó.
+
 ## Hệ quả
 
 Khóa IP được tự giải phóng khi transaction kết thúc; không dựa vào cache/process để quyết định quota. Resolver là thao tác ít thường xuyên nên việc khóa các superuser phù hợp MVP. Đổi secret làm đổi hash và bắt đầu cửa sổ quota/dedup mới cho IP đó. Audit giữ UUID và tên snapshot, cần xác định chính sách lưu trữ nếu sản phẩm bổ sung yêu cầu retention sau MVP. Không có endpoint mở lại report.

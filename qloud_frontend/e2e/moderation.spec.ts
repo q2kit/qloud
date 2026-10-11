@@ -160,6 +160,30 @@ test('anonymous report reaches moderation, superuser removes link and owner rece
     await expect(
       dialog.getByText('Báo cáo đã được tiếp nhận. Cảm ơn bạn.'),
     ).toBeVisible();
+    const anotherReporter = await request.newContext({
+      baseURL,
+      extraHTTPHeaders: {
+        'X-Qloud-E2E-IP': `11.${String(Math.floor(Math.random() * 250))}.1.1`,
+      },
+    });
+    try {
+      expect(
+        (
+          await anotherReporter.post(
+            `/api/v1/public/links/${link.token}/reports`,
+            {
+              data: {
+                node_id: node.id,
+                reason: 'other',
+                message: 'Báo cáo thứ hai cho cùng nội dung.',
+              },
+            },
+          )
+        ).status(),
+      ).toBe(202);
+    } finally {
+      await anotherReporter.dispose();
+    }
     const moderator = await adminContext.newPage();
     const email = await signUpVerifiedViaApi(moderator);
     promoteTestUser(email);
@@ -173,14 +197,33 @@ test('anonymous report reaches moderation, superuser removes link and owner rece
     ).toBe(true);
     const list = (await (
       await moderator.request.get('/api/v1/moderation/reports')
-    ).json()) as { results: { id: string; node_uuid: string }[] };
-    const report = list.results.find((item) => item.node_uuid === node.id);
+    ).json()) as {
+      results: { id: string; node_uuid: string; reason: string }[];
+    };
+    const report = list.results.find(
+      (item) => item.node_uuid === node.id && item.reason === 'malware',
+    );
     expect(report).toBeDefined();
     await mailContaining(
       'moderation@qloud.test',
       `/moderation?report=${report?.id.replaceAll('-', '') ?? ''}`,
     );
     await moderator.goto(`/moderation?report=${report?.id ?? ''}`);
+    await expect(
+      moderator.getByRole('region', { name: 'Báo cáo cùng node' }),
+    ).toContainText('2 báo cáo cùng node · 2 đang chờ');
+    await expect(
+      moderator.getByRole('region', { name: 'Đối tượng bị báo cáo' }),
+    ).toContainText(ownerEmail);
+    await moderator
+      .getByRole('button', { name: 'Xem tất cả báo cáo cùng node' })
+      .click();
+    await expect(
+      moderator.getByText('Đang xem các báo cáo cùng node'),
+    ).toBeVisible();
+    await capture(moderator, 'queue', isMobile);
+    await moderator.goto(`/moderation?report=${report?.id ?? ''}`);
+
     await moderator
       .getByLabel('Ghi chú (bắt buộc)')
       .fill('Đã xác minh nội dung độc hại.');
@@ -190,7 +233,36 @@ test('anonymous report reaches moderation, superuser removes link and owner rece
     await expect(
       moderator.getByRole('region', { name: 'Lịch sử xử lý' }),
     ).toBeVisible();
+    await expect(
+      moderator.getByRole('region', { name: 'Lịch sử xử lý' }),
+    ).toContainText('Đã gỡ thêm 1 link.');
+    await expect(
+      moderator.getByRole('region', { name: 'Báo cáo cùng node' }),
+    ).toContainText('2 báo cáo cùng node · 1 đang chờ');
     await mailContaining(ownerEmail, 'Đã xác minh nội dung độc hại.');
+    const related = (await (
+      await moderator.request.get('/api/v1/moderation/reports', {
+        params: { node_uuid: node.id },
+      })
+    ).json()) as { results: { id: string; status: string }[] };
+    const remaining = related.results.find((item) => item.status === 'open');
+    expect(remaining).toBeDefined();
+    await moderator.goto(`/moderation?report=${remaining?.id ?? ''}`);
+    await expect(
+      moderator.getByRole('region', { name: 'Đối tượng bị báo cáo' }),
+    ).toContainText('Đã thu hồi');
+    await moderator
+      .getByLabel('Ghi chú (bắt buộc)')
+      .fill('Link đã được gỡ ở báo cáo trước.');
+    await moderator.getByRole('button', { name: 'Xem lại thao tác' }).click();
+    await moderator.getByRole('button', { name: 'Xác nhận xử lý' }).click();
+    await expect(
+      moderator.getByRole('region', { name: 'Lịch sử xử lý' }),
+    ).toContainText('Không phát sinh thay đổi mới');
+    await expect(
+      moderator.getByRole('region', { name: 'Báo cáo cùng node' }),
+    ).toContainText('2 báo cáo cùng node · 0 đang chờ');
+
     await visitor.goto(`/s/${link.token}`);
     await expect(
       visitor.getByRole('heading', { name: 'Nội dung không còn khả dụng' }),
@@ -246,7 +318,9 @@ test('moderator suspension invalidates owner sessions and all public links', asy
     expect(response.status()).toBe(202);
     const reports = (await (
       await moderator.request.get('/api/v1/moderation/reports')
-    ).json()) as { results: { id: string; node_uuid: string }[] };
+    ).json()) as {
+      results: { id: string; node_uuid: string; reason: string }[];
+    };
     const report = reports.results.find(
       (item) => item.node_uuid === first.node.id,
     );

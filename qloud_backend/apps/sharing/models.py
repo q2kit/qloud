@@ -123,6 +123,7 @@ class Report(BaseModel):
                 fields=["reporter_ip_hash", "link_uuid", "created_at"], name="report_duplicate"
             ),
             models.Index(fields=["status", "created_at", "id"], name="report_status_time"),
+            models.Index(fields=["node_uuid", "status"], name="report_node_status"),
         ]
         constraints = [
             models.CheckConstraint(

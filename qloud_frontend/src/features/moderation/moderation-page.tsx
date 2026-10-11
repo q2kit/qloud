@@ -4,18 +4,13 @@ import { useSearchParams } from 'react-router';
 import { NotFoundPage } from '@/app/pages';
 import { Button } from '@/components/ui/button';
 import { useMe } from '@/features/settings/use-me';
+import { ArrowLeft, FileWarning } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { formatDate } from '@/features/drive/format';
 import { uuidFromUrl, compactId } from '@/features/drive/paths';
-import { ApiError } from '@/lib/api/errors';
-import {
-  actions,
-  useReport,
-  useReports,
-  useResolveReport,
-  type ReportAction,
-  type ReportStatus,
-  type ReportDetail,
-} from './api';
+import { useReport, useReports, type ReportStatus } from './api';
+import { StatusBadge } from './moderation-status';
+import { ReportPanel } from './moderation-detail';
 
 export function ModerationPage() {
   const { t } = useTranslation();
@@ -31,248 +26,192 @@ function ModerationBrowser() {
   const [status, setStatus] = React.useState<ReportStatus | undefined>('open');
   const selected = params.get('report');
   const id = selected ? uuidFromUrl(selected) : undefined;
-  const list = useReports(status, true);
+  const scopedNode = params.get('node');
+  const nodeId = scopedNode ? uuidFromUrl(scopedNode) : undefined;
+  const list = useReports(status, true, nodeId);
   const detail = useReport(id, true);
+  const closeDetail = () => {
+    setParams((previous) => {
+      const next = new URLSearchParams(previous);
+      next.delete('report');
+      return next;
+    });
+  };
   return (
     <section className="space-y-5">
-      <h1 className="text-xl font-semibold">{t('navigation.moderation')}</h1>
-      <label className="block text-sm">
-        {t('moderation.status')}
-        <select
-          className="ml-2 h-10 rounded-md border border-input bg-background px-3"
-          value={status ?? ''}
-          onChange={(event) => {
-            const value = event.target.value;
-            setStatus(
-              value === 'open' || value === 'actioned' || value === 'dismissed'
-                ? value
-                : undefined,
-            );
-          }}
-        >
-          <option value="">{t('moderation.all')}</option>
-          {(['open', 'actioned', 'dismissed'] as const).map((item) => (
-            <option key={item} value={item}>
-              {t(`moderation.statuses.${item}`)}
-            </option>
-          ))}
-        </select>
-      </label>
-      {list.isPending ? (
-        <p role="status">{t('sharing.loading')}</p>
-      ) : list.isError ? (
-        <div>
-          <p role="alert">{t('report.errors.failed')}</p>
-          <Button onClick={() => void list.refetch()}>
-            {t('preview.retry')}
-          </Button>
-        </div>
-      ) : (
-        <ul className="space-y-2">
-          {list.data.pages
-            .flatMap((page) => page.results)
-            .map((report) => (
-              <li key={report.id}>
-                <button
-                  className="w-full rounded-lg border border-border bg-card p-3 text-left hover:bg-muted"
-                  aria-pressed={id === report.id}
-                  onClick={() => {
-                    setParams({ report: compactId(report.id) });
-                  }}
-                >
-                  <span className="block break-words font-medium">
-                    {report.node_name}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {t(`report.reasons.${report.reason}`)} ·{' '}
-                    {t(`moderation.statuses.${report.status}`)} ·{' '}
-                    {formatDate(report.created_at, i18n.language)}
-                  </span>
-                </button>
-              </li>
-            ))}
-          {!list.data.pages.some((page) => page.results.length) && (
-            <li>{t('moderation.empty')}</li>
-          )}
-        </ul>
-      )}
-      {list.hasNextPage && (
-        <Button
-          variant="outline"
-          disabled={list.isFetchingNextPage}
-          onClick={() => void list.fetchNextPage()}
-        >
-          {t('sharing.more')}
-        </Button>
-      )}
-      {selected &&
-        (detail.isPending ? (
-          <p role="status">{t('sharing.loading')}</p>
-        ) : detail.isError ? (
-          <div>
-            <p role="alert">{t('report.errors.failed')}</p>
-            <Button onClick={() => void detail.refetch()}>
-              {t('preview.retry')}
-            </Button>
-          </div>
-        ) : (
-          <ReportPanel key={detail.data.id} report={detail.data} />
-        ))}
-    </section>
-  );
-}
-function ReportPanel({ report }: { report: ReportDetail }) {
-  const { t, i18n } = useTranslation();
-  const change = useResolveReport(report.id);
-  const [action, setAction] = React.useState<ReportAction>('revoke_link');
-  const [note, setNote] = React.useState('');
-  const [confirm, setConfirm] = React.useState(false);
-  const error =
-    change.error instanceof ApiError
-      ? t(
-          `moderation.errors.${change.error.code === 'report_resolved' ? 'resolved' : change.error.code === 'moderation_target_unavailable' ? 'unavailable' : change.error.code === 'validation_error' ? 'guard' : 'failed'}`,
-        )
-      : t('report.errors.failed');
-  return (
-    <article className="space-y-4 rounded-lg border border-border bg-card p-4">
-      <h2 className="break-words text-lg font-semibold">{report.node_name}</h2>
-      <p>
-        {t(`report.reasons.${report.reason}`)} ·{' '}
-        {t(`moderation.statuses.${report.status}`)}
-      </p>
-      <p className="break-words whitespace-pre-wrap">{report.message}</p>
-      <dl className="space-y-2 break-all text-sm">
-        {(
-          [
-            'reporter_email',
-            'reporter_user_id',
-            'owner_uuid',
-            'node_uuid',
-            'link_uuid',
-          ] as const
-        ).map((key) => (
-          <div key={key}>
-            <dt className="text-muted-foreground">
-              {t(`moderation.fields.${key}`)}
-            </dt>
-            <dd>
-              {report[key] === ''
-                ? t('moderation.anonymous')
-                : (report[key] ?? t('moderation.anonymous'))}
-            </dd>
-          </div>
-        ))}
-      </dl>
-      {report.resolution && (
+      <div className="space-y-1">
+        <h1 className="text-xl font-semibold">{t('navigation.moderation')}</h1>
+        <p className="text-sm text-muted-foreground">
+          {t('moderation.introduction')}
+        </p>
+      </div>
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(15rem,0.8fr)_minmax(0,1.5fr)]">
         <section
-          aria-label={t('moderation.audit')}
-          className="space-y-2 border-t border-border pt-3"
+          aria-label={t('moderation.queue')}
+          className={cn('min-w-0 space-y-3', selected && 'hidden lg:block')}
         >
-          <h3 className="font-medium">{t('moderation.audit')}</h3>
-          <p>
-            {t(`moderation.actions.${report.resolution.action}`)} ·{' '}
-            {formatDate(report.resolution.created_at, i18n.language)}
-          </p>
-          <p className="break-all">{report.resolution.actor_uuid}</p>
-          <p className="break-words whitespace-pre-wrap">
-            {report.resolution.note}
-          </p>
-        </section>
-      )}
-      {report.status === 'open' && (
-        <form
-          className="space-y-3 border-t border-border pt-3"
-          onSubmit={(event) => {
-            event.preventDefault();
-            setConfirm(true);
-          }}
-        >
-          <label className="block text-sm">
-            {t('moderation.action')}
-            <select
-              disabled={change.isPending || confirm}
-              value={action}
-              onChange={(event) => {
-                const value = actions.find(
-                  (item) => item === event.target.value,
-                );
-                if (value) setAction(value);
-              }}
-              className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3"
-            >
-              {actions.map((item) => (
-                <option key={item} value={item}>
-                  {t(`moderation.actions.${item}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <p className="text-sm text-muted-foreground">
-            {t(`moderation.effects.${action}`)}
-          </p>
-          <label className="block text-sm">
-            {t('moderation.note')}
-            <textarea
-              required
-              maxLength={2000}
-              value={note}
-              disabled={change.isPending || confirm}
-              onChange={(event) => {
-                setNote(event.target.value);
-              }}
-              className="mt-1 min-h-24 w-full rounded-md border border-input bg-background p-3"
-            />
-          </label>
-          {change.isError && (
-            <p role="alert" className="text-destructive">
-              {error}
-            </p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-semibold">{t('moderation.queue')}</h2>
+            <label className="flex items-center gap-2 text-sm">
+              {t('moderation.status')}
+              <select
+                className="h-9 rounded-md border border-input bg-background px-2"
+                value={status ?? ''}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setStatus(
+                    value === 'open' ||
+                      value === 'actioned' ||
+                      value === 'dismissed'
+                      ? value
+                      : undefined,
+                  );
+                }}
+              >
+                <option value="">{t('moderation.all')}</option>
+                {(['open', 'actioned', 'dismissed'] as const).map((item) => (
+                  <option key={item} value={item}>
+                    {t(`moderation.statuses.${item}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          {nodeId && (
+            <div className="space-y-2 rounded-lg bg-muted p-3 text-sm">
+              <p>{t('moderation.nodeFilter')}</p>
+              <p className="break-all font-mono text-xs">{nodeId}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setParams((previous) => {
+                    const next = new URLSearchParams(previous);
+                    next.delete('node');
+                    return next;
+                  });
+                }}
+              >
+                {t('moderation.clearFilter')}
+              </Button>
+            </div>
           )}
-          {confirm ? (
+          {list.isPending ? (
+            <p role="status">{t('sharing.loading')}</p>
+          ) : list.isError ? (
             <div className="space-y-2">
-              <p>
-                {t('moderation.confirm', {
-                  action: t(`moderation.actions.${action}`),
-                })}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  disabled={change.isPending}
-                  onClick={() => {
-                    change.mutate(
-                      { action, note: note.trim() },
-                      {
-                        onError: () => {
-                          setConfirm(false);
-                        },
-                      },
-                    );
-                  }}
-                >
-                  {t(
-                    change.isPending
-                      ? 'moderation.processing'
-                      : 'moderation.confirmButton',
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={change.isPending}
-                  onClick={() => {
-                    setConfirm(false);
-                  }}
-                >
-                  {t('moderation.cancel')}
-                </Button>
-              </div>
+              <p role="alert">{t('report.errors.failed')}</p>
+              <Button onClick={() => void list.refetch()}>
+                {t('preview.retry')}
+              </Button>
             </div>
           ) : (
-            <Button disabled={!note.trim()}>{t('moderation.review')}</Button>
+            <ul className="space-y-2 lg:max-h-[70vh] lg:overflow-y-auto lg:pr-1">
+              {list.data.pages
+                .flatMap((page) => page.results)
+                .map((report) => (
+                  <li key={report.id}>
+                    <button
+                      className={cn(
+                        'w-full space-y-2 rounded-xl border bg-card p-4 text-left transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring',
+                        id === report.id
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border',
+                      )}
+                      aria-pressed={id === report.id}
+                      onClick={() => {
+                        setParams((previous) => {
+                          const next = new URLSearchParams(previous);
+                          next.set('report', compactId(report.id));
+                          return next;
+                        });
+                      }}
+                    >
+                      <span className="flex items-start justify-between gap-2">
+                        <span className="min-w-0 break-words font-semibold">
+                          {report.node_name}
+                        </span>
+                        <StatusBadge status={report.status} />
+                      </span>
+                      <span className="block text-sm">
+                        {t(`report.reasons.${report.reason}`)}
+                      </span>
+                      <span className="block text-xs text-muted-foreground">
+                        {formatDate(report.created_at, i18n.language)}
+                      </span>
+                      <span className="block text-xs text-muted-foreground">
+                        {t('moderation.relatedCounts', {
+                          total: report.node_report_count,
+                          open: report.node_open_report_count,
+                        })}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              {!list.data.pages.some((page) => page.results.length) && (
+                <li className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                  {t('moderation.empty')}
+                </li>
+              )}
+            </ul>
           )}
-        </form>
-      )}
-    </article>
+          {list.hasNextPage && (
+            <Button
+              variant="outline"
+              className="w-full"
+              disabled={list.isFetchingNextPage}
+              onClick={() => void list.fetchNextPage()}
+            >
+              {t('sharing.more')}
+            </Button>
+          )}
+        </section>
+        <div
+          className={cn('min-w-0 space-y-3', !selected && 'hidden lg:block')}
+        >
+          {selected ? (
+            <>
+              <Button
+                variant="ghost"
+                className="lg:hidden"
+                onClick={closeDetail}
+              >
+                <ArrowLeft />
+                {t('moderation.backToQueue')}
+              </Button>
+              {!id ? (
+                <p role="alert">{t('report.errors.failed')}</p>
+              ) : detail.isPending ? (
+                <p role="status">{t('sharing.loading')}</p>
+              ) : detail.isError ? (
+                <div className="space-y-2">
+                  <p role="alert">{t('report.errors.failed')}</p>
+                  <Button onClick={() => void detail.refetch()}>
+                    {t('preview.retry')}
+                  </Button>
+                </div>
+              ) : (
+                <ReportPanel
+                  key={detail.data.id}
+                  report={detail.data}
+                  onRelated={() => {
+                    setStatus(undefined);
+                    setParams({ node: compactId(detail.data.node_uuid) });
+                  }}
+                />
+              )}
+            </>
+          ) : (
+            <div className="flex min-h-72 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border p-6 text-center text-muted-foreground">
+              <FileWarning className="size-8" />
+              <p className="font-medium">{t('moderation.selectReport')}</p>
+              <p className="max-w-sm text-sm">
+                {t('moderation.selectReportDescription')}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }

@@ -1,8 +1,10 @@
 import uuid
+from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
-from django.db.models import Q, QuerySet
+from django.db.models import Count, IntegerField, OuterRef, Q, QuerySet, Subquery
+from django.db.models.functions import Coalesce
 from django.http import Http404
 from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -12,6 +14,7 @@ from apps.accounts.services import suspend_user
 from apps.core.errors import ModerationTargetUnavailable, ReportResolved
 
 from .models import ModerationAction, Report, ShareLink
+from .permissions import moderation_node_metadata
 from .report_notifications import schedule_revocation_email
 
 
@@ -22,7 +25,15 @@ def require_superuser(user: User) -> None:
 
 def reports_for(user: User) -> QuerySet[Report]:
     require_superuser(user)
-    return Report.objects.select_related("reporter_user", "resolved_by", "resolution")
+    related = Report.objects.filter(node_uuid=OuterRef("node_uuid")).order_by().values("node_uuid")
+    total = related.annotate(count=Count("pk")).values("count")
+    opened = related.filter(status=Report.Status.OPEN).annotate(count=Count("pk")).values("count")
+    return Report.objects.select_related(
+        "reporter_user", "resolved_by", "resolution", "share_link"
+    ).annotate(
+        node_report_count=Coalesce(Subquery(total, output_field=IntegerField()), 0),
+        node_open_report_count=Coalesce(Subquery(opened, output_field=IntegerField()), 0),
+    )
 
 
 def get_report(user: User, report_id: uuid.UUID) -> Report:
@@ -30,6 +41,49 @@ def get_report(user: User, report_id: uuid.UUID) -> Report:
     if report is None:
         raise Http404
     return report
+
+
+def report_subject(actor: User, report: Report) -> dict[str, Any]:
+    require_superuser(actor)
+    nodes = {
+        node["id"]: node
+        for node in moderation_node_metadata(actor, [report.node_uuid, report.root_node_uuid])
+    }
+    owner = (
+        User.objects.filter(pk=report.owner_uuid)
+        .values("id", "display_name", "email", "is_active", "suspended_at")
+        .first()
+    )
+    link = report.share_link
+    root = nodes.get(report.root_node_uuid)
+    if link is None:
+        state = "deleted"
+    elif link.revoked_at:
+        state = "revoked"
+    elif link.expires_at and link.expires_at <= timezone.now():
+        state = "expired"
+    elif (
+        owner is None
+        or not owner["is_active"]
+        or owner["suspended_at"]
+        or root is None
+        or root["trashed_at"]
+    ):
+        state = "unavailable"
+    else:
+        state = "active"
+    return {
+        "node": nodes.get(report.node_uuid),
+        "root_node": root,
+        "owner": owner,
+        "link_state": state,
+        "link_revoked_at": link.revoked_at if link else None,
+        "link_expires_at": link.expires_at if link else None,
+        "link_revoke_reason": link.revoke_reason if link else None,
+        "resolver_name": (report.resolved_by.display_name or report.resolved_by.email)
+        if report.resolved_by
+        else None,
+    }
 
 
 @transaction.atomic

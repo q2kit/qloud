@@ -493,3 +493,126 @@ def test_concurrent_resolutions_commit_one_audit(data):
     ):
         assert sum(pool.map(worker, range(4))) == 1
     assert ModerationAction.objects.count() == 1
+
+
+def test_node_counts_filter_and_detail_query_budget(data, django_assert_num_queries):
+    first = create(data, "1.1.1.1")
+    second = create(data, "2.2.2.2")
+    create(data, "3.3.3.3")
+    other = report_services.create_report(data[5].token, data[3].pk, "other", client_ip="4.4.4.4")
+    assert other is not None
+    assert resolve(data, first, "dismiss").status_code == 200
+    client = data[-1]
+    with django_assert_num_queries(1):
+        page = client.get(
+            "/api/v1/moderation/reports",
+            {
+                "node_uuid": str(data[2].pk),
+                "status": "open",
+                "page_size": 1,
+            },
+        ).json()
+    assert len(page["results"]) == 1
+    assert page["results"][0]["node_report_count"] == 3
+    assert page["results"][0]["node_open_report_count"] == 2
+    remaining = client.get(page["next"]).json()
+    assert len(remaining["results"]) == 1
+    assert all(row["node_uuid"] == str(data[2].pk) for row in remaining["results"])
+    assert client.get("/api/v1/moderation/reports", {"node_uuid": "bad"}).status_code == 400
+    assert (
+        client.get("/api/v1/moderation/reports", {"node_uuid": str(uuid.uuid7())}).json()["results"]
+        == []
+    )
+    with django_assert_num_queries(3):
+        detail = client.get(f"/api/v1/moderation/reports/{first.pk}").json()
+    assert detail["subject"]["owner"]["email"] == data[0].email
+    assert detail["subject"]["resolver_name"] == data[1].email
+    assert detail["subject"]["link_state"] == "active"
+    second.refresh_from_db()
+    assert second.status == "open"
+
+
+@pytest.mark.parametrize(
+    "state", ["revoked", "expired", "trashed", "suspended", "inactive", "deleted"]
+)
+def test_moderation_context_unavailable_targets(data, state):
+    owner, moderator, root, child, _, link, client = data
+    report = report_services.create_report(link.token, child.pk, "other", client_ip="1.2.3.4")
+    assert report is not None
+    if state == "revoked":
+        link.revoked_at, link.revoke_reason = timezone.now(), "owner"
+        link.save()
+    elif state == "expired":
+        link.expires_at = timezone.now() - datetime.timedelta(seconds=1)
+        link.save()
+    elif state == "trashed":
+        from apps.drive.trash import trash
+
+        trash(owner, [root.pk])
+    elif state == "suspended":
+        owner.suspended_at = timezone.now()
+        owner.save(update_fields=["suspended_at", "is_active"])
+    elif state == "inactive":
+        owner.is_active = False
+        owner.save(update_fields=["is_active", "suspended_at"])
+    else:
+        root.delete()
+    client.force_authenticate(moderator)
+    subject = client.get(f"/api/v1/moderation/reports/{report.pk}").json()["subject"]
+    assert subject["link_state"] == (
+        "unavailable" if state in ["trashed", "suspended", "inactive"] else state
+    )
+    if state == "deleted":
+        assert subject["node"] is None
+        assert subject["root_node"] is None
+    else:
+        assert subject["node"]["id"] == str(child.pk)
+        assert subject["root_node"]["id"] == str(root.pk)
+    assert "token" not in subject
+
+
+def test_metadata_permissions_deleted_owner_and_file_metadata(data):
+    from rest_framework.exceptions import PermissionDenied
+
+    from apps.sharing.permissions import moderation_node_metadata
+
+    with pytest.raises(PermissionDenied):
+        moderation_node_metadata(data[0], [data[2].pk])
+    file = Node.objects.create(
+        owner=data[0],
+        parent=data[2],
+        name="Evidence.txt",
+        kind="file",
+        size=123,
+        mime_type="text/plain",
+    )
+    report = report_services.create_report(data[5].token, file.pk, "other", client_ip="1.2.3.4")
+    assert report is not None
+    data[-1].force_authenticate(data[1])
+    url = f"/api/v1/moderation/reports/{report.pk}"
+    detail = data[-1].get(url).json()
+    assert detail["subject"]["node"]["size"] == 123
+    assert detail["subject"]["node"]["mime_type"] == "text/plain"
+    assert detail["subject"]["root_node"]["kind"] == "folder"
+    data[0].delete()
+    detail = data[-1].get(url).json()
+    assert detail["subject"]["owner"] is None
+    assert detail["node_uuid"] == str(report.node_uuid)
+    assert detail["node_report_count"] == 1
+
+
+def test_same_node_reports_independent_and_no_repeat_email(
+    data, django_capture_on_commit_callbacks
+):
+    first, second = create(data, "1.1.1.1"), create(data, "2.2.2.2")
+    with patch("apps.sharing.report_notifications.send_email.delay") as mail:
+        with django_capture_on_commit_callbacks(execute=True):
+            result = resolve(data, first).json()
+        assert result["node_open_report_count"] == 1
+        second.refresh_from_db()
+        assert second.status == "open"
+        with django_capture_on_commit_callbacks(execute=True):
+            result = resolve(data, second).json()
+        assert result["resolution"]["targets"]["revoked_link_ids"] == []
+        assert result["node_open_report_count"] == 0
+        assert mail.call_count == 1

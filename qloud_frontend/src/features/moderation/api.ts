@@ -39,15 +39,19 @@ export function useCreateReport(token: string, nodeId: string) {
       ),
   });
 }
-export function useReports(status: ReportStatus | undefined, enabled: boolean) {
+export function useReports(
+  status: ReportStatus | undefined,
+  enabled: boolean,
+  nodeId?: string,
+) {
   return useInfiniteQuery({
-    queryKey: ['moderation', 'list', status],
+    queryKey: ['moderation', 'list', status, nodeId],
     enabled,
     retry: false,
     queryFn: async ({ pageParam, signal }) =>
       unwrap(
         await api.GET('/api/v1/moderation/reports', {
-          params: { query: { status, cursor: pageParam } },
+          params: { query: { status, node_uuid: nodeId, cursor: pageParam } },
           signal,
         }),
       ),

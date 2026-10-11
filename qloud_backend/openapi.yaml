@@ -147,6 +147,11 @@ paths:
         description: The pagination cursor value.
         schema:
           type: string
+      - in: query
+        name: node_uuid
+        schema:
+          type: string
+          format: uuid
       - name: page_size
         required: false
         in: query
@@ -1685,6 +1690,20 @@ components:
       description: |-
         * `folder` - Folder
         * `file` - File
+    LinkStateEnum:
+      enum:
+      - active
+      - revoked
+      - expired
+      - deleted
+      - unavailable
+      type: string
+      description: |-
+        * `active` - active
+        * `revoked` - revoked
+        * `expired` - expired
+        * `deleted` - deleted
+        * `unavailable` - unavailable
     LocaleEnum:
       enum:
       - vi
@@ -1749,6 +1768,103 @@ components:
         * `revoke_node` - Revoke Node
         * `suspend_owner` - Suspend Owner
         * `dismiss` - Dismiss
+    ModerationContext:
+      type: object
+      properties:
+        node:
+          allOf:
+          - $ref: '#/components/schemas/ModerationNode'
+          nullable: true
+        root_node:
+          allOf:
+          - $ref: '#/components/schemas/ModerationNode'
+          nullable: true
+        owner:
+          allOf:
+          - $ref: '#/components/schemas/ModerationOwner'
+          nullable: true
+        link_state:
+          $ref: '#/components/schemas/LinkStateEnum'
+        link_revoked_at:
+          type: string
+          format: date-time
+          nullable: true
+        link_expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        link_revoke_reason:
+          type: string
+          nullable: true
+        resolver_name:
+          type: string
+          nullable: true
+      required:
+      - link_expires_at
+      - link_revoke_reason
+      - link_revoked_at
+      - link_state
+      - node
+      - owner
+      - resolver_name
+      - root_node
+    ModerationNode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        kind:
+          $ref: '#/components/schemas/ModerationNodeKindEnum'
+        size:
+          type: integer
+        mime_type:
+          type: string
+          nullable: true
+        trashed_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - id
+      - kind
+      - mime_type
+      - name
+      - size
+      - trashed_at
+    ModerationNodeKindEnum:
+      enum:
+      - file
+      - folder
+      type: string
+      description: |-
+        * `file` - file
+        * `folder` - folder
+    ModerationOwner:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+        email:
+          type: string
+          format: email
+        is_active:
+          type: boolean
+        suspended_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - display_name
+      - email
+      - id
+      - is_active
+      - suspended_at
     MoveRequest:
       type: object
       properties:
@@ -2300,11 +2416,19 @@ components:
           allOf:
           - $ref: '#/components/schemas/ReportStatusEnum'
           readOnly: true
+        node_report_count:
+          type: integer
+          readOnly: true
+        node_open_report_count:
+          type: integer
+          readOnly: true
       required:
       - created_at
       - id
       - link_uuid
       - node_name
+      - node_open_report_count
+      - node_report_count
       - node_uuid
       - owner_uuid
       - reason
@@ -2360,6 +2484,12 @@ components:
           allOf:
           - $ref: '#/components/schemas/ReportStatusEnum'
           readOnly: true
+        node_report_count:
+          type: integer
+          readOnly: true
+        node_open_report_count:
+          type: integer
+          readOnly: true
         message:
           type: string
           readOnly: true
@@ -2390,12 +2520,18 @@ components:
           - $ref: '#/components/schemas/Resolution'
           readOnly: true
           nullable: true
+        subject:
+          allOf:
+          - $ref: '#/components/schemas/ModerationContext'
+          readOnly: true
       required:
       - created_at
       - id
       - link_uuid
       - message
       - node_name
+      - node_open_report_count
+      - node_report_count
       - node_uuid
       - owner_uuid
       - reason
@@ -2407,6 +2543,7 @@ components:
       - resolved_by_id
       - root_node_uuid
       - status
+      - subject
     ReportReasonEnum:
       enum:
       - illegal

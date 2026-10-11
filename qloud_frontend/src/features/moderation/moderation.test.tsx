@@ -51,6 +51,38 @@ const report = {
   resolved_by_id: null,
   resolution_note: '',
   resolution: null,
+  node_report_count: 3,
+  node_open_report_count: 2,
+  subject: {
+    node: {
+      id: ROOT_ID,
+      name: 'Current reported name',
+      kind: 'folder',
+      size: 0,
+      mime_type: null,
+      trashed_at: null,
+    },
+    root_node: {
+      id: ROOT_ID,
+      name: 'Current reported name',
+      kind: 'folder',
+      size: 0,
+      mime_type: null,
+      trashed_at: null,
+    },
+    owner: {
+      id: testUser.id,
+      display_name: 'Content owner',
+      email: 'owner@example.com',
+      is_active: true,
+      suspended_at: null,
+    },
+    link_state: 'active',
+    link_revoked_at: null,
+    link_expires_at: null,
+    link_revoke_reason: null,
+    resolver_name: null,
+  },
 };
 function adminHandlers(superuser = true) {
   server.use(
@@ -185,7 +217,7 @@ it('shows report details, requires a note and confirmation, resolves and renders
         actor_uuid: testUser.id,
         action: 'revoke_link',
         note: 'Confirmed malware',
-        targets: {},
+        targets: { revoked_link_ids: [id] },
       },
     });
   });
@@ -303,4 +335,101 @@ it('reports the file in the public viewer and returns focus to the viewer', asyn
   expect(body).toMatchObject({ node_id: file.id });
   await user.click(within(modal).getByRole('button', { name: 'Close' }));
   expect(await screen.findByRole('dialog', { name: file.name })).toBeVisible();
+});
+
+it('shows target context and filters all related reports across cursor pages', async () => {
+  adminHandlers();
+  const queries: URL[] = [];
+  server.use(
+    http.get('/api/v1/moderation/reports', ({ request }) => {
+      const url = new URL(request.url);
+      queries.push(url);
+      return HttpResponse.json({
+        results: [
+          url.searchParams.has('cursor')
+            ? {
+                ...report,
+                id: '0190c0de-0000-7000-8000-000000001235',
+                node_name: 'Another report',
+              }
+            : report,
+        ],
+        next:
+          url.searchParams.has('node_uuid') && !url.searchParams.has('cursor')
+            ? 'http://localhost/api/v1/moderation/reports?cursor=next'
+            : null,
+        previous: null,
+      });
+    }),
+    http.get('/api/v1/moderation/reports/:id', () => HttpResponse.json(report)),
+  );
+  const user = userEvent.setup();
+  renderApp(`/moderation?report=${id}`, testUser);
+  await screen.findByText('Content owner');
+  expect(screen.getByText('owner@example.com')).toBeInTheDocument();
+  expect(
+    screen.getByRole('region', { name: 'Reports on the same node' }),
+  ).toHaveTextContent('3 reports on this node · 2 open');
+  expect(
+    screen.getByText('The reported node is also the link root node.'),
+  ).toBeInTheDocument();
+  await user.click(
+    screen.getByRole('button', { name: 'View all reports on this node' }),
+  );
+  await screen.findByText('Showing reports on the same node');
+  expect(queries.at(-1)?.searchParams.get('node_uuid')).toBe(ROOT_ID);
+  expect(queries.at(-1)?.searchParams.has('status')).toBe(false);
+  await user.click(await screen.findByRole('button', { name: 'Load more' }));
+  await screen.findByText('Another report');
+  expect(queries.at(-1)?.searchParams.get('node_uuid')).toBe(ROOT_ID);
+  expect(queries.at(-1)?.searchParams.get('cursor')).toBe('next');
+  await user.click(screen.getByRole('button', { name: 'Clear node filter' }));
+  await waitFor(() => {
+    expect(queries.at(-1)?.searchParams.has('node_uuid')).toBe(false);
+  });
+});
+
+it('handles deleted targets and describes an audit with no new changes', async () => {
+  adminHandlers();
+  server.use(
+    http.get('/api/v1/moderation/reports', () =>
+      HttpResponse.json({ results: [], next: null, previous: null }),
+    ),
+    http.get('/api/v1/moderation/reports/:id', () =>
+      HttpResponse.json({
+        ...report,
+        status: 'actioned',
+        message: '',
+        subject: {
+          ...report.subject,
+          node: null,
+          root_node: null,
+          owner: null,
+          link_state: 'deleted',
+        },
+        resolution: {
+          id,
+          created_at: report.created_at,
+          actor_uuid: testUser.id,
+          action: 'revoke_link',
+          note: 'Already handled',
+          targets: { revoked_link_ids: [] },
+        },
+      }),
+    ),
+  );
+  const user = userEvent.setup();
+  renderApp(`/moderation?report=${id}`, testUser);
+  await screen.findByText('The reporter did not provide a description.');
+  expect(
+    screen.getAllByText('Deleted / no longer exists').length,
+  ).toBeGreaterThan(1);
+  expect(
+    screen.getByRole('region', { name: 'Resolution history' }),
+  ).toHaveTextContent('No new changes:');
+  expect(screen.queryByLabelText('Note (required)')).not.toBeInTheDocument();
+  await user.click(screen.getByRole('button', { name: 'Back to queue' }));
+  expect(
+    screen.queryByRole('region', { name: 'Resolution history' }),
+  ).not.toBeInTheDocument();
 });

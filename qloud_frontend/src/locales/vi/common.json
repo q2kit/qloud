@@ -497,7 +497,7 @@
       "dismiss": "Bỏ qua báo cáo"
     },
     "effects": {
-      "revoke_link": "Link bị báo cáo sẽ ngừng hoạt động. Owner nhận email thông báo.",
+      "revoke_link": "Thu hồi link nếu chưa được thu hồi; owner chỉ nhận email khi có thay đổi mới.",
       "revoke_node": "Gỡ mọi link trỏ trực tiếp tới node gốc của link bị báo cáo; không gỡ link riêng của node con hoặc node cha.",
       "suspend_owner": "Chặn đăng nhập, vô hiệu session cũ và mọi link công khai của owner.",
       "dismiss": "Giữ nội dung và link, đóng báo cáo với ghi chú."
@@ -514,6 +514,61 @@
       "resolved": "Báo cáo đã được xử lý. Hãy tải lại trang.",
       "unavailable": "Tài khoản đích không còn tồn tại.",
       "guard": "Không được tự khóa mình hoặc khóa superuser cuối cùng."
-    }
+    },
+    "introduction": "Xem ngữ cảnh báo cáo và kiểm tra phạm vi trước khi xử lý.",
+    "queue": "Danh sách báo cáo",
+    "relatedCounts": "{{total}} báo cáo cùng node · {{open}} đang chờ",
+    "nodeFilter": "Đang xem các báo cáo cùng node",
+    "clearFilter": "Xóa bộ lọc node",
+    "backToQueue": "Quay lại danh sách",
+    "selectReport": "Chọn một báo cáo để xem chi tiết",
+    "selectReportDescription": "Kiểm tra nội dung, đối tượng bị báo cáo và các báo cáo liên quan trước khi quyết định.",
+    "name": "Tên hiện tại",
+    "fileInfo": "Loại nội dung",
+    "currentState": "Trạng thái hiện tại",
+    "identifier": "ID",
+    "deleted": "Đã xóa / không còn tồn tại",
+    "trashed": "Trong thùng rác",
+    "available": "Còn tồn tại",
+    "kinds": {
+      "file": "File",
+      "folder": "Thư mục"
+    },
+    "receivedAt": "Nhận lúc {{time}}",
+    "reportId": "Mã báo cáo",
+    "reportContent": "Nội dung báo cáo",
+    "noMessage": "Người gửi không cung cấp mô tả.",
+    "subject": "Đối tượng bị báo cáo",
+    "rootNode": "Node gốc của link",
+    "ownerId": "ID owner",
+    "ownerSuspended": "Đã khóa",
+    "ownerActive": "Đang hoạt động",
+    "ownerInactive": "Ngừng hoạt động",
+    "linkState": "Trạng thái link",
+    "linkStates": {
+      "active": "Đang hoạt động",
+      "revoked": "Đã thu hồi",
+      "expired": "Đã hết hạn",
+      "deleted": "Đã xóa",
+      "unavailable": "Không còn khả dụng"
+    },
+    "revokeReasons": {
+      "owner": "Thu hồi bởi owner",
+      "moderation": "Thu hồi qua kiểm duyệt"
+    },
+    "expiresAt": "Link hết hạn lúc",
+    "revokedAt": "Link thu hồi lúc",
+    "related": "Báo cáo cùng node",
+    "independentReports": "Mỗi lượt báo cáo được lưu riêng. Xử lý báo cáo này không tự đóng các báo cáo khác cùng node.",
+    "viewRelated": "Xem tất cả báo cáo cùng node",
+    "resolvedAt": "Xử lý lúc",
+    "resolver": "Người xử lý",
+    "resolve": "Quyết định xử lý",
+    "actualResult": "Kết quả thực tế",
+    "dismissResult": "Đã bỏ qua báo cáo; không thay đổi link hay tài khoản.",
+    "revokedResult": "Đã gỡ thêm {{count}} link.",
+    "noChangeResult": "Không phát sinh thay đổi mới: đích đã được xử lý hoặc không còn tồn tại. Không gửi thêm email gỡ link.",
+    "suspendedResult": "Đã khóa tài khoản owner và vô hiệu các session/link công khai.",
+    "sameRoot": "Node bị báo cáo cũng là node gốc của link."
   }
 }

@@ -630,6 +630,15 @@ export interface components {
          */
         KindEnum: "folder" | "file";
         /**
+         * @description * `active` - active
+         *     * `revoked` - revoked
+         *     * `expired` - expired
+         *     * `deleted` - deleted
+         *     * `unavailable` - unavailable
+         * @enum {string}
+         */
+        LinkStateEnum: "active" | "revoked" | "expired" | "deleted" | "unavailable";
+        /**
          * @description * `vi` - Tiếng Việt
          *     * `en` - Tiếng Anh
          * @enum {string}
@@ -664,6 +673,44 @@ export interface components {
          * @enum {string}
          */
         ModerationActionEnum: "revoke_link" | "revoke_node" | "suspend_owner" | "dismiss";
+        ModerationContext: {
+            node: components["schemas"]["ModerationNode"] | null;
+            root_node: components["schemas"]["ModerationNode"] | null;
+            owner: components["schemas"]["ModerationOwner"] | null;
+            link_state: components["schemas"]["LinkStateEnum"];
+            /** Format: date-time */
+            link_revoked_at: string | null;
+            /** Format: date-time */
+            link_expires_at: string | null;
+            link_revoke_reason: string | null;
+            resolver_name: string | null;
+        };
+        ModerationNode: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            kind: components["schemas"]["ModerationNodeKindEnum"];
+            size: number;
+            mime_type: string | null;
+            /** Format: date-time */
+            trashed_at: string | null;
+        };
+        /**
+         * @description * `file` - file
+         *     * `folder` - folder
+         * @enum {string}
+         */
+        ModerationNodeKindEnum: "file" | "folder";
+        ModerationOwner: {
+            /** Format: uuid */
+            id: string;
+            display_name: string;
+            /** Format: email */
+            email: string;
+            is_active: boolean;
+            /** Format: date-time */
+            suspended_at: string | null;
+        };
         MoveRequest: {
             node_ids: string[];
             /** Format: uuid */
@@ -890,6 +937,8 @@ export interface components {
             readonly owner_uuid: string;
             readonly reason: components["schemas"]["ReportReasonEnum"];
             readonly status: components["schemas"]["ReportStatusEnum"];
+            readonly node_report_count: number;
+            readonly node_open_report_count: number;
         };
         ReportAccepted: {
             status: components["schemas"]["ReportAcceptedStatusEnum"];
@@ -915,6 +964,8 @@ export interface components {
             readonly owner_uuid: string;
             readonly reason: components["schemas"]["ReportReasonEnum"];
             readonly status: components["schemas"]["ReportStatusEnum"];
+            readonly node_report_count: number;
+            readonly node_open_report_count: number;
             readonly message: string;
             /** Format: email */
             readonly reporter_email: string;
@@ -926,6 +977,7 @@ export interface components {
             readonly resolved_by_id: string | null;
             readonly resolution_note: string;
             readonly resolution: components["schemas"]["Resolution"] | null;
+            readonly subject: components["schemas"]["ModerationContext"];
         };
         /**
          * @description * `illegal` - Illegal
@@ -1304,6 +1356,7 @@ export interface operations {
             query?: {
                 /** @description The pagination cursor value. */
                 cursor?: string;
+                node_uuid?: string;
                 /** @description Number of results to return per page. */
                 page_size?: number;
                 /**

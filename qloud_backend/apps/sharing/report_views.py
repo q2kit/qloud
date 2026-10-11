@@ -99,7 +99,8 @@ class ReportDetailView(APIView):
     def get(self, request: Request, report_id: uuid.UUID) -> Response:
         return Response(
             ReportDetailSerializer(
-                moderation_services.get_report(cast(User, request.user), report_id)
+                moderation_services.get_report(cast(User, request.user), report_id),
+                context={"request": request},
             ).data
         )
 
@@ -124,4 +125,4 @@ class ResolveReportView(APIView):
         report = moderation_services.resolve_report(
             cast(User, request.user), report_id, **data.validated_data
         )
-        return Response(ReportDetailSerializer(report).data)
+        return Response(ReportDetailSerializer(report, context={"request": request}).data)

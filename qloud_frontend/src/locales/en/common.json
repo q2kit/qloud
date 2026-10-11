@@ -504,7 +504,7 @@
       "dismiss": "Dismiss report"
     },
     "effects": {
-      "revoke_link": "The reported link will stop working. The owner receives an email.",
+      "revoke_link": "Revoke the link if it has not been revoked; the owner receives an email only for a new revocation.",
       "revoke_node": "Remove every link directly attached to the reported link’s root node; links to ancestors or descendants stay unchanged.",
       "suspend_owner": "Block sign-in, invalidate existing sessions and all public links owned by this account.",
       "dismiss": "Keep content and links, and close the report with a note."
@@ -521,6 +521,61 @@
       "resolved": "This report has already been resolved. Reload the page.",
       "unavailable": "The target account no longer exists.",
       "guard": "You cannot suspend yourself or the last superuser."
-    }
+    },
+    "introduction": "Review the report context and action scope before resolving it.",
+    "queue": "Report queue",
+    "relatedCounts": "{{total}} reports on this node · {{open}} open",
+    "nodeFilter": "Showing reports on the same node",
+    "clearFilter": "Clear node filter",
+    "backToQueue": "Back to queue",
+    "selectReport": "Select a report to review",
+    "selectReportDescription": "Review the report, its target and related reports before making a decision.",
+    "name": "Current name",
+    "fileInfo": "Content type",
+    "currentState": "Current state",
+    "identifier": "ID",
+    "deleted": "Deleted / no longer exists",
+    "trashed": "In trash",
+    "available": "Exists",
+    "kinds": {
+      "file": "File",
+      "folder": "Folder"
+    },
+    "receivedAt": "Received {{time}}",
+    "reportId": "Report ID",
+    "reportContent": "Report content",
+    "noMessage": "The reporter did not provide a description.",
+    "subject": "Reported target",
+    "rootNode": "Link root node",
+    "ownerId": "Owner ID",
+    "ownerSuspended": "Suspended",
+    "ownerActive": "Active",
+    "ownerInactive": "Inactive",
+    "linkState": "Link state",
+    "linkStates": {
+      "active": "Active",
+      "revoked": "Revoked",
+      "expired": "Expired",
+      "deleted": "Deleted",
+      "unavailable": "Unavailable"
+    },
+    "revokeReasons": {
+      "owner": "Revoked by owner",
+      "moderation": "Revoked by moderation"
+    },
+    "expiresAt": "Link expires at",
+    "revokedAt": "Link revoked at",
+    "related": "Reports on the same node",
+    "independentReports": "Each submission is stored separately. Resolving this report does not automatically close other reports on the same node.",
+    "viewRelated": "View all reports on this node",
+    "resolvedAt": "Resolved at",
+    "resolver": "Resolved by",
+    "resolve": "Resolution decision",
+    "actualResult": "Actual result",
+    "dismissResult": "Report dismissed; links and accounts were unchanged.",
+    "revokedResult": "{{count}} additional links revoked.",
+    "noChangeResult": "No new changes: the target was already handled or no longer exists. No additional revocation email was sent.",
+    "suspendedResult": "Owner suspended and their sessions and public links invalidated.",
+    "sameRoot": "The reported node is also the link root node."
   }
 }
