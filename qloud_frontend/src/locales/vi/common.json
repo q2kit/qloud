@@ -473,7 +473,6 @@
     }
   },
   "moderation": {
-    "denied": "Bạn không có quyền truy cập màn hình kiểm duyệt.",
     "status": "Trạng thái",
     "all": "Tất cả",
     "statuses": {

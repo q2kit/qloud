@@ -159,10 +159,11 @@ it('prevents ordinary users from querying moderation and hides navigation', asyn
   const query = vi.fn();
   server.use(http.get('/api/v1/moderation/reports', query));
   renderApp('/moderation', testUser);
-  await screen.findByText('You do not have access to moderation.');
+  await screen.findByRole('heading', { name: 'Page not found' });
   expect(
     screen.queryByRole('link', { name: 'Moderation' }),
   ).not.toBeInTheDocument();
+  expect(screen.queryByText('Moderation')).not.toBeInTheDocument();
   expect(query).not.toHaveBeenCalled();
 });
 it('shows report details, requires a note and confirmation, resolves and renders audit', async () => {

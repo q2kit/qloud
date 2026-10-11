@@ -62,6 +62,7 @@ function promoteTestUser(email: string) {
 }
 async function capture(page: Page, kind: string, mobile: boolean) {
   if (!process.env.MODERATION_CAPTURE) return;
+  if (process.env.MODERATION_CAPTURE === '404' && kind !== 'not-found') return;
   for (const theme of ['light', 'dark']) {
     await page.evaluate((value) => {
       localStorage.setItem('qloud-theme', value);
@@ -119,8 +120,10 @@ test('anonymous report reaches moderation, superuser removes link and owner rece
   const { node, link } = await folderLink(page, name);
   await page.goto('/moderation');
   await expect(
-    page.getByText('Bạn không có quyền truy cập màn hình kiểm duyệt.'),
+    page.getByRole('heading', { name: 'Không tìm thấy trang' }),
   ).toBeVisible();
+  await capture(page, 'not-found', isMobile);
+  await expect(page.getByText('Kiểm duyệt', { exact: true })).toHaveCount(0);
   expect((await page.request.get('/api/v1/moderation/reports')).status()).toBe(
     403,
   );

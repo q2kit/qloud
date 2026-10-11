@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
+import { NotFoundPage } from '@/app/pages';
 import { Button } from '@/components/ui/button';
 import { useMe } from '@/features/settings/use-me';
 import { formatDate } from '@/features/drive/format';
@@ -21,8 +22,7 @@ export function ModerationPage() {
   const me = useMe();
   if (me.isError) return <p role="alert">{t('report.errors.failed')}</p>;
   if (!me.data) return <p role="status">{t('sharing.loading')}</p>;
-  if (!me.data.is_superuser)
-    return <p role="alert">{t('moderation.denied')}</p>;
+  if (!me.data.is_superuser) return <NotFoundPage />;
   return <ModerationBrowser />;
 }
 function ModerationBrowser() {
