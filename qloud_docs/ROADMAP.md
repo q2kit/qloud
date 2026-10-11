@@ -66,7 +66,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
 | M4-01 | API: đưa vào thùng rác, khôi phục, xóa vĩnh viễn, dọn sạch | [#30](https://github.com/q2kit/qloud/issues/30) | ✅ [PR #131](https://github.com/q2kit/qloud/pull/131) |
-| M4-02 | Celery: tự xóa vĩnh viễn sau 30 ngày; xóa blob trên S3 | [#31](https://github.com/q2kit/qloud/issues/31) | 🟦 |
+| M4-02 | Celery: tự xóa vĩnh viễn sau 30 ngày; xóa blob trên S3 | [#31](https://github.com/q2kit/qloud/issues/31) | ✅ [PR #132](https://github.com/q2kit/qloud/pull/132) |
 | M4-03 | FE: trang Thùng rác, nút hoàn tác trên toast | [#32](https://github.com/q2kit/qloud/issues/32) | 🟦 |
 | M4-04 | FE: phím Delete đưa lựa chọn vào thùng rác | [#135](https://github.com/q2kit/qloud/issues/135) | 🟦 |
 | M4-05 | Thumbnail trong Thùng rác | [#136](https://github.com/q2kit/qloud/issues/136) | 🟦 |
