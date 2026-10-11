@@ -82,7 +82,7 @@
 - Nội dung dùng locale vi/en của người nhận, gồm người thực hiện chia sẻ (display_name, fallback email), tên/loại mục, role đã dịch và link APP_BASE_URL. HTML escape dữ liệu; subject cố định đã dịch, không có tên người dùng/file tùy ý.
 - Email giữ snapshot khi tạo grant; đổi tên/quyền/email/locale hoặc thu hồi sau đó không sửa thông báo đã xếp hàng. Link folder `/drive/folders/<UUID compact>`, file `/drive/files/<UUID compact>`; truy cập luôn kiểm tra quyền hiện tại và đăng nhập bằng tài khoản nhận email.
 - Tái sử dụng `accounts.tasks.send_email` và retry SMTP/OSError hiện có; không thêm outbox hoặc bảo đảm exactly-once. Worker Celery cần chạy như email auth.
-- Giới hạn route hiện có: link file được chia sẻ riêng nhưng folder cha không được chia sẻ chưa mở viewer được; bug được tách thành M5-08 [#147](https://github.com/q2kit/qloud/issues/147), không sửa lẫn vào task email.
+- M5-08: link file chia sẻ riêng mở viewer độc lập nếu folder cha trả 404; không hiển thị folder cha/file cùng cấp, không tải danh sách cha, tắt chuyển file. Đóng viewer về Drive của người nhận. Thu hồi grant khiến mở lại link, preview và download bị từ chối bởi API.
 
 ## Ngoài phạm vi
 Mật khẩu cho share link, quyền sửa qua share link, mời người chưa có tài khoản (có thể làm sau MVP), chặn thừa kế quyền.

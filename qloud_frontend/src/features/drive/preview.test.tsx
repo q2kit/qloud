@@ -100,6 +100,83 @@ it('resolves a canonical link using the current parent and reaches later pages',
   expect(screen.getByRole('button', { name: 'Next file' })).toBeDisabled();
 });
 
+it('opens a directly granted file without listing its private parent and closes to Drive', async () => {
+  const user = userEvent.setup();
+  const parent = drive.folder('Private parent');
+  const target = drive.file('Granted.txt', parent.id);
+  drive.file('Private sibling.txt', parent.id);
+  server.use(
+    http.get(
+      `/api/v1/nodes/${parent.id}`,
+      () => new HttpResponse(null, { status: 404 }),
+    ),
+  );
+  const router = renderApp(`/drive/files/${compactId(target.id)}`, testUser);
+  const dialog = await screen.findByRole('dialog', { name: target.name });
+  expect(
+    within(dialog).getByRole('button', { name: 'Previous file' }),
+  ).toBeDisabled();
+  expect(
+    within(dialog).getByRole('button', { name: 'Next file' }),
+  ).toBeDisabled();
+  await user.keyboard('{ArrowRight}{ArrowLeft}');
+  expect(router.state.location.pathname).toBe(
+    `/drive/files/${compactId(target.id)}`,
+  );
+  expect(screen.queryByText(parent.name)).not.toBeInTheDocument();
+  expect(screen.queryByText('Private sibling.txt')).not.toBeInTheDocument();
+  expect(drive.requests.some((url) => url.pathname.endsWith('/children'))).toBe(
+    false,
+  );
+  await user.keyboard('{Escape}');
+  await waitFor(() => {
+    expect(router.state.location.pathname).toBe('/drive');
+  });
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+});
+
+it('denies a canonical file link after access is revoked', async () => {
+  const target = drive.file('Revoked.txt');
+  server.use(
+    http.get(
+      `/api/v1/nodes/${target.id}`,
+      () => new HttpResponse(null, { status: 404 }),
+    ),
+  );
+  renderApp(`/drive/files/${compactId(target.id)}`, testUser);
+  expect(
+    await screen.findByRole('heading', {
+      name: 'Unable to preview this file.',
+    }),
+  ).toBeVisible();
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(drive.requests).toHaveLength(0);
+});
+
+it('retries a transient parent error instead of treating it as a private parent', async () => {
+  const user = userEvent.setup();
+  const parent = drive.folder('Accessible parent');
+  const target = drive.file('Retry.txt', parent.id);
+  server.use(
+    http.get(
+      `/api/v1/nodes/${parent.id}`,
+      () => new HttpResponse(null, { status: 500 }),
+    ),
+  );
+  renderApp(`/drive/files/${compactId(target.id)}`, testUser);
+  expect(
+    await screen.findByRole('heading', {
+      name: 'Unable to preview this file.',
+    }),
+  ).toBeVisible();
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  server.resetHandlers(...drive.handlers());
+  await user.click(screen.getByRole('button', { name: 'Try again' }));
+  expect(
+    await screen.findByRole('dialog', { name: target.name }),
+  ).toBeVisible();
+});
+
 it('shows source text literally, retries errors and restores focus on close', async () => {
   const user = userEvent.setup();
   const target = drive.file('unsafe.txt', ROOT_ID, 42, 'text/plain');
