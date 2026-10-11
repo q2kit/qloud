@@ -98,7 +98,7 @@ def create_session(
         part_size = s3.part_size_for(size)
     except ValueError as error:
         raise FileTooLarge from error
-    path = [*drive_selectors.breadcrumb(parent), parent]
+    path = [*drive_selectors.breadcrumb(parent, user), parent]
 
     with transaction.atomic():
         _lock_owner(parent.owner_id)

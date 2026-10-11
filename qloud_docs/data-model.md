@@ -161,7 +161,7 @@ Trạng thái của từng part **không lưu trong DB**: lấy từ S3 `ListPar
 | grantee_id | uuid → User | |
 | role | enum(`viewer`,`editor`) | |
 | created_by_id | uuid → User | |
-Unique `(node_id, grantee_id)`.
+Kế thừa UUIDv7, `created_at`, `updated_at` từ BaseModel. Unique `(node_id, grantee_id)`; check role chỉ viewer/editor. FK node/grantee/created_by dùng CASCADE; index FK phục vụ truy vấn theo người nhận. Migration M5-01 chỉ thêm bảng, đảo ngược được.
 
 ### `sharing_share_link`
 | Cột | Kiểu | Ghi chú |

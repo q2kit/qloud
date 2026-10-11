@@ -56,9 +56,11 @@ def roots_for(user: User) -> QuerySet[Node]:
     return nodes_for(user, Role.OWNER, trashed=True).filter(trashed_root_id=F("id"))
 
 
-def _selected(user: User, ids: Sequence[uuid.UUID], *, trashed: bool) -> list[Node]:
+def _selected(
+    user: User, ids: Sequence[uuid.UUID], *, trashed: bool, role: Role = Role.OWNER
+) -> list[Node]:
     unique = list(dict.fromkeys(ids))
-    nodes = list(nodes_for(user, Role.OWNER, trashed=trashed).filter(pk__in=unique))
+    nodes = list(nodes_for(user, role, trashed=trashed).filter(pk__in=unique))
     if len(nodes) != len(unique):
         raise Http404
     if any(node.parent_id is None for node in nodes):
@@ -70,15 +72,31 @@ def _selected(user: User, ids: Sequence[uuid.UUID], *, trashed: bool) -> list[No
 
 def trash(user: User, ids: Sequence[uuid.UUID]) -> list[Node]:
     with transaction.atomic():
-        User.objects.select_for_update().get(pk=user.pk)
-        nodes = _selected(user, ids, trashed=False)
+        owners = nodes_for(user, Role.EDITOR).filter(pk__in=ids).values("owner_id")
+        owner_ids = list(
+            User.objects.select_for_update()
+            .filter(pk__in=owners)
+            .order_by("pk")
+            .values_list("pk", flat=True)
+        )
+        nodes = _selected(user, ids, trashed=False, role=Role.EDITOR)
         now = timezone.now()
         with connection.cursor() as cursor:
-            cursor.execute(
-                _TRASH, [[str(n.pk) for n in nodes], user.pk, user.pk, now, user.pk, now]
-            )
-        # Return only effective roots when both a folder and a descendant were selected.
-        return list(roots_for(user).filter(pk__in=[n.pk for n in nodes]))
+            for owner_id in owner_ids:
+                cursor.execute(
+                    _TRASH,
+                    [
+                        [str(n.pk) for n in nodes if n.owner_id == owner_id],
+                        owner_id,
+                        owner_id,
+                        now,
+                        user.pk,
+                        now,
+                    ],
+                )
+        # The editor loses read access as soon as trash commits. Return only the
+        # selected roots already authorized above, without querying their trash.
+        return list(Node.objects.filter(pk__in=[n.pk for n in nodes], trashed_root_id=F("id")))
 
 
 def restore(user: User, ids: Sequence[uuid.UUID]) -> list[Node]:

@@ -35,12 +35,21 @@ SELECT EXISTS (SELECT 1 FROM ancestors WHERE id = ANY(%s::uuid[]))
 """
 
 
-def breadcrumb(node: Node) -> list[Node]:
-    """Ancestors of `node`, from the root folder down to its parent.
-
-    M5: with shares, cut the path above the highest folder the viewer can access.
-    """
-    return list(Node.objects.raw(_BREADCRUMB, [node.pk]))
+def breadcrumb(node: Node, user: User) -> list[Node]:
+    """Ancestors visible to the caller, without exposing unshared parent names."""
+    ancestors = list(Node.objects.raw(_BREADCRUMB, [node.pk]))
+    if node.owner_id == user.pk:
+        return ancestors
+    visible = set(
+        nodes_for(user).filter(pk__in=[n.pk for n in ancestors]).values_list("pk", flat=True)
+    )
+    # Keep only the contiguous path leading to this node.
+    path: list[Node] = []
+    for ancestor in reversed(ancestors):
+        if ancestor.pk not in visible:
+            break
+        path.append(ancestor)
+    return list(reversed(path))
 
 
 def is_within(folder_id: uuid.UUID, node_ids: Iterable[uuid.UUID]) -> bool:

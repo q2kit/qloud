@@ -150,11 +150,14 @@ Quyền của một người trên một node = mức quyền cao nhất trong c
 có `Share` trực tiếp trên node; có `Share` trên một folder tổ tiên (quyền được thừa kế).
 Với share link thì chỉ xét token của link đó và cây con bên dưới node được chia sẻ.
 
-Code: `apps/sharing/permissions.py` (M2-01; app `sharing` chưa có model, Share/ShareLink thêm ở M5).
-- `Role`: `VIEWER < EDITOR < OWNER`. Hiện chỉ owner có quyền.
+Code: `apps/sharing/permissions.py`; model Share thêm ở M5-01, ShareLink ở M5-03.
+- `Role`: `VIEWER < EDITOR < OWNER`. Share cấp viewer/editor trực tiếp hoặc qua folder tổ tiên.
 - `nodes_for(user, role, trashed=False)`: queryset các node mà user có ít nhất `role`; `trashed=True` chỉ node trong thùng rác, `None` cả hai.
   Mọi selector và view lấy node từ đây, không dùng `Node.objects` trực tiếp.
 - `get_node_or_404(user, node_id, role)`: không có quyền, không tồn tại hay id sai định dạng đều là cùng một 404.
+- Recursive CTE PostgreSQL duyệt cây từ các grant, chỉ qua folder còn sống và cùng owner. `nodes_for` dùng subquery để giữ queryset composable; `role_of` lấy mức cao nhất. Không cache quyền giữa request.
+- Share không cho xem node đã trash, kể cả `trashed=True/None`; các chế độ đó chỉ mở thùng rác cho owner.
+- `can_move_within` yêu cầu một grant editor chung bao phủ cả node con và folder đích. Breadcrumb cắt trước tổ tiên không có quyền; editor trash khóa owner thực của node và ghi người thao tác vào `trashed_by`.
 - `role_of(user, node)`. User chưa đăng nhập, không active hoặc bị khóa thì không có quyền gì.
 
 ## Triển khai

@@ -10,7 +10,7 @@ from django.http import Http404
 from django.utils import timezone
 
 from apps.accounts.models import User
-from apps.sharing.permissions import Role, get_node_or_404, nodes_for
+from apps.sharing.permissions import Role, can_move_within, get_node_or_404, nodes_for
 
 from . import selectors
 from .errors import InvalidMove, InvalidTarget, NameConflict, RootFolder
@@ -146,6 +146,8 @@ def move(user: User, node_ids: Sequence[uuid.UUID], target_id: uuid.UUID) -> lis
         moving = [node for node in nodes if node.parent_id != target.pk]
         if not moving:
             return nodes
+        if not can_move_within(user, moving, target):
+            raise InvalidMove
         names = _free_names(target, moving)
         now = timezone.now()
         for node in moving:

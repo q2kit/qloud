@@ -9,7 +9,7 @@
 ## Quy tắc
 - Đưa vào thùng rác: gán `trashed_at`, `trashed_by` cho node đó **và toàn bộ cây con**, với `trashed_root_id` = node được chọn.
   Việc này phải chạy trong một transaction; cây lớn thì dùng một câu UPDATE với recursive CTE.
-- Trang Thùng rác chỉ liệt kê các `trashed_root` mà mình là owner, hoặc mình đã xóa (nếu là editor).
+- Trang Thùng rác chỉ liệt kê các `trashed_root` mà mình là owner. Editor có thể đưa node được chia sẻ vào thùng rác nhưng không xem/khôi phục node trong thùng rác; theo quy tắc không truy cập node đã trash qua share của M5 và kế hoạch M5-01 đã duyệt.
 - Khôi phục: bỏ đánh dấu cho toàn bộ cây có cùng `trashed_root_id`.
   - Nếu folder cha không còn (đã bị xóa vĩnh viễn hoặc đang trong thùng rác) thì khôi phục về **folder gốc** của owner.
   - Nếu trùng tên thì tự thêm hậu tố.
@@ -30,7 +30,7 @@
 Đặc tả và kế hoạch M4 được owner duyệt ngày 11/10/2026 trong phiên làm việc;
 [kế hoạch trên #30](https://github.com/q2kit/qloud/issues/30#issuecomment-6106220857).
 
-- M4-01: API thùng rác theo nhóm, hiện hỗ trợ owner; quyền editor theo chia sẻ nối vào M5.
+- M4-01: API thùng rác theo nhóm cho owner; M5-01 bổ sung editor đưa node vào thùng rác của owner, ghi `trashed_by` là editor. Liệt kê, khôi phục, xóa vĩnh viễn vẫn chỉ owner.
 - Khi chọn cả folder và con còn sống trong một request, chỉ folder ngoài cùng là nhóm xóa.
   Nhóm đã nằm trong thùng rác giữ nguyên root và thời điểm xóa.
 - Khôi phục/xóa vĩnh viễn chỉ nhận ID root của nhóm; chọn đồng thời các nhóm lồng nhau thì
