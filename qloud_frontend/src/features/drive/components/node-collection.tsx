@@ -19,7 +19,12 @@ import {
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/lib/use-media-query';
 
-import { DRAG_TYPE, readDraggedIds, type NodeAction } from '../actions';
+import {
+  DRAG_TYPE,
+  isExternalFileDrag,
+  readDraggedIds,
+  type NodeAction,
+} from '../actions';
 import type { DriveNode } from '../api';
 import { DESKTOP_INPUT_QUERY } from '../desktop-input';
 import { formatBytes, formatDate } from '../format';
@@ -361,13 +366,11 @@ function NodeItem({
   const isDropTarget = context.dropTargetId === node.id;
   const canReceive = node.kind === 'folder' && !context.dragging.has(node.id);
 
-  const isFileDrag = (event: React.DragEvent): boolean =>
-    event.dataTransfer.types.includes('Files');
   const dropHandlers =
     node.kind === 'folder'
       ? {
           onDragOver: (event: React.DragEvent) => {
-            if (isFileDrag(event)) {
+            if (isExternalFileDrag(event.dataTransfer)) {
               event.preventDefault();
               event.dataTransfer.dropEffect = 'copy';
               context.setDropTargetId(node.id);
@@ -385,7 +388,7 @@ function NodeItem({
           },
           onDrop: (event: React.DragEvent) => {
             context.setDropTargetId(null);
-            if (isFileDrag(event)) {
+            if (isExternalFileDrag(event.dataTransfer)) {
               // Into this folder, not the one the page shows.
               event.preventDefault();
               event.stopPropagation();
@@ -450,6 +453,12 @@ function NodeItem({
       if (!selected) onSelect(node, { toggle: false, range: false });
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData(DRAG_TYPE, JSON.stringify(ids));
+      const bounds = event.currentTarget.getBoundingClientRect();
+      event.dataTransfer.setDragImage(
+        event.currentTarget,
+        event.clientX - bounds.left,
+        event.clientY - bounds.top,
+      );
       context.setDragging(ids);
     },
     onDragEnd: () => {

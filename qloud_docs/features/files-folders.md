@@ -106,3 +106,7 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
 - [x] Di chuyển 50 mục cùng lúc chỉ tốn một request, và UI cập nhật kiểu lạc quan.
 - [ ] Folder 10.000 mục vẫn cuộn mượt; API đạt NF-01.
 - [ ] Người không có quyền nhận 404 với mọi endpoint của node.
+
+### M4-06 — kéo card có thumbnail
+- Ảnh thumbnail không kéo riêng; kéo từ ảnh vẫn dùng ID node và toàn bộ card làm drag image (kèm tên/metadata), như kéo từ phần tên.
+- Nếu DataTransfer có cả payload node và Files thì ưu tiên di chuyển node, không hiện dropzone hay khởi tạo upload. File ngoài máy vẫn upload vào folder hoặc Drive như trước.

@@ -137,6 +137,14 @@ export function nodeActions(
 /** Drag-and-drop payload: the ids being moved (files-folders.md › Tương tác UI). */
 export const DRAG_TYPE = 'application/x-qloud-nodes';
 
+export function isExternalFileDrag(
+  transfer: Pick<DataTransfer, 'types'>,
+): boolean {
+  return (
+    transfer.types.includes('Files') && !transfer.types.includes(DRAG_TYPE)
+  );
+}
+
 export function readDraggedIds(event: React.DragEvent): string[] | null {
   if (!event.dataTransfer.types.includes(DRAG_TYPE)) return null;
   try {

@@ -60,6 +60,7 @@ function dataTransfer() {
     types: [] as string[],
     dropEffect: 'none',
     effectAllowed: 'all',
+    setDragImage: vi.fn(),
     setData(type: string, value: string) {
       data.set(type, value);
       this.types.push(type);
@@ -446,6 +447,11 @@ describe('moving', () => {
 
     let transfer = dataTransfer();
     fireEvent.dragStart(option('a.pdf'), { dataTransfer: transfer });
+    expect(transfer.setDragImage.mock.calls[0]?.[0]).toBe(option('a.pdf'));
+    // Some browser drags contain both types: the node payload must take priority.
+    transfer.types.push('Files');
+    fireEvent.dragEnter(option('Target'), { dataTransfer: transfer });
+    expect(screen.queryByText(/Drop to upload/)).toBeNull();
     fireEvent.dragOver(option('Target'), { dataTransfer: transfer });
     expect(option('Target').className).toContain('ring-2');
     fireEvent.drop(option('Target'), { dataTransfer: transfer });

@@ -70,7 +70,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M4-03 | FE: trang Thùng rác, nút hoàn tác trên toast | [#32](https://github.com/q2kit/qloud/issues/32) | 🟦 |
 | M4-04 | FE: phím Delete đưa lựa chọn vào thùng rác | [#135](https://github.com/q2kit/qloud/issues/135) | 🟦 |
 | M4-05 | Thumbnail trong Thùng rác | [#136](https://github.com/q2kit/qloud/issues/136) | 🟦 |
-| M4-06 | Fix: kéo thumbnail di chuyển card node | [#137](https://github.com/q2kit/qloud/issues/137) | ⬜ |
+| M4-06 | Fix: kéo thumbnail di chuyển card node | [#137](https://github.com/q2kit/qloud/issues/137) | 🟦 |
 
 ## M5 — Chia sẻ ([sharing.md](features/sharing.md))
 | ID | Task | Issue | Trạng thái |
