@@ -94,9 +94,66 @@ async function captures(
     await page.screenshot({
       path: `../qloud_docs/assets/${prefix}-${kind}-${theme}-${mobile ? '360' : 'desktop'}.png`,
       fullPage: true,
+      animations: 'disabled',
     });
   }
 }
+
+test('Trash displays image, PDF and MP4 thumbnails without source access', async ({
+  page,
+  isMobile,
+}) => {
+  await signUpVerifiedViaApi(page);
+  const parent = await root(page);
+  const nodes = [];
+  for (const [name, mime, fixture] of [
+    ['ảnh.png', 'image/png', 'preview.png'],
+    ['tài-liệu.pdf', 'application/pdf', 'preview.pdf'],
+    ['clip.mp4', 'video/mp4', 'preview.mp4'],
+  ]) {
+    nodes.push(
+      await upload(
+        page,
+        parent,
+        name,
+        mime,
+        await readFile(`e2e/fixtures/${fixture}`),
+      ),
+    );
+  }
+  const response = await page.request.post('/api/v1/nodes/trash', {
+    headers: await csrf(page),
+    data: { node_ids: nodes.map((node) => node.id) },
+  });
+  expect(response.status()).toBe(200);
+  await page.goto('/trash');
+  for (const name of ['ảnh.png', 'tài-liệu.pdf', 'clip.mp4']) {
+    const image = item(page, name).locator('img');
+    await expect(image).toBeVisible();
+    await expect
+      .poll(() =>
+        image.evaluate((element) => (element as HTMLImageElement).naturalWidth),
+      )
+      .toBeGreaterThan(0);
+  }
+  await captures(page, 'trash-grid', isMobile, 'm4-05');
+  await page.getByRole('button', { name: 'Dạng danh sách' }).click();
+  for (const name of ['ảnh.png', 'tài-liệu.pdf', 'clip.mp4'])
+    await expect(item(page, name).locator('img')).toBeVisible();
+  for (const node of nodes) {
+    expect(
+      (await page.request.get(`/api/v1/nodes/${node.id}/preview`)).status(),
+    ).toBe(404);
+    expect(
+      (await page.request.get(`/api/v1/nodes/${node.id}/download`)).status(),
+    ).toBe(404);
+    const thumbnail = await page.request.get(
+      `/api/v1/nodes/${node.id}/preview?trashed_thumbnail=true`,
+    );
+    expect(thumbnail.status()).toBe(200);
+    expect(((await thumbnail.json()) as { url: string | null }).url).toBeNull();
+  }
+});
 
 test('thumbnails in grid and list, image/PDF viewer, navigation and download', async ({
   page,

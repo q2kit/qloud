@@ -72,7 +72,7 @@ class PreviewLink:
     thumbnail: ThumbnailLink | None
 
 
-def preview_link(node: Node) -> PreviewLink:
+def preview_link(node: Node, *, thumbnail_only: bool = False) -> PreviewLink:
     if node.kind != Node.Kind.FILE:
         raise NotAFile
     if node.current_version_id is None:
@@ -81,7 +81,7 @@ def preview_link(node: Node) -> PreviewLink:
     kind = preview_kind(version.mime_type, version.size)
     expires_at = timezone.now() + datetime.timedelta(seconds=settings.S3_DOWNLOAD_URL_SECONDS)
     url = None
-    if kind != "unsupported":
+    if not thumbnail_only and kind != "unsupported":
         url = s3.presign_download(
             version.blob.storage_key,
             filename=node.name,

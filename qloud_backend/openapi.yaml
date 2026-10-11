@@ -281,6 +281,13 @@ paths:
           type: string
           format: uuid
         required: true
+      - in: query
+        name: trashed_thumbnail
+        schema:
+          type: boolean
+          default: false
+        description: Owner-only thumbnail of a trashed file; never returns source
+          URLs.
       tags:
       - v1
       security:
@@ -297,7 +304,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: '`not_a_file`.'
+          description: Invalid query or `not_a_file`.
         '404':
           content:
             application/json:

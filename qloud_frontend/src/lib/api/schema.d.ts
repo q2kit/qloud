@@ -939,7 +939,10 @@ export interface operations {
     };
     nodes_preview: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Owner-only thumbnail of a trashed file; never returns source URLs. */
+                trashed_thumbnail?: boolean;
+            };
             header?: never;
             path: {
                 node_id: string;
@@ -956,7 +959,7 @@ export interface operations {
                     "application/json": components["schemas"]["PreviewLink"];
                 };
             };
-            /** @description `not_a_file`. */
+            /** @description Invalid query or `not_a_file`. */
             400: {
                 headers: {
                     [name: string]: unknown;
