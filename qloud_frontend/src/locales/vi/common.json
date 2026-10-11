@@ -570,5 +570,39 @@
     "noChangeResult": "Không phát sinh thay đổi mới: đích đã được xử lý hoặc không còn tồn tại. Không gửi thêm email gỡ link.",
     "suspendedResult": "Đã khóa tài khoản owner và vô hiệu các session/link công khai.",
     "sameRoot": "Node bị báo cáo cũng là node gốc của link."
+  },
+  "search": {
+    "title": "Kết quả tìm kiếm",
+    "paletteTitle": "Tìm kiếm và câu lệnh",
+    "paletteDescription": "Tìm file, thư mục hoặc chạy câu lệnh. Dùng phím mũi tên để chọn, Enter để mở, Escape để đóng.",
+    "query": "Từ khóa tìm kiếm",
+    "placeholder": "Tìm file và thư mục…",
+    "close": "Đóng tìm kiếm",
+    "viewAll": "Xem tất cả kết quả",
+    "loading": "Đang tìm kiếm…",
+    "failed": "Không tải được kết quả. Kiểm tra từ khóa, bộ lọc và thử lại.",
+    "retry": "Thử lại",
+    "empty": "Không tìm thấy kết quả",
+    "emptyDescription": "Thử tên khác hoặc đổi bộ lọc.",
+    "start": "Tìm file hoặc thư mục",
+    "submit": "Tìm kiếm",
+    "suggestions": "Gợi ý tìm kiếm và câu lệnh",
+    "type": "Loại",
+    "allTypes": "Tất cả loại",
+    "owner": "Người sở hữu",
+    "allOwners": "Tất cả người sở hữu",
+    "mine": "Của tôi",
+    "others": "Được chia sẻ với tôi",
+    "modifiedAfter": "Sửa từ ngày",
+    "types": {
+      "folder": "Thư mục",
+      "document": "Tài liệu",
+      "image": "Ảnh",
+      "video": "Video",
+      "audio": "Âm thanh",
+      "archive": "File nén",
+      "other": "Khác"
+    },
+    "relevance": "Độ liên quan"
   }
 }

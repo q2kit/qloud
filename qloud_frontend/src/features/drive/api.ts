@@ -17,7 +17,7 @@ import type { components, operations } from '@/lib/api/schema';
 
 export type DriveNode = components['schemas']['Node'] &
   Partial<
-    Pick<components['schemas']['SharedNode'], 'owner' | 'effective_role'>
+    Pick<components['schemas']['SearchNode'], 'owner' | 'effective_role'>
   >;
 export type DriveNodeDetail = components['schemas']['NodeDetail'];
 export type ChildrenPage = components['schemas']['PaginatedNodeList'];

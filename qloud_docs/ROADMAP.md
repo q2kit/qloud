@@ -88,8 +88,8 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 ## M6 — Tìm kiếm ([search.md](features/search.md))
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
-| M6-01 | pg_trgm, API search có bộ lọc | [#40](https://github.com/q2kit/qloud/issues/40) | 🟦 |
-| M6-02 | FE: command palette, trang kết quả | [#41](https://github.com/q2kit/qloud/issues/41) | ⬜ |
+| M6-01 | pg_trgm, API search có bộ lọc | [#40](https://github.com/q2kit/qloud/issues/40) | ✅ [PR #156](https://github.com/q2kit/qloud/pull/156) |
+| M6-02 | FE: command palette, trang kết quả | [#41](https://github.com/q2kit/qloud/issues/41) | 🟦 |
 
 ## M7 — Phiên bản ([versioning.md](features/versioning.md))
 | ID | Task | Issue | Trạng thái |
@@ -107,3 +107,4 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M8-04 | Deploy tự động qua GitHub Actions lên VPS | [#48](https://github.com/q2kit/qloud/issues/48) | ⬜ |
 | M8-05 | Backup Postgres hằng ngày, Sentry, log có cấu trúc | [#49](https://github.com/q2kit/qloud/issues/49) | ⬜ |
 | M8-06 | Rate limit chung cho API (600 req/phút/user, tạo upload 60) | [#93](https://github.com/q2kit/qloud/issues/93) | ⬜ |
+| M8-07 | Fix: smoke E2E chờ capability tạo folder trước khi kiểm tra cursor | [#155](https://github.com/q2kit/qloud/issues/155) | ⬜ |

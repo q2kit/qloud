@@ -12,6 +12,7 @@ import { RecentPage } from '@/features/drive/recent-page';
 import { TrashPage } from '@/features/trash/trash-page';
 import { SettingsPage } from '@/features/settings/settings-page';
 
+import { SearchPage } from '@/features/search/search-page';
 import { SharedPage } from '@/features/sharing/shared-page';
 import { PublicPage } from '@/features/sharing/public-page';
 import { ModerationPage } from '@/features/moderation/moderation-page';
@@ -51,6 +52,11 @@ export const appRoutes: RouteObject[] = [
                 path: 'drive/files/:fileId',
                 Component: FileLinkPage,
                 handle: { titleKey: 'preview.title' } satisfies RouteHandle,
+              },
+              {
+                path: 'search',
+                Component: SearchPage,
+                handle: { titleKey: 'search.title' } satisfies RouteHandle,
               },
               {
                 path: 'recent',

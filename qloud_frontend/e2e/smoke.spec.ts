@@ -198,8 +198,8 @@ test('clickable things show the hand cursor', async ({ page, isMobile }) => {
   expect(await cursor(dialog.getByLabel('Tên'))).toBe('text');
   await dialog.getByRole('button', { name: 'Tạo' }).click();
   expect(await cursor(page.getByRole('option').first())).toBe('pointer');
-  // The command palette trigger stays disabled until M6.
+  // M6 enables the command palette trigger.
   expect(
     await cursor(page.getByRole('button', { name: /Tìm kiếm và chạy lệnh/ })),
-  ).toBe('not-allowed');
+  ).toBe('pointer');
 });
