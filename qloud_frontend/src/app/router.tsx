@@ -12,26 +12,13 @@ import { RecentPage } from '@/features/drive/recent-page';
 import { TrashPage } from '@/features/trash/trash-page';
 import { SettingsPage } from '@/features/settings/settings-page';
 
+import { SharedPage } from '@/features/sharing/shared-page';
+import { PublicPage } from '@/features/sharing/public-page';
+
 import { AppLayout } from './layout';
-import { NotFoundPage, RouteErrorPage, SectionPlaceholderPage } from './pages';
+import { NotFoundPage, RouteErrorPage } from './pages';
 import { PublicLayout } from './public-layout';
 import type { RouteHandle } from './route-handle';
-
-type Section = 'shared';
-
-function sectionPlaceholderRoute(section: Section): RouteObject {
-  const handle: RouteHandle = { titleKey: `navigation.${section}` };
-  return {
-    path: section,
-    handle,
-    element: (
-      <SectionPlaceholderPage
-        titleKey={handle.titleKey}
-        descriptionKey={`placeholder.${section}`}
-      />
-    ),
-  };
-}
 
 export const appRoutes: RouteObject[] = [
   {
@@ -69,7 +56,11 @@ export const appRoutes: RouteObject[] = [
                 Component: RecentPage,
                 handle: { titleKey: 'navigation.recent' } satisfies RouteHandle,
               },
-              sectionPlaceholderRoute('shared'),
+              {
+                path: 'shared',
+                Component: SharedPage,
+                handle: { titleKey: 'navigation.shared' } satisfies RouteHandle,
+              },
               {
                 path: 'trash',
                 Component: TrashPage,
@@ -94,6 +85,7 @@ export const appRoutes: RouteObject[] = [
       {
         Component: PublicLayout,
         children: [
+          { path: 's/:token', Component: PublicPage },
           {
             Component: RedirectIfAuthenticated,
             children: [

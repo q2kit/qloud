@@ -93,7 +93,7 @@ Mỗi màn hình được mô tả chi tiết (trạng thái rỗng, đang tải
 - Đổi theme ở một tab thì các tab khác đang mở cũng đổi theo (sự kiện `storage`).
 
 ### S-06 — Gần đây (M2-09)
-- Dùng chung `FileBrowser`/`NodeCollection` với S-05; Được chia sẻ và Thùng rác sẽ dùng cùng core khi triển khai. Trang cấp dữ liệu và action theo ngữ cảnh.
+- Dùng chung `FileBrowser`/`NodeCollection` với S-05; Được chia sẻ và Thùng rác dùng cùng core. Trang cấp dữ liệu và action theo ngữ cảnh.
 - File của mình cập nhật gần nhất từ mọi folder, tối đa 100, thứ tự mới nhất cố định. Lưới/danh sách nhớ chung với Drive; chọn và bàn phím như Drive, double click chỉ desktop có chuột/hover.
 - Một file: Tải xuống, Mở thư mục chứa tệp, Thông tin. Loading/rỗng/lỗi và Thử lại dùng chung core. Không tạo folder bằng double click vùng trống, không kéo item để di chuyển/nhận drop upload tại nội dung Gần đây. Header Tạo mới vẫn trỏ Drive gốc.
 - Mở thư mục chứa tệp chỉ có ở Gần đây, dùng link folder cha với `?select=<UUID-file-không-dấu-gạch>`. Drive kiểm tra file còn ở đúng folder và có quyền, tải tiếp trang cursor tới file, chọn/highlight, cuộn tới và focus item cả khi virtualize. Reload link vẫn chọn file; Esc/click vùng trống bỏ chọn bình thường. Link tới file đã chuyển/xóa/không có quyền báo không tìm thấy, không tự chuyển sang folder khác.
@@ -111,3 +111,9 @@ ngay khi gửi request; thất bại thì rollback cache và giữ lại selecti
 hiển thị Đã chuyển vào thùng rác + Hoàn tác trong khoảng 8 giây, tồn tại qua chuyển trang.
 Hoàn tác dùng root nhóm server trả về; lỗi hiển thị thông báo cho phép thử lại/khôi phục từ trang trash.
 Mỗi request chọn tối đa 1.000 mục, theo giới hạn API. Đủ i18n vi/en, light/dark, responsive 360px.
+
+### S-07, S-11, S-12 — Chia sẻ (M5-05)
+
+- Được chia sẻ dùng lưới/danh sách và cursor chung Drive, thêm tên owner và quyền thực tế. Mở file qua route riêng, folder qua Drive; không nhận drop upload ở danh sách này.
+- Hộp thoại Chia sẻ mở từ một mục có quyền trong toolbar/menu hoặc panel chi tiết. Hai phần Người có quyền truy cập và Link công khai; email/role, danh sách grant, hạn dùng tùy chọn, copy và thu hồi. Hộp thoại cuộn trong 90dvh, co tới 360px; Esc/Đóng trả focus về nơi mở.
+- Trang public dùng PublicLayout với ngôn ngữ/theme, chỉ xem/download. File root mở viewer toàn màn hình, đóng về trang link; folder dùng breadcrumb giới hạn trong cây và FileBrowser. Link không còn hợp lệ hiện “Nội dung không còn khả dụng”. Báo cáo vi phạm triển khai cùng M5-07.

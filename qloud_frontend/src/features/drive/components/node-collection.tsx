@@ -592,6 +592,18 @@ function NodeItem({
           </span>
           {moreButton}
         </span>
+        {node.owner && node.effective_role && (
+          <span className="block break-words text-xs text-muted-foreground">
+            {t('sharing.ownerRole', {
+              name: node.owner.display_name || t('sharing.unnamedOwner'),
+              role: t(
+                node.effective_role === 'editor'
+                  ? 'sharing.editor'
+                  : 'sharing.viewer',
+              ),
+            })}
+          </span>
+        )}
       </div>
     ) : (
       <div
@@ -606,7 +618,23 @@ function NodeItem({
       >
         <span className="flex min-w-0 items-center gap-3">
           <NodeThumbnail node={node} list />
-          <span className="truncate text-sm font-medium">{node.name}</span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-medium">
+              {node.name}
+            </span>
+            {node.owner && node.effective_role && (
+              <span className="block truncate text-xs text-muted-foreground">
+                {t('sharing.ownerRole', {
+                  name: node.owner.display_name || t('sharing.unnamedOwner'),
+                  role: t(
+                    node.effective_role === 'editor'
+                      ? 'sharing.editor'
+                      : 'sharing.viewer',
+                  ),
+                })}
+              </span>
+            )}
+          </span>
         </span>
         <span className="hidden truncate text-sm text-muted-foreground tabular-nums sm:block">
           {formatDate(node.updated_at, i18n.language)}

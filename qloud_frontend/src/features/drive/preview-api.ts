@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
+import { usePublicToken } from '@/features/sharing/public-context';
+
 import { api } from '@/lib/api/client';
 import { unwrap } from '@/lib/api/errors';
 import type { components } from '@/lib/api/schema';
@@ -20,22 +22,30 @@ export function usePreview(
   enabled = true,
   thumbnailOnly = false,
 ) {
+  const token = usePublicToken();
   const trashed = Boolean(node && 'trashed_at' in node && node.trashed_at);
   return useQuery({
-    queryKey: node
-      ? trashed
-        ? [...previewKey(node), 'trash-thumbnail']
-        : previewKey(node)
-      : ['drive', 'preview', ''],
+    queryKey: token
+      ? ['public', token, 'preview', node?.id ?? '', node?.updated_at ?? '']
+      : node
+        ? trashed
+          ? [...previewKey(node), 'trash-thumbnail']
+          : previewKey(node)
+        : ['drive', 'preview', ''],
     queryFn: async ({ signal }) =>
       unwrap(
-        await api.GET('/api/v1/nodes/{node_id}/preview', {
-          params: {
-            path: { node_id: node?.id ?? '' },
-            query: trashed ? { trashed_thumbnail: true } : undefined,
-          },
-          signal,
-        }),
+        token
+          ? await api.GET('/api/v1/public/links/{token}/preview', {
+              params: { path: { token }, query: { node_id: node?.id } },
+              signal,
+            })
+          : await api.GET('/api/v1/nodes/{node_id}/preview', {
+              params: {
+                path: { node_id: node?.id ?? '' },
+                query: trashed ? { trashed_thumbnail: true } : undefined,
+              },
+              signal,
+            }),
       ),
     enabled: enabled && node?.kind === 'file' && (!trashed || thumbnailOnly),
     staleTime: 210_000,

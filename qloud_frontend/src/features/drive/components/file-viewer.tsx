@@ -4,6 +4,8 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 
+import { usePublicToken } from '@/features/sharing/public-context';
+
 import { Button } from '@/components/ui/button';
 
 import { downloadNode, useNode, type DriveNode } from '../api';
@@ -32,7 +34,8 @@ export function FileViewer({
   const [params, setParams] = useSearchParams();
   const rawId = params.get('preview');
   const id = standalone?.fileId ?? (rawId ? uuidFromUrl(rawId) : undefined);
-  const node = useNode(id);
+  const token = usePublicToken();
+  const node = useNode(id, token);
   const preview = usePreview(node.data, Boolean(id));
   const [failedUrl, setFailedUrl] = React.useState<string>();
   const [downloadFailed, setDownloadFailed] = React.useState(false);
@@ -212,7 +215,7 @@ export function FileViewer({
               onClick={() => {
                 if (id) {
                   setDownloadFailed(false);
-                  void downloadNode(id).catch(() => {
+                  void downloadNode(id, token).catch(() => {
                     setDownloadFailed(true);
                   });
                 }

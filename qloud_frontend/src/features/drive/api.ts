@@ -13,7 +13,10 @@ import { api } from '@/lib/api/client';
 import { unwrap } from '@/lib/api/errors';
 import type { components, operations } from '@/lib/api/schema';
 
-export type DriveNode = components['schemas']['Node'];
+export type DriveNode = components['schemas']['Node'] &
+  Partial<
+    Pick<components['schemas']['SharedNode'], 'owner' | 'effective_role'>
+  >;
 export type DriveNodeDetail = components['schemas']['NodeDetail'];
 export type ChildrenPage = components['schemas']['PaginatedNodeList'];
 export type Ordering = NonNullable<
@@ -49,16 +52,31 @@ export function cursorOf(link: string | null | undefined): string | undefined {
 
 export function useNode(
   id: string | undefined,
+  token?: string,
 ): UseQueryResult<DriveNodeDetail> {
   return useQuery({
-    queryKey: driveKeys.node(id ?? ''),
-    queryFn: async () =>
-      unwrap(
+    queryKey: token
+      ? ['public', token, 'node', id ?? '']
+      : driveKeys.node(id ?? ''),
+    queryFn: async ({ signal }) => {
+      if (token) {
+        const node = unwrap(
+          await api.GET('/api/v1/public/links/{token}', {
+            params: { path: { token }, query: { node_id: id } },
+            signal,
+          }),
+        );
+        return { ...node, is_root: false };
+      }
+      return unwrap(
         await api.GET('/api/v1/nodes/{node_id}', {
           params: { path: { node_id: id ?? '' } },
+          signal,
         }),
-      ),
-    enabled: Boolean(id),
+      );
+    },
+    enabled: Boolean(id ?? token),
+    ...(token ? { retry: false } : {}),
   });
 }
 
@@ -266,11 +284,15 @@ export function useMove(): UseMutationResult<
 }
 
 /** Ask for a short-lived link and let the browser download from storage. */
-export async function downloadNode(id: string): Promise<void> {
+export async function downloadNode(id: string, token?: string): Promise<void> {
   const link = unwrap(
-    await api.GET('/api/v1/nodes/{node_id}/download', {
-      params: { path: { node_id: id } },
-    }),
+    token
+      ? await api.GET('/api/v1/public/links/{token}/download', {
+          params: { path: { token }, query: { node_id: id } },
+        })
+      : await api.GET('/api/v1/nodes/{node_id}/download', {
+          params: { path: { node_id: id } },
+        }),
   );
   window.location.assign(link.url);
 }

@@ -1,3 +1,7 @@
+import * as React from 'react';
+import { Button } from '@/components/ui/button';
+import { ShareDialog } from '@/features/sharing/share-dialog';
+import { useNode } from '../api';
 import { useTranslation } from 'react-i18next';
 
 import type { DriveNode } from '../api';
@@ -7,6 +11,8 @@ import { NodeIcon } from './node-icon';
 /** "Info" in the details panel for the selected item. */
 export function NodeDetails({ node }: { node: DriveNode }): React.JSX.Element {
   const { t, i18n } = useTranslation();
+  const detail = useNode(node.id);
+  const [sharing, setSharing] = React.useState(false);
   const rows: [string, string][] = [
     [
       t('details.fields.type'),
@@ -43,6 +49,25 @@ export function NodeDetails({ node }: { node: DriveNode }): React.JSX.Element {
           </div>
         ))}
       </dl>
+      {detail.data?.capabilities.can_share && (
+        <Button
+          className="mt-5"
+          variant="outline"
+          onClick={() => {
+            setSharing(true);
+          }}
+        >
+          {t('sharing.action')}
+        </Button>
+      )}
+      {sharing && (
+        <ShareDialog
+          node={node}
+          onClose={() => {
+            setSharing(false);
+          }}
+        />
+      )}
     </div>
   );
 }
