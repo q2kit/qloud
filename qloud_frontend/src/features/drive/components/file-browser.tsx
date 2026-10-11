@@ -19,14 +19,22 @@ interface FileBrowserProps
   onRetry: () => void;
   onSelectAll: (nodes: DriveNode[]) => void;
   onCreate?: () => void;
+  onDelete?: () => void;
   emptyState: React.ReactNode;
   feedback?: React.ReactNode;
 }
 
 /** Shared file presentation for Drive, Recent, Shared and Trash; pages supply actions/data. */
 export function FileBrowser(props: FileBrowserProps): React.JSX.Element {
-  const { nodes, selected, enabled, onSelectAll, onClearSelection, onCreate } =
-    props;
+  const {
+    nodes,
+    selected,
+    enabled,
+    onSelectAll,
+    onClearSelection,
+    onCreate,
+    onDelete,
+  } = props;
   const contentRef = React.useRef<HTMLDivElement>(null);
   const desktopInput = useMediaQuery(DESKTOP_INPUT_QUERY);
   const selectedIds = React.useMemo(
@@ -62,13 +70,32 @@ export function FileBrowser(props: FileBrowserProps): React.JSX.Element {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a') {
         event.preventDefault();
         onSelectAll(nodes);
+      } else if (
+        event.key === 'Delete' &&
+        !event.repeat &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.altKey &&
+        !event.shiftKey &&
+        selected.length > 0 &&
+        onDelete
+      ) {
+        event.preventDefault();
+        onDelete();
       } else if (event.key === 'Escape') onClearSelection();
     };
     window.addEventListener('keydown', onKeyDown);
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [enabled, nodes, onSelectAll, onClearSelection]);
+  }, [
+    enabled,
+    nodes,
+    selected.length,
+    onSelectAll,
+    onClearSelection,
+    onDelete,
+  ]);
   return (
     <>
       <DriveToolbar {...props} />

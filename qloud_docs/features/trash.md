@@ -16,6 +16,7 @@
 - Xóa vĩnh viễn (chỉ owner): xóa các bản ghi Node, FileVersion; xóa Blob và object trên S3 bằng Celery **sau khi commit**; giảm `used_bytes`.
 - Tự động xóa vĩnh viễn sau `trash_retention_days` (theo plan của owner, mặc định **30 ngày**) kể từ `trashed_at` (Celery beat chạy hằng ngày).
 - Node trong thùng rác **vẫn tính vào quota**.
+- Trong Drive, phím **Delete** đưa các mục đang chọn vào thùng rác như nút/menu; không kích hoạt khi nhập liệu, có menu/dialog, giữ modifier hoặc request đang chạy. Không chọn mục thì không làm gì.
 - Sau khi xóa, UI hiện toast "Đã chuyển vào thùng rác" kèm nút **Hoàn tác** trong khoảng 8 giây.
 
 ## Tiêu chí chấp nhận

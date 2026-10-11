@@ -62,6 +62,7 @@ export function nodeActions(
           key: 'trash',
           label: t('trash.move'),
           icon: Trash2,
+          shortcut: t('trash.deleteShortcut'),
           run: () => {
             handlers.trash?.(selection);
           },

@@ -403,6 +403,7 @@
     "actionFailed": "Could not complete this action. Please try again.",
     "tooMany": "Select up to 1,000 items at a time.",
     "emptyState": "Trash is empty",
-    "emptyDescription": "Items you delete will appear here."
+    "emptyDescription": "Items you delete will appear here.",
+    "deleteShortcut": "Del"
   }
 }
