@@ -4,6 +4,8 @@ import {
   useQuery,
   useQueryClient,
   type InfiniteData,
+  type QueryClient,
+  type QueryKey,
   type UseInfiniteQueryResult,
   type UseMutationResult,
   type UseQueryResult,
@@ -43,6 +45,15 @@ export const driveKeys = {
   childrenSorted: (id: string, ordering: Ordering) =>
     [...driveKeys.children(id), ordering] as const,
 };
+
+/** Initial fetches must be cancelled explicitly before invalidation can refetch. */
+export async function refreshDriveQueries(
+  client: QueryClient,
+  queryKey: QueryKey,
+): Promise<void> {
+  await client.cancelQueries({ queryKey });
+  await client.invalidateQueries({ queryKey });
+}
 
 /** The `cursor` of a `next` link, which is an absolute URL to the same endpoint. */
 export function cursorOf(link: string | null | undefined): string | undefined {
@@ -86,13 +97,14 @@ export function useChildren(
 ): UseInfiniteQueryResult<InfiniteData<ChildrenPage, string | undefined>> {
   return useInfiniteQuery({
     queryKey: driveKeys.childrenSorted(folderId ?? '', ordering),
-    queryFn: async ({ pageParam }) =>
+    queryFn: async ({ pageParam, signal }) =>
       unwrap(
         await api.GET('/api/v1/nodes/{node_id}/children', {
           params: {
             path: { node_id: folderId ?? '' },
             query: { ordering, page_size: PAGE_SIZE, cursor: pageParam },
           },
+          signal,
         }),
       ),
     initialPageParam: undefined as string | undefined,
@@ -106,10 +118,11 @@ export function useRecent(): UseInfiniteQueryResult<
 > {
   return useInfiniteQuery({
     queryKey: driveKeys.recent,
-    queryFn: async ({ pageParam }) =>
+    queryFn: async ({ pageParam, signal }) =>
       unwrap(
         await api.GET('/api/v1/recent', {
           params: { query: { page_size: 50, cursor: pageParam } },
+          signal,
         }),
       ),
     initialPageParam: undefined as string | undefined,
@@ -132,9 +145,10 @@ export function useCreateFolder(): UseMutationResult<
       ),
     onSuccess: (folder) => {
       if (folder.parent_id) {
-        void queryClient.invalidateQueries({
-          queryKey: driveKeys.children(folder.parent_id),
-        });
+        void refreshDriveQueries(
+          queryClient,
+          driveKeys.children(folder.parent_id),
+        );
       }
     },
   });
@@ -201,10 +215,11 @@ export function useRename(): UseMutationResult<
     },
     onSettled: (_data, _error, { node }) => {
       // The server's order may differ (natural sort, collation): refetch to settle it.
-      void queryClient.invalidateQueries({
-        queryKey: driveKeys.children(node.parent_id ?? ''),
-      });
-      void queryClient.invalidateQueries({ queryKey: driveKeys.recent });
+      void refreshDriveQueries(
+        queryClient,
+        driveKeys.children(node.parent_id ?? ''),
+      );
+      void refreshDriveQueries(queryClient, driveKeys.recent);
       // Breadcrumbs below a renamed folder show its name.
       void queryClient.invalidateQueries({
         queryKey: [...driveKeys.all, 'node'],
@@ -272,9 +287,9 @@ export function useMove(): UseMutationResult<
     },
     onSettled: (_data, _error, { nodes, targetId }) => {
       for (const key of [...sourcesOf(nodes), driveKeys.children(targetId)]) {
-        void queryClient.invalidateQueries({ queryKey: key });
+        void refreshDriveQueries(queryClient, key);
       }
-      void queryClient.invalidateQueries({ queryKey: driveKeys.recent });
+      void refreshDriveQueries(queryClient, driveKeys.recent);
       // Moved folders have a new breadcrumb.
       void queryClient.invalidateQueries({
         queryKey: [...driveKeys.all, 'node'],

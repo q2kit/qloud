@@ -113,3 +113,8 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
 ### M4-06 — kéo card có thumbnail
 - Ảnh thumbnail không kéo riêng; kéo từ ảnh vẫn dùng ID node và toàn bộ card làm drag image (kèm tên/metadata), như kéo từ phần tên.
 - Nếu DataTransfer có cả payload node và Files thì ưu tiên di chuyển node, không hiện dropzone hay khởi tạo upload. File ngoài máy vẫn upload vào folder hoặc Drive như trước.
+
+### M5-09 — đồng bộ danh sách khi điều hướng ([#150](https://github.com/q2kit/qloud/issues/150))
+- Khi upload, tạo folder hoặc di chuyển hoàn tất, FE hủy request danh sách cũ của folder liên quan trước khi invalidate và tải lại. Áp dụng cả lần tải đầu tiên bắt đầu trước khi thao tác ghi hoàn tất, các kiểu sắp xếp và cache Gần đây.
+- Folder không đang mở chỉ được đánh dấu stale; lần mở tiếp theo lấy dữ liệu mới. Không polling Drive, không tải lại folder không liên quan hay cache public. Request children/Gần đây truyền AbortSignal để hủy HTTP cũ.
+- Test điều khiển thứ tự response chứng minh kết quả cũ không ghi đè kết quả mới; E2E Chromium dùng response backend thật được giữ lại trong lúc upload/di chuyển và mở folder đích.

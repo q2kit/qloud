@@ -94,7 +94,7 @@ M2-08b ([#106](https://github.com/q2kit/qloud/issues/106)):
 ## UI — khay upload
 - Hiển thị: tổng tiến độ, tốc độ, thời gian còn lại; từng file có trạng thái (đang chờ, đang upload, tạm dừng, lỗi, xong).
 - Hành động: tạm dừng/tiếp tục tất cả, hủy, thử lại các file lỗi. Khi có upload đang chạy mà người dùng định rời trang thì hiện cảnh báo.
-- Khi xong: file hiện ngay trong folder (invalidate query).
+- Khi xong: hủy request danh sách cũ rồi invalidate query của folder đích và Gần đây, để cả lần tải đầu đang chạy lúc điều hướng cũng thấy file mới (M5-09, [#150](https://github.com/q2kit/qloud/issues/150)).
 
 ## M2-10 — bổ sung hoàn thiện M2 ([#26](https://github.com/q2kit/qloud/issues/26))
 - Giữ các E2E tạo folder, upload/download và resume từ session seed của M2-07/M2-08; không viết lại các ca đã có.

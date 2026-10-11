@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import * as React from 'react';
 
-import { driveKeys } from '@/features/drive/api';
+import { driveKeys, refreshDriveQueries } from '@/features/drive/api';
 
 import { ApiError } from '@/lib/api/errors';
 
@@ -23,10 +23,11 @@ export function UploadProvider({
         api: uploadApi,
         createRequest: () => new XMLHttpRequest() as unknown as PartRequest,
         onUploaded: (_node, parentId) => {
-          void queryClient.invalidateQueries({
-            queryKey: parentId ? driveKeys.children(parentId) : driveKeys.all,
-          });
-          void queryClient.invalidateQueries({ queryKey: driveKeys.recent });
+          void refreshDriveQueries(
+            queryClient,
+            parentId ? driveKeys.children(parentId) : driveKeys.all,
+          );
+          void refreshDriveQueries(queryClient, driveKeys.recent);
           void queryClient.invalidateQueries({ queryKey: uploadKeys.active });
         },
         isOnline: () => navigator.onLine,
@@ -82,9 +83,7 @@ export function UploadProvider({
               if (isMounted()) engine.add(files, id);
             },
             onFolder: (id) => {
-              void queryClient.invalidateQueries({
-                queryKey: driveKeys.children(id),
-              });
+              void refreshDriveQueries(queryClient, driveKeys.children(id));
             },
           });
         } catch (failure) {
