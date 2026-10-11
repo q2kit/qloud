@@ -396,6 +396,7 @@
     "actionFailed": "Không thể thực hiện thao tác. Vui lòng thử lại.",
     "tooMany": "Vui lòng chọn tối đa 1.000 mục mỗi lần.",
     "emptyState": "Thùng rác trống",
-    "emptyDescription": "Các mục bạn xóa sẽ xuất hiện ở đây."
+    "emptyDescription": "Các mục bạn xóa sẽ xuất hiện ở đây.",
+    "deleteShortcut": "Del"
   }
 }

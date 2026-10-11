@@ -470,6 +470,7 @@ export function DrivePage(): React.JSX.Element {
         onOpen={open}
         onOpenInNewTab={handlers.openInNewTab}
         onRename={handlers.rename}
+        onDelete={() => handlers.trash?.(selected)}
         actionsFor={() =>
           nodeActions(useDriveStore.getState().selected, handlers, t)
         }

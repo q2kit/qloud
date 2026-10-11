@@ -246,7 +246,7 @@ describe('item menus', () => {
       'Download',
       'RenameF2',
       'Move…',
-      'Move to trash',
+      'Move to trashDel',
       'Infoi',
     ]);
     expect(selectedNames()).toEqual(['report.pdf']);
@@ -296,7 +296,7 @@ describe('item menus', () => {
       within(screen.getByRole('menu'))
         .getAllByRole('menuitem')
         .map((item) => item.textContent),
-    ).toEqual(['Move 2 items…', 'Move to trash']);
+    ).toEqual(['Move 2 items…', 'Move to trashDel']);
   });
 });
 
@@ -353,7 +353,7 @@ describe('folder links (open in a new tab)', () => {
       'Copy link',
       'RenameF2',
       'Move…',
-      'Move to trash',
+      'Move to trashDel',
       'Infoi',
     ]);
     await user.click(menu.getByRole('menuitem', { name: 'Copy link' }));

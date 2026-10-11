@@ -96,6 +96,38 @@ function addTrash(node: DriveNode): void {
   drive.nodes.delete(node.id);
 }
 
+it('Delete trashes the Drive selection with Undo and ignores inputs, dialogs and modifiers', async () => {
+  const user = userEvent.setup();
+  const a = drive.folder('A');
+  const b = drive.folder('B');
+  renderApp('/drive', testUser);
+  await screen.findByRole('option', { name: 'A' });
+  await user.keyboard('{Control>}a{/Control}');
+  await user.keyboard('{Shift>}{Delete}{/Shift}');
+  expect(trashed).toHaveLength(0);
+  const input = document.createElement('input');
+  document.body.append(input);
+  input.focus();
+  await user.keyboard('{Delete}');
+  expect(trashed).toHaveLength(0);
+  input.remove();
+  const dialog = document.createElement('div');
+  dialog.setAttribute('role', 'dialog');
+  document.body.append(dialog);
+  await user.keyboard('{Delete}');
+  expect(trashed).toHaveLength(0);
+  dialog.remove();
+  screen.getByRole('button', { name: 'List view' }).focus();
+  await user.keyboard('{Delete}');
+  await screen.findByText('Moved to trash');
+  expect(trashed.map((node) => node.id)).toEqual([a.id, b.id]);
+  await user.click(screen.getByRole('button', { name: /^Undo$/ }));
+  await screen.findByRole('option', { name: 'A' });
+  await screen.findByRole('option', { name: 'B' });
+  await user.keyboard('{Delete}');
+  expect(trashed).toHaveLength(0);
+});
+
 it('loads cursor pages, selects multiple, restores and removes selection', async () => {
   const user = userEvent.setup();
   const a = drive.folder('A');
