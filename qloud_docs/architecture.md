@@ -223,3 +223,7 @@ Một tiến trình beat duy nhất; worker có thể chạy nhiều instance. D
 ### Frontend chia sẻ (M5-05)
 
 `features/sharing` quản lý grant/link qua TanStack Query và API có kiểu hiện có. `/shared` dùng FileBrowser/NodeCollection; `/s/:token` đặt PublicTokenContext để viewer/thumbnail dùng endpoint public. Cache node/children/preview public có token trong key, tách cache Drive. `useNode` và `downloadNode` nhận token tùy chọn; preview đọc context và giữ refresh URL trước hết hạn. Public node được chuyển sang kiểu hiển thị chung bằng `is_root: false`; không thêm thông tin owner/tổ tiên hoặc cấp quyền từ session. UI capabilities phục vụ ẩn action; server vẫn quyết định quyền mọi request.
+
+
+### Báo cáo và kiểm duyệt (M5-07)
+Moderation nằm trong app sharing, dùng service duy nhất cho API superuser. `/moderation` là route React riêng; `/admin/` chỉ đọc report/audit. Không thêm dependency. PostgreSQL transaction advisory lock theo HMAC IP bảo đảm giới hạn 5 báo cáo mới/giờ và dedup 24 giờ khi nhiều instance; owner row lock đồng bộ với thay đổi cây/link. Resolver khóa actor/owner/superuser theo thứ tự UUID cùng service suspension, sau đó report/link để tránh thao tác cạnh tranh tạo nhiều audit hoặc email. Snapshot UUID giữ lịch sử sau purge. `MODERATION_EMAIL` bắt buộc hợp lệ ở production (dev có thể trống), email qua Celery sau commit; IP qua allauth adapter và trusted proxy hiện có. E2E có header IP riêng chỉ trong test settings để mỗi browser fixture kiểm tra quota độc lập.

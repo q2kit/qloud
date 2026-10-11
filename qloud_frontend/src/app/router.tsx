@@ -14,6 +14,7 @@ import { SettingsPage } from '@/features/settings/settings-page';
 
 import { SharedPage } from '@/features/sharing/shared-page';
 import { PublicPage } from '@/features/sharing/public-page';
+import { ModerationPage } from '@/features/moderation/moderation-page';
 
 import { AppLayout } from './layout';
 import { NotFoundPage, RouteErrorPage } from './pages';
@@ -65,6 +66,13 @@ export const appRoutes: RouteObject[] = [
                 path: 'trash',
                 Component: TrashPage,
                 handle: { titleKey: 'navigation.trash' } satisfies RouteHandle,
+              },
+              {
+                path: 'moderation',
+                Component: ModerationPage,
+                handle: {
+                  titleKey: 'navigation.moderation',
+                } satisfies RouteHandle,
               },
               {
                 path: 'settings',

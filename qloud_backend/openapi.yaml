@@ -137,6 +137,142 @@ paths:
               schema:
                 $ref: '#/components/schemas/Me'
           description: ''
+  /api/v1/moderation/reports:
+    get:
+      operationId: moderation_reports_list
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          enum:
+          - open
+          - actioned
+          - dismissed
+          type: string
+          minLength: 1
+        description: |-
+          * `open` - Open
+          * `actioned` - Actioned
+          * `dismissed` - Dismissed
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReportList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input, recipient or root folder.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/moderation/reports/{report_id}:
+    get:
+      operationId: moderation_reports_retrieve
+      parameters:
+      - in: path
+        name: report_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportDetail'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such resource, or insufficient access.
+  /api/v1/moderation/reports/{report_id}/resolve:
+    post:
+      operationId: moderation_reports_resolve
+      parameters:
+      - in: path
+        name: report_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveReportRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input, recipient or root folder.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such resource, or insufficient access.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/nodes/{node_id}:
     get:
       operationId: nodes_retrieve
@@ -754,6 +890,57 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: No such resource, or insufficient access.
+  /api/v1/public/links/{token}/reports:
+    post:
+      operationId: public_reports_create
+      parameters:
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReportRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportAccepted'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input, recipient or root folder.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such resource, or insufficient access.
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/recent:
     get:
       operationId: recent_list
@@ -1330,6 +1517,31 @@ components:
           type: string
           format: date-time
           nullable: true
+    CreateReportRequest:
+      type: object
+      properties:
+        node_id:
+          type: string
+          format: uuid
+        reason:
+          $ref: '#/components/schemas/ReportReasonEnum'
+        message:
+          type: string
+          maxLength: 2000
+        email:
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+        turnstile_token:
+          type: string
+          writeOnly: true
+          maxLength: 2048
+      required:
+      - node_id
+      - reason
     CreateShareRequest:
       type: object
       properties:
@@ -1513,11 +1725,30 @@ components:
           type: string
           format: uuid
           readOnly: true
+        is_superuser:
+          type: boolean
+          readOnly: true
+          title: Trạng thái superuser
+          description: Định rằng người dùng này có tất cả các quyền mà không gán cho
+            họ một cách cụ thể.
       required:
       - avatar_url
       - email
       - id
+      - is_superuser
       - root_folder_id
+    ModerationActionEnum:
+      enum:
+      - revoke_link
+      - revoke_node
+      - suspend_owner
+      - dismiss
+      type: string
+      description: |-
+        * `revoke_link` - Revoke Link
+        * `revoke_node` - Revoke Node
+        * `suspend_owner` - Suspend Owner
+        * `dismiss` - Dismiss
     MoveRequest:
       type: object
       properties:
@@ -1697,6 +1928,25 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PublicNode'
+    PaginatedReportList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Report'
     PaginatedShareLinkList:
       type: object
       required:
@@ -2012,6 +2262,218 @@ components:
       - parent_id
       - size
       - updated_at
+    Report:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        node_uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        node_name:
+          type: string
+          readOnly: true
+        link_uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        root_node_uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        owner_uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        reason:
+          allOf:
+          - $ref: '#/components/schemas/ReportReasonEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReportStatusEnum'
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - link_uuid
+      - node_name
+      - node_uuid
+      - owner_uuid
+      - reason
+      - root_node_uuid
+      - status
+    ReportAccepted:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ReportAcceptedStatusEnum'
+      required:
+      - status
+    ReportAcceptedStatusEnum:
+      enum:
+      - accepted
+      type: string
+      description: '* `accepted` - accepted'
+    ReportDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        node_uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        node_name:
+          type: string
+          readOnly: true
+        link_uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        root_node_uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        owner_uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        reason:
+          allOf:
+          - $ref: '#/components/schemas/ReportReasonEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReportStatusEnum'
+          readOnly: true
+        message:
+          type: string
+          readOnly: true
+        reporter_email:
+          type: string
+          format: email
+          readOnly: true
+        reporter_user_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        resolved_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        resolved_by_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        resolution_note:
+          type: string
+          readOnly: true
+        resolution:
+          allOf:
+          - $ref: '#/components/schemas/Resolution'
+          readOnly: true
+          nullable: true
+      required:
+      - created_at
+      - id
+      - link_uuid
+      - message
+      - node_name
+      - node_uuid
+      - owner_uuid
+      - reason
+      - reporter_email
+      - reporter_user_id
+      - resolution
+      - resolution_note
+      - resolved_at
+      - resolved_by_id
+      - root_node_uuid
+      - status
+    ReportReasonEnum:
+      enum:
+      - illegal
+      - copyright
+      - malware
+      - abuse
+      - other
+      type: string
+      description: |-
+        * `illegal` - Illegal
+        * `copyright` - Copyright
+        * `malware` - Malware
+        * `abuse` - Abuse
+        * `other` - Other
+    ReportStatusEnum:
+      enum:
+      - open
+      - actioned
+      - dismissed
+      type: string
+      description: |-
+        * `open` - Open
+        * `actioned` - Actioned
+        * `dismissed` - Dismissed
+    Resolution:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        actor_uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        action:
+          allOf:
+          - $ref: '#/components/schemas/ModerationActionEnum'
+          readOnly: true
+        note:
+          type: string
+          readOnly: true
+        targets:
+          readOnly: true
+      required:
+      - action
+      - actor_uuid
+      - created_at
+      - id
+      - note
+      - targets
+    ResolveReportRequest:
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/ModerationActionEnum'
+        note:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+      - action
+      - note
     RevokeReasonEnum:
       enum:
       - owner

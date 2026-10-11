@@ -50,3 +50,8 @@ SOCIALACCOUNT_PROVIDERS = {
         "GITHUB_URL": f"{_OAUTH_URL}/github",
     },
 }
+
+MODERATION_EMAIL = "moderation@qloud.test"
+
+# Each isolated browser gets its own test IP for report throttling.
+ACCOUNT_ADAPTER = "apps.accounts.e2e_adapter.E2EAccountAdapter"

@@ -9,5 +9,14 @@ class MeSerializer(serializers.ModelSerializer[User]):
 
     class Meta:
         model = User
-        fields = ("id", "email", "display_name", "avatar_url", "locale", "theme", "root_folder_id")
-        read_only_fields = ("id", "email", "avatar_url", "root_folder_id")
+        fields = (
+            "id",
+            "email",
+            "display_name",
+            "avatar_url",
+            "locale",
+            "theme",
+            "root_folder_id",
+            "is_superuser",
+        )
+        read_only_fields = ("id", "email", "avatar_url", "root_folder_id", "is_superuser")

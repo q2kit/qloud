@@ -11,7 +11,8 @@
     "main": "Main navigation",
     "login": "Log in",
     "home": "Back to Drive",
-    "preferences": "Display preferences"
+    "preferences": "Display preferences",
+    "moderation": "Moderation"
   },
   "drive": {
     "title": "Drive",
@@ -452,6 +453,75 @@
       "share_exists": "This person already has direct access. Change their role in the list.",
       "expiry": "Choose a future expiry time.",
       "copy": "Could not copy the link. Please try again."
+    }
+  },
+  "report": {
+    "button": "Report abuse",
+    "title": "Report: {{name}}",
+    "description": "Choose a reason and provide details for a moderator to review.",
+    "reason": "Reason",
+    "message": "Description (optional)",
+    "email": "Contact email (optional)",
+    "send": "Submit report",
+    "sending": "Submitting…",
+    "success": "Your report has been accepted. Thank you.",
+    "reasons": {
+      "illegal": "Illegal content",
+      "copyright": "Copyright infringement",
+      "malware": "Malware",
+      "abuse": "Abuse",
+      "other": "Other"
+    },
+    "errors": {
+      "failed": "Could not submit the report. Please try again.",
+      "throttled": "You have submitted 5 new reports in one hour. Please try again later.",
+      "unavailable": "This content is no longer available.",
+      "captcha": "Verification failed. Please try again."
+    }
+  },
+  "moderation": {
+    "denied": "You do not have access to moderation.",
+    "status": "Status",
+    "all": "All",
+    "statuses": {
+      "open": "Open",
+      "actioned": "Actioned",
+      "dismissed": "Dismissed"
+    },
+    "empty": "No reports with this status.",
+    "anonymous": "Not provided",
+    "audit": "Resolution history",
+    "action": "Action",
+    "note": "Note (required)",
+    "review": "Review action",
+    "confirm": "Confirm “{{action}}”?",
+    "confirmButton": "Confirm resolution",
+    "cancel": "Cancel",
+    "processing": "Processing…",
+    "actions": {
+      "revoke_link": "Remove reported link",
+      "revoke_node": "Remove all links to the root node",
+      "suspend_owner": "Suspend owner account",
+      "dismiss": "Dismiss report"
+    },
+    "effects": {
+      "revoke_link": "The reported link will stop working. The owner receives an email.",
+      "revoke_node": "Remove every link directly attached to the reported link’s root node; links to ancestors or descendants stay unchanged.",
+      "suspend_owner": "Block sign-in, invalidate existing sessions and all public links owned by this account.",
+      "dismiss": "Keep content and links, and close the report with a note."
+    },
+    "fields": {
+      "reporter_email": "Contact email",
+      "reporter_user_id": "Reporter account",
+      "owner_uuid": "Owner",
+      "node_uuid": "Reported node",
+      "link_uuid": "Reported link"
+    },
+    "errors": {
+      "failed": "Could not resolve the report. Please try again.",
+      "resolved": "This report has already been resolved. Reload the page.",
+      "unavailable": "The target account no longer exists.",
+      "guard": "You cannot suspend yourself or the last superuser."
     }
   }
 }

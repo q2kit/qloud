@@ -1,0 +1,6 @@
+{% load i18n %}{% translate "A public item has been reported." %}
+{{ name }}
+{{ reason }}
+{{ message }}
+{{ email }}
+{{ url }}

@@ -196,3 +196,17 @@ M4-01 đã triển khai các endpoint thùng rác ở trên và `POST /nodes/tra
 | Method | Path | Mô tả |
 |---|---|---|
 | GET | `/health` | Healthcheck (DB, Redis) |
+
+
+## Báo cáo vi phạm và kiểm duyệt (M5-07)
+
+`GET /api/v1/me` bổ sung `is_superuser` boolean chỉ đọc; PATCH không sửa được quyền.
+
+| Endpoint | Quyền | Hợp đồng |
+|---|---|---|
+| `POST /api/v1/public/links/{token}/reports` | Khách hoặc session hợp lệ; session phải có CSRF | JSON `node_id` UUID, `reason` illegal/copyright/malware/abuse/other; `message` tùy chọn ≤2000, `email` tùy chọn ≤254, `turnstile_token` tùy chọn khi dev tắt captcha. 202 `{status: "accepted"}` cho mới và trùng; 400 validation/captcha_invalid, 403 CSRF, 404 nội dung không khả dụng/ngoài phạm vi, 429 throttled kèm Retry-After. |
+| `GET /api/v1/moderation/reports` | Superuser active, chưa suspended | Cursor pagination chuẩn, `status` tùy chọn open/actioned/dismissed. Mỗi hàng gồm id, created_at, node_uuid, node_name, link_uuid, root_node_uuid, owner_uuid, reason, status. 403 khi không đủ quyền. |
+| `GET /api/v1/moderation/reports/{id}` | Như trên | Thêm message, reporter_email, reporter_user_id nullable, resolved_at/by_id nullable, resolution_note, resolution nullable. Không trả IP hash. 404 nếu report không tồn tại. |
+| `POST /api/v1/moderation/reports/{id}/resolve` | Như trên và CSRF | `action`: revoke_link/revoke_node/suspend_owner/dismiss; `note` bắt buộc, trim, 1–2000 ký tự. 200 chi tiết report sau xử lý. 400 input/guard khóa tài khoản, 403 quyền/CSRF, 404 report, 409 report_resolved/moderation_target_unavailable. |
+
+Audit `resolution` có id, created_at, actor_uuid, action, note, targets (UUID owner/node và danh sách revoked_link_ids hoặc changed khi khóa). Một report có tối đa một resolution; không có endpoint sửa/xóa/mở lại. Gỡ mọi link giới hạn ở node gốc mà ShareLink trỏ tới. Báo cáo giữ snapshot dù mục/link đã xóa. Quy tắc quota/dedup/email xem [sharing.md](features/sharing.md).

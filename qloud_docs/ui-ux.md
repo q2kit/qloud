@@ -117,3 +117,9 @@ Mỗi request chọn tối đa 1.000 mục, theo giới hạn API. Đủ i18n vi
 - Được chia sẻ dùng lưới/danh sách và cursor chung Drive, thêm tên owner và quyền thực tế. Mở file qua route riêng, folder qua Drive; không nhận drop upload ở danh sách này.
 - Hộp thoại Chia sẻ mở từ một mục có quyền trong hàng tiêu đề Drive/menu hoặc panel chi tiết. Hai phần Người có quyền truy cập và Link công khai; email/role, danh sách grant, hạn dùng tùy chọn, copy và thu hồi. Action Chia sẻ nằm ở hàng tiêu đề Drive giữ nguyên chiều cao khi chọn mục, tránh dịch item trong lúc double click. Hộp thoại cuộn trong 90dvh, co tới 360px; Esc/Đóng trả focus về nơi mở.
 - Trang public dùng PublicLayout với ngôn ngữ/theme, chỉ xem/download. File root mở viewer toàn màn hình, đóng về trang link; folder dùng breadcrumb giới hạn trong cây và FileBrowser. Menu thao tác hoạt động ngay cả khi chưa chọn mục. Link không còn hợp lệ hiện “Nội dung không còn khả dụng”. Báo cáo vi phạm triển khai cùng M5-07.
+
+
+### Báo cáo và kiểm duyệt — M5-07
+S-12 thêm nút “Báo cáo vi phạm” cho folder hiện tại; viewer file có nút cờ báo cáo đúng file đang xem. Modal dùng select lý do, textarea mô tả, email liên hệ và Turnstile; đang gửi khóa thao tác, thành công có xác nhận, lỗi quota/404/captcha có thông báo dịch. Dùng cùng dialog, button, màu và layout responsive hiện có.
+
+Route `/moderation` trong app shell chỉ cho superuser (flag `/me.is_superuser`), navigation kiểm duyệt chỉ hiện khi có quyền. User thường truy cập URL trực tiếp thấy thông báo không có quyền và không gọi API báo cáo. Danh sách lọc trạng thái và tải thêm theo cursor; chọn hàng để xem chi tiết/liên hệ/UUID/audit. Report open có chọn action, giải thích phạm vi, ghi chú bắt buộc và bước xác nhận. Xử lý xong hiện audit, không còn form. Hỗ trợ light/dark, vi/en và 360px; `/admin/` của Django giữ chức năng đọc audit.

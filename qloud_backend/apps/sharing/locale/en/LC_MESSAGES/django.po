@@ -46,3 +46,36 @@ msgstr "Sign in with the account that received this email. Access depends on you
 
 msgid "The Qloud team"
 msgstr "The Qloud team"
+
+msgid "New abuse report on Qloud"
+msgstr "New abuse report on Qloud"
+
+msgid "A public item has been reported."
+msgstr "A public item has been reported."
+
+msgid "Name:"
+msgstr "Name:"
+
+msgid "Reason:"
+msgstr "Reason:"
+
+msgid "Message:"
+msgstr "Message:"
+
+msgid "Contact email:"
+msgstr "Contact email:"
+
+msgid "Review report"
+msgstr "Review report"
+
+msgid "A public link was removed on Qloud"
+msgstr "A public link was removed on Qloud"
+
+msgid "A public link to your item was removed by moderation."
+msgstr "A public link to your item was removed by moderation."
+
+msgid "Note:"
+msgstr "Note:"
+
+msgid "The removed link cannot be reactivated."
+msgstr "The removed link cannot be reactivated."

@@ -11,7 +11,8 @@
     "main": "Điều hướng chính",
     "login": "Đăng nhập",
     "home": "Về Drive",
-    "preferences": "Tùy chọn hiển thị"
+    "preferences": "Tùy chọn hiển thị",
+    "moderation": "Kiểm duyệt"
   },
   "drive": {
     "title": "Drive",
@@ -445,6 +446,75 @@
       "share_exists": "Người này đã được chia sẻ trực tiếp. Hãy đổi quyền trong danh sách.",
       "expiry": "Chọn thời gian hết hạn trong tương lai.",
       "copy": "Không sao chép được link. Hãy thử lại."
+    }
+  },
+  "report": {
+    "button": "Báo cáo vi phạm",
+    "title": "Báo cáo: {{name}}",
+    "description": "Chọn lý do và cung cấp thông tin để quản trị viên xem xét.",
+    "reason": "Lý do",
+    "message": "Mô tả (không bắt buộc)",
+    "email": "Email liên hệ (không bắt buộc)",
+    "send": "Gửi báo cáo",
+    "sending": "Đang gửi…",
+    "success": "Báo cáo đã được tiếp nhận. Cảm ơn bạn.",
+    "reasons": {
+      "illegal": "Nội dung trái pháp luật",
+      "copyright": "Vi phạm bản quyền",
+      "malware": "Phần mềm độc hại",
+      "abuse": "Lạm dụng",
+      "other": "Khác"
+    },
+    "errors": {
+      "failed": "Không thể gửi báo cáo. Vui lòng thử lại.",
+      "throttled": "Bạn đã gửi 5 báo cáo mới trong một giờ. Vui lòng thử lại sau.",
+      "unavailable": "Nội dung không còn khả dụng.",
+      "captcha": "Xác minh chưa thành công. Vui lòng thử lại."
+    }
+  },
+  "moderation": {
+    "denied": "Bạn không có quyền truy cập màn hình kiểm duyệt.",
+    "status": "Trạng thái",
+    "all": "Tất cả",
+    "statuses": {
+      "open": "Chờ xử lý",
+      "actioned": "Đã xử lý",
+      "dismissed": "Đã bỏ qua"
+    },
+    "empty": "Không có báo cáo trong trạng thái này.",
+    "anonymous": "Không cung cấp",
+    "audit": "Lịch sử xử lý",
+    "action": "Thao tác",
+    "note": "Ghi chú (bắt buộc)",
+    "review": "Xem lại thao tác",
+    "confirm": "Xác nhận thao tác “{{action}}”?",
+    "confirmButton": "Xác nhận xử lý",
+    "cancel": "Hủy",
+    "processing": "Đang xử lý…",
+    "actions": {
+      "revoke_link": "Gỡ link bị báo cáo",
+      "revoke_node": "Gỡ mọi link của node gốc",
+      "suspend_owner": "Khóa tài khoản owner",
+      "dismiss": "Bỏ qua báo cáo"
+    },
+    "effects": {
+      "revoke_link": "Link bị báo cáo sẽ ngừng hoạt động. Owner nhận email thông báo.",
+      "revoke_node": "Gỡ mọi link trỏ trực tiếp tới node gốc của link bị báo cáo; không gỡ link riêng của node con hoặc node cha.",
+      "suspend_owner": "Chặn đăng nhập, vô hiệu session cũ và mọi link công khai của owner.",
+      "dismiss": "Giữ nội dung và link, đóng báo cáo với ghi chú."
+    },
+    "fields": {
+      "reporter_email": "Email liên hệ",
+      "reporter_user_id": "Tài khoản người báo cáo",
+      "owner_uuid": "Owner",
+      "node_uuid": "Node bị báo cáo",
+      "link_uuid": "Link bị báo cáo"
+    },
+    "errors": {
+      "failed": "Không thể xử lý báo cáo. Vui lòng thử lại.",
+      "resolved": "Báo cáo đã được xử lý. Hãy tải lại trang.",
+      "unavailable": "Tài khoản đích không còn tồn tại.",
+      "guard": "Không được tự khóa mình hoặc khóa superuser cuối cùng."
     }
   }
 }

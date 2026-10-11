@@ -36,6 +36,7 @@ def test_me_returns_profile_and_preferences(api_client, user):
         "locale": "vi",
         "theme": "system",
         "root_folder_id": str(user.root_folder_id),
+        "is_superuser": False,
     }
 
 

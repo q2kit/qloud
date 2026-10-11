@@ -80,8 +80,8 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M5-03 | Model và API ShareLink, endpoint public | [#35](https://github.com/q2kit/qloud/issues/35) | ✅ [PR #146](https://github.com/q2kit/qloud/pull/146) |
 | M5-04 | Email thông báo khi được chia sẻ | [#36](https://github.com/q2kit/qloud/issues/36) | ✅ [PR #148](https://github.com/q2kit/qloud/pull/148) |
 | M5-05 | FE: hộp thoại chia sẻ, trang Được chia sẻ, trang link công khai | [#37](https://github.com/q2kit/qloud/issues/37) | ✅ [PR #151](https://github.com/q2kit/qloud/pull/151) |
-| M5-06 | Bộ test phân quyền (ma trận role × thao tác) | [#38](https://github.com/q2kit/qloud/issues/38) | 🟦 |
-| M5-07 | Báo cáo vi phạm: model, API public, email cho admin, công cụ kiểm duyệt trong Django admin, nút báo cáo trên S-12 | [#39](https://github.com/q2kit/qloud/issues/39) | ⬜ |
+| M5-06 | Bộ test phân quyền (ma trận role × thao tác) | [#38](https://github.com/q2kit/qloud/issues/38) | ✅ [PR #152](https://github.com/q2kit/qloud/pull/152) |
+| M5-07 | Báo cáo vi phạm: model, API public, email cho admin, màn hình kiểm duyệt `/moderation` và audit trong Django admin, nút báo cáo trên S-12 | [#39](https://github.com/q2kit/qloud/issues/39) | 🟦 |
 | M5-08 | Link file chia sẻ riêng không mở được khi folder cha không có quyền | [#147](https://github.com/q2kit/qloud/issues/147) | ✅ [PR #149](https://github.com/q2kit/qloud/pull/149) |
 | M5-09 | Đồng bộ danh sách folder khi upload/di chuyển hoàn tất trong lúc điều hướng | [#150](https://github.com/q2kit/qloud/issues/150) | ⬜ |
 

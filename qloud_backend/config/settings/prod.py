@@ -1,4 +1,5 @@
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.validators import validate_email
 
 from .base import *
 
@@ -41,3 +42,8 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SILENCED_SYSTEM_CHECKS = ["security.W005", "security.W021"]
 
 SPECTACULAR_SETTINGS["SERVE_PERMISSIONS"] = ["rest_framework.permissions.IsAdminUser"]
+
+try:
+    validate_email(MODERATION_EMAIL)
+except ValidationError as error:
+    raise ImproperlyConfigured("MODERATION_EMAIL must be a valid mailbox in production.") from error
