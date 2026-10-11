@@ -49,7 +49,7 @@
 ## Tiêu chí chấp nhận
 - [ ] Có bộ test ma trận đầy đủ: mỗi role × mỗi thao tác × (node trực tiếp, node con được thừa kế).
 - [x] Thu hồi share thì người nhận mất nguồn quyền đó ngay ở request tiếp theo; nếu còn grant khác thì quyền thực tế là mức cao nhất còn lại.
-- [x] Link hết hạn hoặc đã bị thu hồi thì trả 404 ở API; trang thông báo thân thiện thuộc M5-05.
+- [x] Link hết hạn hoặc đã bị thu hồi thì trả 404 ở API và có trang thông báo thân thiện.
 - [ ] Gửi báo cáo từ trang link công khai thì admin nhận email, và báo cáo hiện trong admin.
 - [ ] Admin gỡ link thì link ngừng hoạt động ngay; khóa user thì user không đăng nhập được và mọi link của user ngừng hoạt động.
 - [x] Qua link của folder A, không thể truy cập node nằm ngoài A bằng cách đổi `node_id`.
@@ -83,6 +83,15 @@
 - Email giữ snapshot khi tạo grant; đổi tên/quyền/email/locale hoặc thu hồi sau đó không sửa thông báo đã xếp hàng. Link folder `/drive/folders/<UUID compact>`, file `/drive/files/<UUID compact>`; truy cập luôn kiểm tra quyền hiện tại và đăng nhập bằng tài khoản nhận email.
 - Tái sử dụng `accounts.tasks.send_email` và retry SMTP/OSError hiện có; không thêm outbox hoặc bảo đảm exactly-once. Worker Celery cần chạy như email auth.
 - M5-08: link file chia sẻ riêng mở viewer độc lập nếu folder cha trả 404; không hiển thị folder cha/file cùng cấp, không tải danh sách cha, tắt chuyển file. Đóng viewer về Drive của người nhận. Thu hồi grant khiến mở lại link, preview và download bị từ chối bởi API.
+
+## Tiến độ M5-05
+- S-11: action Chia sẻ ở hàng tiêu đề/menu Drive và panel chi tiết cho một mục có `can_share`. Hộp thoại liệt kê grant trực tiếp (cursor), thêm email viewer/editor, đổi role, thu hồi; thông báo quyền thừa kế phải quản lý ở mục nguồn. Không hiển thị email/tên lỗi thô từ server.
+- Owner tạo nhiều link có hạn dùng (nhập giờ local, gửi ISO) hoặc không hết hạn, sao chép URL `/s/:token`, xem trạng thái hết hạn/thu hồi và thu hồi. Editor chỉ quản lý grant người dùng; API links trả 404 thì hiển thị chỉ owner quản lý link. Link thu hồi không bật lại.
+- S-07 `/shared` dùng FileBrowser/NodeCollection với cursor/sắp xếp/grid/list, hiển thị owner và quyền thực tế; chỉ liệt kê grant trực tiếp, không tự bung cây. Folder mở trong Drive; file mở route canonical (kể cả chia sẻ file riêng). Có loading/rỗng/lỗi/thử lại.
+- Drive lấy capabilities cho mục đang chọn để hiện action ghi/chia sẻ. Folder viewer không nhận upload/drop hay mở tạo folder; header tạo mới bị vô hiệu. Breadcrumb/back trong cây được chia sẻ dùng UUID của mục, chỉ gọi “Drive của tôi” khi đúng root của người nhận.
+- S-12 `/s/:token` dùng layout công khai, không yêu cầu session. Root file tự mở viewer; đóng vẫn ở trang link và mở lại được. Folder có breadcrumb trong cây, grid/list, cursor/sắp xếp, viewer chuyển file và tải trực tiếp S3. Không có action ghi hoặc đường về tổ tiên ngoài phạm vi link.
+- Query/cache node, danh sách và preview/thumbnail public tách theo token; public viewer luôn dùng API token dù visitor đã đăng nhập. Preview dùng cơ chế refresh URL và component ảnh/PDF/media/text hiện có. Link sai/hết hạn/thu hồi hoặc folder ngoài cây có thông báo nội dung không còn khả dụng; các lỗi khác cho thử lại.
+- Nút/form báo cáo vi phạm và moderation thuộc M5-07 (#39); S-12 chưa hiện action chưa có API.
 
 ## Ngoài phạm vi
 Mật khẩu cho share link, quyền sửa qua share link, mời người chưa có tài khoản (có thể làm sau MVP), chặn thừa kế quyền.

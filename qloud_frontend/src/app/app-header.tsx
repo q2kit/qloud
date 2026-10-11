@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { AccountMenu } from '@/features/auth/components/account-menu';
 import { useDriveStore } from '@/features/drive/store';
+import { useNode } from '@/features/drive/api';
 import { useCurrentFolderId } from '@/features/drive/use-current-folder';
 import { useUploader } from '@/features/upload/context';
 import { useFolderUploader } from '@/features/upload/folder-context';
@@ -54,6 +55,10 @@ export function AppHeader({
   const uploader = useUploader();
   // Outside the Drive this is the root folder (useCurrentFolderId).
   const folderId = useCurrentFolderId();
+  const folder = useNode(folderId);
+  const canCreate =
+    folder.data?.is_root === true ||
+    folder.data?.capabilities.can_edit === true;
   const folderUploader = useFolderUploader();
   const directoryInput = React.useRef<HTMLInputElement>(null);
   const fileInput = React.useRef<HTMLInputElement>(null);
@@ -144,6 +149,7 @@ export function AppHeader({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
+            disabled={!canCreate}
             onSelect={() => {
               setCreatingFolder(true);
             }}
@@ -152,7 +158,7 @@ export function AppHeader({
             {t('drive.actions.newFolder')}
           </DropdownMenuItem>
           <DropdownMenuItem
-            disabled={!folderId}
+            disabled={!canCreate}
             onSelect={() => {
               fileInput.current?.click();
             }}
@@ -161,7 +167,7 @@ export function AppHeader({
             {t('drive.actions.upload')}
           </DropdownMenuItem>
           <DropdownMenuItem
-            disabled={!folderId}
+            disabled={!canCreate}
             onSelect={() => directoryInput.current?.click()}
           >
             <FolderUp />

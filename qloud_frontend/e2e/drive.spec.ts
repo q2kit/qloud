@@ -66,11 +66,18 @@ test('rename, and a clashing name is refused', async ({ page }) => {
     .getByRole('dialog', { name: 'Đổi tên' })
     .getByLabel('Tên')
     .fill('Bản nháp');
+  const renamed = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'PATCH' &&
+      /\/api\/v1\/nodes\/[^/]+$/.test(new URL(response.url()).pathname) &&
+      response.status() === 200,
+  );
   await page
     .getByRole('dialog', { name: 'Đổi tên' })
     .getByRole('button', { name: 'Lưu' })
     .click();
   await expect(item(page, 'Bản nháp')).toBeVisible();
+  await renamed;
   await page.reload();
   await expect(item(page, 'Bản nháp')).toBeVisible();
   await expect(item(page, 'Báo cáo')).toBeVisible();
@@ -130,6 +137,9 @@ test.describe('selecting and moving (M2-07b)', () => {
     await expect(page.getByText('2 mục đã chọn')).toBeVisible();
     await item(page, 'Một').dragTo(item(page, 'Đích'));
     await expect(page.getByRole('option')).toHaveText([/^Đích/]);
+    await expect(
+      page.getByRole('status').filter({ hasText: 'Đã di chuyển' }),
+    ).toHaveText('Đã di chuyển 2 mục tới "Đích".');
 
     await openDriveFolder(page, 'Đích');
     await expect(page.getByRole('option')).toHaveText([/^Hai/, /^Một/]);
@@ -139,6 +149,9 @@ test.describe('selecting and moving (M2-07b)', () => {
         .getByRole('link', { name: 'Drive của tôi' }),
     );
     await expect(page.getByRole('option')).toHaveText([/^Một/]);
+    await expect(
+      page.getByRole('status').filter({ hasText: 'Đã di chuyển' }),
+    ).toHaveText('Đã di chuyển 1 mục tới "Drive của tôi".');
     await page.goto('/drive');
     await expect(page.getByRole('option')).toHaveText([/^Đích/, /^Hai/]);
   });

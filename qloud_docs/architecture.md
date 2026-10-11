@@ -219,3 +219,7 @@ là một transaction có khóa owner; kiểm tra lại hạn/trạng thái đ�
 Nghiệp vụ purge dùng chung với API. `apps.drive.tasks.delete_trash_objects` chạy mỗi giờ
 và được enqueue sau commit của API; xóa S3 theo batch 1.000, giữ hàng đợi bền vững khi lỗi.
 Một tiến trình beat duy nhất; worker có thể chạy nhiều instance. Dev cần chạy cả worker và beat.
+
+### Frontend chia sẻ (M5-05)
+
+`features/sharing` quản lý grant/link qua TanStack Query và API có kiểu hiện có. `/shared` dùng FileBrowser/NodeCollection; `/s/:token` đặt PublicTokenContext để viewer/thumbnail dùng endpoint public. Cache node/children/preview public có token trong key, tách cache Drive. `useNode` và `downloadNode` nhận token tùy chọn; preview đọc context và giữ refresh URL trước hết hạn. Public node được chuyển sang kiểu hiển thị chung bằng `is_root: false`; không thêm thông tin owner/tổ tiên hoặc cấp quyền từ session. UI capabilities phục vụ ẩn action; server vẫn quyết định quyền mọi request.

@@ -8,6 +8,7 @@ import {
   Info,
   Link,
   Pencil,
+  Share2,
   Trash2,
   type LucideIcon,
 } from 'lucide-react';
@@ -29,6 +30,7 @@ export interface ActionHandlers {
   move: (nodes: DriveNode[]) => void;
   trash?: (nodes: DriveNode[]) => void;
   info: (node: DriveNode) => void;
+  share?: (node: DriveNode) => void;
   /** Independent URLs for files and folders. */
   openInNewTab: (node: DriveNode) => void;
   copyLink: (node: DriveNode) => void;
@@ -122,6 +124,16 @@ export function nodeActions(
     },
     move,
     ...trash,
+    ...(handlers.share
+      ? [
+          {
+            key: 'share',
+            label: t('sharing.action'),
+            icon: Share2,
+            run: () => handlers.share?.(node),
+          },
+        ]
+      : []),
     {
       key: 'info',
       label: t('drive.actions.info'),

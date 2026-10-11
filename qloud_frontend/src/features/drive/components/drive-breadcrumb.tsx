@@ -3,6 +3,8 @@ import * as React from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
+import { useMe } from '@/features/settings/use-me';
+
 import { readDraggedIds } from '../actions';
 import type { DriveNode, DriveNodeDetail } from '../api';
 import { folderPath } from '../paths';
@@ -20,10 +22,13 @@ export function DriveBreadcrumb({
   ) => void;
 }): React.JSX.Element {
   const { t } = useTranslation();
+  const me = useMe();
   const [over, setOver] = React.useState<string | null>(null);
   const label = (node: { name: string }, index: number): string =>
     // The root's stored name is technical; show the translated one.
-    index === 0 ? t('shell.breadcrumbRoot') : node.name;
+    folder.breadcrumb[index]?.id === me.data?.root_folder_id
+      ? t('shell.breadcrumbRoot')
+      : node.name;
   const ancestors = folder.breadcrumb;
   // Narrow screens: the root and the parent, with an ellipsis between.
   const hidden = ancestors.length > 2 ? ancestors.slice(1, -1) : [];
@@ -47,7 +52,9 @@ export function DriveBreadcrumb({
               </span>
             )}
             <Link
-              to={folderPath(index === 0 ? undefined : node.id)}
+              to={folderPath(
+                node.id === me.data?.root_folder_id ? undefined : node.id,
+              )}
               className={
                 over === node.id
                   ? 'truncate rounded-sm bg-primary/15 px-1 text-foreground ring-2 ring-primary'
@@ -68,7 +75,11 @@ export function DriveBreadcrumb({
                 if (!ids?.length) return;
                 event.preventDefault();
                 onDrop(
-                  { id: node.id, name: node.name, is_root: index === 0 },
+                  {
+                    id: node.id,
+                    name: node.name,
+                    is_root: node.id === me.data?.root_folder_id,
+                  },
                   ids,
                 );
               }}

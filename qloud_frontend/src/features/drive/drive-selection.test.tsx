@@ -294,6 +294,7 @@ describe('item menus', () => {
       'RenameF2',
       'Move…',
       'Move to trashDel',
+      'Share',
       'Infoi',
     ]);
     expect(selectedNames()).toEqual(['report.pdf']);
@@ -401,6 +402,7 @@ describe('folder links (open in a new tab)', () => {
       'RenameF2',
       'Move…',
       'Move to trashDel',
+      'Share',
       'Infoi',
     ]);
     await user.click(menu.getByRole('menuitem', { name: 'Copy link' }));

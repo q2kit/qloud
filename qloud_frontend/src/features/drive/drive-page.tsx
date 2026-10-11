@@ -9,6 +9,9 @@ import {
 } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
+import { ShareDialog } from '@/features/sharing/share-dialog';
+import { useMe } from '@/features/settings/use-me';
+
 import { Button } from '@/components/ui/button';
 import { FormAlert } from '@/features/auth/components/form-field';
 import { ResumeUploads } from '@/features/upload/components/resume-uploads';
@@ -78,6 +81,18 @@ export function DrivePage(): React.JSX.Element {
   const children = useChildren(folderId, ordering);
   const store = useDriveStore();
   const { selected, select } = store;
+  const me = useMe();
+  const selectedDetail = useNode(
+    selected.length === 1 ? selected[0]?.id : undefined,
+  );
+  const canWrite =
+    folder.data?.is_root === true ||
+    folder.data?.capabilities.can_edit === true;
+  const canEditSelection =
+    selected.length === 1
+      ? (selectedDetail.data?.capabilities.can_edit ?? canWrite)
+      : canWrite;
+  const [sharing, setSharing] = React.useState<DriveNode | null>(null);
   const rename = useRename();
   const move = useMove();
   const trash = useTrashNodes();
@@ -96,7 +111,7 @@ export function DrivePage(): React.JSX.Element {
     dataTransfer: DataTransfer,
     parentId: string | undefined,
   ): void => {
-    if (!parentId) return;
+    if (!parentId || !canWrite) return;
     setActionError(null);
     void treeFromDrop(dataTransfer)
       .then((tree) => {
@@ -221,8 +236,13 @@ export function DrivePage(): React.JSX.Element {
   const parentCrumb = crumbs?.at(-1);
   const parent = React.useMemo(
     () =>
-      parentCrumb ? { id: parentCrumb.id, isRoot: crumbs?.length === 1 } : null,
-    [parentCrumb, crumbs?.length],
+      parentCrumb
+        ? {
+            id: parentCrumb.id,
+            isRoot: parentCrumb.id === me.data?.root_folder_id,
+          }
+        : null,
+    [parentCrumb, me.data?.root_folder_id],
   );
 
   // Parent navigation belongs to Drive; selection shortcuts live in FileBrowser.
@@ -315,6 +335,7 @@ export function DrivePage(): React.JSX.Element {
     target: Pick<DriveNode, 'id' | 'name' | 'is_root'>,
     ids: string[],
   ): void => {
+    if (!canWrite) return;
     const byId = new Map(nodes.map((node) => [node.id, node]));
     const items = ids.flatMap((id) => byId.get(id) ?? []);
     if (items.length && items.every((node) => node.id !== target.id))
@@ -352,6 +373,9 @@ export function DrivePage(): React.JSX.Element {
         },
       );
     },
+    share: (node) => {
+      setSharing(node);
+    },
     info: () => {
       store.setDetailOpen(true);
     },
@@ -370,6 +394,23 @@ export function DrivePage(): React.JSX.Element {
       );
     },
   };
+
+  const actionsFor = () =>
+    nodeActions(useDriveStore.getState().selected, handlers, t).filter(
+      (action) => {
+        if (action.key === 'share')
+          return selectedDetail.data?.id ===
+            useDriveStore.getState().selected[0]?.id
+            ? selectedDetail.data?.capabilities.can_share === true
+            : canWrite &&
+                useDriveStore.getState().selected[0]?.is_root === false;
+        if (['rename', 'move', 'trash'].includes(action.key))
+          return canEditSelection;
+        return true;
+      },
+    );
+
+  const shareAction = actionsFor().find((action) => action.key === 'share');
 
   const onSelect = (
     node: DriveNode,
@@ -396,7 +437,7 @@ export function DrivePage(): React.JSX.Element {
   return (
     <section
       className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col gap-4"
-      {...fileDragHandlers}
+      {...(canWrite ? fileDragHandlers : {})}
     >
       {fileDrag && (
         <div
@@ -419,6 +460,17 @@ export function DrivePage(): React.JSX.Element {
             aria-hidden="true"
           />
         )}
+        {shareAction && (
+          <Button
+            className="ml-auto h-7 shrink-0"
+            variant="ghost"
+            size="sm"
+            onClick={shareAction.run}
+          >
+            <shareAction.icon />
+            {shareAction.label}
+          </Button>
+        )}
       </div>
       <ResumeUploads />
       <FileBrowser
@@ -432,16 +484,20 @@ export function DrivePage(): React.JSX.Element {
         ordering={ordering}
         onView={setView}
         onOrdering={setOrdering}
-        actions={nodeActions(selected, handlers, t)}
+        actions={actionsFor()}
         onClearSelection={() => {
           select(null);
         }}
         onSelectAll={(items) => {
           store.selectAll(items);
         }}
-        onCreate={() => {
-          store.setCreatingFolder(true);
-        }}
+        onCreate={
+          canWrite
+            ? () => {
+                store.setCreatingFolder(true);
+              }
+            : undefined
+        }
         enabled={Boolean(folder.data) && children.isSuccess && !folder.isError}
         pending={children.isPending}
         failed={children.isError}
@@ -459,6 +515,7 @@ export function DrivePage(): React.JSX.Element {
         }
         emptyState={
           <EmptyFolder
+            canWrite={canWrite}
             onCreate={() => {
               store.setCreatingFolder(true);
             }}
@@ -473,15 +530,16 @@ export function DrivePage(): React.JSX.Element {
         onSelect={onSelect}
         onOpen={open}
         onOpenInNewTab={handlers.openInNewTab}
-        onRename={handlers.rename}
-        onDelete={() => handlers.trash?.(selected)}
-        actionsFor={() =>
-          nodeActions(useDriveStore.getState().selected, handlers, t)
+        onRename={canEditSelection ? handlers.rename : undefined}
+        onDelete={
+          canEditSelection ? () => handlers.trash?.(selected) : undefined
         }
+        actionsFor={actionsFor}
         dragIdsFor={(node) =>
           selectedIds.has(node.id) ? [...selectedIds] : [node.id]
         }
-        onDropOnFolder={dropOn}
+        draggable={canWrite}
+        onDropOnFolder={canWrite ? dropOn : undefined}
         onDropFiles={(target, dataTransfer) => {
           dragDepth.current = 0;
           setFileDrag(null);
@@ -500,6 +558,14 @@ export function DrivePage(): React.JSX.Element {
         loadingMore={isFetchingNextPage}
         loadMore={() => children.fetchNextPage()}
       />
+      {sharing && (
+        <ShareDialog
+          node={sharing}
+          onClose={() => {
+            setSharing(null);
+          }}
+        />
+      )}
       <NameDialog
         open={renaming !== null}
         title={t('drive.dialogs.rename')}
@@ -530,9 +596,11 @@ export function DrivePage(): React.JSX.Element {
 }
 
 function EmptyFolder({
+  canWrite,
   onCreate,
   onUpload,
 }: {
+  canWrite: boolean;
   onCreate: () => void;
   onUpload: (files: File[]) => void;
 }): React.JSX.Element {
@@ -544,29 +612,33 @@ function EmptyFolder({
       title={t('drive.empty.title')}
       description={t('drive.empty.description')}
     >
-      <input
-        ref={input}
-        type="file"
-        multiple
-        hidden
-        onChange={(event) => {
-          const files = [...(event.target.files ?? [])];
-          if (files.length > 0) onUpload(files);
-          event.target.value = '';
-        }}
-      />
-      <Button
-        onClick={() => {
-          input.current?.click();
-        }}
-      >
-        <FileUp />
-        {t('drive.actions.upload')}
-      </Button>
-      <Button variant="outline" onClick={onCreate}>
-        <FolderPlus />
-        {t('drive.actions.newFolder')}
-      </Button>
+      {canWrite && (
+        <>
+          <input
+            ref={input}
+            type="file"
+            multiple
+            hidden
+            onChange={(event) => {
+              const files = [...(event.target.files ?? [])];
+              if (files.length > 0) onUpload(files);
+              event.target.value = '';
+            }}
+          />
+          <Button
+            onClick={() => {
+              input.current?.click();
+            }}
+          >
+            <FileUp />
+            {t('drive.actions.upload')}
+          </Button>
+          <Button variant="outline" onClick={onCreate}>
+            <FolderPlus />
+            {t('drive.actions.newFolder')}
+          </Button>
+        </>
+      )}
     </CenteredState>
   );
 }
