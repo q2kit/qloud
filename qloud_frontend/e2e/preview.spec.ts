@@ -76,7 +76,12 @@ async function open(page: Page, name: string) {
   await page.getByRole('button', { name: 'Xem trước', exact: true }).click();
   await expect(page.getByRole('dialog', { name })).toBeVisible();
 }
-async function captures(page: Page, kind: string, mobile: boolean) {
+async function captures(
+  page: Page,
+  kind: string,
+  mobile: boolean,
+  prefix = 'm3-03',
+) {
   if (!process.env.PREVIEW_CAPTURE) return;
   for (const theme of ['light', 'dark']) {
     await page.evaluate((value) => {
@@ -87,7 +92,7 @@ async function captures(page: Page, kind: string, mobile: boolean) {
       theme === 'dark' ? /dark/ : /^$/,
     );
     await page.screenshot({
-      path: `../qloud_docs/assets/m3-03-${kind}-${theme}-${mobile ? '360' : 'desktop'}.png`,
+      path: `../qloud_docs/assets/${prefix}-${kind}-${theme}-${mobile ? '360' : 'desktop'}.png`,
       fullPage: true,
     });
   }
@@ -172,6 +177,86 @@ test('thumbnails in grid and list, image/PDF viewer, navigation and download', a
   await page.reload();
   await expect(page.getByRole('img', { name: 'a-ảnh.png' })).toBeVisible();
 });
+
+for (const kind of ['video', 'audio'] as const) {
+  test(`${kind} refresh preserves playing and paused state`, async ({
+    page,
+    isMobile,
+  }) => {
+    await signUpVerifiedViaApi(page);
+    const file = await upload(
+      page,
+      await root(page),
+      kind === 'video' ? 'refresh.mp4' : 'refresh.wav',
+      kind === 'video' ? 'video/mp4' : 'audio/wav',
+      await readFile(
+        `e2e/fixtures/preview.${kind === 'video' ? 'mp4' : 'wav'}`,
+      ),
+    );
+    await page.clock.install();
+    await page.goto(`/drive/files/${compact(file.id)}`);
+    const player = page.locator(kind);
+    await expect
+      .poll(() =>
+        player.evaluate((element) => (element as HTMLMediaElement).readyState),
+      )
+      .toBeGreaterThanOrEqual(1);
+    // Slow the one-second audio fixture so both playback modes can be inspected.
+    await player.evaluate((element) => {
+      const media = element as HTMLMediaElement;
+      media.playbackRate = 0.1;
+      media.currentTime = 0.3;
+      return media.play();
+    });
+    await expect
+      .poll(() =>
+        player.evaluate((element) => (element as HTMLMediaElement).currentTime),
+      )
+      .toBeGreaterThan(0.4);
+    for (const playing of [true, false]) {
+      if (!playing)
+        await player.evaluate((element) => {
+          (element as HTMLMediaElement).pause();
+        });
+      const position = await player.evaluate(
+        (element) => (element as HTMLMediaElement).currentTime,
+      );
+      const oldUrl = await player.getAttribute('src');
+      // S3 signatures have one-second resolution; ensure the real backend signs a new URL.
+      const second = Math.floor(Date.now() / 1000);
+      await expect
+        .poll(() => Math.floor(Date.now() / 1000))
+        .toBeGreaterThan(second);
+      const response = page.waitForResponse((response) =>
+        response.url().endsWith(`/nodes/${file.id}/preview`),
+      );
+      await page.clock.fastForward(270_000);
+      expect((await response).ok()).toBe(true);
+      await expect(player).not.toHaveAttribute('src', oldUrl ?? '');
+      await expect
+        .poll(() =>
+          player.evaluate((element) => (element as HTMLMediaElement).paused),
+        )
+        .toBe(!playing);
+      await expect
+        .poll(() =>
+          player.evaluate(
+            (element) => (element as HTMLMediaElement).currentTime,
+          ),
+        )
+        .toBeGreaterThanOrEqual(position - 0.02);
+      if (playing)
+        await expect
+          .poll(() =>
+            player.evaluate(
+              (element) => (element as HTMLMediaElement).currentTime,
+            ),
+          )
+          .toBeGreaterThan(position + 0.03);
+    }
+    await captures(page, `refresh-${kind}`, isMobile, 'm3-05');
+  });
+}
 
 test('canonical link follows a moved file; unsafe MIME never renders', async ({
   page,
