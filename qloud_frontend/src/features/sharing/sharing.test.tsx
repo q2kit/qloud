@@ -426,3 +426,29 @@ it('denies an outside-tree preview through the public API without falling back t
   );
   expect(requests).not.toContain('/api/v1/public/links/token/preview');
 });
+
+it('opens a public item menu on the first click without a prior selection', async () => {
+  const folder = drive.folder('Public root');
+  const node = drive.file('Menu.txt', folder.id);
+  server.use(
+    http.get('/api/v1/public/links/:token', () =>
+      HttpResponse.json({
+        ...folder,
+        parent_id: null,
+        breadcrumb: [],
+        capabilities: { can_edit: false, can_share: false, can_trash: false },
+      }),
+    ),
+    http.get('/api/v1/public/links/:token/children', () => page([node])),
+  );
+  renderApp('/s/token');
+  await userEvent
+    .setup()
+    .click(
+      await screen.findByRole('button', { name: 'More actions for Menu.txt' }),
+    );
+  expect(
+    await screen.findByRole('menuitem', { name: 'Preview' }),
+  ).toBeVisible();
+  expect(screen.getByRole('menuitem', { name: 'Download' })).toBeVisible();
+});

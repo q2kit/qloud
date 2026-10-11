@@ -68,9 +68,13 @@ function PublicBrowser({ token }: { token: string }) {
     } else next.set('preview', compactId(node.id));
     setParams(next);
   };
-  const actionsFor = (): NodeAction[] => {
-    const node = selection[0];
-    if (!node || selection.length !== 1) return [];
+  const actionsFor = (item?: DriveNode): NodeAction[] => {
+    const chosen =
+      item && !selection.some((node) => node.id === item.id)
+        ? [item]
+        : selection;
+    const node = chosen[0];
+    if (!node || chosen.length !== 1) return [];
     return [
       {
         key: 'open',

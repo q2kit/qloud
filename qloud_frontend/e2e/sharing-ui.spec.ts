@@ -208,10 +208,13 @@ test('owner shares, changes roles, creates links and revokes access through UI',
       ).toBeVisible();
       await captures(visitor, 'public-folder', isMobile);
       await visitor
-        .getByRole('option', { name: 'Readme.txt', exact: true })
+        .getByRole('button', {
+          name: 'Thao tác khác với Readme.txt',
+          exact: true,
+        })
         .click();
       await visitor
-        .getByRole('button', { name: 'Xem trước', exact: true })
+        .getByRole('menuitem', { name: 'Xem trước', exact: true })
         .click();
       await expect(
         visitor.getByRole('dialog', { name: 'Readme.txt' }),

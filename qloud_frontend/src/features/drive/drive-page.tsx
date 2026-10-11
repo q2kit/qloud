@@ -90,7 +90,7 @@ export function DrivePage(): React.JSX.Element {
     folder.data?.capabilities.can_edit === true;
   const canEditSelection =
     selected.length === 1
-      ? selectedDetail.data?.capabilities.can_edit === true
+      ? (selectedDetail.data?.capabilities.can_edit ?? canWrite)
       : canWrite;
   const [sharing, setSharing] = React.useState<DriveNode | null>(null);
   const rename = useRename();
@@ -399,11 +399,11 @@ export function DrivePage(): React.JSX.Element {
     nodeActions(useDriveStore.getState().selected, handlers, t).filter(
       (action) => {
         if (action.key === 'share')
-          return (
-            selectedDetail.data?.id ===
-              useDriveStore.getState().selected[0]?.id &&
-            selectedDetail.data?.capabilities.can_share === true
-          );
+          return selectedDetail.data?.id ===
+            useDriveStore.getState().selected[0]?.id
+            ? selectedDetail.data?.capabilities.can_share === true
+            : canWrite &&
+                useDriveStore.getState().selected[0]?.is_root === false;
         if (['rename', 'move', 'trash'].includes(action.key))
           return canEditSelection;
         return true;
