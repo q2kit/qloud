@@ -115,5 +115,5 @@ Mỗi request chọn tối đa 1.000 mục, theo giới hạn API. Đủ i18n vi
 ### S-07, S-11, S-12 — Chia sẻ (M5-05)
 
 - Được chia sẻ dùng lưới/danh sách và cursor chung Drive, thêm tên owner và quyền thực tế. Mở file qua route riêng, folder qua Drive; không nhận drop upload ở danh sách này.
-- Hộp thoại Chia sẻ mở từ một mục có quyền trong toolbar/menu hoặc panel chi tiết. Hai phần Người có quyền truy cập và Link công khai; email/role, danh sách grant, hạn dùng tùy chọn, copy và thu hồi. Hộp thoại cuộn trong 90dvh, co tới 360px; Esc/Đóng trả focus về nơi mở.
+- Hộp thoại Chia sẻ mở từ một mục có quyền trong hàng tiêu đề Drive/menu hoặc panel chi tiết. Hai phần Người có quyền truy cập và Link công khai; email/role, danh sách grant, hạn dùng tùy chọn, copy và thu hồi. Action Chia sẻ nằm ở hàng tiêu đề Drive giữ nguyên chiều cao khi chọn mục, tránh dịch item trong lúc double click. Hộp thoại cuộn trong 90dvh, co tới 360px; Esc/Đóng trả focus về nơi mở.
 - Trang public dùng PublicLayout với ngôn ngữ/theme, chỉ xem/download. File root mở viewer toàn màn hình, đóng về trang link; folder dùng breadcrumb giới hạn trong cây và FileBrowser. Menu thao tác hoạt động ngay cả khi chưa chọn mục. Link không còn hợp lệ hiện “Nội dung không còn khả dụng”. Báo cáo vi phạm triển khai cùng M5-07.

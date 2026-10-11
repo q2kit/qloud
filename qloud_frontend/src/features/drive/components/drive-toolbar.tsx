@@ -74,7 +74,6 @@ export function DriveToolbar({
                   'move',
                   'location',
                   'trash',
-                  'share',
                   'restore',
                   'delete',
                 ].includes(action.key),

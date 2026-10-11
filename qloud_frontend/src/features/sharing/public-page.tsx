@@ -8,6 +8,7 @@ import { FileViewer } from '@/features/drive/components/file-viewer';
 import {
   CenteredState,
   LoadFailed,
+  LoadingSkeleton,
 } from '@/features/drive/components/browser-states';
 import { useDrivePreferences } from '@/features/drive/preferences';
 import { compactId, uuidFromUrl } from '@/features/drive/paths';
@@ -130,7 +131,7 @@ function PublicBrowser({ token }: { token: string }) {
       />
     );
   if (!root.data || !current.data)
-    return <p role="status">{t('sharing.loading')}</p>;
+    return <LoadingSkeleton view={view} label={t('sharing.loading')} />;
   if (root.data.kind === 'file')
     return (
       <section>

@@ -89,6 +89,18 @@ function ShareForm({ node }: { node: DriveNode }) {
       : change.isError
         ? t('sharing.errors.failed')
         : localError;
+  if (
+    detail.isError &&
+    !(detail.error instanceof ApiError && detail.error.status === 404)
+  )
+    return (
+      <div className="mt-4 space-y-2">
+        <p role="alert">{t('sharing.errors.failed')}</p>
+        <Button onClick={() => void detail.refetch()}>
+          {t('preview.retry')}
+        </Button>
+      </div>
+    );
   if (detail.isError || (detail.data && !allowed))
     return (
       <p role="alert" className="mt-4">
@@ -144,9 +156,12 @@ function ShareForm({ node }: { node: DriveNode }) {
         {shares.isPending ? (
           <p role="status">{t('sharing.loading')}</p>
         ) : shares.isError ? (
-          <Button onClick={() => void shares.refetch()}>
-            {t('preview.retry')}
-          </Button>
+          <div className="mt-2 space-y-2">
+            <p role="alert">{t('sharing.errors.failed')}</p>
+            <Button onClick={() => void shares.refetch()}>
+              {t('preview.retry')}
+            </Button>
+          </div>
         ) : (
           <ul className="mt-3 space-y-3">
             {shares.data.pages
@@ -205,9 +220,12 @@ function ShareForm({ node }: { node: DriveNode }) {
         ) : links.isPending ? (
           <p role="status">{t('sharing.loading')}</p>
         ) : links.isError ? (
-          <Button onClick={() => void links.refetch()}>
-            {t('preview.retry')}
-          </Button>
+          <div className="mt-2 space-y-2">
+            <p role="alert">{t('sharing.errors.failed')}</p>
+            <Button onClick={() => void links.refetch()}>
+              {t('preview.retry')}
+            </Button>
+          </div>
         ) : (
           <>
             <form
