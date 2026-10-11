@@ -38,5 +38,8 @@
   Lưu ý định dọn S3 trong `drive_objectdeletion`; Celery dọn sau commit, giữ Blob tới khi
   S3 xác nhận. Blob còn phiên bản tham chiếu được giữ lại. Thumbnail các phiên bản cũng được dọn.
   Broker lỗi không làm API báo thất bại cho thao tác đã commit; ý định dọn vẫn trong database.
-- M4-02 bổ sung lịch dọn theo plan và quét lại hàng đợi sau khi broker/S3 phục hồi.
-- M4-03 bổ sung giao diện và hoàn tác. Hai task này chưa triển khai trong M4-01.
+- M4-02: Celery beat quét quá hạn hằng ngày theo plan hiện tại của owner (kể cả tài khoản bị khóa),
+  mỗi batch tối đa 200 root; lấy khóa owner và kiểm tra lại trạng thái/hạn trước khi xóa từng nhóm.
+  Quét lại hàng đợi dọn S3 mỗi giờ để phục hồi sau lỗi broker hoặc hết retry.
+  Xóa/retry an toàn khi chạy nhiều worker, hoặc nhóm đã được khôi phục/xóa bởi request khác.
+- M4-03 bổ sung giao diện và hoàn tác, hiện chưa triển khai.

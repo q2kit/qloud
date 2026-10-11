@@ -2,10 +2,19 @@
 
 import uuid
 from collections.abc import Sequence
+from datetime import datetime, timedelta
 from functools import partial
 
 from django.db import connection, transaction
-from django.db.models import F, QuerySet, Sum
+from django.db.models import (
+    DateTimeField,
+    DurationField,
+    ExpressionWrapper,
+    F,
+    QuerySet,
+    Sum,
+    Value,
+)
 from django.http import Http404
 from django.utils import timezone
 
@@ -114,34 +123,68 @@ def delete(user: User, ids: Sequence[uuid.UUID] | None = None) -> None:
     with transaction.atomic():
         owner = User.objects.select_for_update().get(pk=user.pk)
         roots = list(roots_for(user)) if ids is None else _selected(user, ids, trashed=True)
-        if not roots:
-            return
-        with connection.cursor() as cursor:
-            cursor.execute(_SUBTREE, [[str(n.pk) for n in roots], owner.pk, owner.pk])
-            subtree = [row[0] for row in cursor.fetchall()]
-        nodes = nodes_for(user, Role.OWNER, trashed=True).filter(pk__in=subtree)
-        versions = FileVersion.objects.filter(node__in=nodes)
-        size = versions.aggregate(total=Sum("size"))["total"] or 0
-        blob_keys = set(versions.values_list("blob__storage_key", flat=True))
-        keys = {
-            thumbnail_key(pk, size)
-            for pk in versions.values_list("pk", flat=True)
-            for size in SIZES
-        }
-        keys.update(key for key in nodes.values_list("thumbnail_key", flat=True) if key)
-        nodes.delete()
-        # A blob may still serve another version; never remove its object in that case.
-        from .models import Blob
+        _delete_locked(owner, roots)
 
-        keys.update(
-            Blob.objects.filter(storage_key__in=blob_keys, versions__isnull=True).values_list(
-                "storage_key", flat=True
-            )
-        )
-        ObjectDeletion.objects.bulk_create(
-            [ObjectDeletion(storage_key=key) for key in keys], ignore_conflicts=True
-        )
-        User.objects.filter(pk=owner.pk).update(used_bytes=F("used_bytes") - size)
-        from .tasks import enqueue_object_cleanup
 
+def _delete_locked(owner: User, roots: Sequence[Node], *, enqueue: bool = True) -> None:
+    if not roots:
+        return
+    with connection.cursor() as cursor:
+        cursor.execute(_SUBTREE, [[str(n.pk) for n in roots], owner.pk, owner.pk])
+        subtree = [row[0] for row in cursor.fetchall()]
+    nodes = Node.objects.filter(owner=owner, trashed_at__isnull=False, pk__in=subtree)
+    versions = FileVersion.objects.filter(node__in=nodes)
+    size = versions.aggregate(total=Sum("size"))["total"] or 0
+    blob_keys = set(versions.values_list("blob__storage_key", flat=True))
+    keys = {
+        thumbnail_key(pk, size) for pk in versions.values_list("pk", flat=True) for size in SIZES
+    }
+    keys.update(key for key in nodes.values_list("thumbnail_key", flat=True) if key)
+    nodes.delete()
+    # A blob may still serve another version; never remove its object in that case.
+    from .models import Blob
+
+    keys.update(
+        Blob.objects.filter(storage_key__in=blob_keys, versions__isnull=True).values_list(
+            "storage_key", flat=True
+        )
+    )
+    ObjectDeletion.objects.bulk_create(
+        [ObjectDeletion(storage_key=key) for key in keys], ignore_conflicts=True
+    )
+    User.objects.filter(pk=owner.pk).update(used_bytes=F("used_bytes") - size)
+    from .tasks import enqueue_object_cleanup
+
+    if enqueue:
         transaction.on_commit(partial(enqueue_object_cleanup))
+
+
+def expired_root_ids(now: datetime, batch: int = 200) -> list[tuple[uuid.UUID, uuid.UUID]]:
+    # Background maintenance includes suspended owners; this is not a request selector.
+    duration = ExpressionWrapper(
+        F("owner__plan__trash_retention_days") * Value(timedelta(days=1)),
+        output_field=DurationField(),
+    )
+    return list(
+        Node.objects.filter(trashed_root_id=F("id"), trashed_at__isnull=False)
+        .annotate(
+            expires_at=ExpressionWrapper(F("trashed_at") + duration, output_field=DateTimeField())
+        )
+        .filter(expires_at__lte=now)
+        .order_by("trashed_at", "id")
+        .values_list("id", "owner_id")[:batch]
+    )
+
+
+def expire_root(node_id: uuid.UUID, owner_id: uuid.UUID, now: datetime) -> bool:
+    with transaction.atomic():
+        owner = User.objects.select_for_update().filter(pk=owner_id).first()
+        if owner is None:
+            return False
+        node = Node.objects.filter(pk=node_id, owner=owner, trashed_root_id=F("id")).first()
+        if node is None or node.trashed_at is None:
+            return False
+        if node.trashed_at + timedelta(days=owner.plan.trash_retention_days) > now:
+            return False
+        _delete_locked(owner, [node], enqueue=False)
+        return True

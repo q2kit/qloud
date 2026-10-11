@@ -71,3 +71,22 @@ def enqueue_object_cleanup() -> None:
     except KombuError, OSError:
         # The durable queue can be drained by the scheduled sweep after broker recovery.
         logger.exception("Could not enqueue trash object cleanup")
+
+
+@shared_task
+def expire_trash() -> int:
+    from django.utils import timezone
+
+    from . import trash
+
+    now = timezone.now()
+    expired = 0
+    while roots := trash.expired_root_ids(now):
+        done = sum(trash.expire_root(node_id, owner_id, now) for node_id, owner_id in roots)
+        expired += done
+        if not done:
+            break
+    enqueue_object_cleanup()
+    if expired:
+        logger.info("Expired %d trash group(s)", expired)
+    return expired
