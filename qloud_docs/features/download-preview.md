@@ -53,6 +53,10 @@
 - PDF dùng pdf.js 6.4, canvas từng trang, chọn trang/zoom/fit chiều rộng; không dựng mọi trang cùng lúc. Worker, CMap/font/WASM được build/host trong app, không dùng CDN. Không có annotation/action/scripting layer thực thi script hay liên kết trong PDF.
 - Link `/drive/files/:id` (UUID compact) resolve node và folder hiện tại, rồi mở overlay ở folder đó, nên vẫn đúng sau khi file di chuyển. Copy link/tab mới/middle click/Ctrl hoặc ⌘+Enter dùng route này cho file. Gần đây dùng cùng viewer và link.
 
+### Lỗi còn tồn tại sau review M3 (11/10/2026)
+- [M3-05 / #126](https://github.com/q2kit/qloud/issues/126): refresh URL hiện gọi cleanup pause media, sự kiện pause làm mất trạng thái đang phát nên nguồn mới không tự phát tiếp; polling MP4 chưa có thumbnail cũng đổi URL nguồn. Cần giữ trạng thái/vị trí theo thao tác người dùng và thêm test refresh đang phát/tạm dừng.
+- [M3-06 / #127](https://github.com/q2kit/qloud/issues/127): ô số trang PDF nhận số thập phân trong khoảng, pdf.js từ chối và viewer báo lỗi toàn bộ. Cần chặn trang không nguyên và giữ preview khi người dùng nhập giá trị chưa hợp lệ.
+
 ### Link riêng cho file
 - **Link riêng cho file**, giống folder (M2-07b):
   - lưu lại hoặc mở ở tab khác thì ra đúng file đó trong trình xem;
