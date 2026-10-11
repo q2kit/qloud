@@ -135,6 +135,9 @@ qloud_frontend/src/
 └── locales/        # vi/, en/
 ```
 
+### Tìm kiếm tên (M6-01)
+`apps/search` lấy scope từ lớp phân quyền chung, dùng tên chuẩn hóa do trigger PostgreSQL duy trì và GIN trigram; không mở rộng quyền qua public link. Chuẩn hóa bằng NFC/unaccent/lower với collation C, nên không dùng collation natural không xác định để LIKE. Ngưỡng similarity 0,3 được đặt bằng `set_config(..., true)` trong transaction của request, không rò sang kết nối pooled. Cursor ký bao phủ toàn bộ rank và scope. Benchmark: [search.md](features/search.md#kiểm-chứng-m6-01).
+
 ## Các luồng chính
 
 ### Upload

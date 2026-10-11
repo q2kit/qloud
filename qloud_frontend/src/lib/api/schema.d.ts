@@ -364,6 +364,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["search_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/shared-with-me": {
         parameters: {
             query?: never;
@@ -786,6 +802,13 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["Report"][];
         };
+        PaginatedSearchNodeList: {
+            /** Format: uri */
+            next: string | null;
+            /** Format: uri */
+            previous: string | null;
+            results: components["schemas"]["SearchNode"][];
+        };
         PaginatedShareLinkList: {
             /**
              * Format: uri
@@ -1016,6 +1039,30 @@ export interface components {
          * @enum {string}
          */
         RevokeReasonEnum: "owner" | "moderation";
+        SearchNode: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly kind: components["schemas"]["KindEnum"];
+            readonly name: string;
+            /** Format: uuid */
+            readonly parent_id: string | null;
+            readonly is_root: boolean;
+            readonly size: number;
+            readonly mime_type: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            readonly owner: components["schemas"]["SharedOwner"];
+            readonly effective_role: components["schemas"]["SearchRoleEnum"];
+        };
+        /**
+         * @description * `owner` - owner
+         *     * `editor` - editor
+         *     * `viewer` - viewer
+         * @enum {string}
+         */
+        SearchRoleEnum: "owner" | "editor" | "viewer";
         Share: {
             /** Format: uuid */
             readonly id: string;
@@ -2225,6 +2272,71 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedNodeList"];
+                };
+            };
+        };
+    };
+    search_list: {
+        parameters: {
+            query: {
+                /** @description Opaque value from `next` or `previous`. */
+                cursor?: string;
+                modified_after?: string;
+                /**
+                 * @description * `me` - me
+                 *     * `others` - others
+                 */
+                owner?: "me" | "others";
+                /** @description Items per page, at most 200. */
+                page_size?: number;
+                q: string;
+                /**
+                 * @description * `folder` - folder
+                 *     * `document` - document
+                 *     * `image` - image
+                 *     * `video` - video
+                 *     * `audio` - audio
+                 *     * `archive` - archive
+                 *     * `other` - other
+                 */
+                type?: "folder" | "document" | "image" | "video" | "audio" | "archive" | "other";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSearchNodeList"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };

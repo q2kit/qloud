@@ -49,7 +49,7 @@ def test_recent_index_preserves_existing_files_and_is_reversible(make_file):
     try:
         executor = MigrationExecutor(connection)
         executor.migrate(after)
-        from apps.drive.models import Node
+        Node = executor.loader.project_state(after).apps.get_model("drive", "Node")
 
         migrated = Node.objects.get(pk=file.pk)
         assert (
@@ -63,6 +63,7 @@ def test_recent_index_preserves_existing_files_and_is_reversible(make_file):
         assert constraints["node_recent_files"]["index"]
         executor = MigrationExecutor(connection)
         executor.migrate(before)
+        Node = executor.loader.project_state(before).apps.get_model("drive", "Node")
         assert Node.objects.get(pk=file.pk).size == 42
         with connection.cursor() as cursor:
             assert "node_recent_files" not in connection.introspection.get_constraints(
@@ -83,12 +84,15 @@ def test_object_deletion_migration_preserves_files_and_reverses(make_file):
     try:
         executor = MigrationExecutor(connection)
         executor.migrate(after)
-        from apps.drive.models import Node, ObjectDeletion
+        from apps.drive.models import ObjectDeletion
+
+        Node = executor.loader.project_state(after).apps.get_model("drive", "Node")
 
         assert Node.objects.get(pk=file.pk).size == 42
         assert not ObjectDeletion.objects.exists()
         executor = MigrationExecutor(connection)
         executor.migrate(before)
+        Node = executor.loader.project_state(before).apps.get_model("drive", "Node")
         assert Node.objects.get(pk=file.pk).size == 42
         assert "drive_objectdeletion" not in connection.introspection.table_names()
     finally:

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.db.models import F, Q
 from django.db.models.functions import Lower
@@ -28,6 +29,8 @@ class Node(BaseModel):
     # ICU "natural" collation (migration 0003): file2 sorts before file10, accents and
     # case group together; cursor comparisons use the same collation as ORDER BY.
     name = models.CharField(max_length=255, db_collation="natural", validators=[validate_name])
+    # Maintained by a DB trigger, including bulk writes; never a display name.
+    search_name = models.TextField(db_collation="C", editable=False, default="")
     # File only: mirror the current version so listings need no join.
     mime_type = models.CharField(max_length=255, null=True, blank=True)  # noqa: DJ001
     size = models.PositiveBigIntegerField(default=0)
@@ -80,6 +83,7 @@ class Node(BaseModel):
             ),
         ]
         indexes = [
+            GinIndex(fields=["search_name"], opclasses=["gin_trgm_ops"], name="node_search_trgm"),
             models.Index(
                 F("owner"),
                 F("updated_at").desc(),

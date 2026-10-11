@@ -83,6 +83,7 @@ Truy vấn node luôn đi qua `sharing.permissions` (xem [architecture.md › Ph
 | parent_id | uuid → Node, null | chỉ folder gốc có giá trị null |
 | kind | enum(`folder`,`file`) | |
 | name | varchar(255), collation `natural` | không chứa `/`; khác rỗng. Collation ICU `und-u-kn-true` (M2-02) cho natural sort; so sánh của cursor dùng cùng collation |
+| search_name | text, collation `C` | M6-01: `lower(unaccent(normalize(name, NFC)))`, trigger DB duy trì khi INSERT/UPDATE kể cả bulk; không dùng để hiển thị |
 | mime_type | varchar(255), null | chỉ dùng cho file |
 | size | bigint | dung lượng của current version (file); 0 với folder |
 | current_version_id | uuid → FileVersion, null | |
@@ -94,7 +95,7 @@ Truy vấn node luôn đi qua `sharing.permissions` (xem [architecture.md › Ph
 **Ràng buộc và index:**
 - Unique `(parent_id, lower(name))` WHERE `trashed_at IS NULL` để tên không trùng trong cùng folder. Khi trùng thì BE tự thêm hậu tố ` (1)`, ` (2)`…
 - Index `(parent_id, kind DESC, name, id)` khớp thứ tự liệt kê mặc định (folder trước); index `(owner_id, trashed_at)`.
-- Index trigram GIN trên `name` (extension `pg_trgm`) cho tìm kiếm: thêm ở M6-01, cùng lúc bật extension.
+- M6-01: index `node_search_trgm` GIN với `gin_trgm_ops` trên `search_name`; bật `pg_trgm` và `unaccent`, backfill tên chuẩn hóa cho dữ liệu cũ. Cột text tránh giới hạn khi unaccent mở rộng ligature (ví dụ Æ → AE). Migration bỏ trigger/index/cột khi đảo ngược, giữ nguyên tên gốc.
 - Thao tác di chuyển phải chặn trường hợp chuyển node vào chính cây con của nó (kiểm tra bằng recursive CTE).
 
 > Cách lưu cây: **adjacency list (`parent_id`) + recursive CTE**. Nếu đo thấy chậm thì chuyển sang `ltree` hoặc closure table và ghi lại bằng ADR.
