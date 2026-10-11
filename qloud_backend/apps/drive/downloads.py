@@ -38,17 +38,19 @@ class DownloadLink:
     expires_at: datetime.datetime
 
 
-def download_link(node: Node) -> DownloadLink:
+def download_link(node: Node, *, expires_in: int | None = None) -> DownloadLink:
     """For the current version, under the node's current name. `node` is permission-checked."""
     if node.kind != Node.Kind.FILE:
         raise NotAFile
     if node.current_version_id is None:  # not possible for a completed upload
         raise Http404
     version = FileVersion.objects.select_related("blob").get(pk=node.current_version_id)
-    expires_at = timezone.now() + datetime.timedelta(seconds=settings.S3_DOWNLOAD_URL_SECONDS)
+    ttl = expires_in if expires_in is not None else settings.S3_DOWNLOAD_URL_SECONDS
+    expires_at = timezone.now() + datetime.timedelta(seconds=ttl)
     url = s3.presign_download(
         version.blob.storage_key,
         filename=node.name,
         content_type=safe_content_type(version.mime_type),
+        expires_in=ttl,
     )
     return DownloadLink(url=url, expires_at=expires_at)

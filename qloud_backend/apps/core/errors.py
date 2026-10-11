@@ -88,3 +88,8 @@ class ShareExists(AppError):
     status_code = status.HTTP_409_CONFLICT
     default_code = "share_exists"
     default_detail = "A direct share already exists for this recipient."
+
+
+class NotAFolder(AppError):
+    default_code = "not_a_folder"
+    default_detail = "Only folders have children."

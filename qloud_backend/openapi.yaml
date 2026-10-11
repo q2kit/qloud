@@ -80,6 +80,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/Health'
           description: ''
+  /api/v1/links/{link_id}:
+    delete:
+      operationId: links_destroy
+      parameters:
+      - in: path
+        name: link_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such resource, or insufficient access.
   /api/v1/me:
     get:
       operationId: me_retrieve
@@ -271,6 +294,88 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: No such node, or no access to it.
+  /api/v1/nodes/{node_id}/links:
+    get:
+      operationId: nodes_links_list
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      - in: path
+        name: node_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedShareLinkList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input, recipient or root folder.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such resource, or insufficient access.
+    post:
+      operationId: nodes_links_create
+      parameters:
+      - in: path
+        name: node_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLinkRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareLink'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input, recipient or root folder.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such resource, or insufficient access.
   /api/v1/nodes/{node_id}/preview:
     get:
       operationId: nodes_preview
@@ -470,6 +575,185 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: No such node, or no access to it.
+  /api/v1/public/links/{token}:
+    get:
+      operationId: public_links_retrieve
+      parameters:
+      - in: query
+        name: node_id
+        schema:
+          type: string
+          format: uuid
+        description: Defaults to the shared root.
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicNodeDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input, recipient or root folder.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such resource, or insufficient access.
+  /api/v1/public/links/{token}/children:
+    get:
+      operationId: public_links_children_list
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: Opaque value from `next` or `previous`.
+        schema:
+          type: string
+      - in: query
+        name: folder_id
+        schema:
+          type: string
+          format: uuid
+        description: Defaults to the shared root.
+      - name: ordering
+        required: false
+        in: query
+        description: Folders always come before files.
+        schema:
+          type: string
+          enum:
+          - name
+          - -name
+          - updated_at
+          - -updated_at
+          - size
+          - -size
+          default: name
+      - name: page_size
+        required: false
+        in: query
+        description: Items per page, at most 200.
+        schema:
+          type: integer
+          default: 50
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicNodeList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input, recipient or root folder.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such resource, or insufficient access.
+  /api/v1/public/links/{token}/download:
+    get:
+      operationId: public_links_download_retrieve
+      parameters:
+      - in: query
+        name: node_id
+        schema:
+          type: string
+          format: uuid
+        description: Defaults to the shared root.
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadLink'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input, recipient or root folder.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such resource, or insufficient access.
+  /api/v1/public/links/{token}/preview:
+    get:
+      operationId: public_links_preview_retrieve
+      parameters:
+      - in: query
+        name: node_id
+        schema:
+          type: string
+          format: uuid
+        description: Defaults to the shared root.
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewLink'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input, recipient or root folder.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such resource, or insufficient access.
   /api/v1/recent:
     get:
       operationId: recent_list
@@ -1039,6 +1323,13 @@ components:
       required:
       - name
       - parent_id
+    CreateLinkRequest:
+      type: object
+      properties:
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
     CreateShareRequest:
       type: object
       properties:
@@ -1357,6 +1648,9 @@ components:
       - parent_id
       - size
       - updated_at
+    NullEnum:
+      enum:
+      - null
     OnConflictEnum:
       enum:
       - fail
@@ -1384,6 +1678,44 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Node'
+    PaginatedPublicNodeList:
+      type: object
+      required:
+      - results
+      - next
+      - previous
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+        previous:
+          type: string
+          nullable: true
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicNode'
+    PaginatedShareLinkList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShareLink'
     PaginatedShareList:
       type: object
       required:
@@ -1585,6 +1917,109 @@ components:
             check it.
       required:
       - turnstile_site_key
+    PublicNode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/KindEnum'
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        parent_id:
+          type: string
+          nullable: true
+          readOnly: true
+        size:
+          type: integer
+          readOnly: true
+        mime_type:
+          type: string
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - kind
+      - mime_type
+      - name
+      - parent_id
+      - size
+      - updated_at
+    PublicNodeDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/KindEnum'
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        parent_id:
+          type: string
+          nullable: true
+          readOnly: true
+        size:
+          type: integer
+          readOnly: true
+        mime_type:
+          type: string
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        breadcrumb:
+          type: array
+          items:
+            $ref: '#/components/schemas/Breadcrumb'
+          readOnly: true
+        capabilities:
+          allOf:
+          - $ref: '#/components/schemas/Capabilities'
+          readOnly: true
+      required:
+      - breadcrumb
+      - capabilities
+      - created_at
+      - id
+      - kind
+      - mime_type
+      - name
+      - parent_id
+      - size
+      - updated_at
+    RevokeReasonEnum:
+      enum:
+      - owner
+      - moderation
+      type: string
+      description: |-
+        * `owner` - Owner
+        * `moderation` - Moderation
     Share:
       type: object
       properties:
@@ -1624,6 +2059,74 @@ components:
       - node_id
       - role
       - updated_at
+    ShareLink:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        node_id:
+          type: string
+          format: uuid
+          readOnly: true
+        token:
+          type: string
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/ShareLinkRoleEnum'
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        revoked_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        revoked_by_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        revoke_reason:
+          readOnly: true
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/RevokeReasonEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        created_by_id:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - created_by_id
+      - expires_at
+      - id
+      - node_id
+      - revoke_reason
+      - revoked_at
+      - revoked_by_id
+      - role
+      - token
+      - updated_at
+    ShareLinkRoleEnum:
+      enum:
+      - viewer
+      type: string
+      description: '* `viewer` - Viewer'
     ShareRoleEnum:
       enum:
       - viewer

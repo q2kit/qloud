@@ -226,7 +226,14 @@ def content_disposition(filename: str, *, inline: bool = False) -> str:
     return f"{kind}; filename=\"{fallback}\"; filename*=UTF-8''{quote(filename, safe='')}"
 
 
-def presign_download(key: str, *, filename: str, content_type: str, inline: bool = False) -> str:
+def presign_download(
+    key: str,
+    *,
+    filename: str,
+    content_type: str,
+    inline: bool = False,
+    expires_in: int | None = None,
+) -> str:
     """A short-lived GET URL; S3 serves Range requests, so video streams from it."""
     return client().generate_presigned_url(
         "get_object",
@@ -236,7 +243,7 @@ def presign_download(key: str, *, filename: str, content_type: str, inline: bool
             "ResponseContentDisposition": content_disposition(filename, inline=inline),
             "ResponseContentType": content_type,
         },
-        ExpiresIn=settings.S3_DOWNLOAD_URL_SECONDS,
+        ExpiresIn=expires_in if expires_in is not None else settings.S3_DOWNLOAD_URL_SECONDS,
     )
 
 

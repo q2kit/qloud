@@ -176,6 +176,8 @@ Kế thừa UUIDv7, `created_at`, `updated_at` từ BaseModel. Unique `(node_id,
 | revoke_reason | varchar(30), null | `owner`, `moderation` |
 | created_by_id | uuid → User | |
 
+ShareLink kế thừa UUIDv7/created_at/updated_at; bảng `sharing_share_link`. FK node/created_by CASCADE, revoked_by SET_NULL để giữ audit khi tài khoản người thu hồi bị xóa. Token unique, role có check viewer; check revoked_at/revoke_reason đi cùng nhau, reason chỉ owner/moderation, link chưa thu hồi không có revoked_by. Index FK node phục vụ danh sách; migration M5-03 thêm bảng, đảo ngược được, giữ nguyên Node/Share hiện có.
+
 ### `moderation_report`
 Báo cáo vi phạm từ trang link công khai (xem [sharing.md](features/sharing.md)).
 

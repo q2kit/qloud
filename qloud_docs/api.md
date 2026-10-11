@@ -136,7 +136,7 @@ M2-04: `POST /uploads` trả session `{id, part_size, part_count, expires_at, ..
 | DELETE | `/nodes/{id}/versions/{vid}` | Xóa một phiên bản (không xóa được phiên bản hiện tại) |
 
 ### Chia sẻ
-M5-02 triển khai `/nodes/{id}/shares`, `/shares/{id}` và `/shared-with-me`; các endpoint link/public bên dưới thuộc M5-03.
+M5-02 triển khai API share người dùng; M5-03 triển khai API link/public (báo cáo thuộc M5-07).
 - GET/POST danh sách share và PATCH/DELETE share yêu cầu editor hoặc owner trên node còn sống, không phải folder gốc. Viewer/người ngoài/trashed trả 404, folder gốc trả 400 `root_folder`. Kiểm tra quyền trước lookup email.
 - POST `{email, role}` chỉ nhận viewer/editor; tra email chính của tài khoản active, không bị khóa, không phân biệt hoa thường. Không có người nhận hợp lệ: 400 `invalid_share_recipient`; người nhận là chính người thao tác hoặc owner: 400 `invalid_share_target`; grant trực tiếp trùng: 409 `share_exists`.
 - POST trả 201, PATCH `{role}` trả 200 với Share `{id, node_id, grantee: {id, email, display_name}, role, created_by_id, created_at, updated_at}`; DELETE trả 204. Owner/editor có thể sửa/thu hồi mọi grant trực tiếp trên node đó. Grant thừa kế được quản lý ở node nguồn, không qua node con.
@@ -150,10 +150,20 @@ M5-02 triển khai `/nodes/{id}/shares`, `/shares/{id}` và `/shared-with-me`; c
 | PATCH/DELETE | `/shares/{id}` | Đổi quyền / thu hồi |
 | GET/POST | `/nodes/{id}/links` | Danh sách share link / tạo link `{expires_at?}` |
 | DELETE | `/links/{id}` | Thu hồi link |
-| GET | `/public/links/{token}` | Thông tin node qua link (không cần đăng nhập) |
+| GET | `/public/links/{token}?node_id=` | Thông tin node qua link (không cần đăng nhập) |
 | GET | `/public/links/{token}/children?folder_id=` | Duyệt folder được chia sẻ |
 | GET | `/public/links/{token}/download?node_id=` | Tải file qua link |
+| GET | `/public/links/{token}/preview?node_id=` | Xem trước file qua link, schema như preview Drive |
 | POST | `/public/links/{token}/reports` | Báo cáo vi phạm `{node_id, reason, message?, email?, turnstile_token}` |
+
+#### Hợp đồng ShareLink (M5-03)
+- GET/POST links và DELETE link chỉ owner thật trên node còn sống, không phải folder gốc; editor/viewer/người ngoài/trashed trả 404, root trả 400 `root_folder`. Kiểm tra quyền trước payload. POST `{expires_at?: datetime|null}`: null/bỏ qua là không hết hạn; thời gian phải ở tương lai. Trả 201 ShareLink `{id,node_id,token,role,expires_at,revoked_at,revoked_by_id,revoke_reason,created_by_id,created_at,updated_at}`.
+- GET links cursor 50/tối đa 200, mới nhất trước created_at/id; gồm cả link đã hết hạn/thu hồi. DELETE trả 204, ghi revoked_at/by/reason owner; gọi lại không đổi audit, không bật lại link và giữ reason moderation.
+- Public endpoint không dùng quyền session. Root và hậu duệ cùng owner còn sống là phạm vi duy nhất; token sai/hết hạn/thu hồi, owner inactive/suspended đều trả cùng 404 `not_found`. Kiểm tra ở mỗi request và truy vấn node qua lớp quyền link chung.
+- GET public chi tiết nhận node_id tùy chọn, mặc định root. Trả `{id,kind,name,parent_id,size,mime_type,created_at,updated_at,breadcrumb,capabilities}`; parent_id root null, breadcrumb chỉ trong cây link, capabilities can_edit/can_trash/can_share đều false. Không trả email owner, tổ tiên ngoài cây, token/audit hay blob/storage key.
+- Children nhận folder_id tùy chọn mặc định root, dùng cursor/ordering như Drive; chỉ liệt kê con trực tiếp trong cây. File trả 400 `not_a_folder`. Node ngoài cây/trash trả 404. UUID query sai trả 400 `validation_error`; cursor sai trả 404.
+- Download/preview nhận node_id tùy chọn mặc định root. Folder trả 400 `not_a_file`; file chưa có current version trả 404. Download trả `{url,expires_at}`; preview dùng schema/allowlist MIME như Drive, thumbnail chỉ current version. Không có upload, ghi hoặc lịch sử phiên bản qua token.
+- URL nguồn và thumbnail tối đa 5 phút, không vượt expires_at của link (làm tròn xuống theo giây; còn dưới 1 giây không cấp URL). Thu hồi/trash/di chuyển khỏi cây ngăn cấp URL mới ở request tiếp theo; URL S3 đã cấp còn hiệu lực tới hạn chữ ký. Byte không đi qua server ứng dụng.
 
 ### Thùng rác
 | Method | Path | Mô tả |

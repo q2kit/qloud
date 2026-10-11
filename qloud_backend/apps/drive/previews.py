@@ -72,14 +72,17 @@ class PreviewLink:
     thumbnail: ThumbnailLink | None
 
 
-def preview_link(node: Node, *, thumbnail_only: bool = False) -> PreviewLink:
+def preview_link(
+    node: Node, *, thumbnail_only: bool = False, expires_in: int | None = None
+) -> PreviewLink:
     if node.kind != Node.Kind.FILE:
         raise NotAFile
     if node.current_version_id is None:
         raise Http404
     version = FileVersion.objects.select_related("blob").get(pk=node.current_version_id)
     kind = preview_kind(version.mime_type, version.size)
-    expires_at = timezone.now() + datetime.timedelta(seconds=settings.S3_DOWNLOAD_URL_SECONDS)
+    ttl = expires_in if expires_in is not None else settings.S3_DOWNLOAD_URL_SECONDS
+    expires_at = timezone.now() + datetime.timedelta(seconds=ttl)
     url = None
     if not thumbnail_only and kind != "unsupported":
         url = s3.presign_download(
@@ -87,6 +90,7 @@ def preview_link(node: Node, *, thumbnail_only: bool = False) -> PreviewLink:
             filename=node.name,
             content_type="text/plain" if kind == "text" else safe_content_type(version.mime_type),
             inline=True,
+            expires_in=ttl,
         )
     thumbnail = None
     # Only publish the pair belonging to this version, never an old version's key.
@@ -96,10 +100,18 @@ def preview_link(node: Node, *, thumbnail_only: bool = False) -> PreviewLink:
     ) and node.thumbnail_key == f"{prefix}/256.webp":
         thumbnail = ThumbnailLink(
             url=s3.presign_download(
-                node.thumbnail_key, filename="256.webp", content_type="image/webp", inline=True
+                node.thumbnail_key,
+                filename="256.webp",
+                content_type="image/webp",
+                inline=True,
+                expires_in=ttl,
             ),
             large_url=s3.presign_download(
-                f"{prefix}/1024.webp", filename="1024.webp", content_type="image/webp", inline=True
+                f"{prefix}/1024.webp",
+                filename="1024.webp",
+                content_type="image/webp",
+                inline=True,
+                expires_in=ttl,
             ),
             expires_at=expires_at,
         )
