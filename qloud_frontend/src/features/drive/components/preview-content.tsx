@@ -86,13 +86,18 @@ function MediaPreview({
   const ref = React.useRef<HTMLVideoElement & HTMLAudioElement>(null);
   const position = React.useRef(0);
   const playing = React.useRef(false);
+  const restoring = React.useRef(true);
   const Tag = video ? 'video' : 'audio';
   React.useEffect(() => {
     const element = ref.current;
     // Setup must restore the source after StrictMode replays cleanup in development.
+    restoring.current = true;
     if (element) element.src = url;
     return () => {
       if (element) {
+        position.current = element.currentTime;
+        // Source replacement queues pause/timeupdate events; these aren't user intent.
+        restoring.current = true;
         element.pause();
         element.removeAttribute('src');
         element.load();
@@ -107,16 +112,18 @@ function MediaPreview({
       aria-label={name}
       className={video ? 'max-h-full max-w-full' : 'w-full max-w-xl'}
       onTimeUpdate={(event) => {
-        position.current = event.currentTarget.currentTime;
+        if (!restoring.current)
+          position.current = event.currentTarget.currentTime;
       }}
       onPlay={() => {
         playing.current = true;
       }}
       onPause={() => {
-        playing.current = false;
+        if (!restoring.current) playing.current = false;
       }}
       onLoadedMetadata={(event) => {
         event.currentTarget.currentTime = position.current;
+        restoring.current = false;
         if (playing.current)
           void event.currentTarget.play().catch(() => undefined);
       }}

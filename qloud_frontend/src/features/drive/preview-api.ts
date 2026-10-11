@@ -35,16 +35,6 @@ export function usePreview(
     refetchInterval: (query) => {
       const link = query.state.data;
       if (!link) return false;
-      if (
-        !link.thumbnail &&
-        (link.kind === 'image' ||
-          link.kind === 'pdf' ||
-          (node?.mime_type?.split(';')[0]?.trim().toLowerCase() ===
-            'video/mp4' &&
-            link.kind === 'video')) &&
-        query.state.dataUpdateCount < 7
-      )
-        return 5000;
       if (thumbnailOnly && !link.thumbnail) return false;
       return refreshDelay(link);
     },
