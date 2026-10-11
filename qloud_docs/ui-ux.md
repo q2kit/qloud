@@ -98,3 +98,16 @@ Mỗi màn hình được mô tả chi tiết (trạng thái rỗng, đang tải
 - Một file: Tải xuống, Mở thư mục chứa tệp, Thông tin. Loading/rỗng/lỗi và Thử lại dùng chung core. Không tạo folder bằng double click vùng trống, không kéo item để di chuyển/nhận drop upload tại nội dung Gần đây. Header Tạo mới vẫn trỏ Drive gốc.
 - Mở thư mục chứa tệp chỉ có ở Gần đây, dùng link folder cha với `?select=<UUID-file-không-dấu-gạch>`. Drive kiểm tra file còn ở đúng folder và có quyền, tải tiếp trang cursor tới file, chọn/highlight, cuộn tới và focus item cả khi virtualize. Reload link vẫn chọn file; Esc/click vùng trống bỏ chọn bình thường. Link tới file đã chuyển/xóa/không có quyền báo không tìm thấy, không tự chuyển sang folder khác.
 - Menu “⋯” chọn item và mở sau khi click hoàn tất (đã thả con trỏ), tránh mouseup kích hoạt nhầm action khi toolbar đổi chiều cao giữa các vùng chọn. Chuột phải và mở menu bằng bàn phím giữ hành vi hiện có.
+
+### S-08 — Thùng rác (M4-03)
+
+Trang `/trash` dùng chung FileBrowser/NodeCollection với Drive: lưới/danh sách, sắp xếp,
+phân trang cursor, chọn nhiều, menu chuột phải/nút ⋯. Các action là Khôi phục và Xóa vĩnh viễn;
+header có Dọn sạch thùng rác. Xóa vĩnh viễn/dọn sạch mở hộp thoại xác nhận, focus ở Hủy;
+lỗi API giữ hộp thoại và dữ liệu để thử lại. Các mục dùng icon, không mở preview/download.
+
+Drive có action Chuyển vào thùng rác cho một/nhiều mục trong toolbar và menu. Mục rời danh sách
+ngay khi gửi request; thất bại thì rollback cache và giữ lại selection. Toast ở layout chung
+hiển thị Đã chuyển vào thùng rác + Hoàn tác trong khoảng 8 giây, tồn tại qua chuyển trang.
+Hoàn tác dùng root nhóm server trả về; lỗi hiển thị thông báo cho phép thử lại/khôi phục từ trang trash.
+Mỗi request chọn tối đa 1.000 mục, theo giới hạn API. Đủ i18n vi/en, light/dark, responsive 360px.

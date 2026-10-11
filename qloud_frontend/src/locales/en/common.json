@@ -384,5 +384,25 @@
       "fit": "Fit page",
       "canvas": "PDF page {{page}}"
     }
+  },
+  "trash": {
+    "move": "Move to trash",
+    "moved": "Moved to trash",
+    "undo": "Undo",
+    "undoFailed": "Could not undo. Try again or restore from Trash.",
+    "dismiss": "Dismiss notification",
+    "restore": "Restore",
+    "delete": "Delete permanently",
+    "empty": "Empty trash",
+    "emptyTitle": "Empty trash?",
+    "deleteTitle": "Permanently delete selected items?",
+    "deleteWarning": "These files and folders will be permanently deleted. This action cannot be undone.",
+    "description": "Restore or permanently delete removed items. They still count toward your storage.",
+    "loading": "Loading trash…",
+    "loadFailed": "Could not load trash",
+    "actionFailed": "Could not complete this action. Please try again.",
+    "tooMany": "Select up to 1,000 items at a time.",
+    "emptyState": "Trash is empty",
+    "emptyDescription": "Items you delete will appear here."
   }
 }

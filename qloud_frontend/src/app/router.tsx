@@ -9,6 +9,7 @@ import { VerifyEmailPage } from '@/features/auth/pages/verify-email-page';
 import { FileLinkPage } from '@/features/drive/file-link-page';
 import { DrivePage } from '@/features/drive/drive-page';
 import { RecentPage } from '@/features/drive/recent-page';
+import { TrashPage } from '@/features/trash/trash-page';
 import { SettingsPage } from '@/features/settings/settings-page';
 
 import { AppLayout } from './layout';
@@ -16,7 +17,7 @@ import { NotFoundPage, RouteErrorPage, SectionPlaceholderPage } from './pages';
 import { PublicLayout } from './public-layout';
 import type { RouteHandle } from './route-handle';
 
-type Section = 'shared' | 'trash';
+type Section = 'shared';
 
 function sectionPlaceholderRoute(section: Section): RouteObject {
   const handle: RouteHandle = { titleKey: `navigation.${section}` };
@@ -69,7 +70,11 @@ export const appRoutes: RouteObject[] = [
                 handle: { titleKey: 'navigation.recent' } satisfies RouteHandle,
               },
               sectionPlaceholderRoute('shared'),
-              sectionPlaceholderRoute('trash'),
+              {
+                path: 'trash',
+                Component: TrashPage,
+                handle: { titleKey: 'navigation.trash' } satisfies RouteHandle,
+              },
               {
                 path: 'settings',
                 Component: SettingsPage,

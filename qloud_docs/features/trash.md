@@ -19,10 +19,10 @@
 - Sau khi xóa, UI hiện toast "Đã chuyển vào thùng rác" kèm nút **Hoàn tác** trong khoảng 8 giây.
 
 ## Tiêu chí chấp nhận
-- [ ] Xóa một folder có 1.000 node con chỉ tốn một request, và chạy dưới 1 giây.
-- [ ] Xóa file con X, sau đó xóa folder cha A, rồi khôi phục A: X vẫn nằm trong thùng rác (vì có `trashed_root` riêng).
-- [ ] Xóa vĩnh viễn thì quota giảm và object trên S3 bị xóa.
-- [ ] Mục quá 30 ngày bị tự động xóa vĩnh viễn.
+- [x] Xóa một folder có 1.000 node con chỉ tốn một request, và chạy dưới 1 giây.
+- [x] Xóa file con X, sau đó xóa folder cha A, rồi khôi phục A: X vẫn nằm trong thùng rác (vì có `trashed_root` riêng).
+- [x] Xóa vĩnh viễn thì quota giảm và object trên S3 bị xóa.
+- [x] Mục quá 30 ngày bị tự động xóa vĩnh viễn.
 
 ## Triển khai M4
 
@@ -42,4 +42,9 @@
   mỗi batch tối đa 200 root; lấy khóa owner và kiểm tra lại trạng thái/hạn trước khi xóa từng nhóm.
   Quét lại hàng đợi dọn S3 mỗi giờ để phục hồi sau lỗi broker hoặc hết retry.
   Xóa/retry an toàn khi chạy nhiều worker, hoặc nhóm đã được khôi phục/xóa bởi request khác.
-- M4-03 bổ sung giao diện và hoàn tác, hiện chưa triển khai.
+- M4-03: `/trash` dùng FileBrowser/NodeCollection cho lưới/danh sách, sắp xếp, cursor,
+  chọn nhiều và menu theo ngữ cảnh. Khôi phục/xóa nhóm đã chọn; xác nhận trước xóa vĩnh viễn/dọn sạch,
+  focus ban đầu ở Hủy. Drive hỗ trợ đưa một hoặc nhiều mục vào thùng rác, cập nhật optimistic và rollback khi lỗi.
+  Toast Hoàn tác khoảng 8 giây tồn tại qua chuyển trang; dùng ID root server trả về.
+  Các mục trash dùng icon, không gọi preview/download của node còn sống. Đủ bản dịch vi/en và light/dark 360px.
+- Code M4 đã triển khai đủ trong ba PR nối tiếp; chờ owner review/merge để hoàn tất milestone.

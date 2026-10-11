@@ -246,6 +246,7 @@ describe('item menus', () => {
       'Download',
       'RenameF2',
       'Move…',
+      'Move to trash',
       'Infoi',
     ]);
     expect(selectedNames()).toEqual(['report.pdf']);
@@ -278,7 +279,7 @@ describe('item menus', () => {
     expect(selectedNames()).toEqual(['B', 'C']);
   });
 
-  it('the ⋯ button opens the same menu; several items only move', async () => {
+  it('the ⋯ button opens the same menu; several items move or go to trash', async () => {
     const user = userEvent.setup();
     drive.folder('A');
     drive.folder('B');
@@ -295,7 +296,7 @@ describe('item menus', () => {
       within(screen.getByRole('menu'))
         .getAllByRole('menuitem')
         .map((item) => item.textContent),
-    ).toEqual(['Move 2 items…']);
+    ).toEqual(['Move 2 items…', 'Move to trash']);
   });
 });
 
@@ -352,6 +353,7 @@ describe('folder links (open in a new tab)', () => {
       'Copy link',
       'RenameF2',
       'Move…',
+      'Move to trash',
       'Infoi',
     ]);
     await user.click(menu.getByRole('menuitem', { name: 'Copy link' }));

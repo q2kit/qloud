@@ -15,6 +15,7 @@ import { ResumeUploads } from '@/features/upload/components/resume-uploads';
 import { useUploader } from '@/features/upload/context';
 import { treeFromDrop } from '@/features/upload/drop';
 import { useFolderUploader } from '@/features/upload/folder-context';
+import { useTrashNodes } from '@/features/trash/api';
 import { ApiError } from '@/lib/api/errors';
 
 import { nodeActions, type ActionHandlers } from './actions';
@@ -75,6 +76,7 @@ export function DrivePage(): React.JSX.Element {
   const { selected, select } = store;
   const rename = useRename();
   const move = useMove();
+  const trash = useTrashNodes();
   const [renaming, setRenaming] = React.useState<Renaming | null>(null);
   const [moving, setMoving] = React.useState<Moving | null>(null);
   const [actionError, setActionError] = React.useState<string | null>(null);
@@ -327,6 +329,24 @@ export function DrivePage(): React.JSX.Element {
     },
     move: (items) => {
       setMoving({ nodes: items });
+    },
+    trash: (items) => {
+      if (trash.isPending) return;
+      if (items.length > 1000) {
+        setActionError(t('trash.tooMany'));
+        return;
+      }
+      setActionError(null);
+      select(null);
+      trash.mutate(
+        items.map((node) => node.id),
+        {
+          onError: () => {
+            store.selectAll(items);
+            setActionError(t('trash.actionFailed'));
+          },
+        },
+      );
     },
     info: () => {
       store.setDetailOpen(true);

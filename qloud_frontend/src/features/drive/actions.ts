@@ -8,6 +8,7 @@ import {
   Info,
   Link,
   Pencil,
+  Trash2,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -26,6 +27,7 @@ export interface ActionHandlers {
   download: (node: DriveNode) => void;
   rename: (node: DriveNode) => void;
   move: (nodes: DriveNode[]) => void;
+  trash?: (nodes: DriveNode[]) => void;
   info: (node: DriveNode) => void;
   /** Independent URLs for files and folders. */
   openInNewTab: (node: DriveNode) => void;
@@ -34,7 +36,7 @@ export interface ActionHandlers {
 
 /**
  * The item menu (right click, "⋯") for a selection. Only actions with an API so far:
- * Preview (M3), Share (M5) and Delete (M4) join later.
+ * Sharing joins at M5.
  */
 export function nodeActions(
   selection: DriveNode[],
@@ -54,7 +56,19 @@ export function nodeActions(
       handlers.move(selection);
     },
   };
-  if (selection.length > 1) return [move];
+  const trash: NodeAction[] = handlers.trash
+    ? [
+        {
+          key: 'trash',
+          label: t('trash.move'),
+          icon: Trash2,
+          run: () => {
+            handlers.trash?.(selection);
+          },
+        },
+      ]
+    : [];
+  if (selection.length > 1) return [move, ...trash];
   return [
     {
       key: 'open',
@@ -106,6 +120,7 @@ export function nodeActions(
       },
     },
     move,
+    ...trash,
     {
       key: 'info',
       label: t('drive.actions.info'),

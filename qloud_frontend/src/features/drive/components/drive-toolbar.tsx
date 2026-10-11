@@ -67,9 +67,16 @@ export function DriveToolbar({
             {actions
               // The menu has the rest (new tab, link, info).
               .filter((action) =>
-                ['open', 'download', 'rename', 'move', 'location'].includes(
-                  action.key,
-                ),
+                [
+                  'open',
+                  'download',
+                  'rename',
+                  'move',
+                  'location',
+                  'trash',
+                  'restore',
+                  'delete',
+                ].includes(action.key),
               )
               .map((action) => (
                 <Button
