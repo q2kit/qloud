@@ -196,6 +196,7 @@ it.each([
     );
     const image = option.querySelector('img');
     if (!image) throw new Error('Missing thumbnail');
+    expect(image).toHaveAttribute('draggable', 'false');
     fireEvent.error(image);
     expect(option.querySelector('img')).toBeNull();
     vi.unstubAllGlobals();

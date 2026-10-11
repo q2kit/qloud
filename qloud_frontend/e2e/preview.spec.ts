@@ -99,6 +99,77 @@ async function captures(
   }
 }
 
+test('dragging a thumbnail moves the entire node card without uploading', async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(
+    isMobile,
+    'Native HTML drag uses a mouse; a desktop Chromium also checks width 360.',
+  );
+  await signUpVerifiedViaApi(page);
+  const parent = await root(page);
+  await page.addInitScript(() => {
+    const original = Object.getOwnPropertyDescriptor(
+      DataTransfer.prototype,
+      'setDragImage',
+    )?.value as DataTransfer['setDragImage'];
+    DataTransfer.prototype.setDragImage = function (element, x, y) {
+      document.documentElement.dataset.dragImageName =
+        element.getAttribute('aria-label') ?? '';
+      document.documentElement.dataset.dragImageRole =
+        element.getAttribute('role') ?? '';
+      original.call(this, element, x, y);
+    };
+  });
+  for (const width of [1280, 360]) {
+    await page.setViewportSize({ width, height: 740 });
+    const name = `ảnh-${String(width)}.png`;
+    const node = await upload(
+      page,
+      parent,
+      name,
+      'image/png',
+      await readFile('e2e/fixtures/preview.png'),
+    );
+    const folder = await page.request.post('/api/v1/folders', {
+      headers: await csrf(page),
+      data: { parent_id: parent, name: `Đích ${String(width)}` },
+    });
+    expect(folder.status()).toBe(201);
+    const target = (await folder.json()) as { id: string };
+    await page.goto('/drive');
+    await item(page, name).click();
+    const image = item(page, name).locator('img');
+    await expect(image).toBeVisible();
+    await expect(image).toHaveAttribute('draggable', 'false');
+    await captures(page, 'card', width === 360, 'm4-06');
+    const moved = page.waitForResponse(
+      (response) =>
+        response.url().endsWith('/api/v1/nodes/move') &&
+        response.request().method() === 'POST',
+    );
+    await image.dragTo(item(page, `Đích ${String(width)}`));
+    expect((await moved).status()).toBe(200);
+    await expect(item(page, name)).toHaveCount(0);
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-drag-image-name',
+      name,
+    );
+    await expect(page.locator('html')).toHaveAttribute(
+      'data-drag-image-role',
+      'option',
+    );
+    const detail = await page.request.get(`/api/v1/nodes/${node.id}`);
+    expect(((await detail.json()) as { parent_id: string }).parent_id).toBe(
+      target.id,
+    );
+    await expect(
+      page.getByText('Thả để tải lên', { exact: false }),
+    ).toHaveCount(0);
+  }
+});
+
 test('Trash displays image, PDF and MP4 thumbnails without source access', async ({
   page,
   isMobile,

@@ -48,4 +48,4 @@
   focus ban đầu ở Hủy. Drive hỗ trợ đưa một hoặc nhiều mục vào thùng rác, cập nhật optimistic và rollback khi lỗi.
   Toast Hoàn tác khoảng 8 giây tồn tại qua chuyển trang; dùng ID root server trả về.
   Các file trash hiện thumbnail ảnh/PDF/MP4 trong viewport (grid/list); thiếu/lỗi dùng icon. Owner dùng API preview với `trashed_thumbnail=true`, chỉ cấp URL thumbnail, không cấp URL nguồn hay download. Cache thumbnail Trash riêng và refresh theo hạn thumbnail; không polling chờ tạo thumbnail. Đủ bản dịch vi/en và light/dark 360px.
-- Code M4 đã triển khai đủ trong ba PR nối tiếp; chờ owner review/merge để hoàn tất milestone.
+- M4-01…M4-03 triển khai luồng thùng rác; M4-04…M4-06 bổ sung phím Delete, thumbnail Trash và sửa kéo card có preview theo góp ý owner. Chờ owner review/merge các PR còn mở để hoàn tất milestone.

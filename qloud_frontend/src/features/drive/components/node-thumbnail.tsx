@@ -45,6 +45,7 @@ export function NodeThumbnail({
       {src && failedUrl !== src ? (
         <img
           src={src}
+          draggable={false}
           alt=""
           loading="lazy"
           className="size-full object-contain"

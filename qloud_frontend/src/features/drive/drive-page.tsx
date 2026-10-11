@@ -18,7 +18,11 @@ import { useFolderUploader } from '@/features/upload/folder-context';
 import { useTrashNodes } from '@/features/trash/api';
 import { ApiError } from '@/lib/api/errors';
 
-import { nodeActions, type ActionHandlers } from './actions';
+import {
+  isExternalFileDrag,
+  nodeActions,
+  type ActionHandlers,
+} from './actions';
 import {
   downloadNode,
   useChildren,
@@ -109,24 +113,24 @@ export function DrivePage(): React.JSX.Element {
   };
   const fileDragHandlers = {
     onDragEnter: (event: React.DragEvent) => {
-      if (!event.dataTransfer.types.includes('Files')) return;
+      if (!isExternalFileDrag(event.dataTransfer)) return;
       dragDepth.current += 1;
       setFileDrag((current) => current ?? { over: null });
     },
     onDragLeave: (event: React.DragEvent) => {
-      if (!event.dataTransfer.types.includes('Files')) return;
+      if (!isExternalFileDrag(event.dataTransfer)) return;
       dragDepth.current = Math.max(0, dragDepth.current - 1);
       if (dragDepth.current === 0) setFileDrag(null);
     },
     onDragOver: (event: React.DragEvent) => {
-      if (!event.dataTransfer.types.includes('Files')) return;
+      if (!isExternalFileDrag(event.dataTransfer)) return;
       event.preventDefault();
       event.dataTransfer.dropEffect = 'copy';
     },
     onDrop: (event: React.DragEvent) => {
       dragDepth.current = 0;
       setFileDrag(null);
-      if (!event.dataTransfer.types.includes('Files')) return;
+      if (!isExternalFileDrag(event.dataTransfer)) return;
       event.preventDefault();
       uploadFrom(event.dataTransfer, folderId);
     },
