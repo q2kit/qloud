@@ -1,4 +1,11 @@
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
 import { delay, http, HttpResponse } from 'msw';
@@ -145,6 +152,71 @@ it('loads cursor pages, selects multiple, restores and removes selection', async
   expect(useDriveStore.getState().selected).toEqual([]);
   expect(screen.getByRole('button', { name: 'Empty trash' })).toBeDisabled();
 });
+
+it.each(['image/png', 'application/pdf', 'video/mp4'])(
+  'shows %s trash thumbnails in grid/list and falls back on failure',
+  async (mime) => {
+    const observers: IntersectionObserverCallback[] = [];
+    class Observer {
+      constructor(callback: IntersectionObserverCallback) {
+        observers.push(callback);
+      }
+      observe = vi.fn();
+      disconnect = vi.fn();
+    }
+    vi.stubGlobal('IntersectionObserver', Observer);
+    try {
+      const user = userEvent.setup();
+      const node = drive.file('preview-file', undefined, 20, mime);
+      addTrash(node);
+      const calls = vi.fn();
+      server.use(
+        http.get('/api/v1/nodes/:id/preview', ({ request }) => {
+          expect(
+            new URL(request.url).searchParams.get('trashed_thumbnail'),
+          ).toBe('true');
+          calls();
+          return HttpResponse.json({
+            kind: 'image',
+            url: null,
+            expires_at: null,
+            thumbnail: {
+              url: 'https://storage.example/trash-thumb',
+              large_url: 'https://storage.example/large',
+              expires_at: new Date(Date.now() + 300_000).toISOString(),
+            },
+          });
+        }),
+      );
+      renderApp('/trash', testUser);
+      const option = await screen.findByRole('option', { name: node.name });
+      expect(calls).not.toHaveBeenCalled();
+      for (const notify of observers)
+        notify(
+          [{ isIntersecting: true } as IntersectionObserverEntry],
+          {} as IntersectionObserver,
+        );
+      await waitFor(() =>
+        expect(option.querySelector('img')).toHaveAttribute(
+          'src',
+          'https://storage.example/trash-thumb',
+        ),
+      );
+      await user.click(screen.getByRole('button', { name: 'List view' }));
+      await waitFor(() =>
+        expect(option.querySelector('img')).toBeInTheDocument(),
+      );
+      const image = option.querySelector('img');
+      if (!image) throw new Error('Missing thumbnail');
+      fireEvent.error(image);
+      await waitFor(() => {
+        expect(option.querySelector('img')).toBeNull();
+      });
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  },
+);
 
 it('confirms permanent deletion, cancel does not delete, failures can retry', async () => {
   const user = userEvent.setup();

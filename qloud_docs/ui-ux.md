@@ -104,7 +104,7 @@ Mỗi màn hình được mô tả chi tiết (trạng thái rỗng, đang tải
 Trang `/trash` dùng chung FileBrowser/NodeCollection với Drive: lưới/danh sách, sắp xếp,
 phân trang cursor, chọn nhiều, menu chuột phải/nút ⋯. Các action là Khôi phục và Xóa vĩnh viễn;
 header có Dọn sạch thùng rác. Xóa vĩnh viễn/dọn sạch mở hộp thoại xác nhận, focus ở Hủy;
-lỗi API giữ hộp thoại và dữ liệu để thử lại. Các mục dùng icon, không mở preview/download.
+lỗi API giữ hộp thoại và dữ liệu để thử lại. File có thumbnail ảnh/PDF/MP4 trong grid/list; thiếu/lỗi dùng icon. Không mở preview nội dung/download trong Trash.
 
 Drive có action Chuyển vào thùng rác cho một/nhiều mục trong toolbar và menu. Mục rời danh sách
 ngay khi gửi request; thất bại thì rollback cache và giữ lại selection. Toast ở layout chung

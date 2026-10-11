@@ -47,5 +47,5 @@
   chọn nhiều và menu theo ngữ cảnh. Khôi phục/xóa nhóm đã chọn; xác nhận trước xóa vĩnh viễn/dọn sạch,
   focus ban đầu ở Hủy. Drive hỗ trợ đưa một hoặc nhiều mục vào thùng rác, cập nhật optimistic và rollback khi lỗi.
   Toast Hoàn tác khoảng 8 giây tồn tại qua chuyển trang; dùng ID root server trả về.
-  Các mục trash dùng icon, không gọi preview/download của node còn sống. Đủ bản dịch vi/en và light/dark 360px.
+  Các file trash hiện thumbnail ảnh/PDF/MP4 trong viewport (grid/list); thiếu/lỗi dùng icon. Owner dùng API preview với `trashed_thumbnail=true`, chỉ cấp URL thumbnail, không cấp URL nguồn hay download. Cache thumbnail Trash riêng và refresh theo hạn thumbnail; không polling chờ tạo thumbnail. Đủ bản dịch vi/en và light/dark 360px.
 - Code M4 đã triển khai đủ trong ba PR nối tiếp; chờ owner review/merge để hoàn tất milestone.

@@ -80,3 +80,50 @@ it('refreshes an open viewer source near expiry even without a thumbnail', async
   view.unmount();
   client.clear();
 });
+
+it('refreshes trash thumbnails using their expiry while source expiry is null', async () => {
+  vi.useFakeTimers();
+  const node = {
+    ...new FakeDrive().file('photo.png', undefined, 20, 'image/png'),
+    trashed_at: new Date().toISOString(),
+  };
+  const link: PreviewLink = {
+    kind: 'image',
+    url: null,
+    expires_at: null,
+    thumbnail: {
+      url: 'https://storage.example/thumb',
+      large_url: 'https://storage.example/large',
+      expires_at: new Date(Date.now() + 300_000).toISOString(),
+    },
+  };
+  const get = vi
+    .spyOn(api, 'GET')
+    .mockResolvedValue({ data: link, response: new Response() });
+  const client = new QueryClient();
+  client.setQueryData([...previewKey(node), 'trash-thumbnail'], link);
+  const view = renderHook(() => usePreview(node, true, true), {
+    wrapper: ({ children }) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    ),
+  });
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(269_000);
+  });
+  expect(get).not.toHaveBeenCalled();
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(1000);
+  });
+  expect(get).toHaveBeenCalledTimes(1);
+  expect(get).toHaveBeenCalledWith(
+    '/api/v1/nodes/{node_id}/preview',
+    expect.objectContaining({
+      params: {
+        path: { node_id: node.id },
+        query: { trashed_thumbnail: true },
+      },
+    }),
+  );
+  view.unmount();
+  client.clear();
+});

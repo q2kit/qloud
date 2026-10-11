@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 
 from apps.accounts.models import User
 from apps.core.errors import ErrorSerializer
-from apps.sharing.permissions import get_node_or_404, nodes_for, role_of
+from apps.sharing.permissions import Role, get_node_or_404, nodes_for, role_of
 
 from . import downloads, previews, selectors, services, trash
 from .models import Node
@@ -24,6 +24,7 @@ from .serializers import (
     NodeDetailSerializer,
     NodeSerializer,
     PreviewLinkSerializer,
+    PreviewQuerySerializer,
     RenameSerializer,
     TrashNodeSerializer,
     TrashResultSerializer,
@@ -89,15 +90,26 @@ class NodeDownloadView(APIView):
 class NodePreviewView(APIView):
     @extend_schema(
         operation_id="nodes_preview",
+        parameters=[PreviewQuerySerializer],
         responses={
             200: PreviewLinkSerializer,
-            400: OpenApiResponse(ErrorSerializer, description="`not_a_file`."),
+            400: OpenApiResponse(ErrorSerializer, description="Invalid query or `not_a_file`."),
             404: NOT_FOUND,
         },
     )
     def get(self, request: Request, node_id: uuid.UUID) -> Response:
-        node = get_node_or_404(_user(request), node_id)
-        return Response(PreviewLinkSerializer(previews.preview_link(node)).data)
+        query = PreviewQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        thumbnail_only = query.validated_data["trashed_thumbnail"]
+        node = get_node_or_404(
+            _user(request),
+            node_id,
+            Role.OWNER if thumbnail_only else Role.VIEWER,
+            trashed=thumbnail_only,
+        )
+        return Response(
+            PreviewLinkSerializer(previews.preview_link(node, thumbnail_only=thumbnail_only)).data
+        )
 
 
 class NodeChildrenView(generics.ListAPIView[Node]):

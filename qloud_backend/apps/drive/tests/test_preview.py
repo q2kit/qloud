@@ -192,6 +192,64 @@ def test_stale_thumbnail_is_not_exposed(client, make_file):
     assert client.get(preview(node)).json()["thumbnail"] is None
 
 
+@pytest.mark.parametrize(("format", "mime"), [("PNG", "image/png"), ("PDF", "application/pdf")])
+def test_trash_thumbnail_never_signs_source(client, stored_file, monkeypatch, format, mime):
+    source = io.BytesIO()
+    Image.new("RGB", (800, 400), "red").save(source, format=format)
+    node = stored_file("source", source.getvalue(), mime)
+    assert generate(node.current_version_id)
+    Node.objects.filter(pk=node.pk).update(trashed_at=timezone.now(), trashed_root=node)
+    from apps.storage import s3
+
+    sign = s3.presign_download
+    keys = []
+
+    def thumbnail_only(key, **kwargs):
+        keys.append(key)
+        assert key.startswith(f"thumbs/{node.current_version_id}/")
+        return sign(key, **kwargs)
+
+    monkeypatch.setattr(s3, "presign_download", thumbnail_only)
+    result = client.get(preview(node), {"trashed_thumbnail": "true"})
+    assert result.status_code == 200
+    data = result.json()
+    assert data["url"] is None
+    assert data["expires_at"] is None
+    assert len(keys) == 2
+    with fetch(data["thumbnail"]["url"]) as content:
+        assert content.headers["Content-Type"] == "image/webp"
+        with Image.open(io.BytesIO(content.read())) as image:
+            assert image.size == (256, 128)
+    assert client.get(preview(node)).status_code == 404
+    assert client.get(f"/api/v1/nodes/{node.pk}/download").status_code == 404
+
+
+def test_trash_thumbnail_permissions_and_missing_data(client, make_file, root, user):
+    node = make_file()
+    query = {"trashed_thumbnail": "true"}
+    assert client.get(preview(node), query).status_code == 404
+    assert client.get(preview(node), {"trashed_thumbnail": "invalid"}).status_code == 400
+    Node.objects.filter(pk=node.pk).update(trashed_at=timezone.now(), trashed_root=node)
+    assert client.get(preview(node), query).json()["thumbnail"] is None
+    Node.objects.filter(pk=node.pk).update(thumbnail_key=f"thumbs/{uuid.uuid4()}/256.webp")
+    assert client.get(preview(node), query).json()["thumbnail"] is None
+    assert client.get(f"/api/v1/nodes/{uuid.uuid4()}/preview", query).status_code == 404
+    client.force_authenticate(User.objects.create_user("thumbnail-stranger@example.com"))
+    assert client.get(preview(node), query).status_code == 404
+    client.force_authenticate(user)
+    user.suspended_at = timezone.now()
+    user.save(update_fields=["suspended_at"])
+    assert client.get(preview(node), query).status_code == 404
+    user.suspended_at = None
+    user.save(update_fields=["suspended_at"])
+    Node.objects.filter(pk=node.pk).update(current_version=None)
+    assert client.get(preview(node), query).status_code == 404
+    Node.objects.filter(pk=root.pk).update(trashed_at=timezone.now(), trashed_root=root)
+    assert client.get(preview(root), query).status_code == 400
+    client.force_authenticate(None)
+    assert client.get(preview(node), query).status_code == 403
+
+
 def test_video_range_uses_direct_s3_url(client, stored_file):
     node = stored_file("video.mp4", bytes(range(256)) * 100, "video/mp4")
     result = client.get(preview(node)).json()

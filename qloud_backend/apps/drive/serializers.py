@@ -111,6 +111,13 @@ class ThumbnailLinkSerializer(serializers.Serializer[Any]):
     expires_at = serializers.DateTimeField()
 
 
+class PreviewQuerySerializer(serializers.Serializer[Any]):
+    trashed_thumbnail = serializers.BooleanField(
+        default=False,
+        help_text="Owner-only thumbnail of a trashed file; never returns source URLs.",
+    )
+
+
 class PreviewLinkSerializer(serializers.Serializer[Any]):
     kind = serializers.ChoiceField(
         choices=["image", "pdf", "video", "audio", "text", "unsupported"]

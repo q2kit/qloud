@@ -15,7 +15,6 @@ export function NodeThumbnail({
   const [visible, setVisible] = React.useState(false);
   const eligible =
     node.kind === 'file' &&
-    !('trashed_at' in node && node.trashed_at) &&
     /^(image\/(jpeg|png|gif|webp|avif)|application\/pdf|video\/mp4)$/i.test(
       (node.mime_type ?? '').split(';')[0]?.trim() ?? '',
     );
