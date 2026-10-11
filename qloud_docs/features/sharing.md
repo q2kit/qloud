@@ -47,7 +47,7 @@
 - Truy cập một link đã bị gỡ vì kiểm duyệt thì trả 404 với thông báo "Nội dung không còn khả dụng".
 
 ## Tiêu chí chấp nhận
-- [ ] Có bộ test ma trận đầy đủ: mỗi role × mỗi thao tác × (node trực tiếp, node con được thừa kế).
+- [x] Có bộ test ma trận đầy đủ: mỗi role × mỗi thao tác × (node trực tiếp, node con được thừa kế).
 - [x] Thu hồi share thì người nhận mất nguồn quyền đó ngay ở request tiếp theo; nếu còn grant khác thì quyền thực tế là mức cao nhất còn lại.
 - [x] Link hết hạn hoặc đã bị thu hồi thì trả 404 ở API và có trang thông báo thân thiện.
 - [ ] Gửi báo cáo từ trang link công khai thì admin nhận email, và báo cáo hiện trong admin.
@@ -92,6 +92,28 @@
 - S-12 `/s/:token` dùng layout công khai, không yêu cầu session. Root file tự mở viewer; đóng vẫn ở trang link và mở lại được. Folder có breadcrumb trong cây, grid/list, cursor/sắp xếp, viewer chuyển file và tải trực tiếp S3. Không có action ghi hoặc đường về tổ tiên ngoài phạm vi link.
 - Query/cache node, danh sách và preview/thumbnail public tách theo token; public viewer luôn dùng API token dù visitor đã đăng nhập. Preview dùng cơ chế refresh URL và component ảnh/PDF/media/text hiện có. Link sai/hết hạn/thu hồi hoặc folder ngoài cây có thông báo nội dung không còn khả dụng; các lỗi khác cho thử lại.
 - Nút/form báo cáo vi phạm và moderation thuộc M5-07 (#39); S-12 chưa hiện action chưa có API.
+
+## Tiến độ M5-06
+- Bổ sung 490 ca parametrized (480 trong `test_permission_matrix.py`, 10 ca file cho quản lý grant). Bộ ma trận API chạy trên PostgreSQL; role owner/editor/viewer/người ngoài/anonymous, grant trực tiếp trên file/folder hoặc thừa kế từ folder tổ tiên. Anonymous ở API session trả 403 `not_authenticated`; user không đủ quyền trả 404 `not_found`. Editor di chuyển chỉ trong cùng grant; các gốc grant riêng trả 400 `invalid_move`.
+- Mỗi request đọc và request bị từ chối trong ma trận so sánh snapshot metadata/quota/grant/link/upload/version trước–sau. Batch move/trash có một node không đủ quyền không thay đổi node nào. Danh sách 31 con vẫn trong ngân sách 3 query, có cursor.
+- Upload session chỉ thuộc người tạo, kể cả owner folder cũng không đọc/presign/complete/hủy session của editor. Editor upload qua presigned PUT LocalStack, hoàn tất/download đúng bytes; node/quota thuộc owner, `uploaded_by` là editor. Thu hồi hoặc hạ xuống viewer trước complete: 409 `target_unavailable`, hủy session/trả reservation, không tạo node.
+- Downgrade/revoke được gọi qua API; capabilities và rename/download/preview ở request kế tiếp phản ánh mức cao nhất còn lại. Public API kiểm tra token cho root/descendant độc lập với session, cả khi caller là owner; ngoài cây, trash, expiry/revoke đều cùng 404 như token không tồn tại.
+- Bảng dưới ánh xạ ma trận tới test. Các luồng Playwright chia sẻ đã có ở M5-05/M5-08; M5-06 bổ sung kiểm thử API, không đổi UI. Phiên bản file chưa có API (M7); báo cáo/moderation thuộc M5-07, được bổ sung test cùng task tương ứng.
+
+| Nhóm thao tác/biên | Test trong `qloud_backend/apps/` |
+|---|---|
+| Detail/capabilities/breadcrumb, children, download/preview, tạo folder/upload, rename/move/trash × role × trực tiếp/thừa kế | `sharing/tests/test_permission_matrix.py::test_node_operation_matrix` |
+| Trash: đọc thường bị từ chối, restore/delete/thumbnail owner-only × role × file/folder | `test_permission_matrix.py::test_trash_is_owner_only` |
+| Batch không đủ quyền atomic, query budget/pagination children | `test_permission_matrix.py::test_mixed_permission_batch_is_atomic`, `test_children_query_budget_does_not_grow_with_shared_items` |
+| Session upload theo người tạo, bytes S3 và quota; mất quyền trước complete | `test_permission_matrix.py::test_upload_session_belongs_to_creator_not_folder_owner`, `test_upload_complete_rechecks_edit_permission_and_releases_quota` |
+| Nguồn quyền cao nhất/downgrade/revoke ở request tiếp theo | `test_permission_matrix.py::test_highest_role_changes_take_effect_on_next_api_request`; `sharing/tests/test_permissions.py` |
+| GET/POST/PATCH/DELETE grant × role × file/folder × trực tiếp/thừa kế | `sharing/tests/test_api.py::test_manage_share_permissions` |
+| GET/POST/DELETE link owner-only × role × file/folder × trực tiếp/thừa kế | `test_permission_matrix.py::test_link_management_is_owner_only_on_direct_and_inherited_nodes` |
+| Public detail/children/download/preview × caller × root/descendant × active/ngoài cây/expiry/revoke/trash | `test_permission_matrix.py::test_public_token_scope_is_independent_of_session` |
+| Public owner inactive/suspended, moderation revoke, URL/thumbnail TTL, move/trash cập nhật phạm vi | `sharing/tests/test_links.py` |
+| Grant độc lập, cursor/query count của grants/shared-with-me, concurrent grant trùng | `sharing/tests/test_api.py` |
+| Cây sâu, không N+1/duplicate, owner boundary/cycle, tài khoản inactive/suspended | `sharing/tests/test_permissions.py` |
+| Editor di chuyển đúng cây, trash nhiều owner, restore owner và grant còn lại | `drive/tests/test_shared_access.py` |
 
 ## Ngoài phạm vi
 Mật khẩu cho share link, quyền sửa qua share link, mời người chưa có tài khoản (có thể làm sau MVP), chặn thừa kế quyền.

@@ -38,8 +38,11 @@ def detail(share: Share) -> str:
 
 @pytest.mark.parametrize("actor", ["owner", "editor", "viewer", "outside", None])
 @pytest.mark.parametrize("inherited", [False, True])
-def test_manage_share_permissions(world, actor, inherited):
+@pytest.mark.parametrize("kind", ["folder", "file"])
+def test_manage_share_permissions(world, actor, inherited, kind):
     users, parent, node, client = world
+    node.kind = kind
+    node.save(update_fields=["kind"])
     if not inherited:
         Share.objects.filter(node=parent).update(node=node)
     client.force_authenticate(users[actor] if actor else None)
@@ -62,7 +65,10 @@ def test_manage_share_permissions(world, actor, inherited):
         defaults={"created_by": users["owner"], "role": "viewer"},
     )[0]
     assert client.patch(detail(grant), {"role": "editor"}, format="json").status_code == expected
+    grant.refresh_from_db()
+    assert grant.role == ("editor" if expected == 200 else "viewer")
     assert client.delete(detail(grant)).status_code == (204 if expected == 200 else expected)
+    assert Share.objects.filter(pk=grant.pk).exists() == (expected != 200)
 
 
 @pytest.mark.parametrize(
