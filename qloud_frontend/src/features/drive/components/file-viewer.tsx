@@ -1,9 +1,10 @@
 import * as Dialog from '@radix-ui/react-dialog';
-import { ChevronLeft, ChevronRight, Download, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Flag, X } from 'lucide-react';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 
+import { ReportDialog } from '@/features/moderation/report-dialog';
 import { usePublicToken } from '@/features/sharing/public-context';
 
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ export function FileViewer({
   const rawId = params.get('preview');
   const id = standalone?.fileId ?? (rawId ? uuidFromUrl(rawId) : undefined);
   const token = usePublicToken();
+  const [reporting, setReporting] = React.useState<DriveNode>();
   const node = useNode(id, token);
   const preview = usePreview(node.data, Boolean(id));
   const [failedUrl, setFailedUrl] = React.useState<string>();
@@ -164,7 +166,7 @@ export function FileViewer({
             if (
               event.target instanceof Element &&
               event.target.closest(
-                'video, audio, input, textarea, select, [data-preview-controls]',
+                'video, audio, input, textarea, select, [data-preview-controls], [data-report-dialog]',
               )
             )
               return;
@@ -178,6 +180,15 @@ export function FileViewer({
             }
           }}
         >
+          {reporting && token && (
+            <ReportDialog
+              token={token}
+              node={reporting}
+              onClose={() => {
+                setReporting(undefined);
+              }}
+            />
+          )}
           <header className="flex flex-wrap items-center gap-2 border-b border-border p-3">
             <Dialog.Title className="min-w-0 flex-1 truncate text-base font-semibold">
               {node.data?.name ?? t('preview.title')}
@@ -223,6 +234,18 @@ export function FileViewer({
             >
               <Download />
             </Button>
+            {token && node.data?.kind === 'file' && (
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t('report.button')}
+                onClick={() => {
+                  setReporting(node.data);
+                }}
+              >
+                <Flag />
+              </Button>
+            )}
             <Dialog.Close asChild>
               <Button
                 variant="ghost"

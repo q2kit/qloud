@@ -1,0 +1,4 @@
+{% load i18n %}{% translate "A public link to your item was removed by moderation." %}
+{{ name }}
+{{ note }}
+{% translate "The removed link cannot be reactivated." %}

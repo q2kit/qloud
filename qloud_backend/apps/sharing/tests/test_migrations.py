@@ -81,3 +81,92 @@ def test_link_migration_preserves_grants_and_reverses(existing):
     finally:
         restore = MigrationExecutor(connection)
         restore.migrate(restore.loader.graph.leaf_nodes())
+
+
+@pytest.mark.django_db(transaction=True)
+@pytest.mark.parametrize("existing", [False, True])
+def test_moderation_migration_preserves_link_data_and_reverses(existing):
+    executor = MigrationExecutor(connection)
+    latest = executor.loader.graph.leaf_nodes()
+    before = [n for n in latest if n[0] != "sharing"] + [("sharing", "0002_sharelink")]
+    # Read the actual predecessor rather than depending on the generated filename.
+    leaf = next(
+        n for n in executor.loader.disk_migrations if n[0] == "sharing" and n[1].startswith("0003_")
+    )
+    predecessor = executor.loader.disk_migrations[leaf].dependencies
+    before[-1] = next(n for n in predecessor if n[0] == "sharing")
+    executor.migrate(before)
+    try:
+        apps = executor.loader.project_state(before).apps
+        link_id = None
+        if existing:
+            User = apps.get_model("accounts", "User")
+            Plan = apps.get_model("accounts", "Plan")
+            Node = apps.get_model("drive", "Node")
+            Link = apps.get_model("sharing", "ShareLink")
+            owner = User.objects.create(
+                email="moderation-legacy@example.com", plan=Plan.objects.first()
+            )
+            root = Node.objects.create(owner=owner, kind="folder", name="Existing public folder")
+            link_id = Link.objects.create(node=root, created_by=owner).pk
+        executor = MigrationExecutor(connection)
+        executor.migrate(latest)
+        apps = executor.loader.project_state(latest).apps
+        assert "moderation_report" in connection.introspection.table_names()
+        assert "moderation_action" in connection.introspection.table_names()
+        if existing:
+            assert apps.get_model("sharing", "ShareLink").objects.get(pk=link_id).node_id == root.pk
+        MigrationExecutor(connection).migrate(before)
+        assert "moderation_report" not in connection.introspection.table_names()
+        assert "moderation_action" not in connection.introspection.table_names()
+        if existing:
+            assert apps.get_model("sharing", "ShareLink").objects.filter(pk=link_id).exists()
+        MigrationExecutor(connection).migrate(latest)
+    finally:
+        restore = MigrationExecutor(connection)
+        restore.migrate(restore.loader.graph.leaf_nodes())
+
+
+@pytest.mark.django_db(transaction=True)
+def test_report_node_index_migration_preserves_reports_and_reverses():
+    from apps.accounts.models import User
+    from apps.sharing.models import Report, ShareLink
+
+    executor = MigrationExecutor(connection)
+    latest = executor.loader.graph.leaf_nodes()
+    predecessor = next(
+        n for n in executor.loader.disk_migrations if n[0] == "sharing" and n[1].startswith("0003_")
+    )
+    before = [n for n in latest if n[0] != "sharing"] + [predecessor]
+    executor.migrate(before)
+    try:
+        owner = User.objects.create_user("legacy-report-index@example.com")
+        node = owner.root_folder
+        assert node is not None
+        link = ShareLink.objects.create(node=node, created_by=owner)
+        report = Report.objects.create(
+            node=node,
+            share_link=link,
+            node_uuid=node.pk,
+            root_node_uuid=node.pk,
+            owner_uuid=owner.pk,
+            link_uuid=link.pk,
+            node_name=node.name,
+            reason="other",
+            reporter_ip_hash="a" * 64,
+            message="Preserve report",
+        )
+        MigrationExecutor(connection).migrate(latest)
+        assert Report.objects.get(pk=report.pk).message == "Preserve report"
+        with connection.cursor() as cursor:
+            constraints = connection.introspection.get_constraints(cursor, "moderation_report")
+        assert constraints["report_node_status"]["columns"] == ["node_uuid", "status"]
+        MigrationExecutor(connection).migrate(before)
+        assert Report.objects.get(pk=report.pk).message == "Preserve report"
+        with connection.cursor() as cursor:
+            assert "report_node_status" not in connection.introspection.get_constraints(
+                cursor, "moderation_report"
+            )
+    finally:
+        restore = MigrationExecutor(connection)
+        restore.migrate(restore.loader.graph.leaf_nodes())

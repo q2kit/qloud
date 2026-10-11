@@ -93,3 +93,20 @@ class ShareExists(AppError):
 class NotAFolder(AppError):
     default_code = "not_a_folder"
     default_detail = "Only folders have children."
+
+
+class CaptchaInvalid(AppError):
+    default_code = "captcha_invalid"
+    default_detail = "Captcha verification failed."
+
+
+class ReportResolved(AppError):
+    status_code = status.HTTP_409_CONFLICT
+    default_code = "report_resolved"
+    default_detail = "The report has already been resolved."
+
+
+class ModerationTargetUnavailable(AppError):
+    status_code = status.HTTP_409_CONFLICT
+    default_code = "moderation_target_unavailable"
+    default_detail = "The account no longer exists."

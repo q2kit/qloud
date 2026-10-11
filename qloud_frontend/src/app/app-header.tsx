@@ -17,6 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useMe } from '@/features/settings/use-me';
 import { AccountMenu } from '@/features/auth/components/account-menu';
 import { useDriveStore } from '@/features/drive/store';
 import { useNode } from '@/features/drive/api';
@@ -50,7 +51,13 @@ export function AppHeader({
   onDetailToggle,
 }: AppHeaderProps): React.JSX.Element {
   const { t } = useTranslation();
-  const { titleKey, subtitleKey } = useRouteHandle();
+  const routeHandle = useRouteHandle();
+  const me = useMe();
+  const { titleKey, subtitleKey } =
+    routeHandle.titleKey === 'navigation.moderation' &&
+    me.data?.is_superuser === false
+      ? { titleKey: 'notFound.title' }
+      : routeHandle;
   const setCreatingFolder = useDriveStore((state) => state.setCreatingFolder);
   const uploader = useUploader();
   // Outside the Drive this is the root folder (useCurrentFolderId).

@@ -92,6 +92,54 @@ export interface paths {
         patch: operations["me_partial_update"];
         trace?: never;
     };
+    "/api/v1/moderation/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["moderation_reports_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/moderation/reports/{report_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["moderation_reports_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/moderation/reports/{report_id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["moderation_reports_resolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/nodes/{node_id}": {
         parameters: {
             query?: never;
@@ -278,6 +326,22 @@ export interface paths {
         get: operations["public_links_preview_retrieve"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/links/{token}/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["public_reports_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -486,6 +550,14 @@ export interface components {
             /** Format: date-time */
             expires_at?: string | null;
         };
+        CreateReportRequest: {
+            /** Format: uuid */
+            node_id: string;
+            reason: components["schemas"]["ReportReasonEnum"];
+            message?: string;
+            email?: string;
+            turnstile_token?: string;
+        };
         CreateShareRequest: {
             /** Format: email */
             email: string;
@@ -558,6 +630,15 @@ export interface components {
          */
         KindEnum: "folder" | "file";
         /**
+         * @description * `active` - active
+         *     * `revoked` - revoked
+         *     * `expired` - expired
+         *     * `deleted` - deleted
+         *     * `unavailable` - unavailable
+         * @enum {string}
+         */
+        LinkStateEnum: "active" | "revoked" | "expired" | "deleted" | "unavailable";
+        /**
          * @description * `vi` - Tiếng Việt
          *     * `en` - Tiếng Anh
          * @enum {string}
@@ -578,6 +659,57 @@ export interface components {
             theme?: components["schemas"]["ThemeEnum"];
             /** Format: uuid */
             readonly root_folder_id: string;
+            /**
+             * Trạng thái superuser
+             * @description Định rằng người dùng này có tất cả các quyền mà không gán cho họ một cách cụ thể.
+             */
+            readonly is_superuser: boolean;
+        };
+        /**
+         * @description * `revoke_link` - Revoke Link
+         *     * `revoke_node` - Revoke Node
+         *     * `suspend_owner` - Suspend Owner
+         *     * `dismiss` - Dismiss
+         * @enum {string}
+         */
+        ModerationActionEnum: "revoke_link" | "revoke_node" | "suspend_owner" | "dismiss";
+        ModerationContext: {
+            node: components["schemas"]["ModerationNode"] | null;
+            root_node: components["schemas"]["ModerationNode"] | null;
+            owner: components["schemas"]["ModerationOwner"] | null;
+            link_state: components["schemas"]["LinkStateEnum"];
+            /** Format: date-time */
+            link_revoked_at: string | null;
+            /** Format: date-time */
+            link_expires_at: string | null;
+            link_revoke_reason: string | null;
+            resolver_name: string | null;
+        };
+        ModerationNode: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            kind: components["schemas"]["ModerationNodeKindEnum"];
+            size: number;
+            mime_type: string | null;
+            /** Format: date-time */
+            trashed_at: string | null;
+        };
+        /**
+         * @description * `file` - file
+         *     * `folder` - folder
+         * @enum {string}
+         */
+        ModerationNodeKindEnum: "file" | "folder";
+        ModerationOwner: {
+            /** Format: uuid */
+            id: string;
+            display_name: string;
+            /** Format: email */
+            email: string;
+            is_active: boolean;
+            /** Format: date-time */
+            suspended_at: string | null;
         };
         MoveRequest: {
             node_ids: string[];
@@ -640,6 +772,19 @@ export interface components {
             /** Format: uri */
             previous: string | null;
             results: components["schemas"]["PublicNode"][];
+        };
+        PaginatedReportList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["Report"][];
         };
         PaginatedShareLinkList: {
             /**
@@ -775,6 +920,95 @@ export interface components {
             readonly updated_at: string;
             readonly breadcrumb: components["schemas"]["Breadcrumb"][];
             readonly capabilities: components["schemas"]["Capabilities"];
+        };
+        Report: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: uuid */
+            readonly node_uuid: string;
+            readonly node_name: string;
+            /** Format: uuid */
+            readonly link_uuid: string;
+            /** Format: uuid */
+            readonly root_node_uuid: string;
+            /** Format: uuid */
+            readonly owner_uuid: string;
+            readonly reason: components["schemas"]["ReportReasonEnum"];
+            readonly status: components["schemas"]["ReportStatusEnum"];
+            readonly node_report_count: number;
+            readonly node_open_report_count: number;
+        };
+        ReportAccepted: {
+            status: components["schemas"]["ReportAcceptedStatusEnum"];
+        };
+        /**
+         * @description * `accepted` - accepted
+         * @enum {string}
+         */
+        ReportAcceptedStatusEnum: "accepted";
+        ReportDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: uuid */
+            readonly node_uuid: string;
+            readonly node_name: string;
+            /** Format: uuid */
+            readonly link_uuid: string;
+            /** Format: uuid */
+            readonly root_node_uuid: string;
+            /** Format: uuid */
+            readonly owner_uuid: string;
+            readonly reason: components["schemas"]["ReportReasonEnum"];
+            readonly status: components["schemas"]["ReportStatusEnum"];
+            readonly node_report_count: number;
+            readonly node_open_report_count: number;
+            readonly message: string;
+            /** Format: email */
+            readonly reporter_email: string;
+            /** Format: uuid */
+            readonly reporter_user_id: string | null;
+            /** Format: date-time */
+            readonly resolved_at: string | null;
+            /** Format: uuid */
+            readonly resolved_by_id: string | null;
+            readonly resolution_note: string;
+            readonly resolution: components["schemas"]["Resolution"] | null;
+            readonly subject: components["schemas"]["ModerationContext"];
+        };
+        /**
+         * @description * `illegal` - Illegal
+         *     * `copyright` - Copyright
+         *     * `malware` - Malware
+         *     * `abuse` - Abuse
+         *     * `other` - Other
+         * @enum {string}
+         */
+        ReportReasonEnum: "illegal" | "copyright" | "malware" | "abuse" | "other";
+        /**
+         * @description * `open` - Open
+         *     * `actioned` - Actioned
+         *     * `dismissed` - Dismissed
+         * @enum {string}
+         */
+        ReportStatusEnum: "open" | "actioned" | "dismissed";
+        Resolution: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: uuid */
+            readonly actor_uuid: string;
+            readonly action: components["schemas"]["ModerationActionEnum"];
+            readonly note: string;
+            readonly targets: unknown;
+        };
+        ResolveReportRequest: {
+            action: components["schemas"]["ModerationActionEnum"];
+            note: string;
         };
         /**
          * @description * `owner` - Owner
@@ -1113,6 +1347,151 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    moderation_reports_list: {
+        parameters: {
+            query?: {
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                node_uuid?: string;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /**
+                 * @description * `open` - Open
+                 *     * `actioned` - Actioned
+                 *     * `dismissed` - Dismissed
+                 */
+                status?: "open" | "actioned" | "dismissed";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedReportList"];
+                };
+            };
+            /** @description Invalid input, recipient or root folder. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    moderation_reports_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                report_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportDetail"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such resource, or insufficient access. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    moderation_reports_resolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                report_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveReportRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportDetail"];
+                };
+            };
+            /** @description Invalid input, recipient or root folder. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such resource, or insufficient access. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -1756,6 +2135,65 @@ export interface operations {
             };
             /** @description No such resource, or insufficient access. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    public_reports_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateReportRequest"];
+            };
+        };
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportAccepted"];
+                };
+            };
+            /** @description Invalid input, recipient or root folder. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such resource, or insufficient access. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };

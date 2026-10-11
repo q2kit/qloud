@@ -278,6 +278,10 @@ SPECTACULAR_SETTINGS = {
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
     # Several components use the same field names with different choices.
     "ENUM_NAME_OVERRIDES": {
+        "ReportStatusEnum": "apps.sharing.models.ReportStatusChoices",
+        "ReportReasonEnum": "apps.sharing.models.ReportReasonChoices",
+        "ModerationActionEnum": "apps.sharing.models.ModerationActionChoices",
+        "ReportAcceptedStatusEnum": ["accepted"],
         "KindEnum": "apps.drive.models.Node.Kind",
         "ShareRoleEnum": "apps.sharing.models.Share.Role",
         "PreviewKindEnum": ["image", "pdf", "video", "audio", "text", "unsupported"],
@@ -299,3 +303,6 @@ LOGGING = {
     },
     "root": {"handlers": ["console"], "level": env("LOG_LEVEL", default="INFO")},
 }
+
+# Reports notify this moderation mailbox after their transaction commits.
+MODERATION_EMAIL = env("MODERATION_EMAIL", default="")

@@ -4,6 +4,7 @@ import {
   HardDrive,
   Settings,
   Share2,
+  Shield,
   Trash2,
   X,
 } from 'lucide-react';
@@ -13,6 +14,7 @@ import { NavLink } from 'react-router';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useMe } from '@/features/settings/use-me';
 
 import { LanguageSwitcher } from './language-switcher';
 import { ThemeSwitcher } from './theme-switcher';
@@ -45,6 +47,7 @@ export function AppSidebar({
   onOpenChange,
 }: AppSidebarProps): React.JSX.Element {
   const { t } = useTranslation();
+  const me = useMe();
 
   const sidebar = (
     <aside className="flex h-full w-64 flex-col border-r border-border bg-sidebar text-sidebar-foreground">
@@ -87,6 +90,16 @@ export function AppSidebar({
             {t(`navigation.${key}`)}
           </NavLink>
         ))}
+        {me.data?.is_superuser && (
+          <NavLink
+            to="/moderation"
+            onClick={onClose}
+            className={navigationLinkClassName}
+          >
+            <Shield className="size-4.5" aria-hidden="true" />
+            {t('navigation.moderation')}
+          </NavLink>
+        )}
       </nav>
 
       <div className="space-y-3 border-t border-border px-4 py-4">

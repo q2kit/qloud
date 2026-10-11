@@ -46,3 +46,36 @@ msgstr "Đăng nhập bằng tài khoản nhận email này. Khả năng truy c�
 
 msgid "The Qloud team"
 msgstr "Đội ngũ Qloud"
+
+msgid "New abuse report on Qloud"
+msgstr "Báo cáo vi phạm mới trên Qloud"
+
+msgid "A public item has been reported."
+msgstr "Một mục công khai vừa được báo cáo vi phạm."
+
+msgid "Name:"
+msgstr "Tên:"
+
+msgid "Reason:"
+msgstr "Lý do:"
+
+msgid "Message:"
+msgstr "Mô tả:"
+
+msgid "Contact email:"
+msgstr "Email liên hệ:"
+
+msgid "Review report"
+msgstr "Xem báo cáo"
+
+msgid "A public link was removed on Qloud"
+msgstr "Một link công khai đã bị gỡ trên Qloud"
+
+msgid "A public link to your item was removed by moderation."
+msgstr "Một link công khai tới mục của bạn đã bị gỡ vì kiểm duyệt."
+
+msgid "Note:"
+msgstr "Ghi chú:"
+
+msgid "The removed link cannot be reactivated."
+msgstr "Link đã gỡ không thể bật lại."

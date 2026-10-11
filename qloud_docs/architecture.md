@@ -154,6 +154,7 @@ Code: `apps/sharing/permissions.py`; model Share thêm ở M5-01, ShareLink ở 
 - `Role`: `VIEWER < EDITOR < OWNER`. Share cấp viewer/editor trực tiếp hoặc qua folder tổ tiên.
 - `nodes_for(user, role, trashed=False)`: queryset các node mà user có ít nhất `role`; `trashed=True` chỉ node trong thùng rác, `None` cả hai.
   Mọi selector và view lấy node từ đây, không dùng `Node.objects` trực tiếp.
+- `moderation_node_metadata(user, node_ids)` chỉ trả metadata cho superuser active/chưa khóa, gồm cả node trash; giới hạn ID theo report và không cấp token/URL hoặc quyền download.
 - `get_node_or_404(user, node_id, role)`: không có quyền, không tồn tại hay id sai định dạng đều là cùng một 404.
 - Recursive CTE PostgreSQL duyệt cây từ các grant, chỉ qua folder còn sống và cùng owner. `nodes_for` dùng subquery để giữ queryset composable; `role_of` lấy mức cao nhất. Không cache quyền giữa request.
 - Share không cho xem node đã trash, kể cả `trashed=True/None`; các chế độ đó chỉ mở thùng rác cho owner.
@@ -223,3 +224,9 @@ Một tiến trình beat duy nhất; worker có thể chạy nhiều instance. D
 ### Frontend chia sẻ (M5-05)
 
 `features/sharing` quản lý grant/link qua TanStack Query và API có kiểu hiện có. `/shared` dùng FileBrowser/NodeCollection; `/s/:token` đặt PublicTokenContext để viewer/thumbnail dùng endpoint public. Cache node/children/preview public có token trong key, tách cache Drive. `useNode` và `downloadNode` nhận token tùy chọn; preview đọc context và giữ refresh URL trước hết hạn. Public node được chuyển sang kiểu hiển thị chung bằng `is_root: false`; không thêm thông tin owner/tổ tiên hoặc cấp quyền từ session. UI capabilities phục vụ ẩn action; server vẫn quyết định quyền mọi request.
+
+
+### Báo cáo và kiểm duyệt (M5-07)
+Moderation nằm trong app sharing, dùng service duy nhất cho API superuser. `/moderation` là route React riêng; `/admin/` chỉ đọc report/audit. Không thêm dependency. PostgreSQL transaction advisory lock theo HMAC IP bảo đảm giới hạn 5 báo cáo mới/giờ và dedup 24 giờ khi nhiều instance; owner row lock đồng bộ với thay đổi cây/link. Resolver khóa actor/owner/superuser theo thứ tự UUID cùng service suspension, sau đó report/link để tránh thao tác cạnh tranh tạo nhiều audit hoặc email. Snapshot UUID giữ lịch sử sau purge. `MODERATION_EMAIL` bắt buộc hợp lệ ở production (dev có thể trống), email qua Celery sau commit; IP qua allauth adapter và trusted proxy hiện có. E2E có header IP riêng chỉ trong test settings để mỗi browser fixture kiểm tra quota độc lập.
+
+Ngữ cảnh kiểm duyệt lấy metadata node qua lớp phân quyền chung; owner theo UUID snapshot. Danh sách dùng hai correlated count subquery trên index node_uuid/status (một query mỗi trang), detail join report/link/resolver rồi thêm một query metadata node và một query owner (ba query, không N+1). Số đếm không thay đổi theo filter/cursor và giữ report sau purge. Không cấp quyền xem byte file cho moderator.

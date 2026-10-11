@@ -141,6 +141,7 @@ export class FakeDrive {
           locale: 'en',
           theme: 'system',
           root_folder_id: ROOT_ID,
+          is_superuser: false,
         }),
       ),
       http.get('/api/v1/nodes/:id', ({ params }) => {

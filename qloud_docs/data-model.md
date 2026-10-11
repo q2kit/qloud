@@ -184,17 +184,17 @@ Báo cáo vi phạm từ trang link công khai (xem [sharing.md](features/sharin
 | Cột | Kiểu | Ghi chú |
 |---|---|---|
 | id | uuid | |
-| share_link_id | uuid → ShareLink | |
-| node_id | uuid → Node | node cụ thể bị báo cáo (có thể là node con trong folder được chia sẻ) |
+| share_link_id | uuid → ShareLink, null | SET_NULL khi link bị xóa |
+| node_id | uuid → Node, null | SET_NULL khi node bị xóa; node cụ thể bị báo cáo (có thể là node con trong folder được chia sẻ) |
 | reason | enum(`illegal`,`copyright`,`malware`,`abuse`,`other`) | |
-| message | text, null | tối đa 2000 ký tự |
-| reporter_email | citext, null | không bắt buộc |
+| message | text | mặc định rỗng, tối đa 2000 ký tự |
+| reporter_email | varchar(254) | lowercase, mặc định rỗng; không bắt buộc |
 | reporter_user_id | uuid → User, null | có giá trị nếu người báo cáo đang đăng nhập |
 | reporter_ip_hash | char(64) | băm IP kèm salt, dùng để chống spam; không lưu IP gốc |
 | status | enum(`open`,`actioned`,`dismissed`) | |
 | resolved_by_id | uuid → User, null | |
 | resolved_at | timestamptz, null | |
-| resolution_note | text, null | |
+| resolution_note | text | rỗng khi open, bắt buộc khi đã xử lý |
 
 **Khóa user:** thêm vào `accounts_user` các cột `suspended_at timestamptz null` và `suspended_reason text null`.
 User bị khóa thì không đăng nhập được, mọi session cũ bị vô hiệu hóa qua `session_version`, và mọi share link của user ngừng hoạt động (kiểm tra lúc truy cập, không phải xóa link).
@@ -213,3 +213,9 @@ và `storage_key` text unique. Ý định xóa blob/thumbnail được ghi cùng
 FileVersion và giảm quota. Worker xóa S3 trước, rồi Blob không còn tham chiếu và bản ghi hàng đợi.
 Lỗi S3 giữ lại hàng đợi để thử lại; bảng không chứa byte file và không tính quota.
 Migration tạo bảng có thể đảo ngược; không thay đổi dữ liệu Node/Blob hiện có.
+
+
+### Snapshot và audit kiểm duyệt (M5-07)
+`moderation_report` bổ sung `link_uuid`, `node_uuid`, `owner_uuid`, `root_node_uuid` UUID snapshot và `node_name` varchar(255), không đổi khi đích bị xóa. FK reporter/resolver SET_NULL, mọi bảng dùng UUIDv7, created_at/updated_at chuẩn. Index hash IP + thời gian, hash IP + link_uuid + thời gian, status + created_at + id, node_uuid + status (migration `sharing.0004`, phục vụ lọc/đếm report cùng node, đảo ngược được). Constraint lý do hợp lệ; open không có resolver/time/note, actioned/dismissed phải có time/note (resolver có thể null khi tài khoản bị xóa).
+
+`moderation_action`: UUIDv7, created_at/updated_at, report_id one-to-one nullable SET_NULL, report_uuid snapshot, actor_id nullable SET_NULL, actor_uuid snapshot, action enum revoke_link/revoke_node/suspend_owner/dismiss, note text ≤2000, targets JSON snapshot. Mỗi report chỉ xử lý một lần; service ghi audit cùng transaction và không cung cấp thao tác sửa/xóa. Django admin chỉ đọc hai bảng. Migration `sharing.0003` tạo bảng/index/constraint, đảo ngược được và giữ nguyên dữ liệu account/node/share/link hiện có.

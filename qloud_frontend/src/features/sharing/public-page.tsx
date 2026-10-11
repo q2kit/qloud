@@ -14,6 +14,7 @@ import { useDrivePreferences } from '@/features/drive/preferences';
 import { compactId, uuidFromUrl } from '@/features/drive/paths';
 import type { NodeAction } from '@/features/drive/actions';
 import { ApiError } from '@/lib/api/errors';
+import { ReportDialog } from '@/features/moderation/report-dialog';
 import { Button } from '@/components/ui/button';
 import { usePublicChildren } from './api';
 import { PublicTokenContext } from './public-context';
@@ -43,6 +44,7 @@ function PublicBrowser({ token }: { token: string }) {
   );
   const [selection, setSelection] = React.useState<DriveNode[]>([]);
   const [error, setError] = React.useState('');
+  const [reporting, setReporting] = React.useState(false);
   const autoOpened = React.useRef(false);
   React.useEffect(() => {
     if (root.data?.kind === 'file' && !autoOpened.current) {
@@ -175,6 +177,24 @@ function PublicBrowser({ token }: { token: string }) {
       <p className="text-sm text-muted-foreground">
         {t('sharing.publicDescription')}
       </p>
+      <Button
+        variant="outline"
+        className="self-start"
+        onClick={() => {
+          setReporting(true);
+        }}
+      >
+        {t('report.button')}
+      </Button>
+      {reporting && (
+        <ReportDialog
+          token={token}
+          node={current.data}
+          onClose={() => {
+            setReporting(false);
+          }}
+        />
+      )}
       <FileBrowser
         nodes={nodes}
         selected={selection}

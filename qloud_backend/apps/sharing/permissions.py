@@ -165,3 +165,18 @@ def get_link_node_or_404(link: ShareLink, node_id: uuid.UUID | str | None = None
         return nodes_for_link(link).get(pk=node_id if node_id is not None else link.node_id)
     except (Node.DoesNotExist, ValidationError) as error:
         raise Http404 from error
+
+
+def moderation_node_metadata(user: User, node_ids: Sequence[uuid.UUID]) -> list[dict[str, object]]:
+    """Metadata for moderation only; grants no file access or download capability."""
+    active = _active(user)
+    if active is None or not active.is_superuser:
+        from rest_framework.exceptions import PermissionDenied
+
+        raise PermissionDenied
+    return [
+        dict(row)
+        for row in Node.objects.filter(pk__in=node_ids).values(
+            "id", "name", "kind", "size", "mime_type", "trashed_at"
+        )
+    ]

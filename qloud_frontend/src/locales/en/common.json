@@ -11,7 +11,8 @@
     "main": "Main navigation",
     "login": "Log in",
     "home": "Back to Drive",
-    "preferences": "Display preferences"
+    "preferences": "Display preferences",
+    "moderation": "Moderation"
   },
   "drive": {
     "title": "Drive",
@@ -453,5 +454,128 @@
       "expiry": "Choose a future expiry time.",
       "copy": "Could not copy the link. Please try again."
     }
+  },
+  "report": {
+    "button": "Report abuse",
+    "title": "Report: {{name}}",
+    "description": "Choose a reason and provide details for a moderator to review.",
+    "reason": "Reason",
+    "message": "Description (optional)",
+    "email": "Contact email (optional)",
+    "send": "Submit report",
+    "sending": "Submitting…",
+    "success": "Your report has been accepted. Thank you.",
+    "reasons": {
+      "illegal": "Illegal content",
+      "copyright": "Copyright infringement",
+      "malware": "Malware",
+      "abuse": "Abuse",
+      "other": "Other"
+    },
+    "errors": {
+      "failed": "Could not submit the report. Please try again.",
+      "throttled": "You have submitted 5 new reports in one hour. Please try again later.",
+      "unavailable": "This content is no longer available.",
+      "captcha": "Verification failed. Please try again."
+    }
+  },
+  "moderation": {
+    "status": "Status",
+    "all": "All",
+    "statuses": {
+      "open": "Open",
+      "actioned": "Actioned",
+      "dismissed": "Dismissed"
+    },
+    "empty": "No reports with this status.",
+    "anonymous": "Not provided",
+    "audit": "Resolution history",
+    "action": "Action",
+    "note": "Note (required)",
+    "review": "Review action",
+    "confirm": "Confirm “{{action}}”?",
+    "confirmButton": "Confirm resolution",
+    "cancel": "Cancel",
+    "processing": "Processing…",
+    "actions": {
+      "revoke_link": "Remove reported link",
+      "revoke_node": "Remove all links to the root node",
+      "suspend_owner": "Suspend owner account",
+      "dismiss": "Dismiss report"
+    },
+    "effects": {
+      "revoke_link": "Revoke the link if it has not been revoked; the owner receives an email only for a new revocation.",
+      "revoke_node": "Remove every link directly attached to the reported link’s root node; links to ancestors or descendants stay unchanged.",
+      "suspend_owner": "Block sign-in, invalidate existing sessions and all public links owned by this account.",
+      "dismiss": "Keep content and links, and close the report with a note."
+    },
+    "fields": {
+      "reporter_email": "Contact email",
+      "reporter_user_id": "Reporter account",
+      "owner_uuid": "Owner",
+      "node_uuid": "Reported node",
+      "link_uuid": "Reported link"
+    },
+    "errors": {
+      "failed": "Could not resolve the report. Please try again.",
+      "resolved": "This report has already been resolved. Reload the page.",
+      "unavailable": "The target account no longer exists.",
+      "guard": "You cannot suspend yourself or the last superuser."
+    },
+    "introduction": "Review the report context and action scope before resolving it.",
+    "queue": "Report queue",
+    "relatedCounts": "{{total}} reports on this node · {{open}} open",
+    "nodeFilter": "Showing reports on the same node",
+    "clearFilter": "Clear node filter",
+    "backToQueue": "Back to queue",
+    "selectReport": "Select a report to review",
+    "selectReportDescription": "Review the report, its target and related reports before making a decision.",
+    "name": "Current name",
+    "fileInfo": "Content type",
+    "currentState": "Current state",
+    "identifier": "ID",
+    "deleted": "Deleted / no longer exists",
+    "trashed": "In trash",
+    "available": "Exists",
+    "kinds": {
+      "file": "File",
+      "folder": "Folder"
+    },
+    "receivedAt": "Received {{time}}",
+    "reportId": "Report ID",
+    "reportContent": "Report content",
+    "noMessage": "The reporter did not provide a description.",
+    "subject": "Reported target",
+    "rootNode": "Link root node",
+    "ownerId": "Owner ID",
+    "ownerSuspended": "Suspended",
+    "ownerActive": "Active",
+    "ownerInactive": "Inactive",
+    "linkState": "Link state",
+    "linkStates": {
+      "active": "Active",
+      "revoked": "Revoked",
+      "expired": "Expired",
+      "deleted": "Deleted",
+      "unavailable": "Unavailable"
+    },
+    "revokeReasons": {
+      "owner": "Revoked by owner",
+      "moderation": "Revoked by moderation"
+    },
+    "expiresAt": "Link expires at",
+    "revokedAt": "Link revoked at",
+    "related": "Reports on the same node",
+    "independentReports": "Each submission is stored separately. Resolving this report does not automatically close other reports on the same node.",
+    "viewRelated": "View all reports on this node",
+    "resolvedAt": "Resolved at",
+    "resolver": "Resolved by",
+    "resolve": "Resolution decision",
+    "actualResult": "Actual result",
+    "dismissResult": "Report dismissed; links and accounts were unchanged.",
+    "revokedResult": "{{count}} additional links revoked.",
+    "noChangeResult": "No new changes: the target was already handled or no longer exists. No additional revocation email was sent.",
+    "suspendedResult": "Owner suspended and their sessions and public links invalidated.",
+    "sameRoot": "The reported node is also the link root node."
   }
 }

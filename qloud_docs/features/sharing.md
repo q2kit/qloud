@@ -36,7 +36,7 @@
   Form gồm: lý do (bắt buộc), mô tả, email liên hệ (không bắt buộc), và Cloudflare Turnstile.
 - Rate limit: 5 báo cáo mỗi giờ trên mỗi IP. Báo cáo trùng (cùng IP, cùng link, trong 24 giờ) thì bỏ qua nhưng vẫn trả thành công.
 - Khi có báo cáo mới: email cho admin (địa chỉ `MODERATION_EMAIL` trong `.env`).
-- Admin xử lý trong Django admin:
+- Superuser xử lý tại `/moderation` (quyết định owner #39); Django admin chỉ đọc report/audit:
   - **Gỡ link:** gán `revoked_at`, `revoke_reason = moderation`.
   - **Gỡ mọi link của một node.**
   - **Khóa user:** chặn đăng nhập và vô hiệu mọi share link của user đó.
@@ -50,8 +50,8 @@
 - [x] Có bộ test ma trận đầy đủ: mỗi role × mỗi thao tác × (node trực tiếp, node con được thừa kế).
 - [x] Thu hồi share thì người nhận mất nguồn quyền đó ngay ở request tiếp theo; nếu còn grant khác thì quyền thực tế là mức cao nhất còn lại.
 - [x] Link hết hạn hoặc đã bị thu hồi thì trả 404 ở API và có trang thông báo thân thiện.
-- [ ] Gửi báo cáo từ trang link công khai thì admin nhận email, và báo cáo hiện trong admin.
-- [ ] Admin gỡ link thì link ngừng hoạt động ngay; khóa user thì user không đăng nhập được và mọi link của user ngừng hoạt động.
+- [x] Gửi báo cáo từ trang link công khai thì admin nhận email, và báo cáo hiện trong admin.
+- [x] Admin gỡ link thì link ngừng hoạt động ngay; khóa user thì user không đăng nhập được và mọi link của user ngừng hoạt động.
 - [x] Qua link của folder A, không thể truy cập node nằm ngoài A bằng cách đổi `node_id`.
 
 ## Tiến độ M5-01
@@ -91,7 +91,7 @@
 - Drive lấy capabilities cho mục đang chọn để hiện action ghi/chia sẻ. Folder viewer không nhận upload/drop hay mở tạo folder; header tạo mới bị vô hiệu. Breadcrumb/back trong cây được chia sẻ dùng UUID của mục, chỉ gọi “Drive của tôi” khi đúng root của người nhận.
 - S-12 `/s/:token` dùng layout công khai, không yêu cầu session. Root file tự mở viewer; đóng vẫn ở trang link và mở lại được. Folder có breadcrumb trong cây, grid/list, cursor/sắp xếp, viewer chuyển file và tải trực tiếp S3. Không có action ghi hoặc đường về tổ tiên ngoài phạm vi link.
 - Query/cache node, danh sách và preview/thumbnail public tách theo token; public viewer luôn dùng API token dù visitor đã đăng nhập. Preview dùng cơ chế refresh URL và component ảnh/PDF/media/text hiện có. Link sai/hết hạn/thu hồi hoặc folder ngoài cây có thông báo nội dung không còn khả dụng; các lỗi khác cho thử lại.
-- Nút/form báo cáo vi phạm và moderation thuộc M5-07 (#39); S-12 chưa hiện action chưa có API.
+- M5-07 (#39) bổ sung nút báo cáo cho folder đang duyệt và toolbar viewer của file công khai.
 
 ## Tiến độ M5-06
 - Bổ sung 490 ca parametrized (480 trong `test_permission_matrix.py`, 10 ca file cho quản lý grant). Bộ ma trận API chạy trên PostgreSQL; role owner/editor/viewer/người ngoài/anonymous, grant trực tiếp trên file/folder hoặc thừa kế từ folder tổ tiên. Anonymous ở API session trả 403 `not_authenticated`; user không đủ quyền trả 404 `not_found`. Editor di chuyển chỉ trong cùng grant; các gốc grant riêng trả 400 `invalid_move`.
@@ -117,3 +117,16 @@
 
 ## Ngoài phạm vi
 Mật khẩu cho share link, quyền sửa qua share link, mời người chưa có tài khoản (có thể làm sau MVP), chặn thừa kế quyền.
+
+
+## Tiến độ M5-07
+- POST `/public/links/{token}/reports`: `node_id` và lý do bắt buộc, mô tả tối đa 2000 ký tự, email liên hệ tùy chọn (254 ký tự), Turnstile. API chỉ chấp nhận node còn trong phạm vi link ở thời điểm ghi; link hết hạn/thu hồi, node trong trash hoặc owner không khả dụng trả 404. Session có đăng nhập được ghi nhận reporter và phải có CSRF; khách không cần đăng nhập.
+- Báo cáo mới và trùng đều trả 202 `{status: "accepted"}`, không lộ report ID. Chỉ báo cáo mới hợp lệ tính vào giới hạn 5/IP/60 phút trượt. Trùng cùng IP/link trong 24 giờ không tạo hàng/email và không tính quota. Lưu HMAC-SHA256 IP bằng secret của ứng dụng; chỉ tin header proxy đã cấu hình, không lưu IP gốc. Khóa transaction PostgreSQL theo hash IP tuần tự hóa quota/dedup; khóa owner và kiểm tra lại phạm vi trước ghi.
+- `/me.is_superuser` là boolean chỉ đọc. Điều hướng và route `/moderation` chỉ cho superuser; user thường mở URL trực tiếp thấy trang 404 (S-15), không hiện thông báo về quyền kiểm duyệt; mọi API list/detail/resolve vẫn kiểm tra tài khoản active, chưa khóa và superuser ở server. Danh sách cursor có lọc open/actioned/dismissed và node_uuid, số report tổng/đang mở cùng node tính trên toàn bộ dữ liệu; chi tiết gồm nội dung, thời gian, liên hệ, metadata node/root/owner và trạng thái link hiện tại; một bản ghi audit gồm kết quả thay đổi thực tế. Superuser chỉ được lấy metadata phục vụ kiểm duyệt, không có quyền preview/download mới. Ghi chú bắt buộc tối đa 2000 ký tự, chọn action rồi xác nhận trước gửi.
+- `revoke_link` gỡ link bị báo cáo; `revoke_node` chỉ gỡ các link trỏ trực tiếp vào **node gốc của link**, không gỡ link riêng ở ancestor/descendant. Giữ nguyên revocation cũ, không gửi email lần hai. Link đã bị xóa vẫn có thể đóng báo cáo với audit danh sách thay đổi rỗng. `suspend_owner` dùng service khóa user hiện có, giữ guard tự khóa/superuser cuối cùng và vô hiệu session; mọi public link của owner ngừng khả dụng. `dismiss` chỉ đóng báo cáo, không đổi link/tài khoản.
+- Report chỉ xử lý một lần: lần tiếp theo trả 409 `report_resolved`; tài khoản đích đã xóa khi khóa trả 409 `moderation_target_unavailable`. Thay đổi và audit cùng transaction, lỗi không để lại thao tác dở dang. Snapshot UUID/tên giữ lại khi node/link/user bị xóa; Django admin không cho tạo/sửa/xóa report hoặc audit.
+- Email admin qua `MODERATION_EMAIL` dẫn tới `/moderation?report=<UUID không dấu gạch>`. Production bắt buộc mailbox hợp lệ; dev bỏ trống thì không gửi email. Email owner theo locale vi/en khi có link mới bị gỡ, mỗi link một email, có ghi chú và HTML escape. Celery được enqueue sau commit, dùng retry email hiện có.
+- Test API/component/E2E bao gồm khách/session/CSRF, quyền superuser, phạm vi, quota/dedup đồng thời, xử lý đồng thời, audit, email và migration đảo ngược trên DB trống/có dữ liệu. Live Chromium headed chụp form và màn quản trị light/dark ở desktop/360px.
+
+### Ngữ cảnh và report cùng node
+Mỗi report là một lượt gửi độc lập; dedup vẫn cùng IP + cùng link/24h (kể cả hai node khác nhau dưới cùng link folder). Không gom/xóa record và không tự đóng report khác cùng node khi xử lý. UI hiện số đếm tổng/đang mở cùng `node_uuid` snapshot và cho lọc để xem tất cả; các report đã mất FK node vẫn được tính. Metadata hiện tại nullable khi đích đã xóa, không ghi snapshot email hoặc metadata mới vào database. Bố cục desktop hai cột, mobile danh sách → chi tiết, giữ design system hiện có theo kế hoạch owner duyệt trên #39.

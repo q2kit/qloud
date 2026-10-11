@@ -17,6 +17,7 @@ PROD_ENV = {
     "TURNSTILE_SECRET_KEY": "0x4AAAAAAA" + "s" * 25,
     "TURNSTILE_SITE_KEY": "0x4AAAAAAA" + "k" * 12,
     "S3_BUCKET": "qloud-prod",
+    "MODERATION_EMAIL": "moderation@example.com",
     "S3_ACCESS_KEY_ID": "key",
     "S3_SECRET_ACCESS_KEY": "secret",
 }
@@ -51,6 +52,14 @@ def test_wsgi_defaults_to_production_settings():
     ("env", "error"),
     [
         ({"DJANGO_SECRET_KEY": PROD_SECRET, "APP_DOMAIN": "localhost"}, "APP_DOMAIN"),
+        (
+            {
+                "DJANGO_SECRET_KEY": PROD_SECRET,
+                "APP_DOMAIN": "qloud.example.com",
+                "MODERATION_EMAIL": "",
+            },
+            "MODERATION_EMAIL",
+        ),
         (
             {"DJANGO_SECRET_KEY": "dev-insecure-change-me", "APP_DOMAIN": "qloud.example.com"},
             "DJANGO_SECRET_KEY",
