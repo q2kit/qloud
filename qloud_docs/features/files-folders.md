@@ -41,6 +41,8 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
   - quá 200 mục thì virtualization theo cuộn của cửa sổ.
 - **Chọn và bàn phím:**
   - click để chọn một mục (chọn nhiều ở M2-07b); phím mũi tên để di chuyển, Enter để mở, F2 để đổi tên;
+  - phím mũi tên dùng được ngay khi vào trang, không cần click trước: chưa chọn gì thì bắt đầu từ mục đầu tiên, đã chọn thì đi tiếp từ mục đang chọn. Trong ô nhập, hộp thoại và menu, mũi tên vẫn thuộc về chúng;
+  - ở dạng danh sách, các dòng đang chọn đứng cạnh nhau dùng chung một viền thành một khối; dạng lưới thì mỗi card có viền riêng;
   - mục đang chọn hiện trong panel chi tiết (loại, kích thước, ngày sửa, ngày tạo) và có nút Đổi tên/Tải xuống trên thanh công cụ.
 - **Mở:** bấm đúp trên desktop có chuột/hover, hoặc Enter/nút Mở/menu trên mọi thiết bị; folder thì vào trong, file thì tải về cho tới khi M3 có trình xem.
 - **Tạo folder:** menu "Tạo mới" ở header hoặc nút ở trạng thái rỗng; tên trùng thì báo ngay trong hộp thoại.
@@ -69,6 +71,7 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
 - **Di chuyển:**
   - hộp thoại duyệt folder; không vào được folder đang di chuyển; "Di chuyển tới đây" tắt khi đích là chỗ hiện tại;
   - kéo thả (HTML5) vào một folder hoặc một mục của breadcrumb, đích sáng lên khi kéo qua; màn hình cảm ứng dùng hộp thoại;
+  - trong lúc kéo, các mục đang được kéo mờ đi và chỉ còn viền nét đứt ở chỗ cũ; ảnh dưới con trỏ là bản sao của mục (đủ viền), khi kéo nhiều mục thì có thêm các card xếp chồng phía sau và huy hiệu ghi số mục;
   - mọi cách đều gửi **một** request cho cả vùng chọn;
   - lạc quan: mục rời folder ngay, API từ chối (ví dụ `invalid_move`) thì quay lại kèm thông báo;
   - kết quả được đọc cho trình đọc màn hình ("Đã di chuyển 2 mục tới …").

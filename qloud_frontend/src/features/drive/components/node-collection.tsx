@@ -45,6 +45,8 @@ export interface SelectModifiers {
 }
 
 export interface NodeCollectionProps {
+  /** Page-wide arrow keys: off while the list is loading or busy. */
+  enabled?: boolean;
   draggable?: boolean;
   revealId?: string;
   onRevealed?: () => void;
@@ -121,24 +123,27 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
       ?.focus();
   };
 
+  const stepFor = (key: string): number | undefined =>
+    ({ ArrowRight: 1, ArrowLeft: -1, ArrowDown: columns, ArrowUp: -columns })[
+      key
+    ];
+
+  const moveTo = (index: number, range: boolean): void => {
+    const next = nodes[Math.min(nodes.length - 1, Math.max(0, index))];
+    if (!next) return;
+    // Shift+arrows grow the range from the anchor, like Shift+click.
+    props.onSelect(next, { toggle: false, range });
+    focusNode(next);
+  };
+
   const onKeyDown = (event: React.KeyboardEvent, index: number): void => {
     const node = nodes[index];
     if (!node) return;
     const modifier = event.ctrlKey || event.metaKey;
-    const step = {
-      ArrowRight: 1,
-      ArrowLeft: -1,
-      ArrowDown: columns,
-      ArrowUp: -columns,
-    }[event.key];
+    const step = stepFor(event.key);
     if (step !== undefined) {
       event.preventDefault();
-      const next = nodes[Math.min(nodes.length - 1, Math.max(0, index + step))];
-      if (next) {
-        // Shift+arrows grow the range from the anchor, like Shift+click.
-        props.onSelect(next, { toggle: false, range: event.shiftKey });
-        focusNode(next);
-      }
+      moveTo(index + step, event.shiftKey);
     } else if (event.key === ' ' && modifier) {
       event.preventDefault();
       props.onSelect(node, { toggle: true, range: false });
@@ -151,6 +156,46 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
       props.onRename?.(node);
     }
   };
+
+  // Arrow keys work as soon as the page opens, without first clicking an item:
+  // from the selection if there is one, otherwise they start at the first item.
+  const latest = React.useRef({
+    stepFor,
+    moveTo,
+    nodes,
+    selectedIds: props.selectedIds,
+  });
+  React.useLayoutEffect(() => {
+    latest.current = { stepFor, moveTo, nodes, selectedIds: props.selectedIds };
+  });
+  const keyboardEnabled = props.enabled ?? true;
+  React.useEffect(() => {
+    if (!keyboardEnabled) return;
+    const onWindowKeyDown = (event: KeyboardEvent): void => {
+      const { stepFor, moveTo, nodes, selectedIds } = latest.current;
+      const step = stepFor(event.key);
+      if (
+        step === undefined ||
+        event.defaultPrevented ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        document.querySelector(
+          '[role="menu"], [role="dialog"], [role="alertdialog"]',
+        ) ||
+        (event.target instanceof Element &&
+          event.target.closest(ARROW_KEYS_OWNED))
+      )
+        return;
+      event.preventDefault();
+      const current = nodes.findIndex((node) => selectedIds.has(node.id));
+      moveTo(current < 0 ? 0 : current + step, current >= 0 && event.shiftKey);
+    };
+    window.addEventListener('keydown', onWindowKeyDown);
+    return () => {
+      window.removeEventListener('keydown', onWindowKeyDown);
+    };
+  }, [keyboardEnabled]);
 
   const context: ItemContext = {
     canDoubleClick: desktopInput,
@@ -188,11 +233,7 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
             containerRef={containerRef}
           />
         ) : (
-          <div
-            className={
-              view === 'grid' ? gridClassName : 'divide-y divide-border'
-            }
-          >
+          <div className={view === 'grid' ? gridClassName : undefined}>
             {nodes.map((node, index) => (
               <NodeItem
                 key={node.id}
@@ -215,6 +256,11 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
     </div>
   );
 }
+
+// Where arrow keys already mean something: items (their own handler), fields, menus,
+// dialogs, radio groups and sliders.
+const ARROW_KEYS_OWNED =
+  '[role="option"], input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="menu"], [role="menubar"], [role="dialog"], [role="alertdialog"], [role="radiogroup"], [role="tablist"], [role="slider"], [role="listbox"]';
 
 const gridClassName =
   'grid grid-cols-[repeat(auto-fill,minmax(9.5rem,1fr))] gap-3 sm:grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))]';
@@ -264,10 +310,7 @@ function VirtualRows({
       {rows.map((row) => (
         <div
           key={row.key}
-          className={cn(
-            'absolute inset-x-0',
-            view === 'grid' ? 'grid gap-3' : 'border-b border-border',
-          )}
+          className={cn('absolute inset-x-0', view === 'grid' && 'grid gap-3')}
           style={{
             transform: `translateY(${String(row.start - scrollMargin)}px)`,
             gridTemplateColumns:
@@ -321,6 +364,7 @@ function MenuItems({
 function NodeItem({
   node,
   index,
+  nodes,
   view,
   selectedIds,
   context,
@@ -364,7 +408,8 @@ function NodeItem({
   const size =
     node.kind === 'folder' ? '—' : formatBytes(node.size, i18n.language);
   const isDropTarget = context.dropTargetId === node.id;
-  const canReceive = node.kind === 'folder' && !context.dragging.has(node.id);
+  const isDragged = context.dragging.has(node.id);
+  const canReceive = node.kind === 'folder' && !isDragged;
 
   const dropHandlers =
     node.kind === 'folder'
@@ -453,12 +498,7 @@ function NodeItem({
       if (!selected) onSelect(node, { toggle: false, range: false });
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData(DRAG_TYPE, JSON.stringify(ids));
-      const bounds = event.currentTarget.getBoundingClientRect();
-      event.dataTransfer.setDragImage(
-        event.currentTarget,
-        event.clientX - bounds.left,
-        event.clientY - bounds.top,
-      );
+      setDragPreview(event, ids.length);
       context.setDragging(ids);
     },
     onDragEnd: () => {
@@ -467,11 +507,30 @@ function NodeItem({
     },
     ...dropHandlers,
   } as const;
+  // Items on their way to a folder fade to a dashed outline of where they were.
   const state = isDropTarget
     ? 'border-primary bg-primary/15 ring-2 ring-primary'
-    : selected
-      ? 'border-primary bg-primary/10 ring-1 ring-primary'
-      : 'border-border hover:bg-accent/60';
+    : isDragged
+      ? 'border-dashed border-primary/60 bg-primary/5 opacity-50'
+      : selected
+        ? 'border-primary bg-primary/10 ring-1 ring-primary'
+        : 'border-border hover:bg-accent/60';
+  // In the list, neighbouring selected rows share one outline: each row drops the
+  // border (and corners) on the side that touches another selected row.
+  const joins = (other: DriveNode | undefined): boolean =>
+    view === 'list' &&
+    !isDropTarget &&
+    other !== undefined &&
+    selected &&
+    selectedIds.has(other.id) &&
+    context.dropTargetId !== other.id;
+  const listState = isDropTarget
+    ? 'border-primary bg-primary/15'
+    : isDragged
+      ? 'border-dashed border-primary/60 bg-primary/5 opacity-50'
+      : selected
+        ? 'border-primary bg-primary/10'
+        : 'border-transparent hover:bg-accent/60';
   const moreButton = (
     <DropdownMenu open={menuOpen} onOpenChange={changeMenuOpen}>
       <DropdownMenuTrigger asChild>
@@ -538,8 +597,11 @@ function NodeItem({
       <div
         {...props}
         className={cn(
-          'group grid select-none grid-cols-[minmax(0,1fr)_auto_2.25rem] items-center gap-4 rounded-md border border-transparent px-3 py-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring sm:grid-cols-[minmax(0,1fr)_12rem_6rem_2.25rem]',
-          selected || isDropTarget ? state : 'hover:bg-accent/60',
+          // A 2px border inside the same 52px row: padding gives back what it takes.
+          'group grid select-none grid-cols-[minmax(0,1fr)_auto_2.25rem] items-center gap-4 rounded-md border-2 px-[0.625rem] py-[0.3125rem] outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:grid-cols-[minmax(0,1fr)_12rem_6rem_2.25rem]',
+          listState,
+          joins(nodes[index - 1]) && JOIN_TOP,
+          joins(nodes[index + 1]) && JOIN_BOTTOM,
         )}
       >
         <span className="flex min-w-0 items-center gap-3">
@@ -564,6 +626,100 @@ function NodeItem({
       </ContextMenuContent>
     </ContextMenu>
   );
+}
+
+const JOIN_TOP = 'rounded-t-none border-t-0 pt-[0.4375rem]';
+const JOIN_BOTTOM = 'rounded-b-none border-b-0 pb-[0.4375rem]';
+
+/**
+ * The picture under the pointer while items are dragged: a copy of the item with its
+ * own full outline, and for several items a stack of cards behind it and their count.
+ */
+function setDragPreview(event: React.DragEvent, count: number): void {
+  const source = event.currentTarget;
+  if (!(source instanceof HTMLElement)) return;
+  const bounds = source.getBoundingClientRect();
+  const pointerX = event.clientX - bounds.left;
+  const pointerY = event.clientY - bounds.top;
+  const stack = count > 1 ? Math.min(count - 1, 2) : 0;
+  const layerOffset = 6;
+  // Room around the copy: the selected card's ring is drawn outside its box, and the
+  // browser crops the drag image to the element's box.
+  const pad = 2;
+  const size = (base: number): string =>
+    `${String(base + stack * layerOffset + 2 * pad)}px`;
+
+  const preview = document.createElement('div');
+  preview.setAttribute('aria-hidden', 'true');
+  Object.assign(preview.style, {
+    position: 'fixed',
+    top: '-10000px',
+    left: '0',
+    width: size(bounds.width),
+    height: size(bounds.height),
+    pointerEvents: 'none',
+  });
+
+  for (let layer = stack; layer > 0; layer -= 1) {
+    const card = document.createElement('div');
+    card.className = 'absolute border border-primary bg-card';
+    card.dataset.stack = '';
+    Object.assign(card.style, {
+      left: `${String(pad + layer * layerOffset)}px`,
+      top: `${String(pad + layer * layerOffset)}px`,
+      width: `${String(bounds.width)}px`,
+      height: `${String(bounds.height)}px`,
+    });
+    preview.append(card);
+  }
+
+  const copy = source.cloneNode(true) as HTMLElement;
+  for (const name of [
+    'data-node-id',
+    'role',
+    'aria-selected',
+    'tabindex',
+    'id',
+  ])
+    copy.removeAttribute(name);
+  copy.classList.remove(...JOIN_TOP.split(' '), ...JOIN_BOTTOM.split(' '));
+  Object.assign(copy.style, {
+    position: 'absolute',
+    left: `${String(pad)}px`,
+    top: `${String(pad)}px`,
+    width: `${String(bounds.width)}px`,
+    height: `${String(bounds.height)}px`,
+    margin: '0',
+  });
+  // Selected items are tinted with a translucent colour: give the copy a solid one.
+  copy.style.background =
+    'color-mix(in oklab, var(--color-primary) 10%, var(--color-card))';
+  preview.append(copy);
+
+  if (count > 1) {
+    const badge = document.createElement('div');
+    badge.className =
+      'absolute flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-2 text-xs font-semibold text-primary-foreground tabular-nums shadow';
+    badge.textContent = String(count);
+    preview.append(badge);
+  }
+  document.body.append(preview);
+  // The copy has its full corners back (the source may be joined to its neighbours).
+  const radius = getComputedStyle(copy).borderBottomLeftRadius;
+  for (const card of preview.querySelectorAll<HTMLElement>('[data-stack]'))
+    card.style.borderRadius = radius;
+  const badge = preview.lastElementChild;
+  if (count > 1 && badge instanceof HTMLElement) {
+    // Next to the pointer, inside the picture so it is never cut off.
+    const maxLeft = parseFloat(size(bounds.width)) - badge.offsetWidth;
+    badge.style.left = `${String(Math.max(0, Math.min(maxLeft, pad + pointerX + 12)))}px`;
+    badge.style.top = `${String(Math.max(0, pad + pointerY - 28))}px`;
+  }
+  event.dataTransfer.setDragImage(preview, pad + pointerX, pad + pointerY);
+  // The browser takes its snapshot during dragstart; the element can go right after.
+  window.setTimeout(() => {
+    preview.remove();
+  });
 }
 
 function LoadMore({

@@ -12,7 +12,7 @@
 | M1 | Xác thực và tài khoản | ✅ |
 | M2 | Folder, file, upload chia chunk, download | ✅ |
 | M3 | Xem trước và thumbnail | ✅ |
-| M4 | Thùng rác | 🟨 |
+| M4 | Thùng rác | ✅ |
 | M5 | Chia sẻ (cho người dùng và qua link) | ⬜ |
 | M6 | Tìm kiếm | ⬜ |
 | M7 | Phiên bản file | ⬜ |
@@ -67,10 +67,10 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 |---|---|---|---|
 | M4-01 | API: đưa vào thùng rác, khôi phục, xóa vĩnh viễn, dọn sạch | [#30](https://github.com/q2kit/qloud/issues/30) | ✅ [PR #131](https://github.com/q2kit/qloud/pull/131) |
 | M4-02 | Celery: tự xóa vĩnh viễn sau 30 ngày; xóa blob trên S3 | [#31](https://github.com/q2kit/qloud/issues/31) | ✅ [PR #132](https://github.com/q2kit/qloud/pull/132) |
-| M4-03 | FE: trang Thùng rác, nút hoàn tác trên toast | [#32](https://github.com/q2kit/qloud/issues/32) | 🟦 |
-| M4-04 | FE: phím Delete đưa lựa chọn vào thùng rác | [#135](https://github.com/q2kit/qloud/issues/135) | 🟦 |
-| M4-05 | Thumbnail trong Thùng rác | [#136](https://github.com/q2kit/qloud/issues/136) | 🟦 |
-| M4-06 | Fix: kéo thumbnail di chuyển card node | [#137](https://github.com/q2kit/qloud/issues/137) | 🟦 |
+| M4-03 | FE: trang Thùng rác, nút hoàn tác trên toast | [#32](https://github.com/q2kit/qloud/issues/32) | ✅ [PR #133](https://github.com/q2kit/qloud/pull/133) |
+| M4-04 | FE: phím Delete đưa lựa chọn vào thùng rác | [#135](https://github.com/q2kit/qloud/issues/135) | ✅ [PR #138](https://github.com/q2kit/qloud/pull/138) |
+| M4-05 | Thumbnail trong Thùng rác | [#136](https://github.com/q2kit/qloud/issues/136) | ✅ [PR #139](https://github.com/q2kit/qloud/pull/139) |
+| M4-06 | Fix: kéo thumbnail di chuyển card node | [#137](https://github.com/q2kit/qloud/issues/137) | ✅ [PR #140](https://github.com/q2kit/qloud/pull/140) |
 
 ## M5 — Chia sẻ ([sharing.md](features/sharing.md))
 | ID | Task | Issue | Trạng thái |

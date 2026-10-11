@@ -115,10 +115,16 @@ test('dragging a thumbnail moves the entire node card without uploading', async 
       'setDragImage',
     )?.value as DataTransfer['setDragImage'];
     DataTransfer.prototype.setDragImage = function (element, x, y) {
+      // The drag image is a copy of the whole card (name, size and thumbnail).
+      const card = element.querySelector('[aria-label]');
       document.documentElement.dataset.dragImageName =
-        element.getAttribute('aria-label') ?? '';
-      document.documentElement.dataset.dragImageRole =
-        element.getAttribute('role') ?? '';
+        card?.getAttribute('aria-label') ?? '';
+      document.documentElement.dataset.dragImageCard = String(
+        Boolean(card?.querySelector('img')) &&
+          (card?.textContent ?? '').includes(
+            card?.getAttribute('aria-label') ?? '-',
+          ),
+      );
       original.call(this, element, x, y);
     };
   });
@@ -157,8 +163,8 @@ test('dragging a thumbnail moves the entire node card without uploading', async 
       name,
     );
     await expect(page.locator('html')).toHaveAttribute(
-      'data-drag-image-role',
-      'option',
+      'data-drag-image-card',
+      'true',
     );
     const detail = await page.request.get(`/api/v1/nodes/${node.id}`);
     expect(((await detail.json()) as { parent_id: string }).parent_id).toBe(
