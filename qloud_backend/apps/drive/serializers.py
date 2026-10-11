@@ -118,3 +118,19 @@ class PreviewLinkSerializer(serializers.Serializer[Any]):
     url = serializers.URLField(allow_null=True)
     expires_at = serializers.DateTimeField(allow_null=True)
     thumbnail = ThumbnailLinkSerializer(allow_null=True)
+
+
+class TrashSelectionSerializer(serializers.Serializer[dict[str, Any]]):
+    node_ids = serializers.ListField(child=serializers.UUIDField(), min_length=1, max_length=1000)
+
+
+class TrashNodeSerializer(NodeSerializer):
+    trashed_root_id = serializers.UUIDField(read_only=True)
+
+    class Meta(NodeSerializer.Meta):
+        fields = (*NodeSerializer.Meta.fields, "trashed_at", "trashed_root_id")
+        read_only_fields = fields
+
+
+class TrashResultSerializer(serializers.Serializer[dict[str, Any]]):
+    nodes = TrashNodeSerializer(many=True)

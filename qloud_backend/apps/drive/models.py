@@ -135,3 +135,9 @@ class FileVersion(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.original_name} v{self.version_number}"
+
+
+class ObjectDeletion(BaseModel):
+    """Committed cleanup intent, retained until S3 confirms deletion."""
+
+    storage_key = models.TextField(unique=True)

@@ -154,6 +154,19 @@ M2-04: `POST /uploads` trả session `{id, part_size, part_count, expires_at, ..
 | POST | `/trash/delete` | Xóa vĩnh viễn `{node_ids}` |
 | POST | `/trash/empty` | Dọn sạch thùng rác |
 
+M4-01 đã triển khai các endpoint thùng rác ở trên và `POST /nodes/trash`:
+- Các request `{node_ids}` nhận 1–1.000 UUID, bỏ ID lặp. Batch lỗi/quyền thiếu trả 404
+  và không thay đổi mục nào. Folder gốc không được đưa vào thùng rác (`400 root_folder`).
+- `POST /nodes/trash` trả `200 {nodes}` các root thực sự bị xóa; mỗi mục có thêm `trashed_at`,
+  `trashed_root_id`. Nếu chọn cả cha và con còn sống thì trả root cha.
+- `GET /trash` trả `{next, previous, results}` theo cursor, dùng cùng `ordering`/`page_size`
+  với danh sách folder (mặc định tên, folder trước; 50 mục, tối đa 200). Chỉ trả root nhóm của owner.
+- Khôi phục/xóa chỉ nhận ID root nhóm. Khôi phục trả `200 {nodes}` đã khôi phục, cha trước con;
+  trùng tên tự thêm hậu tố, cha không còn sống thì về folder gốc.
+- Xóa vĩnh viễn/dọn sạch trả 204; dọn sạch chỉ tác động thùng rác của owner đang đăng nhập.
+  Quota giảm ngay trong transaction, object S3 và thumbnail được Celery dọn sau commit.
+  Xóa folder bao gồm nhóm xóa cũ bên trong. Tất cả endpoint yêu cầu đăng nhập; quyền chia sẻ ở M5.
+
 ### Tìm kiếm
 | Method | Path | Mô tả |
 |---|---|---|

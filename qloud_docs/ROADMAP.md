@@ -11,8 +11,8 @@
 | M0 | Nền tảng: docs, khung BE/FE, Docker, CI | ✅ |
 | M1 | Xác thực và tài khoản | ✅ |
 | M2 | Folder, file, upload chia chunk, download | ✅ |
-| M3 | Xem trước và thumbnail | 🟨 |
-| M4 | Thùng rác | ⬜ |
+| M3 | Xem trước và thumbnail | ✅ |
+| M4 | Thùng rác | 🟨 |
 | M5 | Chia sẻ (cho người dùng và qua link) | ⬜ |
 | M6 | Tìm kiếm | ⬜ |
 | M7 | Phiên bản file | ⬜ |
@@ -60,12 +60,12 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M3-03 | FE: trình xem file (ảnh, PDF, video, nhảy trước/sau, tải về); link riêng cho file như folder (xem download-preview.md › Ghi chú cho M3) | [#29](https://github.com/q2kit/qloud/issues/29) | ✅ [PR #120](https://github.com/q2kit/qloud/pull/120) |
 | M3-04 | Bổ sung thumbnail cho video MP4 trong worker và grid/list | [#121](https://github.com/q2kit/qloud/issues/121) | ✅ [PR #125](https://github.com/q2kit/qloud/pull/125) |
 | M3-05 | Fix: bỏ polling chờ thumbnail; giữ trạng thái phát và vị trí video/audio khi refresh URL preview | [#126](https://github.com/q2kit/qloud/issues/126) | ✅ [PR #129](https://github.com/q2kit/qloud/pull/129) |
-| M3-06 | Fix: chỉ nhận số trang PDF nguyên, không làm lỗi viewer khi nhập giá trị không hợp lệ | [#127](https://github.com/q2kit/qloud/issues/127) | 🟦 |
+| M3-06 | Fix: chỉ nhận số trang PDF nguyên, không làm lỗi viewer khi nhập giá trị không hợp lệ | [#127](https://github.com/q2kit/qloud/issues/127) | ✅ [PR #130](https://github.com/q2kit/qloud/pull/130) |
 
 ## M4 — Thùng rác ([trash.md](features/trash.md))
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
-| M4-01 | API: đưa vào thùng rác, khôi phục, xóa vĩnh viễn, dọn sạch | [#30](https://github.com/q2kit/qloud/issues/30) | ⬜ |
+| M4-01 | API: đưa vào thùng rác, khôi phục, xóa vĩnh viễn, dọn sạch | [#30](https://github.com/q2kit/qloud/issues/30) | 🟦 |
 | M4-02 | Celery: tự xóa vĩnh viễn sau 30 ngày; xóa blob trên S3 | [#31](https://github.com/q2kit/qloud/issues/31) | ⬜ |
 | M4-03 | FE: trang Thùng rác, nút hoàn tác trên toast | [#32](https://github.com/q2kit/qloud/issues/32) | ⬜ |
 

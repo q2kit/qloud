@@ -43,6 +43,7 @@ def create_folder(
         parent = _target_folder(user, parent_id)
         # Serialize conflict choices with other tree writes for this owner.
         User.objects.select_for_update().get(pk=parent.owner_id)
+        parent = _target_folder(user, parent_id)
         if on_conflict == "reuse":
             existing = nodes_for(user, Role.EDITOR).filter(parent=parent, name__iexact=name).first()
             if existing is not None:
@@ -131,6 +132,7 @@ def move(user: User, node_ids: Sequence[uuid.UUID], target_id: uuid.UUID) -> lis
         target = _target_folder(user, target_id)
         # One mover per tree at a time, so two crossing moves cannot build a cycle.
         User.objects.select_for_update().filter(pk=target.owner_id).first()
+        target = _target_folder(user, target_id)
         nodes = list(nodes_for(user, Role.EDITOR).filter(pk__in=ids).order_by("name", "id"))
         if len(nodes) != len(ids):
             # Same answer as for a single node: no hint about which ids exist.

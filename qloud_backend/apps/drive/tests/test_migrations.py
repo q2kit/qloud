@@ -71,3 +71,26 @@ def test_recent_index_preserves_existing_files_and_is_reversible(make_file):
     finally:
         restore = MigrationExecutor(connection)
         restore.migrate(restore.loader.graph.leaf_nodes())
+
+
+@pytest.mark.django_db(transaction=True)
+def test_object_deletion_migration_preserves_files_and_reverses(make_file):
+    file = make_file("legacy.txt", size=42)
+    before = [("drive", "0005_node_node_recent_files")]
+    after = [("drive", "0006_objectdeletion")]
+    executor = MigrationExecutor(connection)
+    executor.migrate(before)
+    try:
+        executor = MigrationExecutor(connection)
+        executor.migrate(after)
+        from apps.drive.models import Node, ObjectDeletion
+
+        assert Node.objects.get(pk=file.pk).size == 42
+        assert not ObjectDeletion.objects.exists()
+        executor = MigrationExecutor(connection)
+        executor.migrate(before)
+        assert Node.objects.get(pk=file.pk).size == 42
+        assert "drive_objectdeletion" not in connection.introspection.table_names()
+    finally:
+        restore = MigrationExecutor(connection)
+        restore.migrate(restore.loader.graph.leaf_nodes())

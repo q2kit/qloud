@@ -369,3 +369,24 @@ def test_mp4_larger_frame_outputs_both_webp_sizes(source_file):
             BytesIO(s3.read_object(thumbnails.thumbnail_key(version.pk, edge), max_bytes=10000))
         ) as image:
             assert image.size == expected
+
+
+def test_deleted_during_render_does_not_recreate_thumbnail(source_file, user, monkeypatch):
+    from apps.accounts.models import User
+    from apps.drive import trash
+
+    node, version = source_file()
+    read = s3.read_object
+
+    def delete_during_read(*args, **kwargs):
+        source = read(*args, **kwargs)
+        User.objects.filter(pk=user.pk).update(used_bytes=version.size)
+        trash.trash(user, [node.pk])
+        trash.delete(user, [node.pk])
+        return source
+
+    monkeypatch.setattr(s3, "read_object", delete_during_read)
+    put = Mock()
+    monkeypatch.setattr(s3, "put_object", put)
+    assert thumbnails.generate(version.pk) is False
+    put.assert_not_called()

@@ -10,6 +10,7 @@ from typing import cast
 
 import pypdfium2 as pdfium
 from django.conf import settings
+from django.db import transaction
 from django.db.models import F
 from PIL import Image, ImageOps, UnidentifiedImageError
 
@@ -74,12 +75,13 @@ def generate(version_id: uuid.UUID) -> bool:
         source = s3.read_object(
             version.blob.storage_key, max_bytes=settings.THUMBNAIL_MAX_SOURCE_BYTES
         )
+        outputs: dict[str, bytes] = {}
         with _image(source, version.mime_type) as image:
             for size in reversed(SIZES):
                 image.thumbnail((size, size), Image.Resampling.LANCZOS)
                 with BytesIO() as output:
                     image.save(output, format="WEBP", quality=85)
-                    s3.put_object(thumbnail_key(version.pk, size), output.getvalue(), "image/webp")
+                    outputs[thumbnail_key(version.pk, size)] = output.getvalue()
     except (
         UnidentifiedImageError,
         Image.DecompressionBombError,
@@ -91,10 +93,19 @@ def generate(version_id: uuid.UUID) -> bool:
     ) as error:
         logger.info("Skipping thumbnail for version %s: %s", version_id, error)
         return False
-    # A replaced/deleted version must never overwrite the current thumbnail.
-    # Neither thumbnail creation nor publication changes a file's updated_at.
-    return bool(
-        Node.objects.filter(
-            pk=version.node_id, current_version_id=version.pk, trashed_at__isnull=True
-        ).update(thumbnail_key=key)
-    )
+    # Serialize publication with permanent deletion so no late worker recreates objects.
+    with transaction.atomic():
+        node = (
+            Node.objects.select_for_update()
+            .filter(pk=version.node_id, current_version_id=version.pk, trashed_at__isnull=True)
+            .first()
+        )
+        if node is None:
+            return False
+        for output_key, data in outputs.items():
+            s3.put_object(output_key, data, "image/webp")
+        return bool(
+            Node.objects.filter(
+                pk=node.pk, current_version_id=version.pk, trashed_at__isnull=True
+            ).update(thumbnail_key=key)
+        )

@@ -342,6 +342,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: '`name_conflict`.'
+  /api/v1/nodes/trash:
+    post:
+      operationId: nodes_trash
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrashSelectionRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrashResult'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input or operation.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such node, or no access to it.
   /api/v1/recent:
     get:
       operationId: recent_list
@@ -379,6 +411,118 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedNodeList'
           description: ''
+  /api/v1/trash:
+    get:
+      operationId: trash_list
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: Opaque value from `next` or `previous`.
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Folders always come before files.
+        schema:
+          type: string
+          enum:
+          - name
+          - -name
+          - updated_at
+          - -updated_at
+          - size
+          - -size
+          default: name
+      - name: page_size
+        required: false
+        in: query
+        description: Items per page, at most 200.
+        schema:
+          type: integer
+          default: 50
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTrashNodeList'
+          description: ''
+  /api/v1/trash/delete:
+    post:
+      operationId: trash_delete
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrashSelectionRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input or operation.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such node, or no access to it.
+  /api/v1/trash/empty:
+    post:
+      operationId: trash_empty
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/trash/restore:
+    post:
+      operationId: trash_restore
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrashSelectionRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoveResult'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input or operation.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such node, or no access to it.
   /api/v1/uploads:
     get:
       operationId: uploads_list
@@ -992,6 +1136,25 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Node'
+    PaginatedTrashNodeList:
+      type: object
+      required:
+      - results
+      - next
+      - previous
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+        previous:
+          type: string
+          nullable: true
+          format: uri
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrashNode'
     PaginatedUploadSessionList:
       type: object
       required:
@@ -1157,6 +1320,85 @@ components:
       - expires_at
       - large_url
       - url
+    TrashNode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/KindEnum'
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        parent_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        is_root:
+          type: boolean
+          readOnly: true
+        size:
+          type: integer
+          readOnly: true
+        mime_type:
+          type: string
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        trashed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        trashed_root_id:
+          type: string
+          format: uuid
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - is_root
+      - kind
+      - mime_type
+      - name
+      - parent_id
+      - size
+      - trashed_at
+      - trashed_root_id
+      - updated_at
+    TrashResult:
+      type: object
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrashNode'
+      required:
+      - nodes
+    TrashSelectionRequest:
+      type: object
+      properties:
+        node_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 1000
+          minItems: 1
+      required:
+      - node_ids
     UploadSession:
       type: object
       properties:
