@@ -118,7 +118,12 @@ export default function PdfPreview({
             value={page}
             onChange={(event) => {
               const next = Number(event.target.value);
-              if (document && next >= 1 && next <= document.numPages)
+              if (
+                document &&
+                Number.isInteger(next) &&
+                next >= 1 &&
+                next <= document.numPages
+              )
                 setPage(next);
             }}
           />
