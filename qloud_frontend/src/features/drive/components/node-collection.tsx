@@ -643,6 +643,11 @@ function setDragPreview(event: React.DragEvent, count: number): void {
   const pointerY = event.clientY - bounds.top;
   const stack = count > 1 ? Math.min(count - 1, 2) : 0;
   const layerOffset = 6;
+  // Room around the copy: the selected card's ring is drawn outside its box, and the
+  // browser crops the drag image to the element's box.
+  const pad = 2;
+  const size = (base: number): string =>
+    `${String(base + stack * layerOffset + 2 * pad)}px`;
 
   const preview = document.createElement('div');
   preview.setAttribute('aria-hidden', 'true');
@@ -650,8 +655,8 @@ function setDragPreview(event: React.DragEvent, count: number): void {
     position: 'fixed',
     top: '-10000px',
     left: '0',
-    width: `${String(bounds.width + stack * layerOffset)}px`,
-    height: `${String(bounds.height + stack * layerOffset)}px`,
+    width: size(bounds.width),
+    height: size(bounds.height),
     pointerEvents: 'none',
   });
 
@@ -660,8 +665,8 @@ function setDragPreview(event: React.DragEvent, count: number): void {
     card.className = 'absolute border border-primary bg-card';
     card.dataset.stack = '';
     Object.assign(card.style, {
-      left: `${String(layer * layerOffset)}px`,
-      top: `${String(layer * layerOffset)}px`,
+      left: `${String(pad + layer * layerOffset)}px`,
+      top: `${String(pad + layer * layerOffset)}px`,
       width: `${String(bounds.width)}px`,
       height: `${String(bounds.height)}px`,
     });
@@ -680,8 +685,8 @@ function setDragPreview(event: React.DragEvent, count: number): void {
   copy.classList.remove(...JOIN_TOP.split(' '), ...JOIN_BOTTOM.split(' '));
   Object.assign(copy.style, {
     position: 'absolute',
-    left: '0',
-    top: '0',
+    left: `${String(pad)}px`,
+    top: `${String(pad)}px`,
     width: `${String(bounds.width)}px`,
     height: `${String(bounds.height)}px`,
     margin: '0',
@@ -706,11 +711,11 @@ function setDragPreview(event: React.DragEvent, count: number): void {
   const badge = preview.lastElementChild;
   if (count > 1 && badge instanceof HTMLElement) {
     // Next to the pointer, inside the picture so it is never cut off.
-    const maxLeft = bounds.width + stack * layerOffset - badge.offsetWidth;
-    badge.style.left = `${String(Math.max(0, Math.min(maxLeft, pointerX + 12)))}px`;
-    badge.style.top = `${String(Math.max(0, pointerY - 28))}px`;
+    const maxLeft = parseFloat(size(bounds.width)) - badge.offsetWidth;
+    badge.style.left = `${String(Math.max(0, Math.min(maxLeft, pad + pointerX + 12)))}px`;
+    badge.style.top = `${String(Math.max(0, pad + pointerY - 28))}px`;
   }
-  event.dataTransfer.setDragImage(preview, pointerX, pointerY);
+  event.dataTransfer.setDragImage(preview, pad + pointerX, pad + pointerY);
   // The browser takes its snapshot during dragstart; the element can go right after.
   window.setTimeout(() => {
     preview.remove();
