@@ -377,5 +377,25 @@
       "fit": "Vừa trang",
       "canvas": "Trang PDF {{page}}"
     }
+  },
+  "trash": {
+    "move": "Chuyển vào thùng rác",
+    "moved": "Đã chuyển vào thùng rác",
+    "undo": "Hoàn tác",
+    "undoFailed": "Không thể hoàn tác. Vui lòng thử lại hoặc khôi phục từ thùng rác.",
+    "dismiss": "Đóng thông báo",
+    "restore": "Khôi phục",
+    "delete": "Xóa vĩnh viễn",
+    "empty": "Dọn sạch thùng rác",
+    "emptyTitle": "Dọn sạch thùng rác?",
+    "deleteTitle": "Xóa vĩnh viễn các mục đã chọn?",
+    "deleteWarning": "Các file và thư mục sẽ bị xóa vĩnh viễn. Bạn không thể hoàn tác thao tác này.",
+    "description": "Khôi phục hoặc xóa vĩnh viễn các mục đã xóa. Các mục này vẫn tính vào dung lượng.",
+    "loading": "Đang tải thùng rác…",
+    "loadFailed": "Không thể tải thùng rác",
+    "actionFailed": "Không thể thực hiện thao tác. Vui lòng thử lại.",
+    "tooMany": "Vui lòng chọn tối đa 1.000 mục mỗi lần.",
+    "emptyState": "Thùng rác trống",
+    "emptyDescription": "Các mục bạn xóa sẽ xuất hiện ở đây."
   }
 }

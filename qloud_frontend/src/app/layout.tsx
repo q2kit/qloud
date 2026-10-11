@@ -8,6 +8,8 @@ import { FolderUploadFeedback } from '@/features/upload/components/folder-upload
 import { UploadTray } from '@/features/upload/components/upload-tray';
 import { UploadProvider } from '@/features/upload/uploader';
 
+import { TrashToast } from '@/features/trash/trash-toast';
+
 import { AppHeader } from './app-header';
 import { AppSidebar } from './app-sidebar';
 import { DETAIL_SHEET_SELECTOR, DetailPanel } from './detail-panel';
@@ -105,6 +107,7 @@ export function AppLayout(): React.JSX.Element {
         </div>
         <CreateFolderDialog />
         <UploadTray />
+        <TrashToast />
         <ConflictDialog />
         <FolderUploadFeedback />
       </div>

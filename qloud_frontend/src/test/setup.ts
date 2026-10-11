@@ -2,6 +2,7 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 
+import { useTrashNotice } from '@/features/trash/notice';
 import { useDriveStore } from '@/features/drive/store';
 import { useUploadStore } from '@/features/upload/store';
 
@@ -11,6 +12,7 @@ afterEach(() => {
   cleanup();
   // Module-level store: selection and open panels must not leak between tests.
   useDriveStore.setState(useDriveStore.getInitialState(), true);
+  useTrashNotice.setState(useTrashNotice.getInitialState(), true);
   useUploadStore.setState(useUploadStore.getInitialState(), true);
   resetMediaQueries();
   localStorage.clear();
