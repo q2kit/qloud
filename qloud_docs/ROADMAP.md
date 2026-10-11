@@ -11,7 +11,7 @@
 | M0 | Nền tảng: docs, khung BE/FE, Docker, CI | ✅ |
 | M1 | Xác thực và tài khoản | ✅ |
 | M2 | Folder, file, upload chia chunk, download | ✅ |
-| M3 | Xem trước và thumbnail | ⬜ |
+| M3 | Xem trước và thumbnail | 🟨 |
 | M4 | Thùng rác | ⬜ |
 | M5 | Chia sẻ (cho người dùng và qua link) | ⬜ |
 | M6 | Tìm kiếm | ⬜ |
@@ -58,7 +58,9 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M3-01 | Celery tạo thumbnail cho ảnh và PDF | [#27](https://github.com/q2kit/qloud/issues/27) | ✅ [PR #118](https://github.com/q2kit/qloud/pull/118) |
 | M3-02 | API preview | [#28](https://github.com/q2kit/qloud/issues/28) | ✅ [PR #119](https://github.com/q2kit/qloud/pull/119) |
 | M3-03 | FE: trình xem file (ảnh, PDF, video, nhảy trước/sau, tải về); link riêng cho file như folder (xem download-preview.md › Ghi chú cho M3) | [#29](https://github.com/q2kit/qloud/issues/29) | ✅ [PR #120](https://github.com/q2kit/qloud/pull/120) |
-| M3-04 | Bổ sung thumbnail cho video MP4 trong worker và grid/list | [#121](https://github.com/q2kit/qloud/issues/121) | 🟦 |
+| M3-04 | Bổ sung thumbnail cho video MP4 trong worker và grid/list | [#121](https://github.com/q2kit/qloud/issues/121) | ✅ [PR #125](https://github.com/q2kit/qloud/pull/125) |
+| M3-05 | Fix: giữ trạng thái phát và vị trí video/audio khi refresh URL preview; thumbnail polling không làm gián đoạn phát | [#126](https://github.com/q2kit/qloud/issues/126) | ⬜ |
+| M3-06 | Fix: chỉ nhận số trang PDF nguyên, không làm lỗi viewer khi nhập giá trị không hợp lệ | [#127](https://github.com/q2kit/qloud/issues/127) | ⬜ |
 
 ## M4 — Thùng rác ([trash.md](features/trash.md))
 | ID | Task | Issue | Trạng thái |
