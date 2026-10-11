@@ -124,6 +124,52 @@ describe('selecting several items (M2-07b)', () => {
     await user.keyboard('{Shift>}{ArrowRight}{ArrowRight}{/Shift}');
     expect(selectedNames()).toEqual(['A', 'B', 'C']);
   });
+
+  it('arrow keys work before any item is clicked', async () => {
+    const user = userEvent.setup();
+    for (const name of ['A', 'B', 'C']) drive.folder(name);
+    renderApp('/drive', testUser);
+    await screen.findByRole('option', { name: 'A' });
+    expect(selectedNames()).toEqual([]);
+
+    // Nothing selected: the first arrow starts at the first item.
+    await user.keyboard('{ArrowRight}');
+    expect(selectedNames()).toEqual(['A']);
+    expect(option('A')).toHaveFocus();
+
+    // Focus elsewhere: arrows continue from the selection.
+    screen.getByRole('button', { name: 'List view' }).focus();
+    await user.keyboard('{ArrowDown}');
+    expect(selectedNames()).toEqual(['B']);
+    expect(option('B')).toHaveFocus();
+
+    // Dialogs and their fields keep their arrow keys.
+    option('B').focus();
+    await user.keyboard('{F2}');
+    expect(screen.getByRole('textbox')).toHaveFocus();
+    await user.keyboard('{ArrowDown}');
+    expect(selectedNames()).toEqual(['B']);
+  });
+
+  it('neighbouring selected rows in the list share one outline', async () => {
+    const user = userEvent.setup();
+    for (const name of ['A', 'B', 'C', 'D']) drive.folder(name);
+    renderApp('/drive', testUser);
+    await user.click(await screen.findByRole('button', { name: 'List view' }));
+    await user.click(option('A'));
+    await user.keyboard('{Shift>}');
+    await user.click(option('B'));
+    await user.keyboard('{/Shift}{Control>}');
+    await user.click(option('D'));
+    await user.keyboard('{/Control}');
+
+    expect(option('A').className).toContain('border-b-0');
+    expect(option('A').className).not.toContain('border-t-0');
+    expect(option('B').className).toContain('border-t-0');
+    expect(option('B').className).not.toContain('border-b-0');
+    // D stands alone: C between them is not selected.
+    expect(option('D').className).not.toMatch(/border-[tb]-0/);
+  });
 });
 
 describe('rubber-band selection', () => {
@@ -447,7 +493,12 @@ describe('moving', () => {
 
     let transfer = dataTransfer();
     fireEvent.dragStart(option('a.pdf'), { dataTransfer: transfer });
-    expect(transfer.setDragImage.mock.calls[0]?.[0]).toBe(option('a.pdf'));
+    const preview = transfer.setDragImage.mock.calls[0]?.[0] as HTMLElement;
+    // A copy of the item; one item has no count badge.
+    expect(preview).not.toBe(option('a.pdf'));
+    expect(preview.textContent).toContain('a.pdf');
+    expect(preview.querySelector('[data-node-id]')).toBeNull();
+    expect(option('a.pdf').className).toContain('border-dashed');
     // Some browser drags contain both types: the node payload must take priority.
     transfer.types.push('Files');
     fireEvent.dragEnter(option('Target'), { dataTransfer: transfer });
@@ -478,6 +529,26 @@ describe('moving', () => {
     await waitFor(() => {
       expect(names()).toEqual(['Target']);
     });
+  });
+
+  it('dragging several items shows a stack with their count', async () => {
+    const user = userEvent.setup();
+    for (const name of ['A', 'B', 'C']) drive.folder(name);
+    renderApp('/drive', testUser);
+    await user.click(await screen.findByRole('option', { name: 'A' }));
+    await user.keyboard('{Shift>}');
+    await user.click(option('C'));
+    await user.keyboard('{/Shift}');
+
+    const transfer = dataTransfer();
+    fireEvent.dragStart(option('B'), { dataTransfer: transfer });
+    const preview = transfer.setDragImage.mock.calls[0]?.[0] as HTMLElement;
+    expect(preview.querySelectorAll('[data-stack]')).toHaveLength(2);
+    expect(preview.lastElementChild?.textContent).toBe('3');
+    for (const name of ['A', 'B', 'C'])
+      expect(option(name).className).toContain('border-dashed');
+    fireEvent.dragEnd(option('B'), { dataTransfer: transfer });
+    expect(option('B').className).not.toContain('border-dashed');
   });
 
   it('moves fifty items in one request', async () => {
