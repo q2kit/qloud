@@ -1,6 +1,6 @@
 # Chia sẻ (F-SHARE)
 
-**Trạng thái:** Nháp · **Milestone:** M5 · **Màn hình:** S-07, S-11, S-12
+**Trạng thái:** Đang làm · **Milestone:** M5 · **Màn hình:** S-07, S-11, S-12
 
 ## User stories
 - Tôi muốn chia sẻ một file hoặc folder cho người khác qua email, với quyền xem hoặc sửa.
@@ -53,6 +53,13 @@
 - [ ] Gửi báo cáo từ trang link công khai thì admin nhận email, và báo cáo hiện trong admin.
 - [ ] Admin gỡ link thì link ngừng hoạt động ngay; khóa user thì user không đăng nhập được và mọi link của user ngừng hoạt động.
 - [ ] Qua link của folder A, không thể truy cập node nằm ngoài A bằng cách đổi `node_id`.
+
+## Tiến độ M5-01
+- Model Share và lớp quyền chung hỗ trợ share trực tiếp/thừa kế nhiều tầng; queryset giữ được lọc và phân trang, không N+1.
+- Breadcrumb của người nhận chỉ chứa đường dẫn liên tục mà họ xem được; upload session cũng không lưu tên tổ tiên ngoài quyền.
+- Editor chỉ di chuyển node con trong cùng một folder được cấp editor (không chuyển giữa hai cây được chia sẻ riêng, không di chuyển chính gốc chia sẻ bằng grant trên gốc đó).
+- Editor có thể đưa node vào thùng rác của owner; share ngừng cấp quyền ngay. Khôi phục thùng rác, liệt kê và xóa vĩnh viễn vẫn dành cho owner.
+- API quản lý share/danh sách được chia sẻ, ShareLink, email, UI và bộ ma trận toàn milestone thuộc M5-02…M5-07.
 
 ## Ngoài phạm vi
 Mật khẩu cho share link, quyền sửa qua share link, mời người chưa có tài khoản (có thể làm sau MVP), chặn thừa kế quyền.

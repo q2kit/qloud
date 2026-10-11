@@ -89,10 +89,10 @@ trong transaction để các lần tạo/giữ cả hai/gộp đồng thời kh�
 
 M2-02 (5 endpoint trên):
 - Node trả về `id, kind, name, parent_id, is_root, size, mime_type, created_at, updated_at`. Folder gốc có `is_root: true`; tên lưu là `Drive`, FE hiển thị tên đã dịch.
-- Chi tiết thêm `breadcrumb` (`[{id, name}]` từ folder gốc tới folder cha) và `capabilities` (`can_edit`: đổi tên, di chuyển, tạo bên trong; `can_trash`; `can_share`). Folder gốc có cả ba là `false`.
+- Chi tiết thêm `breadcrumb` (`[{id, name}]` từ folder gốc tới folder cha; với người nhận share chỉ gồm đường dẫn liên tục có quyền xem) và `capabilities` (`can_edit`: đổi tên, di chuyển, tạo bên trong; `can_trash`; `can_share`). Folder gốc có cả ba là `false`.
 - `children`: phân trang keyset (`apps/drive/pagination.py`), cùng dạng `{results, next, previous}`. `ordering` mặc định `name`; cursor chỉ dùng được với đúng `ordering` đã tạo ra nó, sai thì 404 `not_found`.
   File không có con: trả trang rỗng.
-- `move`: 1–1000 id, một transaction; trả `{nodes: [...]}` sau khi chuyển (tên có thể đã thêm hậu tố). Một id không thấy hoặc không có quyền thì 404 và không chuyển gì.
+- `move`: 1–1000 id, một transaction; trả `{nodes: [...]}` sau khi chuyển (tên có thể đã thêm hậu tố). Một id không thấy hoặc không có quyền thì 404 và không chuyển gì. Editor chỉ chuyển node con trong cùng một folder cấp editor; chuyển giữa các cây được chia sẻ riêng hoặc chuyển chính gốc grant trả 400 `invalid_move`.
 - Mã lỗi: `name_conflict` (409), `invalid_target` (400: đích không phải folder), `invalid_move` (400: vào chính nó/cây con, hoặc sang Drive của người khác), `root_folder` (400: đổi tên/di chuyển folder gốc).
 | POST | `/nodes/trash` | Đưa nhiều node vào thùng rác `{node_ids}` |
 | GET | `/nodes/{id}/download` | Trả về `{url, expires_at}` (presigned, 5 phút; folder → 400 `not_a_file`) |
@@ -166,7 +166,7 @@ M4-01 đã triển khai các endpoint thùng rác ở trên và `POST /nodes/tra
   trùng tên tự thêm hậu tố, cha không còn sống thì về folder gốc.
 - Xóa vĩnh viễn/dọn sạch trả 204; dọn sạch chỉ tác động thùng rác của owner đang đăng nhập.
   Quota giảm ngay trong transaction, object S3 và thumbnail được Celery dọn sau commit.
-  Xóa folder bao gồm nhóm xóa cũ bên trong. Tất cả endpoint yêu cầu đăng nhập; quyền chia sẻ ở M5.
+  Xóa folder bao gồm nhóm xóa cũ bên trong. Tất cả endpoint yêu cầu đăng nhập. Từ M5-01, đưa vào thùng rác cần editor/owner và ghi editor vào `trashed_by`; owner thực của node giữ quyền liệt kê/khôi phục/xóa vĩnh viễn, người nhận share mất quyền truy cập ngay.
 
 ### Tìm kiếm
 | Method | Path | Mô tả |

@@ -46,7 +46,7 @@ def _detail(user: User, node: Node) -> Response:
     role = role_of(user, node)
     if role is None:  # cannot happen for a node loaded through the permission layer
         raise Http404
-    node.breadcrumb = selectors.breadcrumb(node)  # type: ignore[attr-defined]
+    node.breadcrumb = selectors.breadcrumb(node, user)  # type: ignore[attr-defined]
     node.capabilities = capabilities(node, role)  # type: ignore[attr-defined]
     return Response(NodeDetailSerializer(node).data)
 
