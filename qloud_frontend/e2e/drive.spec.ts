@@ -66,11 +66,18 @@ test('rename, and a clashing name is refused', async ({ page }) => {
     .getByRole('dialog', { name: 'Đổi tên' })
     .getByLabel('Tên')
     .fill('Bản nháp');
+  const renamed = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'PATCH' &&
+      /\/api\/v1\/nodes\/[^/]+$/.test(new URL(response.url()).pathname) &&
+      response.status() === 200,
+  );
   await page
     .getByRole('dialog', { name: 'Đổi tên' })
     .getByRole('button', { name: 'Lưu' })
     .click();
   await expect(item(page, 'Bản nháp')).toBeVisible();
+  await renamed;
   await page.reload();
   await expect(item(page, 'Bản nháp')).toBeVisible();
   await expect(item(page, 'Báo cáo')).toBeVisible();

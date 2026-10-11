@@ -84,6 +84,11 @@ test('folder upload preserves nested files, then merges or keeps both on conflic
     });
     await fileDialog.getByRole('button', { name: 'Bỏ qua' }).click();
     await fileDialog.getByRole('button', { name: 'Bỏ qua' }).click();
+    await expect(
+      page
+        .getByRole('region', { name: 'Tải lên' })
+        .getByText('Đã tải lên 1 tệp'),
+    ).toBeVisible();
     await openFolder(page, 'Album');
     await expect(item(page, 'new.txt')).toBeVisible();
     await expect(page.getByRole('option')).toHaveCount(3);
