@@ -58,6 +58,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/links/{link_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["links_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me": {
         parameters: {
             query?: never;
@@ -124,6 +140,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/nodes/{node_id}/links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["nodes_links_list"];
+        put?: never;
+        post: operations["nodes_links_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/nodes/{node_id}/preview": {
         parameters: {
             query?: never;
@@ -182,6 +214,70 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["nodes_trash"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/links/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["public_links_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/links/{token}/children": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["public_links_children_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/links/{token}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["public_links_download_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/public/links/{token}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["public_links_preview_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -386,6 +482,10 @@ export interface components {
             /** @default fail */
             on_conflict: components["schemas"]["FolderConflictEnum"];
         };
+        CreateLinkRequest: {
+            /** Format: date-time */
+            expires_at?: string | null;
+        };
         CreateShareRequest: {
             /** Format: email */
             email: string;
@@ -519,6 +619,8 @@ export interface components {
             readonly breadcrumb: components["schemas"]["Breadcrumb"][];
             readonly capabilities: components["schemas"]["Capabilities"];
         };
+        /** @enum {unknown} */
+        NullEnum: null;
         /**
          * @description * `fail` - Fail
          *     * `rename` - Rename
@@ -531,6 +633,26 @@ export interface components {
             /** Format: uri */
             previous: string | null;
             results: components["schemas"]["Node"][];
+        };
+        PaginatedPublicNodeList: {
+            /** Format: uri */
+            next: string | null;
+            /** Format: uri */
+            previous: string | null;
+            results: components["schemas"]["PublicNode"][];
+        };
+        PaginatedShareLinkList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["ShareLink"][];
         };
         PaginatedShareList: {
             /**
@@ -626,6 +748,40 @@ export interface components {
             /** @description Cloudflare Turnstile site key; null when the server does not check it. */
             turnstile_site_key: string | null;
         };
+        PublicNode: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly kind: components["schemas"]["KindEnum"];
+            readonly name: string;
+            readonly parent_id: string | null;
+            readonly size: number;
+            readonly mime_type: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        PublicNodeDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly kind: components["schemas"]["KindEnum"];
+            readonly name: string;
+            readonly parent_id: string | null;
+            readonly size: number;
+            readonly mime_type: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            readonly breadcrumb: components["schemas"]["Breadcrumb"][];
+            readonly capabilities: components["schemas"]["Capabilities"];
+        };
+        /**
+         * @description * `owner` - Owner
+         *     * `moderation` - Moderation
+         * @enum {string}
+         */
+        RevokeReasonEnum: "owner" | "moderation";
         Share: {
             /** Format: uuid */
             readonly id: string;
@@ -640,6 +796,32 @@ export interface components {
             /** Format: date-time */
             readonly updated_at: string;
         };
+        ShareLink: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly node_id: string;
+            readonly token: string;
+            readonly role: components["schemas"]["ShareLinkRoleEnum"];
+            /** Format: date-time */
+            readonly expires_at: string | null;
+            /** Format: date-time */
+            readonly revoked_at: string | null;
+            /** Format: uuid */
+            readonly revoked_by_id: string | null;
+            readonly revoke_reason: (components["schemas"]["RevokeReasonEnum"] | components["schemas"]["NullEnum"]) | null;
+            /** Format: uuid */
+            readonly created_by_id: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /**
+         * @description * `viewer` - Viewer
+         * @enum {string}
+         */
+        ShareLinkRoleEnum: "viewer";
         /**
          * @description * `viewer` - Viewer
          *     * `editor` - Editor
@@ -864,6 +1046,35 @@ export interface operations {
             };
         };
     };
+    links_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                link_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such resource, or insufficient access. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     me_retrieve: {
         parameters: {
             query?: never;
@@ -1054,6 +1265,93 @@ export interface operations {
                 };
             };
             /** @description No such node, or no access to it. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    nodes_links_list: {
+        parameters: {
+            query?: {
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+            };
+            header?: never;
+            path: {
+                node_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedShareLinkList"];
+                };
+            };
+            /** @description Invalid input, recipient or root folder. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such resource, or insufficient access. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    nodes_links_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                node_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CreateLinkRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShareLink"];
+                };
+            };
+            /** @description Invalid input, recipient or root folder. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such resource, or insufficient access. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1283,6 +1581,180 @@ export interface operations {
                 };
             };
             /** @description No such node, or no access to it. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    public_links_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Defaults to the shared root. */
+                node_id?: string;
+            };
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicNodeDetail"];
+                };
+            };
+            /** @description Invalid input, recipient or root folder. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such resource, or insufficient access. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    public_links_children_list: {
+        parameters: {
+            query?: {
+                /** @description Opaque value from `next` or `previous`. */
+                cursor?: string;
+                /** @description Defaults to the shared root. */
+                folder_id?: string;
+                /** @description Folders always come before files. */
+                ordering?: "name" | "-name" | "updated_at" | "-updated_at" | "size" | "-size";
+                /** @description Items per page, at most 200. */
+                page_size?: number;
+            };
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedPublicNodeList"];
+                };
+            };
+            /** @description Invalid input, recipient or root folder. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such resource, or insufficient access. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    public_links_download_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Defaults to the shared root. */
+                node_id?: string;
+            };
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DownloadLink"];
+                };
+            };
+            /** @description Invalid input, recipient or root folder. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such resource, or insufficient access. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    public_links_preview_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Defaults to the shared root. */
+                node_id?: string;
+            };
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreviewLink"];
+                };
+            };
+            /** @description Invalid input, recipient or root folder. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such resource, or insufficient access. */
             404: {
                 headers: {
                     [name: string]: unknown;

@@ -49,10 +49,10 @@
 ## Tiêu chí chấp nhận
 - [ ] Có bộ test ma trận đầy đủ: mỗi role × mỗi thao tác × (node trực tiếp, node con được thừa kế).
 - [x] Thu hồi share thì người nhận mất nguồn quyền đó ngay ở request tiếp theo; nếu còn grant khác thì quyền thực tế là mức cao nhất còn lại.
-- [ ] Link hết hạn hoặc đã bị thu hồi thì trả 404 kèm trang thông báo thân thiện.
+- [x] Link hết hạn hoặc đã bị thu hồi thì trả 404 ở API; trang thông báo thân thiện thuộc M5-05.
 - [ ] Gửi báo cáo từ trang link công khai thì admin nhận email, và báo cáo hiện trong admin.
 - [ ] Admin gỡ link thì link ngừng hoạt động ngay; khóa user thì user không đăng nhập được và mọi link của user ngừng hoạt động.
-- [ ] Qua link của folder A, không thể truy cập node nằm ngoài A bằng cách đổi `node_id`.
+- [x] Qua link của folder A, không thể truy cập node nằm ngoài A bằng cách đổi `node_id`.
 
 ## Tiến độ M5-01
 - Model Share và lớp quyền chung hỗ trợ share trực tiếp/thừa kế nhiều tầng; queryset giữ được lọc và phân trang, không N+1.
@@ -68,6 +68,14 @@
 - Grant do editor tạo là độc lập: thu hồi quyền editor không tự xóa các grant họ đã tạo; owner quản lý/thu hồi riêng. Quy tắc này và hợp đồng API được owner duyệt trong kế hoạch #34.
 - "Được chia sẻ với tôi" chỉ liệt kê node có grant trực tiếp cho mình, không thuộc sở hữu của mình, còn sống; không bung hậu duệ. Grant trên cha và con thì cả hai xuất hiện. `effective_role` tính cả quyền thừa kế; thông tin owner chỉ id/display_name.
 - Email thông báo thuộc M5-04, UI chia sẻ thuộc M5-05. M5-02 kiểm thử API stack thật và việc duyệt node được chia sẻ qua Drive hiện có.
+
+## Tiến độ M5-03
+- ShareLink có token ngẫu nhiên 256 bit, role chỉ viewer, tùy chọn hạn dùng và thông tin thu hồi. Owner quản lý nhiều link trên node còn sống, không phải folder gốc; editor không được tạo/thu hồi link.
+- Public API đọc chi tiết, liệt kê folder, download và preview. Token chỉ mở root/cây con cùng owner còn sống; quyền session của caller không mở rộng phạm vi. Breadcrumb dừng ở root của link, parent_id của root là null.
+- Link sai/hết hạn/thu hồi, owner inactive/suspended hoặc node trong thùng rác đều trả cùng 404. Không cache quyền qua request; node chuyển ra ngoài cây mất quyền qua token ngay.
+- URL nguồn/thumbnail đi thẳng S3, tối đa 5 phút và không quá expires_at của link (làm tròn xuống theo giây). Thu hồi chặn cấp URL mới ngay; URL S3 đã cấp dùng được tới hạn chữ ký. Mật khẩu/quyền sửa qua token không thuộc MVP.
+- Owner không bật lại link đã thu hồi; DELETE lại trả 204, giữ nguyên audit kể cả reason moderation. Công cụ kiểm duyệt/báo cáo/email thuộc M5-07; màn hình public S-12 thuộc M5-05.
+- Hợp đồng chi tiết public (node_id tùy chọn) và preview bổ sung cùng giới hạn URL đã cấp được owner duyệt trong kế hoạch #35.
 
 ## Ngoài phạm vi
 Mật khẩu cho share link, quyền sửa qua share link, mời người chưa có tài khoản (có thể làm sau MVP), chặn thừa kế quyền.

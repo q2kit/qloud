@@ -21,6 +21,8 @@ from django.http import Http404
 from apps.accounts.models import User
 from apps.drive.models import Node
 
+from .models import ShareLink
+
 
 class Role(enum.IntEnum):
     VIEWER = 1
@@ -127,4 +129,39 @@ def get_node_or_404(
     try:
         return nodes_for(user, role, trashed=trashed).get(pk=node_id)
     except (Node.DoesNotExist, ValidationError) as error:  # ValidationError: not a UUID
+        raise Http404 from error
+
+
+# The token's scope is independent of any logged-in user's other grants. Joining
+# the live link inside the CTE rechecks expiry, suspension and trash on every read.
+_LINK_TREE = """
+WITH RECURSIVE linked(id, owner_id, kind) AS (
+    SELECT n.id, n.owner_id, n.kind
+    FROM sharing_share_link l
+    JOIN drive_node n ON n.id = l.node_id
+    JOIN accounts_user u ON u.id = n.owner_id
+    WHERE l.id = %s AND l.revoked_at IS NULL
+      AND (l.expires_at IS NULL OR l.expires_at > STATEMENT_TIMESTAMP())
+      AND u.is_active AND u.suspended_at IS NULL AND n.trashed_at IS NULL
+    UNION
+    SELECT n.id, n.owner_id, n.kind
+    FROM drive_node n JOIN linked t ON n.parent_id = t.id
+    WHERE t.kind = 'folder' AND n.owner_id = t.owner_id AND n.trashed_at IS NULL
+)
+"""
+
+
+def nodes_for_link(link: ShareLink) -> QuerySet[Node]:
+    return Node.objects.filter(
+        pk__in=RawSQL(  # noqa: S611 - fixed SQL, bound UUID
+            _LINK_TREE + "SELECT id FROM linked",  # noqa: S608 - constants only
+            [link.pk],
+        )
+    )
+
+
+def get_link_node_or_404(link: ShareLink, node_id: uuid.UUID | str | None = None) -> Node:
+    try:
+        return nodes_for_link(link).get(pk=node_id if node_id is not None else link.node_id)
+    except (Node.DoesNotExist, ValidationError) as error:
         raise Http404 from error

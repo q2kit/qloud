@@ -162,6 +162,8 @@ Code: `apps/sharing/permissions.py`; model Share thêm ở M5-01, ShareLink ở 
 
 M5-02: `sharing.services` tuần tự hóa mọi thao tác ghi grant bằng khóa user owner thật của node và kiểm tra lại quyền sau khóa, dùng cùng khóa với Drive move/trash. Selector danh sách đi qua `nodes_for`; `shared_with_me` dùng Exists/Case để tính role và select_related owner trong một query, danh sách grant select_related grantee. Grant trực tiếp độc lập với grant đã cấp quyền cho người tạo; thu hồi không cascade theo created_by. API/schema/type cùng được cập nhật; email và UI chia sẻ thuộc M5-04/M5-05.
 
+M5-03: `ShareLink` và `sharing.link_services/link_selectors` quản lý link owner-only, cùng khóa owner với Drive. `nodes_for_link` dùng recursive CTE từ đúng root/cùng owner, chỉ đi qua folder còn sống; kiểm tra lại revoked_at/expiry/trash/is_active/suspended_at trong query, độc lập với session và grant người dùng. Public breadcrumb cũng giới hạn CTE này; mọi endpoint public đi qua lớp quyền chung. Public views AllowAny và không dùng session authentication; chỉ GET, quản lý link vẫn session/CSRF như API khác. `storage.s3.presign_download` nhận TTL tùy chọn, Drive download/preview giữ hạn mặc định cho session, public giới hạn cả URL nguồn/thumbnail theo thời gian còn lại của link. Không proxy byte; URL đã cấp không thể thu hồi trước hạn chữ ký. Hợp đồng này và preview public được owner duyệt ở #35.
+
 ## Triển khai
 
 ### Dev
