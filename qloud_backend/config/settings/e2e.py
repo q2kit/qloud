@@ -18,7 +18,11 @@ DATABASES["default"]["CONN_MAX_AGE"] = 0
 # the browser can PUT parts straight to it (the pytest bucket has no CORS).
 S3_BUCKET = env("E2E_S3_BUCKET", default="qloud-e2e")
 
-# Celery stays eager, so the email reaches Mailpit within the request.
+# Default to eager for CI; opt in to a real worker on an isolated E2E queue.
+CELERY_TASK_ALWAYS_EAGER = env.bool("E2E_CELERY_EAGER", default=True)
+CELERY_TASK_DEFAULT_QUEUE = "qloud-e2e"
+
+# Auth emails use Mailpit in both eager and real-worker runs.
 MAILERS = {
     "default": {
         "BACKEND": "django.core.mail.backends.smtp.EmailBackend",

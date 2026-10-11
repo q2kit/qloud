@@ -1,5 +1,6 @@
 import uuid
 from io import BytesIO
+from pathlib import Path
 from typing import Any, cast
 from unittest.mock import Mock
 
@@ -316,3 +317,55 @@ def test_broker_outage_does_not_break_committed_upload(monkeypatch, caplog):
     )
     tasks.enqueue_thumbnail(str(uuid.uuid7()))
     assert "Could not enqueue thumbnail" in caplog.text
+
+
+@pytest.mark.parametrize("data", [b"corrupt", b""])
+def test_bad_mp4_has_no_thumbnail(source_file, data):
+    node, version = source_file(data, "video/mp4")
+    assert thumbnails.generate(version.pk) is False
+    node.refresh_from_db()
+    assert node.thumbnail_key is None
+
+
+def test_mp4_worker_publishes_pair_without_quota_or_timestamp_changes(source_file, user):
+    data = (
+        Path(__file__).resolve().parents[4] / "qloud_frontend/e2e/fixtures/preview.mp4"
+    ).read_bytes()
+    node, version = source_file(data, "video/mp4")
+    original_time = node.updated_at
+    counters = (user.used_bytes, user.reserved_bytes)
+    assert tasks.generate_thumbnail.delay(str(version.pk)).get() is True
+    for size in thumbnails.SIZES:
+        with Image.open(
+            BytesIO(s3.read_object(thumbnails.thumbnail_key(version.pk, size), max_bytes=10000))
+        ) as image:
+            assert image.format == "WEBP"
+            assert image.size == (160, 90)
+    node.refresh_from_db()
+    user.refresh_from_db()
+    assert node.thumbnail_key == thumbnails.thumbnail_key(version.pk, 256)
+    assert node.updated_at == original_time
+    assert (user.used_bytes, user.reserved_bytes) == counters
+
+
+def test_mp4_missing_decoder_or_oversized_source_falls_back(source_file, settings):
+    node, version = source_file(b"mp4", "video/mp4")
+    settings.THUMBNAIL_FFMPEG = "/missing/ffmpeg"
+    assert thumbnails.generate(version.pk) is False
+    settings.THUMBNAIL_MAX_SOURCE_BYTES = 1
+    assert thumbnails.generate(version.pk) is False
+    node.refresh_from_db()
+    assert node.thumbnail_key is None
+
+
+def test_mp4_larger_frame_outputs_both_webp_sizes(source_file):
+    data = (
+        Path(__file__).resolve().parents[4] / "qloud_frontend/e2e/fixtures/preview-wide.mp4"
+    ).read_bytes()
+    _, version = source_file(data, "video/mp4")
+    assert thumbnails.generate(version.pk)
+    for edge, expected in [(256, (256, 144)), (1024, (1024, 576))]:
+        with Image.open(
+            BytesIO(s3.read_object(thumbnails.thumbnail_key(version.pk, edge), max_bytes=10000))
+        ) as image:
+            assert image.size == expected

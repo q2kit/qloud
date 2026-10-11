@@ -145,56 +145,62 @@ it('shows source text literally, retries errors and restores focus on close', as
   await waitFor(() => expect(option).toHaveFocus());
 });
 
-it('fetches thumbnails only after visibility and falls back on image errors in list view', async () => {
-  const observers: IntersectionObserverCallback[] = [];
-  class Observer {
-    constructor(callback: IntersectionObserverCallback) {
-      observers.push(callback);
+it.each([
+  ['photo.png', 'image/png', 'image'],
+  ['clip.mp4', 'video/mp4', 'video'],
+])(
+  'fetches visible %s thumbnails and falls back on errors in list view',
+  async (name, mime, kind) => {
+    const observers: IntersectionObserverCallback[] = [];
+    class Observer {
+      constructor(callback: IntersectionObserverCallback) {
+        observers.push(callback);
+      }
+      observe = vi.fn();
+      unobserve = vi.fn();
+      disconnect = vi.fn();
     }
-    observe = vi.fn();
-    unobserve = vi.fn();
-    disconnect = vi.fn();
-  }
-  vi.stubGlobal('IntersectionObserver', Observer);
-  const user = userEvent.setup();
-  const node = drive.file('photo.png', ROOT_ID, 20, 'image/png');
-  const calls = vi.fn();
-  server.use(
-    http.get('/api/v1/nodes/:id/preview', () => {
-      calls();
-      return HttpResponse.json({
-        kind: 'image',
-        url: 'https://storage.example/source',
-        expires_at: new Date(Date.now() + 300000).toISOString(),
-        thumbnail: {
-          url: 'https://storage.example/thumb',
-          large_url: 'https://storage.example/large',
+    vi.stubGlobal('IntersectionObserver', Observer);
+    const user = userEvent.setup();
+    const node = drive.file(name, ROOT_ID, 20, mime);
+    const calls = vi.fn();
+    server.use(
+      http.get('/api/v1/nodes/:id/preview', () => {
+        calls();
+        return HttpResponse.json({
+          kind,
+          url: 'https://storage.example/source',
           expires_at: new Date(Date.now() + 300000).toISOString(),
-        },
-      });
-    }),
-  );
-  renderApp('/drive', testUser);
-  const option = await screen.findByRole('option', { name: node.name });
-  expect(calls).not.toHaveBeenCalled();
-  await user.click(screen.getByRole('button', { name: 'List view' }));
-  for (const callback of observers)
-    callback(
-      [{ isIntersecting: true } as IntersectionObserverEntry],
-      {} as IntersectionObserver,
+          thumbnail: {
+            url: 'https://storage.example/thumb',
+            large_url: 'https://storage.example/large',
+            expires_at: new Date(Date.now() + 300000).toISOString(),
+          },
+        });
+      }),
     );
-  await waitFor(() =>
-    expect(option.querySelector('img')).toHaveAttribute(
-      'src',
-      'https://storage.example/thumb',
-    ),
-  );
-  const image = option.querySelector('img');
-  if (!image) throw new Error('Missing thumbnail');
-  fireEvent.error(image);
-  expect(option.querySelector('img')).toBeNull();
-  vi.unstubAllGlobals();
-});
+    renderApp('/drive', testUser);
+    const option = await screen.findByRole('option', { name: node.name });
+    expect(calls).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: 'List view' }));
+    for (const callback of observers)
+      callback(
+        [{ isIntersecting: true } as IntersectionObserverEntry],
+        {} as IntersectionObserver,
+      );
+    await waitFor(() =>
+      expect(option.querySelector('img')).toHaveAttribute(
+        'src',
+        'https://storage.example/thumb',
+      ),
+    );
+    const image = option.querySelector('img');
+    if (!image) throw new Error('Missing thumbnail');
+    fireEvent.error(image);
+    expect(option.querySelector('img')).toBeNull();
+    vi.unstubAllGlobals();
+  },
+);
 
 it('refreshes visible thumbnail URLs before expiry and stops when hidden', async () => {
   let notify: IntersectionObserverCallback | undefined;

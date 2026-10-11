@@ -288,3 +288,70 @@ test('audio uses native playback controls', async ({ page, isMobile }) => {
     .toBeGreaterThan(0);
   await captures(page, 'audio', isMobile);
 });
+
+test('MP4 thumbnails in grid and list with corrupt fallback and playable source', async ({
+  page,
+  isMobile,
+}) => {
+  await signUpVerifiedViaApi(page);
+  const parent = await root(page);
+  await upload(
+    page,
+    parent,
+    'clip.mp4',
+    'video/mp4',
+    await readFile('e2e/fixtures/preview.mp4'),
+  );
+  await upload(
+    page,
+    parent,
+    'broken.mp4',
+    'video/mp4',
+    Buffer.from('corrupt MP4'),
+  );
+  await page.goto('/drive');
+  const thumbnail = item(page, 'clip.mp4').locator('img');
+  await expect(thumbnail).toBeVisible();
+  await expect
+    .poll(() =>
+      thumbnail.evaluate((image) => (image as HTMLImageElement).naturalWidth),
+    )
+    .toBeGreaterThan(0);
+  await expect(item(page, 'broken.mp4').locator('img')).toHaveCount(0);
+  for (const layout of ['grid', 'list']) {
+    if (layout === 'list')
+      await page.getByRole('button', { name: 'Dạng danh sách' }).click();
+    await expect(item(page, 'clip.mp4').locator('img')).toBeVisible();
+    if (process.env.PREVIEW_CAPTURE) {
+      for (const theme of ['light', 'dark']) {
+        await page.evaluate((value) => {
+          localStorage.setItem('qloud-theme', value);
+          window.dispatchEvent(
+            new StorageEvent('storage', { key: 'qloud-theme' }),
+          );
+        }, theme);
+        await expect(page.locator('html')).toHaveClass(
+          theme === 'dark' ? /dark/ : /^$/,
+        );
+        await page.screenshot({
+          path: `../qloud_docs/assets/m3-04-${layout}-${theme}-${isMobile ? '360' : 'desktop'}.png`,
+          fullPage: true,
+          animations: 'disabled',
+        });
+      }
+    }
+  }
+  await expect(item(page, 'broken.mp4').locator('img')).toHaveCount(0);
+  await open(page, 'clip.mp4');
+  await expect(page.locator('video')).toHaveAttribute('src', /^https?:\/\//);
+  await page
+    .locator('video')
+    .evaluate((element) => (element as HTMLVideoElement).play());
+  await expect
+    .poll(() =>
+      page
+        .locator('video')
+        .evaluate((element) => (element as HTMLVideoElement).currentTime),
+    )
+    .toBeGreaterThan(0);
+});

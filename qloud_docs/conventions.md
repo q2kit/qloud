@@ -11,7 +11,7 @@
 - Dự án là mã nguồn mở, giấy phép **MIT**. Dependency phải có giấy phép permissive.
 - **Danh sách cho phép** (SPDX): MIT, MIT-0, 0BSD, BSD-2-Clause, BSD-3-Clause, Apache-2.0, ISC, PSF-2.0, Python-2.0, HPND, MPL-2.0, Unlicense, CC0-1.0, BlueOak-1.0.0, Zlib.
   Với biểu thức `A OR B` chỉ cần một vế được phép; `A AND B` thì cả hai.
-- **Ngoại lệ theo từng package** (ghi lý do, khớp đúng chuỗi giấy phép): LGPL cho thư viện liên kết động (psycopg); nội dung không phải code như font (OFL-1.1) hay dữ liệu dùng lúc build (CC-BY-4.0, caniuse-lite).
+- **Ngoại lệ theo từng package** (ghi lý do, khớp đúng chuỗi giấy phép): LGPL cho thư viện liên kết động (psycopg); FFmpeg/ffprobe LGPL-2.1-or-later cho subprocess thumbnail trên worker, chỉ build không GPL/nonfree/version3 bằng `scripts/build_ffmpeg.py`, giữ shared libraries, source và notice (owner duyệt [#121](https://github.com/q2kit/qloud/issues/121#issuecomment-6103108839)); nội dung không phải code như font (OFL-1.1) hay dữ liệu dùng lúc build (CC-BY-4.0, caniuse-lite).
 - **Cấm GPL, AGPL** và giấy phép không phải mã nguồn mở (SSPL, BUSL, Commons Clause…). Nếu thật sự cần thì phải hỏi trước.
 - CI kiểm tra bằng `scripts/check_licenses.py` (dữ liệu từ `pip-licenses` và `pnpm licenses list`). Giấy phép lạ hoặc không xác định thì **fail** cho tới khi được xem xét và thêm vào danh sách hoặc ngoại lệ.
 

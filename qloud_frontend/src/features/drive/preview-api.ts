@@ -37,7 +37,11 @@ export function usePreview(
       if (!link) return false;
       if (
         !link.thumbnail &&
-        (link.kind === 'image' || link.kind === 'pdf') &&
+        (link.kind === 'image' ||
+          link.kind === 'pdf' ||
+          (node?.mime_type?.split(';')[0]?.trim().toLowerCase() ===
+            'video/mp4' &&
+            link.kind === 'video')) &&
         query.state.dataUpdateCount < 7
       )
         return 5000;

@@ -204,6 +204,12 @@ THUMBNAIL_MAX_SOURCE_BYTES = env.int("THUMBNAIL_MAX_SOURCE_BYTES", default=100 *
 THUMBNAIL_MAX_PIXELS = env.int("THUMBNAIL_MAX_PIXELS", default=40_000_000)
 THUMBNAIL_SOFT_TIME_LIMIT = env.int("THUMBNAIL_SOFT_TIME_LIMIT", default=60)
 THUMBNAIL_TIME_LIMIT = env.int("THUMBNAIL_TIME_LIMIT", default=90)
+THUMBNAIL_FFMPEG = env(
+    "THUMBNAIL_FFMPEG", default=str(BASE_DIR.parent / ".tools/ffmpeg/bin/ffmpeg")
+)
+THUMBNAIL_FFPROBE = env(
+    "THUMBNAIL_FFPROBE", default=str(BASE_DIR.parent / ".tools/ffmpeg/bin/ffprobe")
+)
 
 # --- Cloudflare Turnstile (empty secret disables the check; prod requires it) ---
 # The SPA reads the site key from GET /api/v1/config, so both keys live here.

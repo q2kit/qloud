@@ -2,6 +2,7 @@ import datetime
 import io
 import urllib.request
 import uuid
+from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 import pytest
@@ -221,3 +222,24 @@ def test_video_range_uses_direct_s3_url(client, stored_file):
 )
 def test_code_mime_allowlist(mime):
     assert preview_kind(mime, 20) == "text"
+
+
+def test_mp4_thumbnail_urls_permissions_and_stale_version(client, stored_file):
+    data = (
+        Path(__file__).resolve().parents[4] / "qloud_frontend/e2e/fixtures/preview.mp4"
+    ).read_bytes()
+    node = stored_file("clip.mp4", data, "video/mp4")
+    assert generate(node.current_version_id)
+    result = client.get(preview(node)).json()
+    assert result["kind"] == "video"
+    assert result["thumbnail"]["expires_at"] == result["expires_at"]
+    for field in ["url", "large_url"]:
+        with fetch(result["thumbnail"][field]) as content:
+            assert content.headers["Content-Type"] == "image/webp"
+            with Image.open(io.BytesIO(content.read())) as image:
+                assert image.size == (160, 90)
+    client.force_authenticate(User.objects.create_user("video-stranger@example.com"))
+    assert client.get(preview(node)).status_code == 404
+    Node.objects.filter(pk=node.pk).update(thumbnail_key=f"thumbs/{uuid.uuid4()}/256.webp")
+    client.force_authenticate(node.owner)
+    assert client.get(preview(node)).json()["thumbnail"] is None
