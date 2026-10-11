@@ -13,7 +13,7 @@ from apps.accounts.models import User
 from apps.core.errors import ErrorSerializer
 from apps.sharing.permissions import get_node_or_404, nodes_for, role_of
 
-from . import downloads, previews, selectors, services
+from . import downloads, previews, selectors, services, trash
 from .models import Node
 from .pagination import NodeChildrenPagination, RecentPagination
 from .serializers import (
@@ -25,6 +25,9 @@ from .serializers import (
     NodeSerializer,
     PreviewLinkSerializer,
     RenameSerializer,
+    TrashNodeSerializer,
+    TrashResultSerializer,
+    TrashSelectionSerializer,
     capabilities,
 )
 
@@ -159,3 +162,61 @@ class RecentView(generics.ListAPIView[Node]):
     @extend_schema(operation_id="recent_list", responses={200: NodeSerializer(many=True)})
     def get(self, request: Request, *args: object, **kwargs: object) -> Response:
         return super().get(request, *args, **kwargs)
+
+
+class NodeTrashView(APIView):
+    @extend_schema(
+        operation_id="nodes_trash",
+        request=TrashSelectionSerializer,
+        responses={200: TrashResultSerializer, 400: BAD_REQUEST, 404: NOT_FOUND},
+    )
+    def post(self, request: Request) -> Response:
+        serializer = TrashSelectionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        nodes = trash.trash(_user(request), serializer.validated_data["node_ids"])
+        return Response(TrashResultSerializer({"nodes": nodes}).data)
+
+
+class TrashListView(generics.ListAPIView[Node]):
+    serializer_class = TrashNodeSerializer
+    pagination_class = NodeChildrenPagination
+
+    def get_queryset(self) -> QuerySet[Node]:
+        return trash.roots_for(_user(self.request))
+
+    @extend_schema(operation_id="trash_list", responses={200: TrashNodeSerializer(many=True)})
+    def get(self, request: Request, *args: object, **kwargs: object) -> Response:
+        return super().get(request, *args, **kwargs)
+
+
+class TrashRestoreView(APIView):
+    @extend_schema(
+        operation_id="trash_restore",
+        request=TrashSelectionSerializer,
+        responses={200: MoveResultSerializer, 400: BAD_REQUEST, 404: NOT_FOUND},
+    )
+    def post(self, request: Request) -> Response:
+        serializer = TrashSelectionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        nodes = trash.restore(_user(request), serializer.validated_data["node_ids"])
+        return Response(MoveResultSerializer({"nodes": nodes}).data)
+
+
+class TrashDeleteView(APIView):
+    @extend_schema(
+        operation_id="trash_delete",
+        request=TrashSelectionSerializer,
+        responses={204: None, 400: BAD_REQUEST, 404: NOT_FOUND},
+    )
+    def post(self, request: Request) -> Response:
+        serializer = TrashSelectionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        trash.delete(_user(request), serializer.validated_data["node_ids"])
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class TrashEmptyView(APIView):
+    @extend_schema(operation_id="trash_empty", request=None, responses={204: None})
+    def post(self, request: Request) -> Response:
+        trash.delete(_user(request))
+        return Response(status=status.HTTP_204_NO_CONTENT)

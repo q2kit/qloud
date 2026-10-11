@@ -35,3 +35,39 @@ def enqueue_thumbnail(version_id: str) -> None:
         generate_thumbnail.delay(version_id)
     except KombuError, OSError:
         logger.exception("Could not enqueue thumbnail for version %s", version_id)
+
+
+@shared_task(autoretry_for=(s3.StorageError,), retry_backoff=True, max_retries=5)
+def delete_trash_objects() -> int:
+    from django.db import transaction
+
+    from .models import Blob, ObjectDeletion
+
+    deleted = 0
+    while True:
+        with transaction.atomic():
+            pending = list(
+                ObjectDeletion.objects.select_for_update(skip_locked=True).order_by("id")[:1000]
+            )
+            if not pending:
+                return deleted
+            keys = [item.storage_key for item in pending]
+            # Serialize workers and protect any blob still serving a version.
+            blobs = list(Blob.objects.select_for_update().filter(storage_key__in=keys))
+            referenced = set(
+                Blob.objects.filter(
+                    pk__in=[b.pk for b in blobs], versions__isnull=False
+                ).values_list("storage_key", flat=True)
+            )
+            s3.delete_objects(key for key in keys if key not in referenced)
+            Blob.objects.filter(pk__in=[b.pk for b in blobs], versions__isnull=True).delete()
+            ObjectDeletion.objects.filter(pk__in=[item.pk for item in pending]).delete()
+            deleted += len(pending)
+
+
+def enqueue_object_cleanup() -> None:
+    try:
+        delete_trash_objects.delay()
+    except KombuError, OSError:
+        # The durable queue can be drained by the scheduled sweep after broker recovery.
+        logger.exception("Could not enqueue trash object cleanup")

@@ -7,10 +7,20 @@ from .views import (
     NodeDownloadView,
     NodeMoveView,
     NodePreviewView,
+    NodeTrashView,
     RecentView,
+    TrashDeleteView,
+    TrashEmptyView,
+    TrashListView,
+    TrashRestoreView,
 )
 
 urlpatterns = [
+    path("nodes/trash", NodeTrashView.as_view(), name="nodes-trash"),
+    path("trash", TrashListView.as_view(), name="trash-list"),
+    path("trash/restore", TrashRestoreView.as_view(), name="trash-restore"),
+    path("trash/delete", TrashDeleteView.as_view(), name="trash-delete"),
+    path("trash/empty", TrashEmptyView.as_view(), name="trash-empty"),
     path("recent", RecentView.as_view(), name="recent"),
     path("nodes/move", NodeMoveView.as_view(), name="nodes-move"),
     path("nodes/<uuid:node_id>", NodeDetailView.as_view(), name="node-detail"),

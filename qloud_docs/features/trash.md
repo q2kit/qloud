@@ -1,6 +1,6 @@
 # Thùng rác (F-TRASH)
 
-**Trạng thái:** Nháp · **Milestone:** M4 · **Màn hình:** S-08
+**Trạng thái:** Đang làm · **Milestone:** M4 · **Màn hình:** S-08
 
 ## User stories
 - Tôi muốn xóa file mà không sợ mất ngay, và có thể hoàn tác.
@@ -23,3 +23,20 @@
 - [ ] Xóa file con X, sau đó xóa folder cha A, rồi khôi phục A: X vẫn nằm trong thùng rác (vì có `trashed_root` riêng).
 - [ ] Xóa vĩnh viễn thì quota giảm và object trên S3 bị xóa.
 - [ ] Mục quá 30 ngày bị tự động xóa vĩnh viễn.
+
+## Triển khai M4
+
+Đặc tả và kế hoạch M4 được owner duyệt ngày 11/10/2026 trong phiên làm việc;
+[kế hoạch trên #30](https://github.com/q2kit/qloud/issues/30#issuecomment-6106220857).
+
+- M4-01: API thùng rác theo nhóm, hiện hỗ trợ owner; quyền editor theo chia sẻ nối vào M5.
+- Khi chọn cả folder và con còn sống trong một request, chỉ folder ngoài cùng là nhóm xóa.
+  Nhóm đã nằm trong thùng rác giữ nguyên root và thời điểm xóa.
+- Khôi phục/xóa vĩnh viễn chỉ nhận ID root của nhóm; chọn đồng thời các nhóm lồng nhau thì
+  khôi phục cha trước. Xóa vĩnh viễn folder bao gồm cả nhóm xóa cũ còn ở bên trong.
+- Xóa bản ghi và trừ quota (tổng size của mọi FileVersion bị xóa) trong transaction.
+  Lưu ý định dọn S3 trong `drive_objectdeletion`; Celery dọn sau commit, giữ Blob tới khi
+  S3 xác nhận. Blob còn phiên bản tham chiếu được giữ lại. Thumbnail các phiên bản cũng được dọn.
+  Broker lỗi không làm API báo thất bại cho thao tác đã commit; ý định dọn vẫn trong database.
+- M4-02 bổ sung lịch dọn theo plan và quét lại hàng đợi sau khi broker/S3 phục hồi.
+- M4-03 bổ sung giao diện và hoàn tác. Hai task này chưa triển khai trong M4-01.
