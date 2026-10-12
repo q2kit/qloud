@@ -94,7 +94,7 @@ describe('version panel', () => {
       role = value;
       setup();
       expect(await screen.findByText('Hiện tại')).toBeVisible();
-      expect(screen.getAllByText('Giữ mãi').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Đã khóa').length).toBeGreaterThan(0);
       expect(screen.getAllByText('Tài khoản đã bị xóa')).toHaveLength(2);
       expect(
         screen.getByRole('button', { name: 'Tải phiên bản 1' }),
@@ -369,15 +369,19 @@ it('owner toggles current and old retention only after success and handles error
   setup();
   const user = userEvent.setup();
   const old = await screen.findByRole('button', {
-    name: 'Giữ mãi phiên bản 1',
+    name: 'Khóa phiên bản 1',
   });
   expect(old).toHaveAttribute('aria-pressed', 'false');
+  expect(old).toHaveTextContent('Khóa');
+  expect(old).toHaveAttribute('title', i18n.t('versions.keepTitle'));
   await user.click(old);
   await waitFor(() => expect(old).toHaveAttribute('aria-pressed', 'true'));
-  await user.click(screen.getByRole('button', { name: 'Giữ mãi phiên bản 2' }));
+  expect(old).toHaveTextContent('Bỏ khóa');
+  expect(old).toHaveAttribute('title', i18n.t('versions.unkeepTitle'));
+  await user.click(screen.getByRole('button', { name: 'Khóa phiên bản 2' }));
   await waitFor(() =>
     expect(
-      screen.getByRole('button', { name: 'Giữ mãi phiên bản 2' }),
+      screen.getByRole('button', { name: 'Khóa phiên bản 2' }),
     ).toHaveAttribute('aria-pressed', 'false'),
   );
   expect(patch).toHaveBeenCalledWith(
@@ -399,7 +403,7 @@ it.each(['viewer', 'editor'] as const)(
     setup();
     await screen.findByText('Hiện tại');
     expect(
-      screen.queryByRole('button', { name: 'Giữ mãi phiên bản 1' }),
+      screen.queryByRole('button', { name: 'Khóa phiên bản 1' }),
     ).not.toBeInTheDocument();
   },
 );

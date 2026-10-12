@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { Download, History, Trash2 } from 'lucide-react';
+import { Download, History, Lock, LockOpen, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -116,7 +116,11 @@ export function VersionPanel({ node }: { node: DriveNode }): React.JSX.Element {
                   </span>
                 )}
                 {version.keep_forever && (
-                  <span className="text-xs text-muted-foreground">
+                  <span
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground"
+                    title={t('versions.keepTitle')}
+                  >
+                    <Lock className="size-3" aria-hidden="true" />
                     {t('versions.kept')}
                   </span>
                 )}
@@ -170,6 +174,11 @@ export function VersionPanel({ node }: { node: DriveNode }): React.JSX.Element {
                     size="sm"
                     disabled={pending}
                     aria-pressed={version.keep_forever}
+                    title={t(
+                      version.keep_forever
+                        ? 'versions.unkeepTitle'
+                        : 'versions.keepTitle',
+                    )}
                     aria-label={t('versions.keepLabel', {
                       number: version.version_number,
                     })}
@@ -177,6 +186,11 @@ export function VersionPanel({ node }: { node: DriveNode }): React.JSX.Element {
                       retention.mutate(version);
                     }}
                   >
+                    {version.keep_forever ? (
+                      <LockOpen aria-hidden="true" />
+                    ) : (
+                      <Lock aria-hidden="true" />
+                    )}
                     {t(
                       version.keep_forever
                         ? 'versions.unkeep'

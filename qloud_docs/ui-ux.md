@@ -55,7 +55,7 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
 
 ### Tab Phiên bản (M7-03)
 
-Trong panel chi tiết, Thông tin/Phiên bản có thể đổi bằng click hoặc mũi tên/Home/End; đổi lựa chọn luôn về Thông tin. Chỉ một file còn sống mới bật Phiên bản. Danh sách card nhỏ cuộn trong panel/bottom sheet, có số version, nhãn Hiện tại/Giữ mãi, thời gian/dung lượng, tên gốc/MIME và uploader. Tải thêm theo cursor; skeleton/rỗng/lỗi có Thử lại. Hành động tải cho viewer, restore cho editor/owner, delete cho owner; current không có restore/delete. Restore/delete có hộp xác nhận và focus quay lại hành động hoặc danh sách khi phiên bản đã xóa. Nội dung/thao tác co ở 360px, chuỗi vi/en và màu token. Chi tiết: [versioning.md](features/versioning.md#m7-03--tab-phiên-bản).
+Trong panel chi tiết, Thông tin/Phiên bản có thể đổi bằng click hoặc mũi tên/Home/End; đổi lựa chọn luôn về Thông tin. Chỉ một file còn sống mới bật Phiên bản. Danh sách card nhỏ cuộn trong panel/bottom sheet, có số version, nhãn Hiện tại/Khóa, thời gian/dung lượng, tên gốc/MIME và uploader. Tải thêm theo cursor; skeleton/rỗng/lỗi có Thử lại. Hành động tải cho viewer, restore cho editor/owner, delete cho owner; current không có restore/delete. Restore/delete có hộp xác nhận và focus quay lại hành động hoặc danh sách khi phiên bản đã xóa. Nội dung/thao tác co ở 360px, chuỗi vi/en và màu token. Chi tiết: [versioning.md](features/versioning.md#m7-03--tab-phiên-bản).
 
 ## Danh sách màn hình
 
@@ -134,4 +134,4 @@ Route `/moderation` trong app shell chỉ cho superuser (flag `/me.is_superuser`
 - Nhập từ khóa: debounce 150ms, tối đa 8 gợi ý và mục “Xem tất cả kết quả”; dùng ↑/↓ để chọn, Enter để mở, Esc để đóng và trả focus về điểm mở. Dialog có loading, lỗi/thử lại và trạng thái rỗng.
 - S-09 giữ từ khóa, loại, người sở hữu và ngày sửa trong URL; dùng lưới/danh sách chung. API xếp theo độ liên quan, UI giữ nguyên thứ tự đó. File mở viewer, folder mở Drive; mục được chia sẻ hiện owner/quyền, dữ liệu được tải thêm bằng cursor.
 
-M7-04: tab Phiên bản thêm nút Giữ mãi/Bỏ giữ mãi cho owner, cả current và bản cũ; nút có `aria-pressed`, khóa trong lúc gửi và chỉ cập nhật sau thành công. Viewer/editor chỉ thấy nhãn Giữ mãi. Hướng thiết kế và vị trí panel giữ nguyên.
+M7-04: tab Phiên bản thêm nút Khóa/Bỏ khóa cho owner, cả current và bản cũ; nút có icon ổ khóa/mở khóa, title giải thích tác dụng và `aria-pressed`, khóa trong lúc gửi và chỉ cập nhật sau thành công. Viewer/editor chỉ thấy nhãn Khóa. Hướng thiết kế và vị trí panel giữ nguyên.

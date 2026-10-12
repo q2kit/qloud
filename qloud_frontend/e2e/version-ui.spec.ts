@@ -207,7 +207,7 @@ for (const role of ['viewer', 'editor'] as const) {
         actor.getByRole('button', { name: 'Xóa phiên bản 1' }),
       ).toHaveCount(0);
       await expect(
-        actor.getByRole('button', { name: 'Giữ mãi phiên bản 1' }),
+        actor.getByRole('button', { name: 'Khóa phiên bản 1' }),
       ).toHaveCount(0);
       if (role === 'viewer') {
         await expect(
@@ -280,14 +280,14 @@ test('owner toggles keep forever on old and current versions', async ({
   await page.goto('/drive');
   await openHistory(page);
   const old = page.getByRole('button', {
-    name: 'Giữ mãi phiên bản 1',
+    name: 'Khóa phiên bản 1',
     exact: true,
   });
   await expect(old).toHaveAttribute('aria-pressed', 'false');
   await old.click();
   await expect(old).toHaveAttribute('aria-pressed', 'true');
   const current = page.getByRole('button', {
-    name: 'Giữ mãi phiên bản 2',
+    name: 'Khóa phiên bản 2',
     exact: true,
   });
   await current.click();

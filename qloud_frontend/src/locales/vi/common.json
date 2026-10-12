@@ -606,7 +606,7 @@
   "versions": {
     "number": "Phiên bản {{number}}",
     "current": "Hiện tại",
-    "kept": "Giữ mãi",
+    "kept": "Đã khóa",
     "loading": "Đang tải phiên bản…",
     "empty": "Chưa có phiên bản nào.",
     "retry": "Thử lại",
@@ -628,8 +628,10 @@
     "failed": "Không thể thực hiện thao tác. Vui lòng thử lại.",
     "unnamedUploader": "Người dùng chưa đặt tên",
     "deletedUploader": "Tài khoản đã bị xóa",
-    "keep": "Giữ mãi",
-    "unkeep": "Bỏ giữ mãi",
-    "keepLabel": "Giữ mãi phiên bản {{number}}"
+    "keep": "Khóa",
+    "unkeep": "Bỏ khóa",
+    "keepLabel": "Khóa phiên bản {{number}}",
+    "keepTitle": "Khóa để phiên bản không bị dọn tự động. Dung lượng vẫn được tính; bạn vẫn có thể xóa thủ công phiên bản cũ.",
+    "unkeepTitle": "Bỏ khóa để phiên bản có thể được dọn tự động theo giới hạn và thời hạn lưu của gói. Phiên bản hiện tại luôn được giữ lại."
   }
 }

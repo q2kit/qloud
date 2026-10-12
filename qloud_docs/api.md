@@ -133,7 +133,7 @@ M2-04: `POST /uploads` trả session `{id, part_size, part_count, expires_at, ..
 | GET | `/nodes/{id}/versions` | Danh sách phiên bản |
 | GET | `/nodes/{id}/versions/{vid}/download` | Tải một phiên bản cũ |
 | POST | `/nodes/{id}/versions/{vid}/restore` | Đặt phiên bản này làm phiên bản hiện tại (tạo version mới) |
-| PATCH | `/nodes/{id}/versions/{vid}` | Bật/tắt Giữ mãi (owner) |
+| PATCH | `/nodes/{id}/versions/{vid}` | Bật/tắt Khóa (owner) |
 | DELETE | `/nodes/{id}/versions/{vid}` | Xóa một phiên bản (không xóa được phiên bản hiện tại) |
 
 M7-03 bổ sung `capabilities.can_delete_versions` vào chi tiết node: true cho owner của file còn sống, false cho folder/root và public. Editor/viewer không có capability này; quyền restore vẫn theo `can_edit`. Không đổi luật kiểm tra quyền của endpoint.
@@ -143,7 +143,7 @@ M7-02 triển khai cả bốn endpoint, chỉ cho file còn sống và phiên đ
 - List trả `{results, next, previous}`, `version_number` giảm dần, page_size mặc định 50, tối đa 200. Version gồm `{id, version_number, size, mime_type, original_name, uploaded_by: {id, display_name} | null, created_at, keep_forever, is_current}`; không có email/storage_key.
 - Download trả `200 {url, expires_at}`, tên file theo node hiện tại, MIME an toàn của version đã chọn; TTL giống download current. Byte đi trực tiếp tới S3.
 - Restore không nhận body, trả `200 Node`; tạo version mới dùng chung Blob nguồn, quota không tăng kể cả đã đầy. Reset/enqueue thumbnail cho version mới, giữ tên/vị trí/share/link.
-- PATCH nhận bắt buộc `{keep_forever: boolean}` (JSON boolean), trả `200 FileVersion` với `is_current`. Chỉ owner, kể cả current; 400 khi thiếu/sai kiểu hoặc folder, 404 khi node trash/không có quyền/version sai node. Giữ mãi không ngăn owner xóa thủ công bản cũ.
+- PATCH nhận bắt buộc `{keep_forever: boolean}` (JSON boolean), trả `200 FileVersion` với `is_current`. Chỉ owner, kể cả current; 400 khi thiếu/sai kiểu hoặc folder, 404 khi node trash/không có quyền/version sai node. Khóa không ngăn owner xóa thủ công bản cũ.
 - Delete trả 204; restore/delete current trả 409 `current_version`. Xóa Blob khỏi quota chỉ khi hết tham chiếu, S3/thumbnail được dọn qua hàng đợi bền vững sau commit.
 
 ### Chia sẻ
