@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useShortcut } from '@/features/shortcuts/context';
 import { useMediaQuery } from '@/lib/use-media-query';
 
 import type { DriveNode } from '../api';
@@ -54,49 +55,47 @@ export function FileBrowser(props: FileBrowserProps): React.JSX.Element {
     onClear: onClearSelection,
     onCreate: () => onCreate?.(),
   });
-  React.useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent): void => {
-      if (
-        !enabled ||
-        event.defaultPrevented ||
-        document.querySelector(
-          '[role="menu"], [role="dialog"], [role="alertdialog"]',
-        ) ||
-        (event.target instanceof Element &&
-          event.target.closest(
-            'input, textarea, select, [contenteditable]:not([contenteditable="false"])',
-          ))
-      )
-        return;
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a') {
-        event.preventDefault();
-        onSelectAll(nodes);
-      } else if (
-        event.key === 'Delete' &&
-        !event.repeat &&
-        !event.ctrlKey &&
-        !event.metaKey &&
-        !event.altKey &&
-        !event.shiftKey &&
-        selected.length > 0 &&
-        onDelete
-      ) {
-        event.preventDefault();
-        onDelete();
-      } else if (event.key === 'Escape') onClearSelection();
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-    };
-  }, [
-    enabled,
-    nodes,
-    selected.length,
-    onSelectAll,
-    onClearSelection,
-    onDelete,
-  ]);
+  // Same checks as the item menu: a shortcut runs only an action the menu offers.
+  const runAction = (key: string) => {
+    const [node] = selected;
+    if (selected.length !== 1 || !node) return;
+    props
+      .actionsFor(node)
+      .find((action) => action.key === key)
+      ?.run();
+  };
+  useShortcut(
+    'selectAll',
+    () => {
+      onSelectAll(nodes);
+    },
+    { enabled },
+  );
+  useShortcut('trash', () => onDelete?.(), {
+    enabled: enabled && selected.length > 0 && Boolean(onDelete),
+  });
+  useShortcut('clearSelection', onClearSelection, { enabled });
+  useShortcut(
+    'share',
+    () => {
+      runAction('share');
+    },
+    { enabled },
+  );
+  useShortcut(
+    'download',
+    () => {
+      runAction('download');
+    },
+    { enabled },
+  );
+  useShortcut(
+    'toggleView',
+    () => {
+      props.onView(props.view === 'grid' ? 'list' : 'grid');
+    },
+    { enabled },
+  );
   return (
     <>
       <DriveToolbar {...props} />

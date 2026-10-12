@@ -11,7 +11,12 @@ import { Button } from '@/components/ui/button';
 
 import { downloadNode, useNode, type DriveNode } from '../api';
 import { compactId, uuidFromUrl } from '../paths';
+import { useShortcut } from '@/features/shortcuts/context';
+import { ariaKeyshortcuts, matchesShortcut } from '@/features/shortcuts/keys';
+
 import { usePreview } from '../preview-api';
+
+const VIEWER_SELECTOR = '[data-file-viewer]';
 import { NodeIcon } from './node-icon';
 import { PreviewContent } from './preview-content';
 
@@ -128,6 +133,17 @@ export function FileViewer({
   const onContentError = React.useCallback(() => {
     setFailedUrl(link?.url ?? undefined);
   }, [link?.url]);
+  const download = () => {
+    if (!id) return;
+    setDownloadFailed(false);
+    void downloadNode(id, token).catch(() => {
+      setDownloadFailed(true);
+    });
+  };
+  useShortcut('viewerDownload', download, {
+    enabled: Boolean(id) && node.data?.kind === 'file',
+    within: VIEWER_SELECTOR,
+  });
   const retry = () => {
     setFailedUrl(undefined);
     void preview.refetch();
@@ -172,11 +188,14 @@ export function FileViewer({
               )
             )
               return;
-            if (event.key === 'ArrowLeft' && previous) {
+            if (
+              matchesShortcut(event.nativeEvent, 'previousFile') &&
+              previous
+            ) {
               event.preventDefault();
               setFile(previous.id);
             }
-            if (event.key === 'ArrowRight' && index >= 0) {
+            if (matchesShortcut(event.nativeEvent, 'nextFile') && index >= 0) {
               event.preventDefault();
               void nextFile();
             }
@@ -204,6 +223,7 @@ export function FileViewer({
                   variant="ghost"
                   size="icon"
                   aria-label={t('preview.previous')}
+                  aria-keyshortcuts={ariaKeyshortcuts('previousFile')}
                   disabled={index <= 0}
                   onClick={() => {
                     if (previous) setFile(previous.id);
@@ -215,6 +235,7 @@ export function FileViewer({
                   variant="ghost"
                   size="icon"
                   aria-label={t('preview.next')}
+                  aria-keyshortcuts={ariaKeyshortcuts('nextFile')}
                   disabled={
                     index < 0 || (!files[index + 1] && !hasMore) || loadingMore
                   }
@@ -228,15 +249,9 @@ export function FileViewer({
               variant="ghost"
               size="icon"
               aria-label={t('drive.actions.download')}
+              aria-keyshortcuts={ariaKeyshortcuts('viewerDownload')}
               disabled={node.data?.kind !== 'file'}
-              onClick={() => {
-                if (id) {
-                  setDownloadFailed(false);
-                  void downloadNode(id, token).catch(() => {
-                    setDownloadFailed(true);
-                  });
-                }
-              }}
+              onClick={download}
             >
               <Download />
             </Button>

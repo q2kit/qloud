@@ -115,10 +115,6 @@
     "navigationDescription": "Navigate to the main areas of Qloud.",
     "breadcrumbRoot": "My Drive",
     "search": "Search and quick actions",
-    "searchShortcut": "{{modifier}} K",
-    "keys": {
-      "ctrl": "Ctrl"
-    },
     "create": "Create"
   },
   "details": {
@@ -404,8 +400,7 @@
     "actionFailed": "Couldn't complete this action. Please try again.",
     "tooMany": "Select up to 1,000 items at a time.",
     "emptyState": "Trash is empty",
-    "emptyDescription": "Items you delete will appear here.",
-    "deleteShortcut": "Del"
+    "emptyDescription": "Items you delete will appear here."
   },
   "sharing": {
     "action": "Share",
@@ -698,5 +693,49 @@
     "done": "Done",
     "clear": "Clear date",
     "anyDate": "Any date"
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "description": "Press ? anywhere to show this list.",
+    "close": "Close keyboard shortcuts",
+    "then": "then",
+    "or": "or",
+    "groups": {
+      "general": "General",
+      "navigation": "Navigation",
+      "selection": "Selection",
+      "items": "Item actions",
+      "viewer": "File viewer"
+    },
+    "actions": {
+      "palette": "Search and quick actions",
+      "help": "Show keyboard shortcuts",
+      "details": "Show or hide details",
+      "goDrive": "Go to Drive",
+      "goRecent": "Go to Recent",
+      "goShared": "Go to Shared with me",
+      "goTrash": "Go to Trash",
+      "goSettings": "Go to Settings",
+      "parentFolder": "Go to the parent folder",
+      "moveSelection": "Move between items",
+      "extendSelection": "Extend the selection",
+      "toggleSelection": "Add or remove the focused item",
+      "selectAll": "Select all",
+      "clearSelection": "Clear the selection",
+      "open": "Open",
+      "openInNewTab": "Open in a new tab",
+      "rename": "Rename",
+      "trash": "Move to trash",
+      "share": "Share",
+      "download": "Download",
+      "newFolder": "New folder",
+      "upload": "Upload files",
+      "uploadFolder": "Upload a folder",
+      "toggleView": "Switch grid or list view",
+      "previousFile": "Previous file",
+      "nextFile": "Next file",
+      "viewerDownload": "Download the file",
+      "closeViewer": "Close the viewer"
+    }
   }
 }
