@@ -210,16 +210,16 @@ test('anonymous report reaches moderation, superuser removes link and owner rece
     );
     await moderator.goto(`/moderation?report=${report?.id ?? ''}`);
     await expect(
-      moderator.getByRole('region', { name: 'Báo cáo cùng node' }),
-    ).toContainText('2 báo cáo cùng node · 2 đang chờ');
+      moderator.getByRole('region', { name: 'Báo cáo về cùng một mục' }),
+    ).toContainText('2 báo cáo về mục này · 2 đang chờ xử lý');
     await expect(
       moderator.getByRole('region', { name: 'Đối tượng bị báo cáo' }),
     ).toContainText(ownerEmail);
     await moderator
-      .getByRole('button', { name: 'Xem tất cả báo cáo cùng node' })
+      .getByRole('button', { name: 'Xem tất cả báo cáo về mục này' })
       .click();
     await expect(
-      moderator.getByText('Đang xem các báo cáo cùng node'),
+      moderator.getByText('Đang xem các báo cáo về cùng một mục'),
     ).toBeVisible();
     await capture(moderator, 'queue', isMobile);
     await moderator.goto(`/moderation?report=${report?.id ?? ''}`);
@@ -235,10 +235,10 @@ test('anonymous report reaches moderation, superuser removes link and owner rece
     ).toBeVisible();
     await expect(
       moderator.getByRole('region', { name: 'Lịch sử xử lý' }),
-    ).toContainText('Đã gỡ thêm 1 link.');
+    ).toContainText('Đã thu hồi thêm 1 liên kết.');
     await expect(
-      moderator.getByRole('region', { name: 'Báo cáo cùng node' }),
-    ).toContainText('2 báo cáo cùng node · 1 đang chờ');
+      moderator.getByRole('region', { name: 'Báo cáo về cùng một mục' }),
+    ).toContainText('2 báo cáo về mục này · 1 đang chờ xử lý');
     await mailContaining(ownerEmail, 'Đã xác minh nội dung độc hại.');
     const related = (await (
       await moderator.request.get('/api/v1/moderation/reports', {
@@ -258,14 +258,14 @@ test('anonymous report reaches moderation, superuser removes link and owner rece
     await moderator.getByRole('button', { name: 'Xác nhận xử lý' }).click();
     await expect(
       moderator.getByRole('region', { name: 'Lịch sử xử lý' }),
-    ).toContainText('Không phát sinh thay đổi mới');
+    ).toContainText('Không có thay đổi mới');
     await expect(
-      moderator.getByRole('region', { name: 'Báo cáo cùng node' }),
-    ).toContainText('2 báo cáo cùng node · 0 đang chờ');
+      moderator.getByRole('region', { name: 'Báo cáo về cùng một mục' }),
+    ).toContainText('2 báo cáo về mục này · 0 đang chờ xử lý');
 
     await visitor.goto(`/s/${link.token}`);
     await expect(
-      visitor.getByRole('heading', { name: 'Nội dung không còn khả dụng' }),
+      visitor.getByRole('heading', { name: 'Không thể truy cập nội dung' }),
     ).toBeVisible();
     expect(
       (
@@ -326,7 +326,9 @@ test('moderator suspension invalidates owner sessions and all public links', asy
     );
     expect(report).toBeDefined();
     await moderator.goto(`/moderation?report=${report?.id ?? ''}`);
-    await moderator.getByLabel('Thao tác').selectOption('suspend_owner');
+    await moderator
+      .getByRole('combobox', { name: /^Thao tác/ })
+      .selectOption('suspend_owner');
     await moderator
       .getByLabel('Ghi chú (bắt buộc)')
       .fill('Đã xác minh hành vi lạm dụng.');

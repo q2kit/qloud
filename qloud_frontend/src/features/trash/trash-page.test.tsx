@@ -357,7 +357,9 @@ it('keeps undo available after a restore failure and can dismiss the toast', asy
   await user.click(await screen.findByRole('option', { name: 'A' }));
   await chooseSelectionAction(user, 'Move to trash');
   await user.click(await screen.findByRole('button', { name: 'Undo' }));
-  await screen.findByText('Could not undo. Try again or restore from Trash.');
+  await screen.findByText(
+    "Couldn't undo this action. Try again or restore the item from Trash.",
+  );
   expect(screen.getByRole('button', { name: 'Undo' })).toBeEnabled();
   await user.click(
     screen.getByRole('button', { name: 'Dismiss notification' }),
@@ -373,7 +375,7 @@ it('reports a failed trash listing and retries it', async () => {
     http.get('/api/v1/trash', () => HttpResponse.json({}, { status: 500 })),
   );
   renderApp('/trash', testUser);
-  await screen.findByText('Could not load trash');
+  await screen.findByText("Couldn't load trash");
   server.use(
     http.get('/api/v1/trash', () =>
       HttpResponse.json({ results: [], next: null, previous: null }),

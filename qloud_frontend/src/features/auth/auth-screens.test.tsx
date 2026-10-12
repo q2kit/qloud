@@ -131,7 +131,7 @@ describe('login (S-01)', () => {
       'The email or password is incorrect.',
     ],
     [failure(429), 'Too many attempts. Please wait a minute and try again.'],
-    [failure(401), 'This account cannot be signed in to.'],
+    [failure(401), "Couldn't sign in to this account."],
   ])('explains a failed login', async (response, message) => {
     server.use(http.post(`${AUTH_BASE}/auth/login`, () => response.clone()));
     const user = userEvent.setup();
@@ -147,7 +147,7 @@ describe('login (S-01)', () => {
   it('shows OAuth outcomes and the enabled providers', async () => {
     renderApp('/login?error=cancelled');
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Could not sign in with this account.',
+      "Couldn't sign in with this account. Please try again.",
     );
     expect(
       await screen.findByRole('button', { name: 'Continue with GitHub' }),
@@ -208,7 +208,7 @@ describe('signup (S-02)', () => {
     await user.click(screen.getByRole('button', { name: 'Sign up' }));
 
     expect(await screen.findByLabelText('Email')).toHaveAccessibleDescription(
-      'This email is already used by another account.',
+      'This email is already registered.',
     );
     expect(screen.getByLabelText('Password')).toHaveAccessibleDescription(
       'This password is too common.',
@@ -225,7 +225,7 @@ describe('signup (S-02)', () => {
     await user.click(screen.getByRole('button', { name: 'Sign up' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Sign-up is not open at the moment.',
+      'Qloud is not accepting new accounts right now.',
     );
   });
 });
@@ -264,12 +264,12 @@ describe('email verification (S-03)', () => {
 
     expect(
       await screen.findByRole('heading', {
-        name: 'Could not verify your email',
+        name: "Couldn't verify your email",
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /already used, or expired\. If you verified your email before/,
+        /has already been used, or has expired\. If your email is already verified/,
       ),
     ).toBeInTheDocument();
     expect(

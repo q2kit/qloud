@@ -134,7 +134,7 @@ for (const view of ['grid', 'list'] as const) {
     await dialog.getByLabel('Tên').fill('con');
     await dialog.getByRole('button', { name: 'Tạo', exact: true }).click();
     await expect(
-      dialog.getByText('Đã có một mục cùng tên trong thư mục này.'),
+      dialog.getByText('Thư mục này đã có tệp hoặc thư mục cùng tên.'),
     ).toBeVisible();
     await dialog.getByRole('button', { name: 'Hủy' }).click();
     if (isMobile) {
@@ -192,7 +192,9 @@ test('dropping at the bottom uploads to the current folder; a child remains a se
   });
   await item(page, 'Con').dispatchEvent('dragenter', { dataTransfer });
   await item(page, 'Con').dispatchEvent('dragover', { dataTransfer });
-  await expect(page.getByText('Thả để tải lên vào "Con"')).toBeVisible();
+  await expect(
+    page.getByText('Thả tệp để tải lên thư mục "Con"'),
+  ).toBeVisible();
   await item(page, 'Con').dispatchEvent('drop', { dataTransfer });
   await expect(
     page.getByRole('region', { name: 'Tải lên' }).getByText('Đã tải lên 2 tệp'),

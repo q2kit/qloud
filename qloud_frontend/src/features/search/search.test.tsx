@@ -57,7 +57,7 @@ it('offers quick commands without requesting search and restores keyboard focus'
   renderApp('/drive', testUser);
   await screen.findByRole('heading', { level: 1, name: 'My Drive' });
   const trigger = screen.getAllByRole('button', {
-    name: /Search and run commands/,
+    name: /Search and quick actions/,
   })[0];
   if (!trigger) throw new Error('missing trigger');
   trigger.focus();
@@ -120,7 +120,7 @@ it('debounces requests, cancels obsolete reads and opens a selected suggestion',
     );
   });
   expect(
-    screen.queryByRole('dialog', { name: 'Search and commands' }),
+    screen.queryByRole('dialog', { name: 'Search and quick actions' }),
   ).not.toBeInTheDocument();
 });
 
@@ -171,9 +171,7 @@ it('loads cursor pages and reports errors with a retry', async () => {
     }),
   );
   renderApp('/search?q=report', testUser);
-  expect(
-    await screen.findByText(/Could not load search results/),
-  ).toBeVisible();
+  expect(await screen.findByText(/Couldn't load search results/)).toBeVisible();
   fail = false;
   await user.click(screen.getByRole('button', { name: 'Try again' }));
   expect(await screen.findByRole('option', { name: 'report1' })).toBeVisible();
@@ -204,7 +202,7 @@ it('runs create-folder and does not stack the palette over another dialog', asyn
   expect(dialog).toBeVisible();
   fireEvent.keyDown(window, { key: 'k', metaKey: true });
   expect(
-    screen.queryByRole('dialog', { name: 'Search and commands' }),
+    screen.queryByRole('dialog', { name: 'Search and quick actions' }),
   ).toBeNull();
   expect(requests).toHaveLength(0);
 });

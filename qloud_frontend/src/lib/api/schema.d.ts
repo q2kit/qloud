@@ -747,7 +747,7 @@ export interface components {
             readonly email: string;
             /** Tên hiển thị */
             display_name?: string;
-            /** URL ảnh đại diện */
+            /** Đường dẫn ảnh đại diện */
             readonly avatar_url: string | null;
             /** Ngôn ngữ */
             locale?: components["schemas"]["LocaleEnum"];

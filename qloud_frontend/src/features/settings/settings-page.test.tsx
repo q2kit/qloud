@@ -316,7 +316,7 @@ describe('settings (S-13)', () => {
       name: 'Linked accounts',
     });
     expect(within(linked).getByRole('alert')).toHaveTextContent(
-      'The account could not be linked.',
+      "Couldn't link this account. It may already be linked to someone else.",
     );
   });
 });

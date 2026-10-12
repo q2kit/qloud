@@ -29,7 +29,7 @@ describe('authErrorMessages', () => {
       },
     ]);
     expect(authErrorMessages(error, t).fields).toEqual({
-      email: 'This email is already used by another account.',
+      email: 'This email is already registered.',
       password: 'Too short (server)',
     });
   });
@@ -39,14 +39,14 @@ describe('authErrorMessages', () => {
       { code: 'captcha_invalid', message: 'x', param: 'turnstile_token' },
     ]);
     expect(authErrorMessages(error, t).form).toBe(
-      'Bot verification failed. Please try again.',
+      "Couldn't complete verification. Please try again.",
     );
   });
 
   it.each([
     [429, 'Too many attempts. Please wait a minute and try again.'],
-    [403, 'Sign-up is not open at the moment.'],
-    [401, 'This account cannot be signed in to.'],
+    [403, 'Qloud is not accepting new accounts right now.'],
+    [401, "Couldn't sign in to this account."],
   ])('explains a bare %i', (status, message) => {
     expect(authErrorMessages(new AuthApiError(status, []), t).form).toBe(
       message,

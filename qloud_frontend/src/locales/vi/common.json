@@ -5,7 +5,7 @@
   "navigation": {
     "drive": "Drive",
     "recent": "Gần đây",
-    "shared": "Được chia sẻ",
+    "shared": "Được chia sẻ với tôi",
     "trash": "Thùng rác",
     "settings": "Cài đặt",
     "main": "Điều hướng chính",
@@ -31,15 +31,15 @@
       "label": "Sắp xếp",
       "nameAsc": "Tên (A → Z)",
       "nameDesc": "Tên (Z → A)",
-      "newest": "Sửa gần đây nhất",
-      "oldest": "Sửa lâu nhất",
+      "newest": "Cập nhật mới nhất",
+      "oldest": "Cập nhật cũ nhất",
       "largest": "Lớn nhất trước",
       "smallest": "Nhỏ nhất trước"
     },
     "columns": {
       "name": "Tên",
-      "modified": "Sửa lần cuối",
-      "size": "Kích thước"
+      "modified": "Cập nhật lần cuối",
+      "size": "Dung lượng"
     },
     "kind": {
       "folder": "Thư mục",
@@ -55,7 +55,7 @@
     },
     "empty": {
       "title": "Thư mục này đang trống",
-      "description": "Kéo tệp từ máy vào đây để tải lên, hoặc tạo thư mục để sắp xếp."
+      "description": "Kéo tệp vào đây để tải lên hoặc tạo thư mục mới."
     },
     "actions": {
       "upload": "Tải tệp lên",
@@ -71,25 +71,25 @@
       "moveCount_other": "Di chuyển {{count}} mục…",
       "moveHere": "Di chuyển tới đây",
       "info": "Thông tin",
-      "more": "Thao tác khác với {{name}}",
+      "more": "Thao tác với {{name}}",
       "openInNewTab": "Mở trong thẻ mới",
       "copyLink": "Sao chép liên kết",
       "openLocation": "Mở thư mục chứa tệp"
     },
     "errors": {
-      "generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
-      "name_conflict": "Đã có một mục cùng tên trong thư mục này.",
-      "invalid_target": "Chỉ có thể tạo bên trong một thư mục.",
+      "generic": "Có lỗi xảy ra. Vui lòng thử lại.",
+      "name_conflict": "Thư mục này đã có tệp hoặc thư mục cùng tên.",
+      "invalid_target": "Chọn một thư mục để tạo mục mới.",
       "root_folder": "Không thể đổi tên thư mục gốc.",
       "not_found": "Không tìm thấy mục này.",
-      "loadFailed": "Không tải được nội dung thư mục",
+      "loadFailed": "Không thể tải nội dung thư mục",
       "loadFailedDescription": "Kiểm tra kết nối mạng rồi thử lại.",
       "notFoundTitle": "Không tìm thấy thư mục",
-      "notFoundDescription": "Thư mục không tồn tại, đã bị xóa, hoặc bạn không có quyền xem.",
-      "downloadFailed": "Không tải xuống được tệp. Vui lòng thử lại.",
+      "notFoundDescription": "Thư mục đã bị xóa, không tồn tại hoặc bạn không có quyền truy cập.",
+      "downloadFailed": "Không thể tải tệp xuống. Vui lòng thử lại.",
       "invalid_move": "Không thể di chuyển một thư mục vào chính nó hoặc thư mục con của nó.",
-      "copyFailed": "Không sao chép được liên kết.",
-      "locationUnavailable": "Không tìm thấy tệp trong thư mục này hoặc bạn không có quyền truy cập."
+      "copyFailed": "Không thể sao chép liên kết. Vui lòng thử lại.",
+      "locationUnavailable": "Tệp không còn trong thư mục này hoặc bạn không có quyền truy cập."
     },
     "selection": {
       "count_other": "{{count}} mục đã chọn"
@@ -103,13 +103,13 @@
     "linkCopied": "Đã sao chép liên kết tới \"{{name}}\"."
   },
   "shell": {
-    "openNavigation": "Mở điều hướng",
-    "closeNavigation": "Đóng điều hướng",
+    "openNavigation": "Mở menu điều hướng",
+    "closeNavigation": "Đóng menu điều hướng",
     "openDetails": "Mở bảng chi tiết",
     "closeDetails": "Đóng bảng chi tiết",
-    "navigationDescription": "Điều hướng tới các khu vực chính của Qloud.",
+    "navigationDescription": "Truy cập các mục chính trong Qloud.",
     "breadcrumbRoot": "Drive của tôi",
-    "search": "Tìm kiếm và chạy lệnh",
+    "search": "Tìm kiếm và thao tác nhanh",
     "searchShortcut": "{{modifier}} K",
     "keys": {
       "ctrl": "Ctrl"
@@ -119,7 +119,7 @@
   "details": {
     "title": "Chi tiết",
     "emptyTitle": "Chưa chọn mục nào",
-    "emptyDescription": "Chọn một tệp hoặc thư mục để xem thông tin, phiên bản và quyền chia sẻ.",
+    "emptyDescription": "Chọn tệp hoặc thư mục để xem chi tiết.",
     "tabs": {
       "info": "Thông tin",
       "versions": "Phiên bản",
@@ -127,14 +127,14 @@
     },
     "fields": {
       "type": "Loại",
-      "size": "Kích thước",
-      "modified": "Sửa lần cuối",
-      "created": "Tạo lúc"
+      "size": "Dung lượng",
+      "modified": "Cập nhật lần cuối",
+      "created": "Ngày tạo"
     }
   },
   "placeholder": {
-    "shared": "Nội dung Được chia sẻ sẽ được triển khai trong M5-05.",
-    "trash": "Nội dung Thùng rác sẽ được triển khai trong M4-03."
+    "shared": "Các tệp và thư mục được chia sẻ với bạn sẽ xuất hiện ở đây.",
+    "trash": "Các tệp và thư mục đã xóa sẽ xuất hiện ở đây."
   },
   "notFound": {
     "title": "Không tìm thấy trang",
@@ -142,7 +142,7 @@
   },
   "routeError": {
     "title": "Đã xảy ra lỗi",
-    "description": "Có lỗi không mong muốn khi hiển thị trang này. Hãy thử tải lại trang hoặc quay về Drive.",
+    "description": "Không thể hiển thị trang này. Hãy tải lại trang hoặc quay về Drive.",
     "reload": "Tải lại trang"
   },
   "language": {
@@ -164,7 +164,7 @@
     },
     "login": {
       "title": "Đăng nhập",
-      "description": "Đăng nhập để vào Drive của bạn.",
+      "description": "Đăng nhập để truy cập Drive của bạn.",
       "remember": "Ghi nhớ đăng nhập",
       "forgotPassword": "Quên mật khẩu?",
       "submit": "Đăng nhập",
@@ -174,62 +174,62 @@
     },
     "signup": {
       "title": "Tạo tài khoản",
-      "description": "Đăng ký miễn phí để lưu trữ và chia sẻ file.",
-      "passwordHint": "Tối thiểu 8 ký tự, không quá giống email.",
+      "description": "Đăng ký miễn phí để lưu trữ và chia sẻ tệp.",
+      "passwordHint": "Dùng ít nhất 8 ký tự. Tránh đặt mật khẩu giống email.",
       "submit": "Đăng ký",
       "submitting": "Đang tạo tài khoản…",
       "haveAccount": "Đã có tài khoản?",
       "loginLink": "Đăng nhập",
       "successTitle": "Kiểm tra hộp thư của bạn",
-      "successDescription": "Chúng tôi đã gửi email xác thực tới {{email}}. Bạn có thể dùng Drive ngay; một số tính năng như upload cần xác thực email.",
+      "successDescription": "Email xác thực đã được gửi tới {{email}}. Bạn có thể dùng Drive ngay. Hãy xác thực email để tải tệp lên.",
       "continue": "Vào Drive"
     },
     "verify": {
       "pendingTitle": "Đang xác thực email",
-      "pending": "Vui lòng chờ trong giây lát…",
+      "pending": "Vui lòng đợi một chút…",
       "successTitle": "Đã xác thực email",
-      "successDescription": "Cảm ơn bạn! Địa chỉ email của bạn đã được xác thực.",
+      "successDescription": "Bạn đã xác thực email thành công.",
       "errorTitle": "Không thể xác thực email",
       "toDrive": "Vào Drive",
       "toLogin": "Đăng nhập",
-      "errorDescription": "Liên kết không hợp lệ, đã được dùng hoặc đã hết hạn. Nếu bạn đã xác thực email trước đó thì không cần làm gì thêm."
+      "errorDescription": "Liên kết không hợp lệ, đã được sử dụng hoặc đã hết hạn. Nếu email đã được xác thực, bạn có thể tiếp tục dùng Qloud."
     },
     "reset": {
       "requestTitle": "Quên mật khẩu",
-      "requestDescription": "Nhập email của tài khoản, chúng tôi sẽ gửi liên kết để đặt lại mật khẩu.",
+      "requestDescription": "Nhập email của tài khoản để nhận liên kết đặt lại mật khẩu.",
       "send": "Gửi liên kết",
       "sending": "Đang gửi…",
       "sentTitle": "Kiểm tra hộp thư của bạn",
-      "sentDescription": "Nếu {{email}} có tài khoản Qloud, bạn sẽ nhận được liên kết đặt lại mật khẩu trong vài phút.",
+      "sentDescription": "Nếu {{email}} đã đăng ký Qloud, bạn sẽ nhận được email đặt lại mật khẩu trong vài phút.",
       "backToLogin": "Quay lại đăng nhập",
       "newPasswordTitle": "Đặt mật khẩu mới",
       "newPasswordDescription": "Chọn mật khẩu mới cho tài khoản Qloud của bạn.",
       "save": "Lưu mật khẩu",
       "saving": "Đang lưu…",
-      "requestAgain": "Gửi lại liên kết mới",
+      "requestAgain": "Gửi liên kết mới",
       "doneTitle": "Đã đổi mật khẩu",
-      "doneDescription": "Mật khẩu đã được cập nhật và mọi phiên đăng nhập cũ đã bị đăng xuất.",
+      "doneDescription": "Mật khẩu đã được đổi. Hãy đăng nhập lại bằng mật khẩu mới.",
       "toLogin": "Đăng nhập"
     },
     "oauth": {
       "divider": "hoặc",
       "continueWith": "Tiếp tục với {{provider}}",
       "failed": "Không thể đăng nhập bằng tài khoản này. Vui lòng thử lại.",
-      "emailInUse": "Email này đã có tài khoản Qloud. Hãy đăng nhập bằng mật khẩu, sau đó liên kết tài khoản trong phần Cài đặt."
+      "emailInUse": "Email này đã đăng ký Qloud. Hãy đăng nhập bằng mật khẩu rồi liên kết tài khoản trong Cài đặt."
     },
     "errors": {
-      "generic": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+      "generic": "Có lỗi xảy ra. Vui lòng thử lại.",
       "invalidCredentials": "Email hoặc mật khẩu không đúng.",
       "emailTaken": "Email này đã được dùng cho một tài khoản khác.",
-      "captchaInvalid": "Xác minh chống bot không thành công. Vui lòng thử lại.",
+      "captchaInvalid": "Không thể hoàn tất xác minh. Vui lòng thử lại.",
       "rateLimited": "Bạn đã thử quá nhiều lần. Vui lòng đợi một phút rồi thử lại.",
-      "signupClosed": "Hiện chưa mở đăng ký tài khoản mới.",
+      "signupClosed": "Qloud hiện chưa nhận đăng ký mới.",
       "accountUnavailable": "Không thể đăng nhập vào tài khoản này.",
-      "invalidLink": "Liên kết không hợp lệ hoặc đã hết hạn. Hãy yêu cầu một liên kết mới."
+      "invalidLink": "Liên kết không hợp lệ hoặc đã hết hạn. Hãy yêu cầu liên kết mới."
     },
     "sessionError": {
-      "title": "Không kết nối được máy chủ",
-      "description": "Không kiểm tra được phiên đăng nhập. Hãy kiểm tra kết nối mạng rồi thử lại.",
+      "title": "Không thể kết nối với máy chủ",
+      "description": "Không thể kiểm tra trạng thái đăng nhập. Hãy kiểm tra kết nối mạng rồi thử lại.",
       "retry": "Thử lại"
     }
   },
@@ -241,22 +241,22 @@
     "save": "Lưu",
     "saving": "Đang lưu…",
     "saved": "Đã lưu.",
-    "loadFailed": "Không tải được cài đặt.",
+    "loadFailed": "Không thể tải cài đặt. Vui lòng thử lại.",
     "profile": {
       "title": "Hồ sơ",
       "displayName": "Tên hiển thị",
-      "displayNameHint": "Hiện cho những người bạn chia sẻ file.",
-      "saveFailed": "Không lưu được tên hiển thị. Vui lòng thử lại."
+      "displayNameHint": "Tên mà người khác thấy khi bạn chia sẻ tệp.",
+      "saveFailed": "Không thể lưu tên hiển thị. Vui lòng thử lại."
     },
     "preferences": {
       "title": "Ngôn ngữ và giao diện",
-      "description": "Áp dụng ngay và theo tài khoản của bạn sang mọi trình duyệt."
+      "description": "Thay đổi có hiệu lực ngay và được đồng bộ khi bạn đăng nhập trên trình duyệt khác."
     },
     "password": {
       "changeTitle": "Đổi mật khẩu",
-      "changeDescription": "Các phiên đăng nhập khác sẽ bị đăng xuất; phiên này vẫn giữ.",
+      "changeDescription": "Sau khi đổi mật khẩu, bạn sẽ được đăng xuất trên các trình duyệt khác. Bạn vẫn đăng nhập trên trình duyệt này.",
       "setTitle": "Đặt mật khẩu",
-      "setDescription": "Tài khoản của bạn đang đăng nhập bằng Google/GitHub. Đặt mật khẩu để đăng nhập bằng email, và để có thể gỡ liên kết.",
+      "setDescription": "Đặt mật khẩu để đăng nhập bằng email thay cho Google hoặc GitHub. Sau đó, bạn có thể gỡ liên kết tài khoản.",
       "current": "Mật khẩu hiện tại",
       "wrongCurrent": "Mật khẩu hiện tại không đúng.",
       "submit": "Lưu mật khẩu",
@@ -265,21 +265,21 @@
     "linked": {
       "title": "Tài khoản liên kết",
       "description": "Đăng nhập nhanh bằng Google hoặc GitHub.",
-      "none": "Hiện chưa bật đăng nhập bằng Google hoặc GitHub.",
+      "none": "Đăng nhập bằng Google hoặc GitHub hiện chưa được bật.",
       "notLinked": "Chưa liên kết",
       "connect": "Liên kết",
       "disconnect": "Gỡ liên kết",
-      "connectFailed": "Không liên kết được tài khoản. Có thể tài khoản này đã liên kết với người dùng khác.",
-      "loadFailed": "Không tải được danh sách tài khoản liên kết."
+      "connectFailed": "Không thể liên kết tài khoản này. Tài khoản có thể đã được liên kết với người khác.",
+      "loadFailed": "Không thể tải danh sách tài khoản liên kết. Vui lòng thử lại."
     }
   },
   "upload": {
-    "dropHere": "Thả để tải lên vào \"{{folder}}\"",
+    "dropHere": "Thả tệp để tải lên thư mục \"{{folder}}\"",
     "tray": {
       "label": "Tải lên",
-      "uploading": "Đang tải lên {{done}}/{{total}}",
+      "uploading": "Đang tải lên · {{done}}/{{total}} tệp hoàn tất",
       "finished_other": "Đã tải lên {{count}} tệp",
-      "offline": "Mất kết nối — sẽ tự tiếp tục khi có mạng",
+      "offline": "Mất kết nối. Tệp sẽ tự tải tiếp khi có mạng.",
       "speed": "{{speed}}/s · còn khoảng {{time}}",
       "expand": "Mở rộng khay tải lên",
       "collapse": "Thu gọn khay tải lên",
@@ -288,7 +288,7 @@
     "actions": {
       "pauseAll": "Tạm dừng tất cả",
       "resumeAll": "Tiếp tục tất cả",
-      "retryFailed_other": "Thử lại {{count}} tệp lỗi",
+      "retryFailed_other": "Thử tải lại {{count}} tệp",
       "pause": "Tạm dừng {{name}}",
       "resume": "Tiếp tục {{name}}",
       "retry": "Thử lại {{name}}",
@@ -297,37 +297,37 @@
     },
     "status": {
       "queued": "Đang chờ",
-      "conflict": "Tên đã có trong thư mục",
+      "conflict": "Đã có tệp hoặc thư mục cùng tên",
       "uploading": "{{loaded}} / {{size}}",
       "completing": "Đang hoàn tất…",
       "paused": "Đã tạm dừng · {{loaded}} / {{size}}",
       "cancelled": "Đã hủy",
       "skipped": "Đã bỏ qua",
-      "done": "Xong"
+      "done": "Đã tải lên"
     },
     "errors": {
-      "upload_failed": "Không tải lên được. Hãy thử lại.",
-      "quota_exceeded": "Không đủ dung lượng cho tệp này.",
-      "file_too_large": "Tệp lớn hơn mức gói của bạn cho phép.",
+      "upload_failed": "Không thể tải tệp lên. Vui lòng thử lại.",
+      "quota_exceeded": "Không đủ dung lượng trống để tải tệp này lên.",
+      "file_too_large": "Tệp vượt quá dung lượng tối đa mà gói cho phép.",
       "email_not_verified": "Hãy xác thực email trước khi tải tệp lên.",
-      "invalid_target": "Không thể thay thế đích này. Chọn một tệp còn tồn tại; không thể thay thế thư mục.",
-      "not_found": "Thư mục đích không còn tồn tại hoặc bạn không có quyền.",
+      "invalid_target": "Chỉ có thể thay thế tệp còn tồn tại. Không thể thay thế thư mục.",
+      "not_found": "Thư mục không còn tồn tại hoặc bạn không có quyền truy cập.",
       "upload_expired": "Lượt tải lên đã hết hạn. Hãy chọn lại tệp.",
       "upload_closed": "Lượt tải lên đã kết thúc.",
-      "target_unavailable": "Tệp hoặc thư mục đích không còn khả dụng. Hãy hủy và tải lên lại.",
-      "storage_unavailable": "Kho lưu trữ đang tạm lỗi. Hãy thử lại sau ít phút.",
-      "folder_failed": "Không đọc hoặc tải thư mục lên được. Hãy chọn lại thư mục.",
-      "name_conflict": "Tên này đang được một tệp sử dụng. Hãy chọn Giữ cả hai để tải thư mục lên.",
-      "fingerprint_mismatch": "Tệp này không khớp với bản gốc. Hãy chọn đúng tệp, giữ nguyên thời gian chỉnh sửa."
+      "target_unavailable": "Tệp hoặc thư mục không còn tồn tại hoặc bạn không có quyền truy cập. Hãy hủy lượt tải này rồi tải lại.",
+      "storage_unavailable": "Tạm thời không thể kết nối với kho lưu trữ. Hãy thử lại sau vài phút.",
+      "folder_failed": "Không thể đọc hoặc tải thư mục lên. Hãy chọn lại thư mục.",
+      "name_conflict": "Đã có tệp trùng tên với thư mục này. Chọn \"Giữ cả hai\" để tiếp tục tải lên.",
+      "fingerprint_mismatch": "Tệp bạn chọn khác với tệp đang tải dở. Hãy chọn lại tệp gốc chưa được chỉnh sửa."
     },
     "verify": {
       "resend": "Gửi lại email xác thực",
-      "sent": "Đã gửi tới {{email}}.",
-      "failed": "Gửi không được — thử lại"
+      "sent": "Đã gửi email xác thực tới {{email}}.",
+      "failed": "Không thể gửi email. Hãy thử lại."
     },
     "conflict": {
-      "title": "Tên đã được dùng",
-      "description": "Thư mục này đã có một mục tên \"{{name}}\".",
+      "title": "Trùng tên",
+      "description": "Thư mục này đã có tệp hoặc thư mục tên \"{{name}}\".",
       "forAll_other": "Áp dụng cho {{count}} tệp còn lại",
       "skip": "Bỏ qua",
       "keepBoth": "Giữ cả hai",
@@ -336,13 +336,13 @@
     "folder": {
       "preparing": "Đang chuẩn bị thư mục…",
       "dismiss": "Đóng",
-      "title": "Tên thư mục đã được dùng",
-      "description": "Đã có mục tên \"{{name}}\". Gộp vào thư mục có sẵn hay giữ cả hai?",
+      "title": "Trùng tên thư mục",
+      "description": "Đã có mục tên \"{{name}}\". Bạn muốn gộp vào thư mục có sẵn hay giữ cả hai?",
       "merge": "Gộp"
     },
     "resume": {
-      "title": "Tệp tải lên dở dang",
-      "description": "Chọn lại tệp gốc để tiếp tục từ các phần đã tải lên, hoặc hủy để trả lại dung lượng.",
+      "title": "Tệp chưa tải lên xong",
+      "description": "Chọn lại tệp gốc để tải tiếp từ chỗ đã dừng. Nếu không cần tải nữa, hãy hủy để giải phóng dung lượng đang được giữ chỗ.",
       "retry": "Thử lại",
       "more": "Xem thêm",
       "pick": "Chọn lại {{name}}",
@@ -353,44 +353,44 @@
   "recent": {
     "description": "100 tệp được cập nhật gần nhất của bạn.",
     "emptyTitle": "Chưa có tệp gần đây",
-    "emptyDescription": "Tải tệp lên Drive để xem chúng tại đây.",
+    "emptyDescription": "Các tệp bạn tải lên hoặc cập nhật sẽ xuất hiện ở đây.",
     "loading": "Đang tải tệp gần đây",
-    "loadFailed": "Không tải được tệp gần đây"
+    "loadFailed": "Không thể tải danh sách tệp gần đây"
   },
   "preview": {
     "title": "Xem trước tệp",
-    "description": "Xem trước và tải tệp. Dùng phím mũi tên để chuyển tệp, Esc để đóng.",
+    "description": "Xem trước hoặc tải tệp xuống. Dùng phím mũi tên để chuyển tệp, Esc để đóng.",
     "open": "Xem trước",
     "previous": "Tệp trước",
     "next": "Tệp sau",
     "close": "Đóng trình xem",
-    "loading": "Đang tải xem trước…",
+    "loading": "Đang tải bản xem trước…",
     "failed": "Không thể xem trước tệp này.",
     "retry": "Thử lại",
-    "unsupported": "Loại tệp này chưa hỗ trợ xem trước. Bạn có thể tải về.",
+    "unsupported": "Chưa hỗ trợ xem trước loại tệp này. Bạn có thể tải tệp xuống để mở.",
     "pdf": {
       "previous": "Trang trước",
       "next": "Trang sau",
       "page": "Trang",
       "zoomIn": "Phóng to",
       "zoomOut": "Thu nhỏ",
-      "fit": "Vừa trang",
-      "canvas": "Trang PDF {{page}}"
+      "fit": "Vừa khung xem",
+      "canvas": "Trang {{page}} của tệp PDF"
     }
   },
   "trash": {
     "move": "Chuyển vào thùng rác",
     "moved": "Đã chuyển vào thùng rác",
     "undo": "Hoàn tác",
-    "undoFailed": "Không thể hoàn tác. Vui lòng thử lại hoặc khôi phục từ thùng rác.",
+    "undoFailed": "Không thể hoàn tác. Hãy thử lại hoặc khôi phục mục này trong Thùng rác.",
     "dismiss": "Đóng thông báo",
     "restore": "Khôi phục",
     "delete": "Xóa vĩnh viễn",
     "empty": "Dọn sạch thùng rác",
     "emptyTitle": "Dọn sạch thùng rác?",
     "deleteTitle": "Xóa vĩnh viễn các mục đã chọn?",
-    "deleteWarning": "Các file và thư mục sẽ bị xóa vĩnh viễn. Bạn không thể hoàn tác thao tác này.",
-    "description": "Khôi phục hoặc xóa vĩnh viễn các mục đã xóa. Các mục này vẫn tính vào dung lượng.",
+    "deleteWarning": "Các tệp và thư mục sẽ bị xóa vĩnh viễn. Bạn không thể hoàn tác thao tác này.",
+    "description": "Các tệp và thư mục trong thùng rác vẫn chiếm dung lượng. Bạn có thể khôi phục hoặc xóa vĩnh viễn chúng.",
     "loading": "Đang tải thùng rác…",
     "loadFailed": "Không thể tải thùng rác",
     "actionFailed": "Không thể thực hiện thao tác. Vui lòng thử lại.",
@@ -402,7 +402,7 @@
   "sharing": {
     "action": "Chia sẻ",
     "title": "Chia sẻ {{name}}",
-    "inherited": "Quyền được thừa kế xuống mục con. Quản lý quyền thừa kế tại mục được chia sẻ ban đầu.",
+    "inherited": "Tệp và thư mục con có cùng quyền truy cập với thư mục được chia sẻ. Để đổi quyền này, hãy mở phần Chia sẻ của thư mục đó.",
     "close": "Đóng",
     "people": "Người có quyền truy cập",
     "email": "Email người nhận",
@@ -414,42 +414,42 @@
     "removeFor": "Thu hồi quyền của {{email}}",
     "remove": "Thu hồi",
     "more": "Tải thêm",
-    "loading": "Đang tải chia sẻ…",
-    "links": "Link công khai",
-    "ownerOnly": "Chỉ chủ sở hữu quản lý link công khai.",
-    "expiry": "Hết hạn lúc (không bắt buộc)",
-    "noExpiry": "Để trống nếu link không hết hạn. Link chỉ cho phép xem và tải xuống.",
-    "createLink": "Tạo link",
+    "loading": "Đang tải thông tin chia sẻ…",
+    "links": "Liên kết công khai",
+    "ownerOnly": "Chỉ chủ sở hữu có thể quản lý liên kết công khai.",
+    "expiry": "Thời gian hết hạn (không bắt buộc)",
+    "noExpiry": "Để trống nếu không muốn liên kết hết hạn. Người có liên kết chỉ được xem và tải xuống.",
+    "createLink": "Tạo liên kết",
     "revoked": "Đã thu hồi",
     "expired": "Đã hết hạn",
     "until": "Hết hạn: {{date}}",
-    "active": "Có hiệu lực · Không hết hạn",
-    "copy": "Sao chép link",
-    "copied": "Đã sao chép link",
-    "revoke": "Thu hồi link",
+    "active": "Đang hoạt động · Không hết hạn",
+    "copy": "Sao chép liên kết",
+    "copied": "Đã sao chép liên kết",
+    "revoke": "Thu hồi liên kết",
     "saved": "Đã chia sẻ",
-    "sharedDescription": "Các mục được chia sẻ trực tiếp với bạn. Quyền hiển thị là quyền thực tế gồm cả thừa kế.",
-    "empty": "Chưa có mục được chia sẻ",
-    "emptyDescription": "File và thư mục người khác chia sẻ với bạn sẽ xuất hiện tại đây.",
+    "sharedDescription": "Các tệp và thư mục được chia sẻ trực tiếp với bạn. Quyền truy cập có thể đến từ mục này hoặc thư mục cha.",
+    "empty": "Chưa có nội dung được chia sẻ",
+    "emptyDescription": "Tệp và thư mục người khác chia sẻ với bạn sẽ xuất hiện tại đây.",
     "ownerRole": "{{name}} · {{role}}",
     "unnamedOwner": "Chủ sở hữu",
-    "unavailable": "Nội dung không còn khả dụng",
-    "unavailableDescription": "Link không hợp lệ, đã hết hạn hoặc đã bị thu hồi.",
-    "publicEmpty": "Thư mục được chia sẻ chưa có nội dung.",
+    "unavailable": "Không thể truy cập nội dung",
+    "unavailableDescription": "Liên kết không hợp lệ, đã hết hạn hoặc đã bị thu hồi.",
+    "publicEmpty": "Thư mục được chia sẻ đang trống.",
     "errors": {
-      "failed": "Không cập nhật được chia sẻ. Hãy thử lại.",
+      "failed": "Không thể cập nhật thông tin chia sẻ. Vui lòng thử lại.",
       "denied": "Bạn không có quyền quản lý chia sẻ của mục này.",
-      "invalid_share_recipient": "Email này chưa có tài khoản hợp lệ.",
+      "invalid_share_recipient": "Không tìm thấy tài khoản có thể nhận chia sẻ với email này.",
       "invalid_share_target": "Không thể chia sẻ cho chính bạn hoặc chủ sở hữu.",
-      "share_exists": "Người này đã được chia sẻ trực tiếp. Hãy đổi quyền trong danh sách.",
-      "expiry": "Chọn thời gian hết hạn trong tương lai.",
-      "copy": "Không sao chép được link. Hãy thử lại."
+      "share_exists": "Người này đã có quyền truy cập trực tiếp. Bạn có thể đổi quyền trong danh sách.",
+      "expiry": "Thời gian hết hạn phải sau thời điểm hiện tại.",
+      "copy": "Không thể sao chép liên kết. Vui lòng thử lại."
     }
   },
   "report": {
     "button": "Báo cáo vi phạm",
     "title": "Báo cáo: {{name}}",
-    "description": "Chọn lý do và cung cấp thông tin để quản trị viên xem xét.",
+    "description": "Chọn lý do và mô tả vấn đề để quản trị viên xem xét.",
     "reason": "Lý do",
     "message": "Mô tả (không bắt buộc)",
     "email": "Email liên hệ (không bắt buộc)",
@@ -466,7 +466,7 @@
     "errors": {
       "failed": "Không thể gửi báo cáo. Vui lòng thử lại.",
       "throttled": "Bạn đã gửi 5 báo cáo mới trong một giờ. Vui lòng thử lại sau.",
-      "unavailable": "Nội dung không còn khả dụng.",
+      "unavailable": "Nội dung này không còn truy cập được.",
       "captcha": "Xác minh chưa thành công. Vui lòng thử lại."
     }
   },
@@ -478,8 +478,8 @@
       "actioned": "Đã xử lý",
       "dismissed": "Đã bỏ qua"
     },
-    "empty": "Không có báo cáo trong trạng thái này.",
-    "anonymous": "Không cung cấp",
+    "empty": "Không có báo cáo nào ở trạng thái này.",
+    "anonymous": "Chưa cung cấp",
     "audit": "Lịch sử xử lý",
     "action": "Thao tác",
     "note": "Ghi chú (bắt buộc)",
@@ -489,35 +489,35 @@
     "cancel": "Hủy",
     "processing": "Đang xử lý…",
     "actions": {
-      "revoke_link": "Gỡ link bị báo cáo",
-      "revoke_node": "Gỡ mọi link của node gốc",
-      "suspend_owner": "Khóa tài khoản owner",
+      "revoke_link": "Thu hồi liên kết bị báo cáo",
+      "revoke_node": "Thu hồi tất cả liên kết của mục được chia sẻ",
+      "suspend_owner": "Khóa tài khoản chủ sở hữu",
       "dismiss": "Bỏ qua báo cáo"
     },
     "effects": {
-      "revoke_link": "Thu hồi link nếu chưa được thu hồi; owner chỉ nhận email khi có thay đổi mới.",
-      "revoke_node": "Gỡ mọi link trỏ trực tiếp tới node gốc của link bị báo cáo; không gỡ link riêng của node con hoặc node cha.",
-      "suspend_owner": "Chặn đăng nhập, vô hiệu session cũ và mọi link công khai của owner.",
-      "dismiss": "Giữ nội dung và link, đóng báo cáo với ghi chú."
+      "revoke_link": "Ngừng cho phép truy cập qua liên kết này. Chủ sở hữu sẽ nhận email nếu liên kết được thu hồi trong lần xử lý này.",
+      "revoke_node": "Thu hồi tất cả liên kết trỏ tới mục được chia sẻ qua liên kết bị báo cáo. Các liên kết riêng của tệp hoặc thư mục con và thư mục cha vẫn hoạt động.",
+      "suspend_owner": "Chặn đăng nhập, đăng xuất trên mọi trình duyệt và vô hiệu hóa tất cả liên kết công khai của chủ sở hữu.",
+      "dismiss": "Giữ nguyên nội dung và các liên kết. Đóng báo cáo và lưu ghi chú xử lý."
     },
     "fields": {
       "reporter_email": "Email liên hệ",
       "reporter_user_id": "Tài khoản người báo cáo",
-      "owner_uuid": "Owner",
-      "node_uuid": "Node bị báo cáo",
-      "link_uuid": "Link bị báo cáo"
+      "owner_uuid": "Chủ sở hữu",
+      "node_uuid": "Mục bị báo cáo",
+      "link_uuid": "Liên kết bị báo cáo"
     },
     "errors": {
       "failed": "Không thể xử lý báo cáo. Vui lòng thử lại.",
       "resolved": "Báo cáo đã được xử lý. Hãy tải lại trang.",
-      "unavailable": "Tài khoản đích không còn tồn tại.",
-      "guard": "Không được tự khóa mình hoặc khóa superuser cuối cùng."
+      "unavailable": "Tài khoản cần xử lý không còn tồn tại.",
+      "guard": "Không thể khóa tài khoản của bạn hoặc tài khoản quản trị viên cấp cao cuối cùng."
     },
-    "introduction": "Xem ngữ cảnh báo cáo và kiểm tra phạm vi trước khi xử lý.",
+    "introduction": "Kiểm tra nội dung báo cáo và những mục bị ảnh hưởng trước khi xử lý.",
     "queue": "Danh sách báo cáo",
-    "relatedCounts": "{{total}} báo cáo cùng node · {{open}} đang chờ",
-    "nodeFilter": "Đang xem các báo cáo cùng node",
-    "clearFilter": "Xóa bộ lọc node",
+    "relatedCounts": "{{total}} báo cáo về mục này · {{open}} đang chờ xử lý",
+    "nodeFilter": "Đang xem các báo cáo về cùng một mục",
+    "clearFilter": "Bỏ lọc theo mục",
     "backToQueue": "Quay lại danh sách",
     "selectReport": "Chọn một báo cáo để xem chi tiết",
     "selectReportDescription": "Kiểm tra nội dung, đối tượng bị báo cáo và các báo cáo liên quan trước khi quyết định.",
@@ -525,11 +525,11 @@
     "fileInfo": "Loại nội dung",
     "currentState": "Trạng thái hiện tại",
     "identifier": "ID",
-    "deleted": "Đã xóa / không còn tồn tại",
+    "deleted": "Đã xóa hoặc không còn tồn tại",
     "trashed": "Trong thùng rác",
     "available": "Còn tồn tại",
     "kinds": {
-      "file": "File",
+      "file": "Tệp",
       "folder": "Thư mục"
     },
     "receivedAt": "Nhận lúc {{time}}",
@@ -537,12 +537,12 @@
     "reportContent": "Nội dung báo cáo",
     "noMessage": "Người gửi không cung cấp mô tả.",
     "subject": "Đối tượng bị báo cáo",
-    "rootNode": "Node gốc của link",
-    "ownerId": "ID owner",
+    "rootNode": "Mục được chia sẻ qua liên kết",
+    "ownerId": "Mã chủ sở hữu",
     "ownerSuspended": "Đã khóa",
     "ownerActive": "Đang hoạt động",
     "ownerInactive": "Ngừng hoạt động",
-    "linkState": "Trạng thái link",
+    "linkState": "Trạng thái liên kết",
     "linkStates": {
       "active": "Đang hoạt động",
       "revoked": "Đã thu hồi",
@@ -551,54 +551,54 @@
       "unavailable": "Không còn khả dụng"
     },
     "revokeReasons": {
-      "owner": "Thu hồi bởi owner",
-      "moderation": "Thu hồi qua kiểm duyệt"
+      "owner": "Chủ sở hữu thu hồi",
+      "moderation": "Quản trị viên thu hồi"
     },
-    "expiresAt": "Link hết hạn lúc",
-    "revokedAt": "Link thu hồi lúc",
-    "related": "Báo cáo cùng node",
-    "independentReports": "Mỗi lượt báo cáo được lưu riêng. Xử lý báo cáo này không tự đóng các báo cáo khác cùng node.",
-    "viewRelated": "Xem tất cả báo cáo cùng node",
-    "resolvedAt": "Xử lý lúc",
+    "expiresAt": "Thời gian liên kết hết hạn",
+    "revokedAt": "Thời gian thu hồi liên kết",
+    "related": "Báo cáo về cùng một mục",
+    "independentReports": "Mỗi báo cáo được xử lý riêng. Xử lý báo cáo này sẽ không tự đóng các báo cáo khác về cùng một mục.",
+    "viewRelated": "Xem tất cả báo cáo về mục này",
+    "resolvedAt": "Thời gian xử lý",
     "resolver": "Người xử lý",
     "resolve": "Quyết định xử lý",
     "actualResult": "Kết quả thực tế",
-    "dismissResult": "Đã bỏ qua báo cáo; không thay đổi link hay tài khoản.",
-    "revokedResult": "Đã gỡ thêm {{count}} link.",
-    "noChangeResult": "Không phát sinh thay đổi mới: đích đã được xử lý hoặc không còn tồn tại. Không gửi thêm email gỡ link.",
-    "suspendedResult": "Đã khóa tài khoản owner và vô hiệu các session/link công khai.",
-    "sameRoot": "Node bị báo cáo cũng là node gốc của link."
+    "dismissResult": "Đã bỏ qua báo cáo; không thay đổi liên kết hay tài khoản.",
+    "revokedResult": "Đã thu hồi thêm {{count}} liên kết.",
+    "noChangeResult": "Không có thay đổi mới vì mục này đã được xử lý hoặc không còn tồn tại. Không gửi thêm email thông báo thu hồi liên kết.",
+    "suspendedResult": "Đã khóa tài khoản chủ sở hữu, đăng xuất trên mọi trình duyệt và vô hiệu hóa tất cả liên kết công khai.",
+    "sameRoot": "Mục bị báo cáo là mục được chia sẻ qua liên kết này."
   },
   "search": {
     "title": "Kết quả tìm kiếm",
-    "paletteTitle": "Tìm kiếm và câu lệnh",
-    "paletteDescription": "Tìm file, thư mục hoặc chạy câu lệnh. Dùng phím mũi tên để chọn, Enter để mở, Escape để đóng.",
+    "paletteTitle": "Tìm kiếm và thao tác nhanh",
+    "paletteDescription": "Tìm tệp, thư mục hoặc chọn thao tác nhanh. Dùng phím mũi tên để chọn, Enter để mở, Esc để đóng.",
     "query": "Từ khóa tìm kiếm",
-    "placeholder": "Tìm file và thư mục…",
+    "placeholder": "Tìm tệp và thư mục…",
     "close": "Đóng tìm kiếm",
     "viewAll": "Xem tất cả kết quả",
     "loading": "Đang tìm kiếm…",
-    "failed": "Không tải được kết quả. Kiểm tra từ khóa, bộ lọc và thử lại.",
+    "failed": "Không thể tải kết quả tìm kiếm. Kiểm tra từ khóa và bộ lọc rồi thử lại.",
     "retry": "Thử lại",
     "empty": "Không tìm thấy kết quả",
-    "emptyDescription": "Thử tên khác hoặc đổi bộ lọc.",
-    "start": "Tìm file hoặc thư mục",
+    "emptyDescription": "Thử từ khóa khác hoặc thay đổi bộ lọc.",
+    "start": "Tìm tệp hoặc thư mục",
     "submit": "Tìm kiếm",
-    "suggestions": "Gợi ý tìm kiếm và câu lệnh",
+    "suggestions": "Gợi ý tìm kiếm và thao tác nhanh",
     "type": "Loại",
     "allTypes": "Tất cả loại",
-    "owner": "Người sở hữu",
-    "allOwners": "Tất cả người sở hữu",
+    "owner": "Chủ sở hữu",
+    "allOwners": "Tất cả chủ sở hữu",
     "mine": "Của tôi",
     "others": "Được chia sẻ với tôi",
-    "modifiedAfter": "Sửa từ ngày",
+    "modifiedAfter": "Cập nhật từ ngày",
     "types": {
       "folder": "Thư mục",
       "document": "Tài liệu",
       "image": "Ảnh",
       "video": "Video",
       "audio": "Âm thanh",
-      "archive": "File nén",
+      "archive": "Tệp nén",
       "other": "Khác"
     },
     "relevance": "Độ liên quan"
@@ -607,11 +607,11 @@
     "number": "Phiên bản {{number}}",
     "current": "Hiện tại",
     "kept": "Đã khóa",
-    "loading": "Đang tải phiên bản…",
+    "loading": "Đang tải lịch sử phiên bản…",
     "empty": "Chưa có phiên bản nào.",
     "retry": "Thử lại",
     "more": "Tải thêm",
-    "download": "Tải về",
+    "download": "Tải xuống",
     "restore": "Khôi phục",
     "delete": "Xóa",
     "downloadLabel": "Tải phiên bản {{number}}",
@@ -619,19 +619,19 @@
     "deleteLabel": "Xóa phiên bản {{number}}",
     "confirmRestore": "Khôi phục phiên bản {{number}}?",
     "confirmDelete": "Xóa phiên bản {{number}}?",
-    "restoreDescription": "Nội dung này sẽ được khôi phục thành một phiên bản mới. Lịch sử được giữ nguyên và dung lượng đã dùng không tăng.",
+    "restoreDescription": "Tạo phiên bản mới từ nội dung của phiên bản này. Các phiên bản khác vẫn được giữ lại và dung lượng đã dùng không tăng.",
     "deleteDescription": "Phiên bản này sẽ bị xóa vĩnh viễn. Bạn không thể hoàn tác thao tác này.",
     "cancel": "Hủy",
     "working": "Đang xử lý…",
-    "unavailable": "File hoặc phiên bản không còn khả dụng, hoặc bạn không còn quyền truy cập.",
-    "currentError": "Đây đã là phiên bản hiện tại. Hãy tải lại lịch sử.",
+    "unavailable": "Tệp hoặc phiên bản không còn tồn tại hoặc bạn không có quyền truy cập.",
+    "currentError": "Đây là phiên bản hiện tại. Hãy tải lại danh sách phiên bản.",
     "failed": "Không thể thực hiện thao tác. Vui lòng thử lại.",
     "unnamedUploader": "Người dùng chưa đặt tên",
     "deletedUploader": "Tài khoản đã bị xóa",
     "keep": "Khóa",
     "unkeep": "Bỏ khóa",
     "keepLabel": "Khóa phiên bản {{number}}",
-    "keepTitle": "Khóa để phiên bản không bị dọn tự động. Dung lượng vẫn được tính; bạn vẫn có thể xóa thủ công phiên bản cũ.",
-    "unkeepTitle": "Bỏ khóa để phiên bản có thể được dọn tự động theo giới hạn và thời hạn lưu của gói. Phiên bản hiện tại luôn được giữ lại."
+    "keepTitle": "Khóa để phiên bản không bị tự động xóa. Phiên bản vẫn chiếm dung lượng và bạn vẫn có thể xóa bản cũ theo cách thủ công.",
+    "unkeepTitle": "Bỏ khóa để cho phép tự động xóa phiên bản theo giới hạn của gói. Phiên bản hiện tại luôn được giữ lại."
   }
 }

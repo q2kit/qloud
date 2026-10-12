@@ -9,7 +9,7 @@
     "trash": "Trash",
     "settings": "Settings",
     "main": "Main navigation",
-    "login": "Log in",
+    "login": "Sign in",
     "home": "Back to Drive",
     "preferences": "Display preferences",
     "moderation": "Moderation"
@@ -31,14 +31,14 @@
       "label": "Sort",
       "nameAsc": "Name (A → Z)",
       "nameDesc": "Name (Z → A)",
-      "newest": "Last modified first",
-      "oldest": "Oldest modified first",
+      "newest": "Most recently updated",
+      "oldest": "Least recently updated",
       "largest": "Largest first",
       "smallest": "Smallest first"
     },
     "columns": {
       "name": "Name",
-      "modified": "Last modified",
+      "modified": "Last updated",
       "size": "Size"
     },
     "kind": {
@@ -56,7 +56,7 @@
     },
     "empty": {
       "title": "This folder is empty",
-      "description": "Drag files from your computer here to upload them, or create a folder."
+      "description": "Drag files here to upload them, or create a folder."
     },
     "actions": {
       "upload": "Upload files",
@@ -83,22 +83,22 @@
       "name_conflict": "An item with this name already exists in this folder.",
       "invalid_target": "You can only create items inside a folder.",
       "root_folder": "The root folder cannot be renamed.",
-      "not_found": "This item could not be found.",
+      "not_found": "Couldn't find this item.",
       "loadFailed": "Couldn't load this folder",
       "loadFailedDescription": "Check your connection and try again.",
       "notFoundTitle": "Folder not found",
       "notFoundDescription": "This folder doesn't exist, was deleted, or you don't have access to it.",
       "downloadFailed": "Couldn't download the file. Please try again.",
       "invalid_move": "A folder can't be moved into itself or one of its subfolders.",
-      "copyFailed": "Couldn't copy the link.",
-      "locationUnavailable": "The file is unavailable in this folder or you do not have access."
+      "copyFailed": "Couldn't copy the link. Please try again.",
+      "locationUnavailable": "This file is no longer in this folder, or you don't have access."
     },
     "selection": {
       "count_one": "{{count}} item selected",
       "count_other": "{{count}} items selected"
     },
     "move": {
-      "description": "Pick the destination folder, then choose \"Move here\".",
+      "description": "Choose a destination folder, then select \"Move here\".",
       "noFolders": "No subfolders.",
       "folders": "Subfolders",
       "done_one": "Moved {{count}} item to \"{{target}}\".",
@@ -113,7 +113,7 @@
     "closeDetails": "Close details panel",
     "navigationDescription": "Navigate to the main areas of Qloud.",
     "breadcrumbRoot": "My Drive",
-    "search": "Search and run commands",
+    "search": "Search and quick actions",
     "searchShortcut": "{{modifier}} K",
     "keys": {
       "ctrl": "Ctrl"
@@ -123,7 +123,7 @@
   "details": {
     "title": "Details",
     "emptyTitle": "Nothing selected",
-    "emptyDescription": "Select a file or folder to see its information, versions, and sharing access.",
+    "emptyDescription": "Select a file or folder to see its details.",
     "tabs": {
       "info": "Info",
       "versions": "Versions",
@@ -132,13 +132,13 @@
     "fields": {
       "type": "Type",
       "size": "Size",
-      "modified": "Modified",
+      "modified": "Last updated",
       "created": "Created"
     }
   },
   "placeholder": {
-    "shared": "Shared content will be implemented in M5-05.",
-    "trash": "Trash content will be implemented in M4-03."
+    "shared": "Files and folders shared with you will appear here.",
+    "trash": "Deleted files and folders will appear here."
   },
   "notFound": {
     "title": "Page not found",
@@ -146,7 +146,7 @@
   },
   "routeError": {
     "title": "Something went wrong",
-    "description": "An unexpected error occurred while showing this page. Try reloading, or go back to Drive.",
+    "description": "Couldn't display this page. Reload the page or go back to Drive.",
     "reload": "Reload page"
   },
   "language": {
@@ -179,28 +179,28 @@
     "signup": {
       "title": "Create an account",
       "description": "Sign up for free to store and share files.",
-      "passwordHint": "At least 8 characters, not too similar to your email.",
+      "passwordHint": "Use at least 8 characters. Avoid a password similar to your email.",
       "submit": "Sign up",
       "submitting": "Creating account…",
       "haveAccount": "Already have an account?",
       "loginLink": "Sign in",
       "successTitle": "Check your inbox",
-      "successDescription": "We sent a verification email to {{email}}. You can use Drive right away; some features, such as uploading, need a verified email.",
+      "successDescription": "We sent a verification email to {{email}}. You can use Drive now. Verify your email to upload files.",
       "continue": "Go to Drive"
     },
     "verify": {
       "pendingTitle": "Verifying your email",
       "pending": "Please wait a moment…",
       "successTitle": "Email verified",
-      "successDescription": "Thank you! Your email address is verified.",
-      "errorTitle": "Could not verify your email",
+      "successDescription": "Your email address has been verified.",
+      "errorTitle": "Couldn't verify your email",
       "toDrive": "Go to Drive",
       "toLogin": "Sign in",
-      "errorDescription": "This link is invalid, already used, or expired. If you verified your email before, there is nothing more to do."
+      "errorDescription": "This link is invalid, has already been used, or has expired. If your email is already verified, you can continue using Qloud."
     },
     "reset": {
       "requestTitle": "Forgot password",
-      "requestDescription": "Enter the email of your account and we will send you a link to reset your password.",
+      "requestDescription": "Enter your account email to receive a password reset link.",
       "send": "Send link",
       "sending": "Sending…",
       "sentTitle": "Check your inbox",
@@ -212,28 +212,28 @@
       "saving": "Saving…",
       "requestAgain": "Send a new link",
       "doneTitle": "Password changed",
-      "doneDescription": "Your password is updated and every earlier session was signed out.",
+      "doneDescription": "Your password has been changed. Sign in again with your new password.",
       "toLogin": "Sign in"
     },
     "oauth": {
       "divider": "or",
       "continueWith": "Continue with {{provider}}",
-      "failed": "Could not sign in with this account. Please try again.",
+      "failed": "Couldn't sign in with this account. Please try again.",
       "emailInUse": "This email already has a Qloud account. Sign in with your password, then link the account in Settings."
     },
     "errors": {
       "generic": "Something went wrong. Please try again.",
       "invalidCredentials": "The email or password is incorrect.",
-      "emailTaken": "This email is already used by another account.",
-      "captchaInvalid": "Bot verification failed. Please try again.",
+      "emailTaken": "This email is already registered.",
+      "captchaInvalid": "Couldn't complete verification. Please try again.",
       "rateLimited": "Too many attempts. Please wait a minute and try again.",
-      "signupClosed": "Sign-up is not open at the moment.",
-      "accountUnavailable": "This account cannot be signed in to.",
+      "signupClosed": "Qloud is not accepting new accounts right now.",
+      "accountUnavailable": "Couldn't sign in to this account.",
       "invalidLink": "This link is invalid or has expired. Please request a new one."
     },
     "sessionError": {
       "title": "Cannot reach the server",
-      "description": "Your session could not be checked. Check your connection and try again.",
+      "description": "Couldn't check your sign-in status. Check your connection and try again.",
       "retry": "Try again"
     }
   },
@@ -245,22 +245,22 @@
     "save": "Save",
     "saving": "Saving…",
     "saved": "Saved.",
-    "loadFailed": "Settings could not be loaded.",
+    "loadFailed": "Couldn't load settings. Please try again.",
     "profile": {
       "title": "Profile",
       "displayName": "Display name",
-      "displayNameHint": "Shown to people you share files with.",
-      "saveFailed": "The display name could not be saved. Please try again."
+      "displayNameHint": "The name others see when you share files.",
+      "saveFailed": "Couldn't save your display name. Please try again."
     },
     "preferences": {
       "title": "Language and appearance",
-      "description": "Applied at once and follows your account to every browser."
+      "description": "Changes take effect immediately and sync when you sign in on another browser."
     },
     "password": {
       "changeTitle": "Change password",
-      "changeDescription": "Other sessions will be signed out; this one stays.",
+      "changeDescription": "Changing your password signs you out of other browsers. You'll stay signed in on this browser.",
       "setTitle": "Set a password",
-      "setDescription": "Your account signs in with Google/GitHub. Set a password to sign in with your email, and to be able to unlink accounts.",
+      "setDescription": "Set a password to sign in with your email instead of Google or GitHub. You can then unlink those accounts.",
       "current": "Current password",
       "wrongCurrent": "The current password is incorrect.",
       "submit": "Save password",
@@ -273,15 +273,15 @@
       "notLinked": "Not linked",
       "connect": "Link",
       "disconnect": "Unlink",
-      "connectFailed": "The account could not be linked. It may already belong to another user.",
-      "loadFailed": "Linked accounts could not be loaded."
+      "connectFailed": "Couldn't link this account. It may already be linked to someone else.",
+      "loadFailed": "Couldn't load linked accounts. Please try again."
     }
   },
   "upload": {
     "dropHere": "Drop to upload to \"{{folder}}\"",
     "tray": {
       "label": "Uploads",
-      "uploading": "Uploading {{done}}/{{total}}",
+      "uploading": "Uploading · {{done}}/{{total}} files complete",
       "finished_one": "Uploaded {{count}} file",
       "finished_other": "Uploaded {{count}} files",
       "offline": "Offline — uploads resume when the connection is back",
@@ -293,8 +293,8 @@
     "actions": {
       "pauseAll": "Pause all",
       "resumeAll": "Resume all",
-      "retryFailed_one": "Retry {{count}} failed file",
-      "retryFailed_other": "Retry {{count}} failed files",
+      "retryFailed_one": "Retry {{count}} failed upload",
+      "retryFailed_other": "Retry {{count}} failed uploads",
       "pause": "Pause {{name}}",
       "resume": "Resume {{name}}",
       "retry": "Retry {{name}}",
@@ -303,37 +303,37 @@
     },
     "status": {
       "queued": "Waiting",
-      "conflict": "Name already in this folder",
+      "conflict": "A file or folder with this name already exists",
       "uploading": "{{loaded}} / {{size}}",
       "completing": "Finishing…",
       "paused": "Paused · {{loaded}} / {{size}}",
       "cancelled": "Cancelled",
       "skipped": "Skipped",
-      "done": "Done"
+      "done": "Uploaded"
     },
     "errors": {
-      "upload_failed": "Couldn't upload. Try again.",
+      "upload_failed": "Couldn't upload this file. Please try again.",
       "quota_exceeded": "Not enough storage left for this file.",
       "file_too_large": "This file is larger than your plan allows.",
       "email_not_verified": "Verify your email address before uploading.",
-      "invalid_target": "Cannot replace this destination. Choose an existing file; folders cannot be replaced.",
-      "not_found": "The destination folder no longer exists or isn't yours.",
+      "invalid_target": "Only existing files can be replaced. Folders cannot be replaced.",
+      "not_found": "The folder no longer exists, or you don't have access.",
       "upload_expired": "This upload expired. Pick the file again.",
       "upload_closed": "This upload has already ended.",
-      "target_unavailable": "The destination file or folder is no longer available. Cancel and upload again.",
+      "target_unavailable": "The file or folder no longer exists, or you don't have access. Cancel this upload and try again.",
       "storage_unavailable": "Storage is temporarily unavailable. Try again in a few minutes.",
-      "folder_failed": "Cannot read or upload this folder. Please select it again.",
-      "name_conflict": "The name belongs to a file. Choose Keep both to upload the folder.",
-      "fingerprint_mismatch": "This file does not match the original. Select the same file, with its original modification time."
+      "folder_failed": "Couldn't read or upload this folder. Select the folder again.",
+      "name_conflict": "A file already has this folder’s name. Choose \"Keep both\" to continue uploading.",
+      "fingerprint_mismatch": "The selected file doesn't match the unfinished upload. Choose the original file without any changes."
     },
     "verify": {
       "resend": "Resend the verification email",
-      "sent": "Sent to {{email}}.",
-      "failed": "Couldn't send — try again"
+      "sent": "Verification email sent to {{email}}.",
+      "failed": "Couldn't send the email. Try again."
     },
     "conflict": {
       "title": "Name already in use",
-      "description": "This folder already has an item named \"{{name}}\".",
+      "description": "This folder already has a file or folder named \"{{name}}\".",
       "forAll_one": "Do this for the {{count}} remaining file",
       "forAll_other": "Do this for the {{count}} remaining files",
       "skip": "Skip",
@@ -343,13 +343,13 @@
     "folder": {
       "preparing": "Preparing folders…",
       "dismiss": "Dismiss",
-      "title": "Folder name already used",
+      "title": "Folder name already in use",
       "description": "An item named \"{{name}}\" already exists. Merge into an existing folder or keep both?",
       "merge": "Merge"
     },
     "resume": {
       "title": "Unfinished uploads",
-      "description": "Select the original file to continue from the parts already uploaded, or cancel to release storage.",
+      "description": "Select the original file to resume where you left off. If you no longer need the upload, cancel it to free up reserved storage.",
       "retry": "Try again",
       "more": "Show more",
       "pick": "Reselect {{name}}",
@@ -360,7 +360,7 @@
   "recent": {
     "description": "Your 100 most recently updated files.",
     "emptyTitle": "No recent files yet",
-    "emptyDescription": "Upload files to Drive to see them here.",
+    "emptyDescription": "Files you upload or update will appear here.",
     "loading": "Loading recent files",
     "loadFailed": "Couldn't load recent files"
   },
@@ -372,7 +372,7 @@
     "next": "Next file",
     "close": "Close preview",
     "loading": "Loading preview…",
-    "failed": "Unable to preview this file.",
+    "failed": "Couldn't preview this file.",
     "retry": "Try again",
     "unsupported": "Preview is unavailable for this file type. You can download it.",
     "pdf": {
@@ -381,15 +381,15 @@
       "page": "Page",
       "zoomIn": "Zoom in",
       "zoomOut": "Zoom out",
-      "fit": "Fit page",
-      "canvas": "PDF page {{page}}"
+      "fit": "Fit to view",
+      "canvas": "Page {{page}} of the PDF"
     }
   },
   "trash": {
     "move": "Move to trash",
     "moved": "Moved to trash",
     "undo": "Undo",
-    "undoFailed": "Could not undo. Try again or restore from Trash.",
+    "undoFailed": "Couldn't undo this action. Try again or restore the item from Trash.",
     "dismiss": "Dismiss notification",
     "restore": "Restore",
     "delete": "Delete permanently",
@@ -397,10 +397,10 @@
     "emptyTitle": "Empty trash?",
     "deleteTitle": "Permanently delete selected items?",
     "deleteWarning": "These files and folders will be permanently deleted. This action cannot be undone.",
-    "description": "Restore or permanently delete removed items. They still count toward your storage.",
+    "description": "Files and folders in Trash still use storage. You can restore them or delete them permanently.",
     "loading": "Loading trash…",
-    "loadFailed": "Could not load trash",
-    "actionFailed": "Could not complete this action. Please try again.",
+    "loadFailed": "Couldn't load trash",
+    "actionFailed": "Couldn't complete this action. Please try again.",
     "tooMany": "Select up to 1,000 items at a time.",
     "emptyState": "Trash is empty",
     "emptyDescription": "Items you delete will appear here.",
@@ -409,7 +409,7 @@
   "sharing": {
     "action": "Share",
     "title": "Share {{name}}",
-    "inherited": "Access is inherited by children. Manage inherited access at the original shared item.",
+    "inherited": "Files and subfolders have the same access as the shared folder. To change this access, open Sharing for that folder.",
     "close": "Close",
     "people": "People with access",
     "email": "Recipient email",
@@ -421,7 +421,7 @@
     "removeFor": "Remove access for {{email}}",
     "remove": "Remove access",
     "more": "Load more",
-    "loading": "Loading sharing…",
+    "loading": "Loading sharing details…",
     "links": "Public links",
     "ownerOnly": "Only the owner can manage public links.",
     "expiry": "Expires at (optional)",
@@ -435,34 +435,34 @@
     "copied": "Link copied",
     "revoke": "Revoke link",
     "saved": "Shared",
-    "sharedDescription": "Items shared directly with you. The displayed role includes inherited access.",
+    "sharedDescription": "Files and folders shared directly with you. Your access may come from the item itself or a parent folder.",
     "empty": "Nothing shared yet",
     "emptyDescription": "Files and folders others share with you will appear here.",
     "ownerRole": "{{name}} · {{role}}",
     "unnamedOwner": "Owner",
-    "unavailable": "Content is no longer available",
+    "unavailable": "Couldn't access this content",
     "unavailableDescription": "The link is invalid, expired or revoked.",
     "publicEmpty": "This shared folder is empty.",
     "errors": {
-      "failed": "Could not update sharing. Please try again.",
+      "failed": "Couldn't update sharing. Please try again.",
       "denied": "You cannot manage sharing for this item.",
-      "invalid_share_recipient": "This email has no eligible account.",
+      "invalid_share_recipient": "No account eligible for sharing was found for this email.",
       "invalid_share_target": "You cannot share with yourself or the owner.",
       "share_exists": "This person already has direct access. Change their role in the list.",
-      "expiry": "Choose a future expiry time.",
-      "copy": "Could not copy the link. Please try again."
+      "expiry": "Choose an expiry time later than now.",
+      "copy": "Couldn't copy the link. Please try again."
     }
   },
   "report": {
     "button": "Report abuse",
     "title": "Report: {{name}}",
-    "description": "Choose a reason and provide details for a moderator to review.",
+    "description": "Choose a reason and describe the issue for a moderator to review.",
     "reason": "Reason",
     "message": "Description (optional)",
     "email": "Contact email (optional)",
     "send": "Submit report",
     "sending": "Submitting…",
-    "success": "Your report has been accepted. Thank you.",
+    "success": "Your report has been received. Thank you.",
     "reasons": {
       "illegal": "Illegal content",
       "copyright": "Copyright infringement",
@@ -471,7 +471,7 @@
       "other": "Other"
     },
     "errors": {
-      "failed": "Could not submit the report. Please try again.",
+      "failed": "Couldn't submit the report. Please try again.",
       "throttled": "You have submitted 5 new reports in one hour. Please try again later.",
       "unavailable": "This content is no longer available.",
       "captcha": "Verification failed. Please try again."
@@ -482,7 +482,7 @@
     "all": "All",
     "statuses": {
       "open": "Open",
-      "actioned": "Actioned",
+      "actioned": "Resolved",
       "dismissed": "Dismissed"
     },
     "empty": "No reports with this status.",
@@ -496,35 +496,35 @@
     "cancel": "Cancel",
     "processing": "Processing…",
     "actions": {
-      "revoke_link": "Remove reported link",
-      "revoke_node": "Remove all links to the root node",
+      "revoke_link": "Revoke reported link",
+      "revoke_node": "Revoke all links to the shared item",
       "suspend_owner": "Suspend owner account",
       "dismiss": "Dismiss report"
     },
     "effects": {
-      "revoke_link": "Revoke the link if it has not been revoked; the owner receives an email only for a new revocation.",
-      "revoke_node": "Remove every link directly attached to the reported link’s root node; links to ancestors or descendants stay unchanged.",
-      "suspend_owner": "Block sign-in, invalidate existing sessions and all public links owned by this account.",
-      "dismiss": "Keep content and links, and close the report with a note."
+      "revoke_link": "Stop access through this link. The owner receives an email if the link is revoked during this action.",
+      "revoke_node": "Revoke all links to the item shared through the reported link. Separate links to its children or parent folders remain active.",
+      "suspend_owner": "Block sign-in, sign out of all browsers, and disable all public links owned by this account.",
+      "dismiss": "Keep the content and links unchanged. Close the report and save the resolution note."
     },
     "fields": {
       "reporter_email": "Contact email",
       "reporter_user_id": "Reporter account",
       "owner_uuid": "Owner",
-      "node_uuid": "Reported node",
+      "node_uuid": "Reported item",
       "link_uuid": "Reported link"
     },
     "errors": {
-      "failed": "Could not resolve the report. Please try again.",
+      "failed": "Couldn't resolve the report. Please try again.",
       "resolved": "This report has already been resolved. Reload the page.",
       "unavailable": "The target account no longer exists.",
-      "guard": "You cannot suspend yourself or the last superuser."
+      "guard": "You cannot suspend your own account or the last superuser account."
     },
-    "introduction": "Review the report context and action scope before resolving it.",
+    "introduction": "Review the report and which items will be affected before taking action.",
     "queue": "Report queue",
-    "relatedCounts": "{{total}} reports on this node · {{open}} open",
-    "nodeFilter": "Showing reports on the same node",
-    "clearFilter": "Clear node filter",
+    "relatedCounts": "{{total}} reports on this item · {{open}} awaiting review",
+    "nodeFilter": "Showing reports on the same item",
+    "clearFilter": "Clear item filter",
     "backToQueue": "Back to queue",
     "selectReport": "Select a report to review",
     "selectReportDescription": "Review the report, its target and related reports before making a decision.",
@@ -544,7 +544,7 @@
     "reportContent": "Report content",
     "noMessage": "The reporter did not provide a description.",
     "subject": "Reported target",
-    "rootNode": "Link root node",
+    "rootNode": "Item shared through the link",
     "ownerId": "Owner ID",
     "ownerSuspended": "Suspended",
     "ownerActive": "Active",
@@ -563,42 +563,42 @@
     },
     "expiresAt": "Link expires at",
     "revokedAt": "Link revoked at",
-    "related": "Reports on the same node",
-    "independentReports": "Each submission is stored separately. Resolving this report does not automatically close other reports on the same node.",
-    "viewRelated": "View all reports on this node",
+    "related": "Reports on the same item",
+    "independentReports": "Each report is handled separately. Resolving this report does not automatically close other reports on the same item.",
+    "viewRelated": "View all reports on this item",
     "resolvedAt": "Resolved at",
     "resolver": "Resolved by",
     "resolve": "Resolution decision",
     "actualResult": "Actual result",
     "dismissResult": "Report dismissed; links and accounts were unchanged.",
-    "revokedResult": "{{count}} additional links revoked.",
-    "noChangeResult": "No new changes: the target was already handled or no longer exists. No additional revocation email was sent.",
-    "suspendedResult": "Owner suspended and their sessions and public links invalidated.",
-    "sameRoot": "The reported node is also the link root node."
+    "revokedResult": "Revoked {{count}} more links.",
+    "noChangeResult": "No changes were needed: the item was already handled or no longer exists. No additional link revocation email was sent.",
+    "suspendedResult": "The owner’s account was suspended, all browsers were signed out, and all public links were disabled.",
+    "sameRoot": "The reported item is the item shared through this link."
   },
   "search": {
     "title": "Search results",
-    "paletteTitle": "Search and commands",
-    "paletteDescription": "Find files and folders or run a command. Use arrow keys to select, Enter to open, Escape to close.",
+    "paletteTitle": "Search and quick actions",
+    "paletteDescription": "Find files and folders or choose a quick action. Use arrow keys to select, Enter to open, and Esc to close.",
     "query": "Search term",
     "placeholder": "Search files and folders…",
     "close": "Close search",
     "viewAll": "View all results",
     "loading": "Searching…",
-    "failed": "Could not load search results. Check the search term and filters, then try again.",
-    "retry": "Retry",
+    "failed": "Couldn't load search results. Check the search term and filters, then try again.",
+    "retry": "Try again",
     "empty": "No results found",
     "emptyDescription": "Try another name or change the filters.",
     "start": "Find a file or folder",
     "submit": "Search",
-    "suggestions": "Search suggestions and commands",
+    "suggestions": "Search suggestions and quick actions",
     "type": "Type",
     "allTypes": "All types",
     "owner": "Owner",
     "allOwners": "All owners",
     "mine": "Owned by me",
     "others": "Shared with me",
-    "modifiedAfter": "Modified since",
+    "modifiedAfter": "Updated since",
     "types": {
       "folder": "Folder",
       "document": "Document",
@@ -614,7 +614,7 @@
     "number": "Version {{number}}",
     "current": "Current",
     "kept": "Locked",
-    "loading": "Loading versions…",
+    "loading": "Loading version history…",
     "empty": "No versions yet.",
     "retry": "Try again",
     "more": "Load more",
@@ -626,19 +626,19 @@
     "deleteLabel": "Delete version {{number}}",
     "confirmRestore": "Restore version {{number}}?",
     "confirmDelete": "Delete version {{number}}?",
-    "restoreDescription": "This content will be restored as a new version. History is preserved and used storage does not increase.",
+    "restoreDescription": "Create a new version using this version’s content. Other versions are kept, and used storage does not increase.",
     "deleteDescription": "This version will be permanently deleted. This action cannot be undone.",
     "cancel": "Cancel",
-    "working": "Working…",
-    "unavailable": "The file or version is unavailable, or you no longer have access.",
-    "currentError": "This is already the current version. Refresh the history.",
-    "failed": "The operation failed. Please try again.",
+    "working": "Processing…",
+    "unavailable": "The file or version no longer exists, or you don't have access.",
+    "currentError": "This is the current version. Reload the version list.",
+    "failed": "Couldn't complete this action. Please try again.",
     "unnamedUploader": "Unnamed user",
     "deletedUploader": "Deleted account",
     "keep": "Lock",
     "unkeep": "Unlock",
     "keepLabel": "Lock version {{number}}",
-    "keepTitle": "Lock to protect this version from automatic cleanup. It still counts toward storage; old versions can still be deleted manually.",
-    "unkeepTitle": "Unlock to allow automatic cleanup under your plan’s version limits and retention period. The current version is always retained."
+    "keepTitle": "Lock to prevent automatic deletion. This version still uses storage, and old versions can still be deleted manually.",
+    "unkeepTitle": "Unlock to allow automatic deletion under your plan’s limits. The current version is always kept."
   }
 }

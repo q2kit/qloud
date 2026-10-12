@@ -21,7 +21,7 @@ msgid "Type:"
 msgstr "Loại:"
 
 msgid "Permission:"
-msgstr "Quyền:"
+msgstr "Quyền truy cập:"
 
 msgid "Folder"
 msgstr "Thư mục"
@@ -42,7 +42,7 @@ msgid "Open the shared item"
 msgstr "Mở mục được chia sẻ"
 
 msgid "Sign in with the account that received this email. Access depends on your current permissions."
-msgstr "Đăng nhập bằng tài khoản nhận email này. Khả năng truy cập phụ thuộc vào quyền hiện tại của bạn."
+msgstr "Đăng nhập bằng tài khoản nhận email này để mở nội dung. Bạn chỉ có thể truy cập nếu vẫn còn quyền."
 
 msgid "The Qloud team"
 msgstr "Đội ngũ Qloud"
@@ -51,7 +51,7 @@ msgid "New abuse report on Qloud"
 msgstr "Báo cáo vi phạm mới trên Qloud"
 
 msgid "A public item has been reported."
-msgstr "Một mục công khai vừa được báo cáo vi phạm."
+msgstr "Một tệp hoặc thư mục được chia sẻ công khai vừa bị báo cáo vi phạm."
 
 msgid "Name:"
 msgstr "Tên:"
@@ -69,13 +69,13 @@ msgid "Review report"
 msgstr "Xem báo cáo"
 
 msgid "A public link was removed on Qloud"
-msgstr "Một link công khai đã bị gỡ trên Qloud"
+msgstr "Một liên kết công khai đã bị thu hồi trên Qloud"
 
 msgid "A public link to your item was removed by moderation."
-msgstr "Một link công khai tới mục của bạn đã bị gỡ vì kiểm duyệt."
+msgstr "Quản trị viên đã thu hồi một liên kết công khai tới tệp hoặc thư mục của bạn."
 
 msgid "Note:"
 msgstr "Ghi chú:"
 
 msgid "The removed link cannot be reactivated."
-msgstr "Link đã gỡ không thể bật lại."
+msgstr "Liên kết đã thu hồi không thể khôi phục."

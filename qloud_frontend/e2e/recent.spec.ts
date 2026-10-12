@@ -71,7 +71,7 @@ async function file(
 
 async function navigateRecent(page: Page, isMobile: boolean) {
   if (isMobile)
-    await page.getByRole('button', { name: 'Mở điều hướng' }).click();
+    await page.getByRole('button', { name: 'Mở menu điều hướng' }).click();
   await page.getByRole('link', { name: 'Gần đây', exact: true }).click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Gần đây');
 }
@@ -94,7 +94,7 @@ test('Recent shares the browser, downloads files and opens their folders without
   );
   await expect(item(page, 'Dự án')).toHaveCount(0);
   await expect(
-    page.getByRole('button', { name: 'Sửa gần đây nhất' }),
+    page.getByRole('button', { name: 'Cập nhật mới nhất' }),
   ).toHaveCount(0);
   await page
     .getByTestId('folder-content')
@@ -261,9 +261,7 @@ test('file location links reveal files beyond cursor pages and virtualized rows'
   const target = await file(page, parent.id, 'z-target.txt', '');
   await page.goto('/recent');
   await page.getByRole('button', { name: 'Dạng danh sách' }).click();
-  await page
-    .getByRole('button', { name: 'Thao tác khác với z-target.txt' })
-    .click();
+  await page.getByRole('button', { name: 'Thao tác với z-target.txt' }).click();
   await page.getByRole('menuitem', { name: 'Mở thư mục chứa tệp' }).click();
   await expect(page).toHaveURL(
     new RegExp(
@@ -306,7 +304,9 @@ test('file location links reveal files beyond cursor pages and virtualized rows'
   await expect(selected).toHaveAttribute('aria-selected', 'true');
   await expect(selected).toBeInViewport();
   await page.goto(`/drive?select=${target.id.replaceAll('-', '')}`);
-  await expect(page.getByRole('alert')).toContainText('Không tìm thấy tệp');
+  await expect(page.getByRole('alert')).toContainText(
+    'Tệp không còn trong thư mục này',
+  );
 });
 
 test('item menu opens after pointer release without accidentally opening a folder', async ({

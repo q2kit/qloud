@@ -76,4 +76,4 @@ def test_signup_reports_a_short_password_in_vietnamese(client):
     assert response.status_code == 400
     error = response.json()["errors"][0]
     assert error["param"] == "password"
-    assert error["message"] == "Mật khẩu quá ngắn. Mật khẩu phải có ít nhất 8 ký tự."
+    assert error["message"] == "Mật khẩu phải có ít nhất 8 ký tự."

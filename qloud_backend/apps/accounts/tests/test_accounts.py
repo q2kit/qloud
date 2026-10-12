@@ -185,7 +185,7 @@ def test_missing_default_plan_is_translated_and_createsuperuser_handles_it():
     from django.utils.translation import override
 
     Plan.objects.update(is_default_for_signup=False)
-    with override("vi"), pytest.raises(CommandError, match="Chưa cấu hình"):
+    with override("vi"), pytest.raises(CommandError, match="Chưa thiết lập gói mặc định"):
         call_command("createsuperuser", email="admin@example.com", interactive=False)
 
 
@@ -320,7 +320,9 @@ def test_explicit_partial_save_does_not_hide_unsaved_state_change():
     user.session_version = 1
     user.display_name = "Alice"
     user.save(update_fields=["display_name"])
-    with pytest.raises(ValidationError, match="update_fields"):
+    with pytest.raises(
+        ValidationError, match="Không thể cập nhật trạng thái tài khoản bằng thao tác này"
+    ):
         user.save()
 
 
@@ -341,7 +343,9 @@ def test_deferred_state_assignment_cannot_be_silently_ignored():
     suspend_user(user, reason="Original")
     profile = User.objects.only("display_name").get(pk=user.pk)
     profile.suspended_at = None
-    with pytest.raises(ValidationError, match="update_fields"):
+    with pytest.raises(
+        ValidationError, match="Không thể cập nhật trạng thái tài khoản bằng thao tác này"
+    ):
         profile.save()
     assert User.objects.get(pk=user.pk).suspended_at is not None
 
@@ -382,7 +386,9 @@ def test_refresh_from_db_snapshot_accepts_positional_and_generator_fields(positi
         user.refresh_from_db(fields=fields)
     assert user.display_name == "Remote"
     # The unrefreshed local change must still be detected, not absorbed by the snapshot.
-    with pytest.raises(ValidationError, match="update_fields"):
+    with pytest.raises(
+        ValidationError, match="Không thể cập nhật trạng thái tài khoản bằng thao tác này"
+    ):
         user.save()
     user.session_version = 0
     user.display_name = "Local"

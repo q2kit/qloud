@@ -5,7 +5,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "No default signup plan is configured."
-msgstr "No default signup plan is configured."
+msgstr "No default plan has been set for new accounts."
 
 msgid "The selected plan no longer exists."
 msgstr "The selected plan no longer exists."
@@ -17,7 +17,7 @@ msgid "At least one active superuser must remain."
 msgstr "At least one active superuser must remain."
 
 msgid "Use this plan for new accounts"
-msgstr "Use this plan for new accounts"
+msgstr "Set as the default plan for new accounts"
 
 msgid "Select exactly one active plan."
 msgstr "Select exactly one active plan."
@@ -32,7 +32,7 @@ msgid "The selected plan is inactive."
 msgstr "The selected plan is inactive."
 
 msgid "The default signup plan must be active."
-msgstr "The default signup plan must be active."
+msgstr "The default plan for new accounts must be active."
 
 msgid "Code"
 msgstr "Code"
@@ -47,16 +47,16 @@ msgid "Maximum file size (bytes)"
 msgstr "Maximum file size (bytes)"
 
 msgid "Maximum old versions per file"
-msgstr "Maximum old versions per file"
+msgstr "Maximum number of old versions per file"
 
 msgid "Version retention (days)"
-msgstr "Version retention (days)"
+msgstr "Old version retention (days)"
 
 msgid "Trash retention (days)"
-msgstr "Trash retention (days)"
+msgstr "Deleted item retention (days)"
 
 msgid "Default for signup"
-msgstr "Default for signup"
+msgstr "Default for new accounts"
 
 msgid "Active"
 msgstr "Active"
@@ -86,7 +86,7 @@ msgid "Display name"
 msgstr "Display name"
 
 msgid "Staff"
-msgstr "Staff"
+msgstr "Can access the admin site"
 
 msgid "Avatar URL"
 msgstr "Avatar URL"
@@ -98,7 +98,7 @@ msgid "Theme"
 msgstr "Theme"
 
 msgid "Quota override (bytes)"
-msgstr "Quota override (bytes)"
+msgstr "Custom storage limit (bytes)"
 
 msgid "Used storage (bytes)"
 msgstr "Used storage (bytes)"
@@ -125,27 +125,25 @@ msgid "Accounts"
 msgstr "Accounts"
 
 msgid "Account state changes require explicit update_fields."
-msgstr "Account state changes require explicit update_fields."
+msgstr "Couldn't update the account status using this action."
 
 #, python-format
 msgid ""
 "%(count)d selected account(s) were already suspended; their original "
 "suspension was kept."
-msgstr ""
-"%(count)d selected account(s) were already suspended; their original "
-"suspension was kept."
+msgstr "%(count)d selected account(s) were already suspended. Their original suspension details were kept."
 
 msgid "Bot verification failed. Please try again."
-msgstr "Bot verification failed. Please try again."
+msgstr "Couldn't complete verification. Please try again."
 
 msgid "Confirm your email address for Qloud"
-msgstr "Confirm your email address for Qloud"
+msgstr "Verify your email address on Qloud"
 
 msgid "Hello,"
 msgstr "Hello,"
 
 msgid "Please confirm the email address of your Qloud account by opening this link:"
-msgstr "Please confirm the email address of your Qloud account by opening this link:"
+msgstr "Open this link to verify your email address on Qloud:"
 
 msgid "If you did not create a Qloud account, you can ignore this email."
 msgstr "If you did not create a Qloud account, you can ignore this email."
@@ -157,41 +155,41 @@ msgid "Reset your Qloud password"
 msgstr "Reset your Qloud password"
 
 msgid "We received a request to reset the password of your Qloud account. Open this link to choose a new password:"
-msgstr "We received a request to reset the password of your Qloud account. Open this link to choose a new password:"
+msgstr "We received a request to reset your Qloud password. Open this link to set a new password:"
 
 msgid "If you did not ask for this, you can ignore this email: your password stays the same."
-msgstr "If you did not ask for this, you can ignore this email: your password stays the same."
+msgstr "If you didn't request this, ignore this email. Your password will stay the same."
 
 msgid "Password reset request for Qloud"
 msgstr "Password reset request for Qloud"
 
 #, python-format
 msgid "Someone asked to reset the Qloud password for %(email)s, but there is no Qloud account with this email address."
-msgstr "Someone asked to reset the Qloud password for %(email)s, but there is no Qloud account with this email address."
+msgstr "We received a password reset request for %(email)s. This email is not registered with Qloud."
 
 msgid "If it was you, you can create an account here:"
-msgstr "If it was you, you can create an account here:"
+msgstr "If you sent this request, you can create an account here:"
 
 msgid "Otherwise, you can ignore this email."
-msgstr "Otherwise, you can ignore this email."
+msgstr "If you didn't send this request, ignore this email."
 
 msgid "You already have a Qloud account"
 msgstr "You already have a Qloud account"
 
 #, python-format
 msgid "Someone tried to sign up for Qloud with %(email)s, but an account with this email address already exists."
-msgstr "Someone tried to sign up for Qloud with %(email)s, but an account with this email address already exists."
+msgstr "We received a sign-up request for %(email)s. This email already has a Qloud account."
 
 msgid "If you forgot your password, you can reset it here:"
 msgstr "If you forgot your password, you can reset it here:"
 
 #, python-format
 msgid "%(count)d account(s) suspended; their sessions were signed out."
-msgstr "%(count)d account(s) suspended; their sessions were signed out."
+msgstr "Suspended %(count)d account(s) and signed them out of all browsers."
 
 #, python-format
 msgid "%(count)d account(s) unsuspended."
-msgstr "%(count)d account(s) unsuspended."
+msgstr "Unsuspended %(count)d account(s)."
 
 msgid "Users and plans"
 msgstr "Users and plans"
@@ -206,19 +204,19 @@ msgid "You cannot remove your primary email address."
 msgstr "You cannot remove your primary email address."
 
 msgid "This email address is already associated with this account."
-msgstr "This email address is already associated with this account."
+msgstr "This email has already been added to this account."
 
 msgid "The email address and/or password you specified are not correct."
-msgstr "The email address and/or password you specified are not correct."
+msgstr "The email or password is incorrect."
 
 msgid "The phone number and/or password you specified are not correct."
-msgstr "The phone number and/or password you specified are not correct."
+msgstr "The phone number or password is incorrect."
 
 msgid "A user is already registered with this email address."
-msgstr "A user is already registered with this email address."
+msgstr "This email is already registered."
 
 msgid "Please type your current password."
-msgstr "Please type your current password."
+msgstr "Enter your current password."
 
 msgid "Incorrect code."
 msgstr "Incorrect code."
@@ -227,71 +225,71 @@ msgid "Incorrect password."
 msgstr "Incorrect password."
 
 msgid "Invalid or expired key."
-msgstr "Invalid or expired key."
+msgstr "This link is invalid or has expired."
 
 msgid "Invalid login."
-msgstr "Invalid login."
+msgstr "Couldn't sign in."
 
 msgid "The password reset token was invalid."
-msgstr "The password reset token was invalid."
+msgstr "This password reset link is invalid."
 
 msgid "A user is already registered with this phone number."
-msgstr "A user is already registered with this phone number."
+msgstr "This phone number is already registered."
 
 msgid "Too many failed login attempts. Try again later."
 msgstr "Too many failed login attempts. Try again later."
 
 msgid "The email address is not assigned to any user account."
-msgstr "The email address is not assigned to any user account."
+msgstr "No account uses this email address."
 
 msgid "The phone number is not assigned to any user account."
-msgstr "The phone number is not assigned to any user account."
+msgstr "No account uses this phone number."
 
 msgid "Your primary email address must be verified."
-msgstr "Your primary email address must be verified."
+msgstr "Verify your primary email address."
 
 msgid "Username can not be used. Please use other username."
-msgstr "Username can not be used. Please use other username."
+msgstr "This username can't be used. Choose another one."
 
 msgid "The username and/or password you specified are not correct."
-msgstr "The username and/or password you specified are not correct."
+msgstr "The username or password is incorrect."
 
 msgid "A user with that username already exists."
-msgstr "A user with that username already exists."
+msgstr "This username is already in use."
 
 msgid "Please select only one."
-msgstr "Please select only one."
+msgstr "Select only one item."
 
 msgid "The new value must be different from the current one."
 msgstr "The new value must be different from the current one."
 
 msgid "Be patient, you are sending too many requests."
-msgstr "Be patient, you are sending too many requests."
+msgstr "Too many requests. Wait a moment and try again."
 
 msgid "Invalid token."
-msgstr "Invalid token."
+msgstr "The verification details are invalid."
 
 msgid "Your account has no password set up."
-msgstr "Your account has no password set up."
+msgstr "Your account has no password. Set a password before unlinking an account."
 
 msgid "Your account has no verified email address."
-msgstr "Your account has no verified email address."
+msgstr "No email address has been verified for this account."
 
 msgid "You cannot disconnect your last remaining third-party account."
-msgstr "You cannot disconnect your last remaining third-party account."
+msgstr "You can't unlink your last linked account."
 
 msgid "The third-party account is already connected to a different account."
-msgstr "The third-party account is already connected to a different account."
+msgstr "This account is already linked to someone else."
 
 msgid "You must type the same password each time."
-msgstr "You must type the same password each time."
+msgstr "The passwords don't match."
 
 msgid "You must type the same email each time."
-msgstr "You must type the same email each time."
+msgstr "The email addresses don't match."
 
 #, python-format
 msgid "An account already exists with this email address. Please sign in to that account first, then connect your %s account."
-msgstr "An account already exists with this email address. Please sign in to that account first, then connect your %s account."
+msgstr "This email already has a Qloud account. Sign in to that account, then link your %s account."
 
 #, python-format
 msgid "You cannot add more than %d email addresses."
@@ -300,6 +298,6 @@ msgstr "You cannot add more than %d email addresses."
 #, python-format
 msgid "This password is too short. It must contain at least %d character."
 msgid_plural "This password is too short. It must contain at least %d characters."
-msgstr[0] "This password is too short. It must contain at least %d character."
-msgstr[1] "This password is too short. It must contain at least %d characters."
+msgstr[0] "Use at least %d character for your password."
+msgstr[1] "Use at least %d characters for your password."
 

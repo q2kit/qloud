@@ -91,7 +91,7 @@ test('replace a taken name, retain the same file and refresh its preview and dow
     mimeType: 'text/plain',
     buffer: latest,
   });
-  const conflict = page.getByRole('dialog', { name: 'Tên đã được dùng' });
+  const conflict = page.getByRole('dialog', { name: 'Trùng tên' });
   await expect(
     conflict.getByRole('button', { name: 'Thay thế', exact: true }),
   ).toBeVisible();

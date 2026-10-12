@@ -15,8 +15,8 @@
 | M4 | Thùng rác | ✅ |
 | M5 | Chia sẻ (cho người dùng và qua link) | ✅ |
 | M6 | Tìm kiếm | ✅ |
-| M7 | Phiên bản file | 🟨 |
-| M8 | Quota UI, hoàn thiện, deploy production | ⬜ |
+| M7 | Phiên bản file | ✅ |
+| M8 | Quota UI, hoàn thiện, deploy production | 🟨 |
 
 ## M0 — Nền tảng
 Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: milestone [M0](https://github.com/q2kit/qloud/milestone/1?closed=1) trên GitHub.
@@ -97,7 +97,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M7-01 | Upload phiên bản mới cho file đã có (upload trùng tên thì hỏi người dùng) | [#42](https://github.com/q2kit/qloud/issues/42) | ✅ [PR #160](https://github.com/q2kit/qloud/pull/160) |
 | M7-02 | API danh sách, tải về, khôi phục, xóa phiên bản | [#43](https://github.com/q2kit/qloud/issues/43) | ✅ [PR #162](https://github.com/q2kit/qloud/pull/162) |
 | M7-03 | FE: tab Phiên bản trong panel chi tiết | [#44](https://github.com/q2kit/qloud/issues/44) | ✅ [PR #163](https://github.com/q2kit/qloud/pull/163) |
-| M7-04 | Dọn phiên bản theo plan và đánh dấu Khóa | [#159](https://github.com/q2kit/qloud/issues/159) | 🟦 |
+| M7-04 | Dọn phiên bản theo plan và đánh dấu Khóa | [#159](https://github.com/q2kit/qloud/issues/159) | ✅ [PR #176](https://github.com/q2kit/qloud/pull/176) |
 
 ## M8 — Hoàn thiện và deploy ([quota.md](features/quota.md))
 | ID | Task | Issue | Trạng thái |
@@ -121,3 +121,4 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M8-17 | Fix: database pytest dùng lại làm cạn số cột của PostgreSQL | [#122](https://github.com/q2kit/qloud/issues/122) | ⬜ |
 | M8-18 | Fix: E2E double click vùng trống cuối lưới Drive không ổn định | [#123](https://github.com/q2kit/qloud/issues/123) | ⬜ |
 | M8-19 | Fix: E2E nhập số trang PDF đôi lúc vẫn ở trang 1 | [#144](https://github.com/q2kit/qloud/issues/144) | ⬜ |
+| M8-20 | Rà soát câu chữ i18n (vi/en, email) cho tự nhiên và nhất quán | [#178](https://github.com/q2kit/qloud/issues/178) | 🟦 |
