@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import { driveKeys, refreshDriveQueries } from '@/features/drive/api';
 
+import { versionKey } from '@/features/versions/api';
 import { ApiError } from '@/lib/api/errors';
 
 import { createUploadFolder, uploadApi, uploadKeys } from './api';
@@ -33,6 +34,7 @@ export function UploadProvider({
               driveKeys.children(node.parent_id),
             );
           void refreshDriveQueries(queryClient, driveKeys.node(node.id));
+          void refreshDriveQueries(queryClient, versionKey(node.id));
           void refreshDriveQueries(queryClient, driveKeys.recent);
           void queryClient.invalidateQueries({
             queryKey: ['sharing', 'shared'],

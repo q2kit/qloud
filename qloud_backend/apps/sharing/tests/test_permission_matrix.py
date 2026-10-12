@@ -182,9 +182,10 @@ def test_node_operation_matrix(matrix, actor, operation, kind, bucket):
     body = response.json()
     if operation == "detail":
         assert body["id"] == str(node.pk)
-        assert body["capabilities"] == dict.fromkeys(
-            ["can_edit", "can_trash", "can_share"], actor in {"owner", "editor"}
-        )
+        assert body["capabilities"] == {
+            **dict.fromkeys(["can_edit", "can_trash", "can_share"], actor in {"owner", "editor"}),
+            "can_delete_versions": actor == "owner" and node.kind == "file",
+        }
         ancestors = [matrix.scope.pk] if matrix.inherited else []
         if actor == "owner":
             ancestors = [matrix.users["owner"].root_folder_id, matrix.scope.pk]

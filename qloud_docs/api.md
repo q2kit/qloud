@@ -135,6 +135,8 @@ M2-04: `POST /uploads` trả session `{id, part_size, part_count, expires_at, ..
 | POST | `/nodes/{id}/versions/{vid}/restore` | Đặt phiên bản này làm phiên bản hiện tại (tạo version mới) |
 | DELETE | `/nodes/{id}/versions/{vid}` | Xóa một phiên bản (không xóa được phiên bản hiện tại) |
 
+M7-03 bổ sung `capabilities.can_delete_versions` vào chi tiết node: true cho owner của file còn sống, false cho folder/root và public. Editor/viewer không có capability này; quyền restore vẫn theo `can_edit`. Không đổi luật kiểm tra quyền của endpoint.
+
 M7-02 triển khai cả bốn endpoint, chỉ cho file còn sống và phiên đăng nhập:
 - List/download cần viewer; restore cần editor; delete chỉ owner. Quyền trực tiếp và thừa kế dùng lớp chung. Không truy cập được, node trash hoặc version sai node → 404; folder → 400 `not_a_file`.
 - List trả `{results, next, previous}`, `version_number` giảm dần, page_size mặc định 50, tối đa 200. Version gồm `{id, version_number, size, mime_type, original_name, uploaded_by: {id, display_name} | null, created_at, keep_forever, is_current}`; không có email/storage_key.

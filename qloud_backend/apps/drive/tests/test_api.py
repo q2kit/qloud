@@ -98,7 +98,12 @@ def test_root_detail(client, root):
     assert body["is_root"] is True
     assert body["parent_id"] is None
     assert body["breadcrumb"] == []
-    assert body["capabilities"] == {"can_edit": False, "can_trash": False, "can_share": False}
+    assert body["capabilities"] == {
+        "can_edit": False,
+        "can_trash": False,
+        "can_share": False,
+        "can_delete_versions": False,
+    }
 
 
 def test_nested_detail_has_breadcrumb_and_capabilities(client, root, django_assert_num_queries):
@@ -112,7 +117,12 @@ def test_nested_detail_has_breadcrumb_and_capabilities(client, root, django_asse
         {"id": str(a.pk), "name": "A"},
         {"id": str(b.pk), "name": "B"},
     ]
-    assert body["capabilities"] == {"can_edit": True, "can_trash": True, "can_share": True}
+    assert body["capabilities"] == {
+        "can_edit": True,
+        "can_trash": True,
+        "can_share": True,
+        "can_delete_versions": False,
+    }
     assert body["kind"] == "folder"
     assert body["is_root"] is False
 

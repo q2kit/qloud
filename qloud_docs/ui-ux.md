@@ -52,6 +52,10 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
 - Màn hình đăng nhập và các trang công khai dùng layout riêng, không hiển thị application shell. Các màn hình auth (S-01 đến S-04) là một card ở giữa, rộng tối đa 384px.
 - Lỗi khi hiển thị bất kỳ route nào: trang lỗi đã dịch (`routeError.*`), có nút tải lại trang và nút về Drive, thay cho màn hình lỗi tiếng Anh mặc định của React Router.
 
+### Tab Phiên bản (M7-03)
+
+Trong panel chi tiết, Thông tin/Phiên bản có thể đổi bằng click hoặc mũi tên/Home/End; đổi lựa chọn luôn về Thông tin. Chỉ một file còn sống mới bật Phiên bản. Danh sách card nhỏ cuộn trong panel/bottom sheet, có số version, nhãn Hiện tại/Giữ mãi, thời gian/dung lượng, tên gốc/MIME và uploader. Tải thêm theo cursor; skeleton/rỗng/lỗi có Thử lại. Hành động tải cho viewer, restore cho editor/owner, delete cho owner; current không có restore/delete. Restore/delete có hộp xác nhận và focus quay lại hành động hoặc danh sách khi phiên bản đã xóa. Nội dung/thao tác co ở 360px, chuỗi vi/en và màu token. Chi tiết: [versioning.md](features/versioning.md#m7-03--tab-phiên-bản).
+
 ## Danh sách màn hình
 
 | ID | Màn hình | Route | Feature |
