@@ -13,6 +13,7 @@ import { renderApp } from '@/test/render-app';
 import { DESKTOP_INPUT_QUERY } from './desktop-input';
 import { compactId } from './paths';
 import { useDriveStore } from './store';
+import { chooseSelectionAction } from '@/test/item-menu';
 
 const server = setupServer();
 let drive: FakeDrive;
@@ -104,9 +105,7 @@ it('shares selection, keyboard, info and menus; opens the containing nested fold
   await user.click(screen.getByRole('menuitem', { name: 'Info' }));
   expect(await screen.findByText('application/pdf')).toBeVisible();
   await user.keyboard('{Escape}');
-  await user.click(
-    screen.getByRole('button', { name: 'Open containing folder' }),
-  );
+  await chooseSelectionAction(user, 'Open containing folder');
   await waitFor(() => {
     expect(router.state.location.pathname).toBe(
       `/drive/folders/${compactId(folder.id)}`,
@@ -139,9 +138,7 @@ it('opens root locations, ignores blank-area double click and supports select-al
   await user.keyboard('{Escape}');
   expect(useDriveStore.getState().selected).toEqual([]);
   await user.click(screen.getByRole('option', { name: 'a.txt' }));
-  await user.click(
-    screen.getByRole('button', { name: 'Open containing folder' }),
-  );
+  await chooseSelectionAction(user, 'Open containing folder');
   await waitFor(() => {
     expect(router.state.location.pathname).toBe('/drive');
   });
@@ -186,7 +183,7 @@ it('retries a failed request and reports a download failure without recording an
     false,
   );
   await user.click(file);
-  await user.click(screen.getByRole('button', { name: 'Download' }));
+  await chooseSelectionAction(user, 'Download');
   expect(
     await screen.findByText("Couldn't download the file. Please try again."),
   ).toBeVisible();

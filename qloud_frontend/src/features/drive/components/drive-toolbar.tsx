@@ -1,4 +1,4 @@
-import { ArrowDownUp, LayoutGrid, List, X } from 'lucide-react';
+import { ArrowDownUp, LayoutGrid, List } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-import type { NodeAction } from '../actions';
 import { ORDERINGS, type DriveNode, type Ordering } from '../api';
 import type { DriveView } from '../preferences';
 
@@ -30,9 +29,6 @@ export interface DriveToolbarProps {
   orderingLabel?: string;
   onView: (view: DriveView) => void;
   onOrdering?: (ordering: Ordering) => void;
-  /** The item menu's actions for the selection, as buttons. */
-  actions: NodeAction[];
-  onClearSelection: () => void;
 }
 
 export function DriveToolbar({
@@ -42,58 +38,15 @@ export function DriveToolbar({
   orderingLabel,
   onView,
   onOrdering,
-  actions,
-  onClearSelection,
 }: DriveToolbarProps): React.JSX.Element {
   const { t } = useTranslation();
   return (
-    <div className="flex min-h-10 flex-wrap items-center justify-between gap-2">
-      <div
-        className="flex min-w-0 flex-wrap items-center gap-1"
-        role="group"
-        aria-label={t('drive.selectionActions')}
-      >
-        {selected.length > 0 && (
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label={t('drive.selection.clear')}
-              onClick={onClearSelection}
-            >
-              <X />
-              <span aria-live="polite">
-                {t('drive.selection.count', { count: selected.length })}
-              </span>
-            </Button>
-            {actions
-              // The menu has the rest (new tab, link, info).
-              .filter((action) =>
-                [
-                  'open',
-                  'download',
-                  'rename',
-                  'move',
-                  'location',
-                  'trash',
-                  'restore',
-                  'delete',
-                ].includes(action.key),
-              )
-              .map((action) => (
-                <Button
-                  key={action.key}
-                  variant="ghost"
-                  size="sm"
-                  onClick={action.run}
-                >
-                  <action.icon />
-                  {action.label}
-                </Button>
-              ))}
-          </>
-        )}
-      </div>
+    <div className="flex min-h-10 flex-wrap items-center justify-end gap-2">
+      {/* Item actions live in the item menu (right click, ⋯, Shift+F10). */}
+      <span className="sr-only" aria-live="polite">
+        {selected.length > 0 &&
+          t('drive.selection.count', { count: selected.length })}
+      </span>
       <div className="flex items-center gap-2">
         {onOrdering ? (
           <DropdownMenu>

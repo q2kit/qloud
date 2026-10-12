@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { signUpVerifiedViaApi } from './auth';
+import { chooseItemAction } from './drive';
 
 test.use({ launchOptions: { slowMo: process.env.TRASH_LIVE ? 180 : 0 } });
 const item = (page: Page, name: string) =>
@@ -81,10 +82,7 @@ test('Drive trash action and undo survive navigation; Trash restores selected it
   const parent = await root(page);
   await folder(page, parent, 'Tài liệu');
   await page.goto('/drive');
-  await item(page, 'Tài liệu').click();
-  await page
-    .getByRole('button', { name: 'Chuyển vào thùng rác', exact: true })
-    .click();
+  await chooseItemAction(page, 'Tài liệu', 'Chuyển vào thùng rác');
   await expect(page.getByText('Đã chuyển vào thùng rác')).toBeVisible();
   await expect(item(page, 'Tài liệu')).toHaveCount(0);
   await navigateTrash(page, isMobile);
@@ -92,14 +90,10 @@ test('Drive trash action and undo survive navigation; Trash restores selected it
   await page.getByRole('button', { name: 'Hoàn tác', exact: true }).click();
   await expect(page.getByText('Thùng rác trống')).toBeVisible();
   await page.goto('/drive');
-  await item(page, 'Tài liệu').click();
-  await page
-    .getByRole('button', { name: 'Chuyển vào thùng rác', exact: true })
-    .click();
+  await chooseItemAction(page, 'Tài liệu', 'Chuyển vào thùng rác');
   await expect(page.getByText('Đã chuyển vào thùng rác')).toBeVisible();
   await navigateTrash(page, isMobile);
-  await item(page, 'Tài liệu').click();
-  await page.getByRole('button', { name: 'Khôi phục', exact: true }).click();
+  await chooseItemAction(page, 'Tài liệu', 'Khôi phục');
   await expect(page.getByText('Thùng rác trống')).toBeVisible();
   await page.goto('/drive');
   await expect(item(page, 'Tài liệu')).toBeVisible();
@@ -118,21 +112,15 @@ test('nested trash groups stay separate; permanent deletion removes S3 bytes', a
   await page.goto('/trash');
   await expect(item(page, 'Dự án')).toBeVisible();
   await expect(item(page, 'ghi-chú.txt')).toBeVisible();
-  await item(page, 'Dự án').click();
-  await page.getByRole('button', { name: 'Khôi phục', exact: true }).click();
+  await chooseItemAction(page, 'Dự án', 'Khôi phục');
   await expect(item(page, 'Dự án')).toHaveCount(0);
   await expect(item(page, 'ghi-chú.txt')).toBeVisible();
   await page.getByRole('button', { name: 'Dạng danh sách' }).click();
-  await item(page, 'ghi-chú.txt').click();
-  await page
-    .getByRole('button', { name: 'Xóa vĩnh viễn', exact: true })
-    .click();
+  await chooseItemAction(page, 'ghi-chú.txt', 'Xóa vĩnh viễn');
   const confirmation = page.getByRole('alertdialog');
   await confirmation.getByRole('button', { name: 'Hủy' }).click();
   await expect(item(page, 'ghi-chú.txt')).toBeVisible();
-  await page
-    .getByRole('button', { name: 'Xóa vĩnh viễn', exact: true })
-    .click();
+  await chooseItemAction(page, 'ghi-chú.txt', 'Xóa vĩnh viễn');
   await confirmation
     .getByRole('button', { name: 'Xóa vĩnh viễn', exact: true })
     .click();
@@ -173,7 +161,7 @@ test('multi-selection and empty trash work in both themes without horizontal ove
       });
   }
   await page.keyboard.press('Control+a');
-  await page.getByRole('button', { name: 'Khôi phục', exact: true }).click();
+  await chooseItemAction(page, 'Tài liệu dự án', 'Khôi phục');
   await expect(page.getByText('Thùng rác trống')).toBeVisible();
   await trashViaApi(page, [a, b, c]);
   await page.reload();

@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import { signUpVerifiedViaApi } from './auth';
+import { chooseItemAction } from './drive';
 
 test.use({ launchOptions: { slowMo: process.env.PREVIEW_LIVE ? 150 : 0 } });
 async function csrf(page: Page) {
@@ -72,8 +73,7 @@ const compact = (id: string) => id.replaceAll('-', '');
 const item = (page: Page, name: string) =>
   page.getByRole('option', { name, exact: true });
 async function open(page: Page, name: string) {
-  await item(page, name).click();
-  await page.getByRole('button', { name: 'Xem trước', exact: true }).click();
+  await chooseItemAction(page, name, 'Xem trước');
   await expect(page.getByRole('dialog', { name })).toBeVisible();
 }
 async function captures(

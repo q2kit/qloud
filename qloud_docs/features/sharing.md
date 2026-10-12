@@ -85,7 +85,7 @@
 - M5-08: link file chia sẻ riêng mở viewer độc lập nếu folder cha trả 404; không hiển thị folder cha/file cùng cấp, không tải danh sách cha, tắt chuyển file. Đóng viewer về Drive của người nhận. Thu hồi grant khiến mở lại link, preview và download bị từ chối bởi API.
 
 ## Tiến độ M5-05
-- S-11: action Chia sẻ ở hàng tiêu đề/menu Drive và panel chi tiết cho một mục có `can_share`. Hộp thoại liệt kê grant trực tiếp (cursor), thêm email viewer/editor, đổi role, thu hồi; thông báo quyền thừa kế phải quản lý ở mục nguồn. Không hiển thị email/tên lỗi thô từ server.
+- S-11: action Chia sẻ trong menu item của Drive và panel chi tiết cho một mục có `can_share`. Hộp thoại liệt kê grant trực tiếp (cursor), thêm email viewer/editor, đổi role, thu hồi; thông báo quyền thừa kế phải quản lý ở mục nguồn. Không hiển thị email/tên lỗi thô từ server.
 - Owner tạo nhiều link có hạn dùng (nhập giờ local, gửi ISO) hoặc không hết hạn, sao chép URL `/s/:token`, xem trạng thái hết hạn/thu hồi và thu hồi. Editor chỉ quản lý grant người dùng; API links trả 404 thì hiển thị chỉ owner quản lý link. Link thu hồi không bật lại.
 - S-07 `/shared` dùng FileBrowser/NodeCollection với cursor/sắp xếp/grid/list, hiển thị owner và quyền thực tế; chỉ liệt kê grant trực tiếp, không tự bung cây. Folder mở trong Drive; file mở route canonical (kể cả chia sẻ file riêng). Có loading/rỗng/lỗi/thử lại.
 - Drive lấy capabilities cho mục đang chọn để hiện action ghi/chia sẻ. Folder viewer không nhận upload/drop hay mở tạo folder; header tạo mới bị vô hiệu. Breadcrumb/back trong cây được chia sẻ dùng UUID của mục, chỉ gọi “Drive của tôi” khi đúng root của người nhận.

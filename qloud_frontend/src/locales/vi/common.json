@@ -21,7 +21,6 @@
     "loading": "Đang tải nội dung thư mục",
     "loadMore": "Tải thêm",
     "loadingMore": "Đang tải…",
-    "selectionActions": "Thao tác với mục đang chọn",
     "defaultFolderName": "Thư mục không tên",
     "view": {
       "label": "Kiểu hiển thị",
@@ -93,8 +92,7 @@
       "locationUnavailable": "Không tìm thấy tệp trong thư mục này hoặc bạn không có quyền truy cập."
     },
     "selection": {
-      "count_other": "{{count}} mục đã chọn",
-      "clear": "Bỏ chọn"
+      "count_other": "{{count}} mục đã chọn"
     },
     "move": {
       "description": "Chọn thư mục đích rồi bấm \"Di chuyển tới đây\".",

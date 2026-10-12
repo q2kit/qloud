@@ -202,7 +202,6 @@ function PublicBrowser({ token }: { token: string }) {
         onView={setView}
         ordering={ordering}
         onOrdering={setOrdering}
-        actions={actionsFor()}
         actionsFor={actionsFor}
         onClearSelection={() => {
           setSelection([]);

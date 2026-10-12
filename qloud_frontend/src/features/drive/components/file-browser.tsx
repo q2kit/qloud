@@ -18,6 +18,7 @@ interface FileBrowserProps
   failed: boolean;
   onRetry: () => void;
   onSelectAll: (nodes: DriveNode[]) => void;
+  onClearSelection: () => void;
   onCreate?: () => void;
   onDelete?: () => void;
   emptyState: React.ReactNode;

@@ -18,6 +18,7 @@ import { i18n } from '@/lib/i18n';
 import { compactId } from '@/features/drive/paths';
 import { setMediaQuery } from '@/test/match-media';
 import { DESKTOP_INPUT_QUERY } from '@/features/drive/desktop-input';
+import { chooseSelectionAction } from '@/test/item-menu';
 
 const server = setupServer();
 let drive: FakeDrive;
@@ -66,7 +67,7 @@ async function dialog() {
   );
   renderApp('/drive', testUser);
   await user.click(await screen.findByRole('option', { name: node.name }));
-  await user.click(await screen.findByRole('button', { name: 'Share' }));
+  await chooseSelectionAction(user, 'Share');
   const modal = await screen.findByRole('dialog', { name: 'Share Owned.txt' });
   await within(modal).findByRole('button', { name: 'Create link' });
   return { user, node, modal };
@@ -193,9 +194,7 @@ it('does not offer public link creation to an editor', async () => {
   await userEvent
     .setup()
     .click(within(modal).getByRole('button', { name: 'Close' }));
-  await userEvent
-    .setup()
-    .click(await screen.findByRole('button', { name: 'Share' }));
+  await chooseSelectionAction(userEvent.setup(), 'Share');
   expect(
     await screen.findByText('Only the owner can manage public links.'),
   ).toBeVisible();
@@ -388,7 +387,7 @@ it('paginates direct grants in the dialog and keeps link pagination separate', a
     ),
   );
   await user.click(within(modal).getByRole('button', { name: 'Close' }));
-  await user.click(await screen.findByRole('button', { name: 'Share' }));
+  await chooseSelectionAction(user, 'Share');
   const section = await screen.findByRole('region', {
     name: 'People with access',
   });

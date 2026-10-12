@@ -26,6 +26,7 @@ import { DESKTOP_INPUT_QUERY } from './desktop-input';
 
 import { VIRTUALIZE_AFTER } from './components/node-collection';
 import { compactId, folderPath } from './paths';
+import { chooseSelectionAction } from '@/test/item-menu';
 
 const server = setupServer();
 let drive: FakeDrive;
@@ -131,7 +132,7 @@ describe('Drive (S-05)', () => {
     await user.dblClick(screen.getByTestId('folder-content'));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     await user.click(screen.getByRole('option', { name: 'Photos' }));
-    await user.click(screen.getByRole('button', { name: 'Open' }));
+    await chooseSelectionAction(user, 'Open');
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Photos' }),
     ).toBeVisible();
@@ -439,7 +440,11 @@ describe('Drive (S-05)', () => {
     renderApp('/drive', testUser);
 
     await user.click(await screen.findByRole('option', { name: /Mine/ }));
-    await user.click(screen.getByRole('button', { name: 'Rename' }));
+    // Item actions are only in the item menu, not as toolbar buttons.
+    for (const name of ['Rename', 'Move…', 'Move to trash', 'Share']) {
+      expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
+    }
+    await chooseSelectionAction(user, 'Rename');
     const dialog = within(screen.getByRole('dialog', { name: 'Rename' }));
     await user.clear(dialog.getByLabelText('Name'));
     await user.type(dialog.getByLabelText('Name'), 'taken{Enter}');

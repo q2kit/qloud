@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 import { signUpViaApi } from './auth';
-import { openDriveFolder } from './drive';
+import { chooseItemAction, openDriveFolder } from './drive';
 
 // S-05 against the real backend (files-folders.md acceptance criteria).
 test.beforeEach(async ({ page }) => {
@@ -176,8 +176,7 @@ test.describe('selecting and moving (M2-07b)', () => {
     await expect(dialog.getByRole('button', { name: 'Cha' })).toBeDisabled();
     await dialog.getByRole('button', { name: 'Hủy' }).click();
 
-    await item(page, 'Ghi chú').click();
-    await page.getByRole('button', { name: 'Di chuyển…' }).click();
+    await chooseItemAction(page, 'Ghi chú', 'Di chuyển…');
     await dialog.getByRole('button', { name: 'Cha' }).click();
     await dialog.getByRole('button', { name: 'Con' }).click();
     await dialog.getByRole('button', { name: 'Di chuyển tới đây' }).click();

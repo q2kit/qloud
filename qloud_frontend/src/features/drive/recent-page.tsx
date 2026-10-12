@@ -131,7 +131,6 @@ export function RecentPage(): React.JSX.Element {
         view={view}
         onView={setView}
         ordering="-updated_at"
-        actions={actionsFor()}
         actionsFor={actionsFor}
         onClearSelection={() => {
           select(null);
