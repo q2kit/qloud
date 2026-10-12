@@ -13,8 +13,8 @@
 | M2 | Folder, file, upload chia chunk, download | ✅ |
 | M3 | Xem trước và thumbnail | ✅ |
 | M4 | Thùng rác | ✅ |
-| M5 | Chia sẻ (cho người dùng và qua link) | 🟨 |
-| M6 | Tìm kiếm | ⬜ |
+| M5 | Chia sẻ (cho người dùng và qua link) | ✅ |
+| M6 | Tìm kiếm | 🟨 |
 | M7 | Phiên bản file | ⬜ |
 | M8 | Quota UI, hoàn thiện, deploy production | ⬜ |
 
@@ -83,12 +83,12 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M5-06 | Bộ test phân quyền (ma trận role × thao tác) | [#38](https://github.com/q2kit/qloud/issues/38) | ✅ [PR #152](https://github.com/q2kit/qloud/pull/152) |
 | M5-07 | Báo cáo vi phạm: model, API public, email cho admin, màn hình kiểm duyệt `/moderation` và audit trong Django admin, nút báo cáo trên S-12 | [#39](https://github.com/q2kit/qloud/issues/39) | ✅ [PR #153](https://github.com/q2kit/qloud/pull/153) |
 | M5-08 | Link file chia sẻ riêng không mở được khi folder cha không có quyền | [#147](https://github.com/q2kit/qloud/issues/147) | ✅ [PR #149](https://github.com/q2kit/qloud/pull/149) |
-| M5-09 | Đồng bộ danh sách folder khi upload/di chuyển hoàn tất trong lúc điều hướng | [#150](https://github.com/q2kit/qloud/issues/150) | 🟦 |
+| M5-09 | Đồng bộ danh sách folder khi upload/di chuyển hoàn tất trong lúc điều hướng | [#150](https://github.com/q2kit/qloud/issues/150) | ✅ [PR #154](https://github.com/q2kit/qloud/pull/154) |
 
 ## M6 — Tìm kiếm ([search.md](features/search.md))
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
-| M6-01 | pg_trgm, API search có bộ lọc | [#40](https://github.com/q2kit/qloud/issues/40) | ⬜ |
+| M6-01 | pg_trgm, API search có bộ lọc | [#40](https://github.com/q2kit/qloud/issues/40) | 🟦 |
 | M6-02 | FE: command palette, trang kết quả | [#41](https://github.com/q2kit/qloud/issues/41) | ⬜ |
 
 ## M7 — Phiên bản ([versioning.md](features/versioning.md))

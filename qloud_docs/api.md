@@ -192,6 +192,14 @@ M4-01 đã triển khai các endpoint thùng rác ở trên và `POST /nodes/tra
 |---|---|---|
 | GET | `/search?q=&type=&modified_after=&owner=me|others` | Tìm theo tên |
 
+M6-01: endpoint yêu cầu đăng nhập, nhận `q` (1–255 ký tự sau trim), `type` (folder/document/image/video/audio/archive/other), `owner` (me/others), `modified_after` (ISO 8601 có timezone, lọc >=), `page_size` (mặc định 50, tối đa 200) và `cursor`. Bỏ bộ lọc nghĩa là tất cả node có quyền.
+- Không phân biệt hoa/dấu, NFC; chuỗi con và trigram >=0,3 cho từ khóa từ 3 ký tự. Từ khóa 1–2 ký tự chỉ chuỗi con; `%`/`_` không là wildcard.
+- Xếp exact → prefix → similarity giảm dần (lượng tử hóa thành số nguyên triệu phần) → updated_at giảm dần → UUID giảm dần. Cursor có chữ ký, gắn user/từ khóa/bộ lọc, hỗ trợ tiến/lùi.
+- Response `{next, previous, results}`; mỗi kết quả gồm metadata Node, `owner: {id, display_name}`, `effective_role: owner|editor|viewer`. Không trả breadcrumb, source URL hay byte.
+- Bao gồm node sở hữu và được share trực tiếp/thừa kế; loại folder gốc và trash. Link public không cấp quyền tìm kiếm. Truy vấn qua `sharing.permissions.nodes_for`.
+- Query sai trả 400 `validation_error`; chưa đăng nhập trả 403; cursor sai hoặc dùng với user/từ khóa/bộ lọc khác trả 404.
+- MIME document: text/*, PDF/RTF/MS Office/OpenXML/OpenDocument; archive: ZIP/RAR/7z/tar/gzip/bzip2/xz; image/video/audio theo MIME prefix; other gồm MIME chưa biết hoặc null.
+
 ### Hệ thống
 | Method | Path | Mô tả |
 |---|---|---|

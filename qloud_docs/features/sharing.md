@@ -1,6 +1,6 @@
 # Chia sẻ (F-SHARE)
 
-**Trạng thái:** Đang làm · **Milestone:** M5 · **Màn hình:** S-07, S-11, S-12
+**Trạng thái:** Hoàn thành · **Milestone:** M5 · **Màn hình:** S-07, S-11, S-12
 
 ## User stories
 - Tôi muốn chia sẻ một file hoặc folder cho người khác qua email, với quyền xem hoặc sửa.

@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.postgres",
     "rest_framework",
     "drf_spectacular",
     # Before allauth so our email templates and translations take precedence over its own.
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     "apps.sharing",
     "apps.storage",
     "apps.uploads",
+    "apps.search",
 ]
 
 MIDDLEWARE = [
@@ -278,6 +280,8 @@ SPECTACULAR_SETTINGS = {
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
     # Several components use the same field names with different choices.
     "ENUM_NAME_OVERRIDES": {
+        "SearchTypeEnum": "apps.search.selectors.SEARCH_TYPES",
+        "SearchRoleEnum": ["owner", "editor", "viewer"],
         "ReportStatusEnum": "apps.sharing.models.ReportStatusChoices",
         "ReportReasonEnum": "apps.sharing.models.ReportReasonChoices",
         "ModerationActionEnum": "apps.sharing.models.ModerationActionChoices",
