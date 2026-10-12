@@ -1,6 +1,7 @@
 import { delay, http, HttpResponse } from 'msw';
 
 import type { DriveNode } from '@/features/drive/api';
+import type { StorageUsage } from '@/features/storage/api';
 
 import { testUser } from './auth';
 
@@ -14,6 +15,23 @@ export class FakeDrive {
   /** Milliseconds every write waits, to observe optimistic updates. */
   writeDelay = 0;
   failChildren = false;
+  /** What `/me/storage` reports; plenty of room unless a test fills it. */
+  storage: StorageUsage = {
+    quota_bytes: 5_000_000_000,
+    used_bytes: 1_000_000,
+    reserved_bytes: 0,
+    max_file_size_bytes: 5_000_000_000,
+    breakdown: {
+      document: 1_000_000,
+      image: 0,
+      video: 0,
+      audio: 0,
+      archive: 0,
+      other: 0,
+      old_versions: 0,
+      trash: 0,
+    },
+  };
   pageLimit = Infinity;
   private counter = 0;
 
@@ -143,6 +161,16 @@ export class FakeDrive {
           theme: 'system',
           root_folder_id: ROOT_ID,
           is_superuser: false,
+        }),
+      ),
+      http.get('/api/v1/me/storage', () => HttpResponse.json(this.storage)),
+      http.get('/api/v1/me/storage/largest', () =>
+        HttpResponse.json({
+          results: [...this.nodes.values()]
+            .filter((node) => node.kind === 'file')
+            .sort((a, b) => b.size - a.size),
+          next: null,
+          previous: null,
         }),
       ),
       http.get('/api/v1/nodes/:id', ({ params }) => {

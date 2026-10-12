@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RotateCw } from 'lucide-react';
 import * as React from 'react';
-import { useSearchParams } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
 import type { Theme } from '@/app/theme-provider';
@@ -15,6 +15,8 @@ import {
 } from '@/features/auth/api';
 import { authErrorMessages } from '@/features/auth/auth-errors';
 import { FormAlert, FormField } from '@/features/auth/components/form-field';
+import { formatBytes } from '@/features/drive/format';
+import { useStorage } from '@/features/storage/api';
 import {
   sessionQueryKey,
   useAuthProviders,
@@ -95,6 +97,27 @@ function ChoiceGroup<T extends string>({
         ))}
       </div>
     </fieldset>
+  );
+}
+
+function StorageSection(): React.JSX.Element {
+  const { t, i18n } = useTranslation();
+  const storage = useStorage();
+  return (
+    <Section
+      title={t('storage.settings.title')}
+      description={
+        storage.data &&
+        t('storage.summary', {
+          used: formatBytes(storage.data.used_bytes, i18n.language),
+          quota: formatBytes(storage.data.quota_bytes, i18n.language),
+        })
+      }
+    >
+      <Button asChild variant="outline">
+        <Link to="/settings/storage">{t('storage.settings.manage')}</Link>
+      </Button>
+    </Section>
   );
 }
 
@@ -452,6 +475,7 @@ export function SettingsPage(): React.JSX.Element {
             hasPassword={session?.user?.has_usable_password ?? true}
           />
           <LinkedAccountsSection />
+          <StorageSection />
         </>
       )}
     </section>

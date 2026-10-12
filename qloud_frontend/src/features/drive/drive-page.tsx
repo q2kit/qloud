@@ -14,6 +14,8 @@ import { useMe } from '@/features/settings/use-me';
 
 import { Button } from '@/components/ui/button';
 import { FormAlert } from '@/features/auth/components/form-field';
+import { StorageFullBanner } from '@/features/storage/storage-banner';
+import { useUploadBlocked } from '@/features/storage/use-upload-blocked';
 import { ResumeUploads } from '@/features/upload/components/resume-uploads';
 import { useUploader } from '@/features/upload/context';
 import { treeFromDrop } from '@/features/upload/drop';
@@ -102,6 +104,7 @@ export function DrivePage(): React.JSX.Element {
   const [announcement, setAnnouncement] = React.useState('');
   const uploader = useUploader();
   const folderUploader = useFolderUploader();
+  const uploadBlocked = useUploadBlocked(folderId);
   // Files dragged in from the computer (ui-ux.md: "Kéo file vào đây để upload").
   const [fileDrag, setFileDrag] = React.useState<{
     over: string | null;
@@ -112,6 +115,10 @@ export function DrivePage(): React.JSX.Element {
     parentId: string | undefined,
   ): void => {
     if (!parentId || !canWrite) return;
+    if (uploadBlocked) {
+      setActionError(t('storage.full.uploadBlocked'));
+      return;
+    }
     setActionError(null);
     void treeFromDrop(dataTransfer)
       .then((tree) => {
@@ -493,6 +500,7 @@ export function DrivePage(): React.JSX.Element {
             {locationUnavailable && (
               <FormAlert>{t('drive.errors.locationUnavailable')}</FormAlert>
             )}
+            <StorageFullBanner />
             {actionError && <FormAlert>{actionError}</FormAlert>}
             <p className="sr-only" role="status">
               {announcement}
@@ -502,6 +510,7 @@ export function DrivePage(): React.JSX.Element {
         emptyState={
           <EmptyFolder
             canWrite={canWrite}
+            canUpload={!uploadBlocked}
             onCreate={() => {
               store.setCreatingFolder(true);
             }}
@@ -583,10 +592,12 @@ export function DrivePage(): React.JSX.Element {
 
 function EmptyFolder({
   canWrite,
+  canUpload,
   onCreate,
   onUpload,
 }: {
   canWrite: boolean;
+  canUpload: boolean;
   onCreate: () => void;
   onUpload: (files: File[]) => void;
 }): React.JSX.Element {
@@ -612,6 +623,7 @@ function EmptyFolder({
             }}
           />
           <Button
+            disabled={!canUpload}
             onClick={() => {
               input.current?.click();
             }}

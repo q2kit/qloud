@@ -12,7 +12,8 @@
     "login": "Sign in",
     "home": "Back to Drive",
     "preferences": "Display preferences",
-    "moderation": "Moderation"
+    "moderation": "Moderation",
+    "storage": "Storage"
   },
   "drive": {
     "title": "Drive",
@@ -640,5 +641,53 @@
     "keepLabel": "Lock version {{number}}",
     "keepTitle": "Lock to prevent automatic deletion. This version still uses storage, and old versions can still be deleted manually.",
     "unkeepTitle": "Unlock to allow automatic deletion under your plan’s limits. The current version is always kept."
+  },
+  "storage": {
+    "summary": "{{used}} of {{quota}} used",
+    "used": "Storage used",
+    "overview": "Overview",
+    "reserved": "Held for uploads in progress",
+    "maxFileSize": "Largest file allowed",
+    "level": {
+      "normal": "{{percent}}% used.",
+      "warning": "{{percent}}% used. Your storage is filling up.",
+      "critical": "{{percent}}% used. Your storage is almost full.",
+      "full": "Storage full. Uploads are paused until you free up space."
+    },
+    "breakdown": "By file type",
+    "total": "{{size}} stored in total",
+    "groups": {
+      "document": "Documents",
+      "image": "Images",
+      "video": "Videos",
+      "audio": "Audio",
+      "archive": "Archives",
+      "other": "Other files",
+      "old_versions": "Old versions",
+      "trash": "Trash"
+    },
+    "openTrash": "Open trash",
+    "largest": "Largest files",
+    "noFiles": "You have no files yet.",
+    "openFolder": "Show in folder",
+    "openFolderLabel": "Show {{name}} in its folder",
+    "trash": "Move to trash",
+    "trashLabel": "Move {{name}} to trash",
+    "trashFailed": "Couldn't move the file to trash. Try again.",
+    "more": "Load more",
+    "loading": "Loading storage",
+    "failed": "Storage usage could not be loaded.",
+    "largestFailed": "The largest files could not be loaded.",
+    "retry": "Try again",
+    "full": {
+      "title": "Your storage is full.",
+      "description": "You can still view, download and delete files, but new uploads are paused.",
+      "manage": "Manage storage",
+      "uploadBlocked": "Your storage is full. Free up space to upload."
+    },
+    "settings": {
+      "title": "Storage",
+      "manage": "Manage storage"
+    }
   }
 }
