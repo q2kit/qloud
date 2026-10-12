@@ -94,7 +94,7 @@ describe('version panel', () => {
       role = value;
       setup();
       expect(await screen.findByText('Hiện tại')).toBeVisible();
-      expect(screen.getByText('Giữ mãi')).toBeVisible();
+      expect(screen.getAllByText('Giữ mãi').length).toBeGreaterThan(0);
       expect(screen.getAllByText('Tài khoản đã bị xóa')).toHaveLength(2);
       expect(
         screen.getByRole('button', { name: 'Tải phiên bản 1' }),
@@ -345,3 +345,61 @@ it('refreshes current markers after a 409 restore conflict', async () => {
     ).not.toBeInTheDocument();
   });
 });
+
+it('owner toggles current and old retention only after success and handles errors', async () => {
+  const patch = vi
+    .spyOn(api, 'PATCH')
+    .mockImplementation(async (_path, options) => {
+      await Promise.resolve();
+      const request = options as {
+        params: { path: { version_id: string } };
+        body: { keep_forever: boolean };
+      };
+      const selected = items.find(
+        (item) => item.id === request.params.path.version_id,
+      );
+      if (!selected) throw new Error('Missing version');
+      const updated = {
+        ...selected,
+        keep_forever: request.body.keep_forever,
+      };
+      items = items.map((item) => (item.id === updated.id ? updated : item));
+      return ok(updated);
+    });
+  setup();
+  const user = userEvent.setup();
+  const old = await screen.findByRole('button', {
+    name: 'Giữ mãi phiên bản 1',
+  });
+  expect(old).toHaveAttribute('aria-pressed', 'false');
+  await user.click(old);
+  await waitFor(() => expect(old).toHaveAttribute('aria-pressed', 'true'));
+  await user.click(screen.getByRole('button', { name: 'Giữ mãi phiên bản 2' }));
+  await waitFor(() =>
+    expect(
+      screen.getByRole('button', { name: 'Giữ mãi phiên bản 2' }),
+    ).toHaveAttribute('aria-pressed', 'false'),
+  );
+  expect(patch).toHaveBeenCalledWith(
+    '/api/v1/nodes/{node_id}/versions/{version_id}',
+    expect.objectContaining({ body: { keep_forever: false } }),
+  );
+  patch.mockRejectedValueOnce(new Error('offline'));
+  await user.click(old);
+  expect(await screen.findByRole('alert')).toHaveTextContent(
+    'Không thể thực hiện thao tác',
+  );
+  expect(old).toHaveAttribute('aria-pressed', 'true');
+});
+
+it.each(['viewer', 'editor'] as const)(
+  '%s cannot toggle retention',
+  async (value) => {
+    role = value;
+    setup();
+    await screen.findByText('Hiện tại');
+    expect(
+      screen.queryByRole('button', { name: 'Giữ mãi phiên bản 1' }),
+    ).not.toBeInTheDocument();
+  },
+);

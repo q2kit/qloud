@@ -11,6 +11,7 @@ import {
   downloadVersion,
   refreshVersionNode,
   useVersionChange,
+  useVersionRetention,
   useVersions,
   type FileVersion,
 } from './api';
@@ -21,6 +22,7 @@ export function VersionPanel({ node }: { node: DriveNode }): React.JSX.Element {
   const detail = useNode(node.id);
   const mutation = useVersionChange(node);
   const client = useQueryClient();
+  const retention = useVersionRetention(node.id);
   const panelRef = React.useRef<HTMLDivElement>(null);
   const actionRef = React.useRef<HTMLButtonElement | null>(null);
   const [confirmation, setConfirmation] = React.useState<{
@@ -40,7 +42,8 @@ export function VersionPanel({ node }: { node: DriveNode }): React.JSX.Element {
   const canEdit = !detail.isError && detail.data?.capabilities.can_edit;
   const canDelete =
     !detail.isError && detail.data?.capabilities.can_delete_versions;
-  const pending = mutation.isPending || download !== null;
+  const pending =
+    mutation.isPending || retention.isPending || download !== null;
 
   if (query.isPending)
     return (
@@ -83,9 +86,9 @@ export function VersionPanel({ node }: { node: DriveNode }): React.JSX.Element {
       <p className="mb-4 break-words text-sm font-medium">
         {detail.data?.name ?? node.name}
       </p>
-      {Boolean(mutation.error ?? downloadError) && (
+      {Boolean(mutation.error ?? retention.error ?? downloadError) && (
         <p role="alert" className="mb-3 text-sm text-destructive">
-          {errorMessage(mutation.error ?? downloadError)}
+          {errorMessage(mutation.error ?? retention.error ?? downloadError)}
         </p>
       )}
       {items.length === 0 ? (
@@ -161,6 +164,26 @@ export function VersionPanel({ node }: { node: DriveNode }): React.JSX.Element {
                   <Download aria-hidden="true" />
                   {t('versions.download')}
                 </Button>
+                {canDelete && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={pending}
+                    aria-pressed={version.keep_forever}
+                    aria-label={t('versions.keepLabel', {
+                      number: version.version_number,
+                    })}
+                    onClick={() => {
+                      retention.mutate(version);
+                    }}
+                  >
+                    {t(
+                      version.keep_forever
+                        ? 'versions.unkeep'
+                        : 'versions.keep',
+                    )}
+                  </Button>
+                )}
                 {!version.is_current && canEdit && (
                   <Button
                     variant="ghost"

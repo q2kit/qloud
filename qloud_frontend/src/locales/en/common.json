@@ -634,6 +634,9 @@
     "currentError": "This is already the current version. Refresh the history.",
     "failed": "The operation failed. Please try again.",
     "unnamedUploader": "Unnamed user",
-    "deletedUploader": "Deleted account"
+    "deletedUploader": "Deleted account",
+    "keep": "Keep forever",
+    "unkeep": "Stop keeping forever",
+    "keepLabel": "Keep version {{number}} forever"
   }
 }

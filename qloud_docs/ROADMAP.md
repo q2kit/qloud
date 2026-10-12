@@ -97,7 +97,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M7-01 | Upload phiên bản mới cho file đã có (upload trùng tên thì hỏi người dùng) | [#42](https://github.com/q2kit/qloud/issues/42) | ✅ [PR #160](https://github.com/q2kit/qloud/pull/160) |
 | M7-02 | API danh sách, tải về, khôi phục, xóa phiên bản | [#43](https://github.com/q2kit/qloud/issues/43) | ✅ [PR #162](https://github.com/q2kit/qloud/pull/162) |
 | M7-03 | FE: tab Phiên bản trong panel chi tiết | [#44](https://github.com/q2kit/qloud/issues/44) | ✅ [PR #163](https://github.com/q2kit/qloud/pull/163) |
-| M7-04 | Dọn phiên bản theo plan và đánh dấu Giữ mãi | [#159](https://github.com/q2kit/qloud/issues/159) | ⬜ |
+| M7-04 | Dọn phiên bản theo plan và đánh dấu Giữ mãi | [#159](https://github.com/q2kit/qloud/issues/159) | 🟦 |
 
 ## M8 — Hoàn thiện và deploy ([quota.md](features/quota.md))
 | ID | Task | Issue | Trạng thái |

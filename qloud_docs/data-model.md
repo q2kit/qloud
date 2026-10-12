@@ -123,7 +123,7 @@ object trên S3 phải được xóa trước, việc này thuộc thùng rác (
 | mime_type | varchar(255) | |
 | uploaded_by_id | uuid → User | |
 | original_name | varchar(255) | tên file lúc upload |
-| keep_forever | bool | không bị chính sách giữ phiên bản tự động dọn |
+| keep_forever | bool | owner bật/tắt; không bị dọn tự động và không chiếm hạn mức bản cũ không ghim; không ngăn xóa thủ công |
 
 `version_number` ≥ 1. `uploaded_by` dùng `SET_NULL`.
 `drive_node.current_version_id` chỉ trỏ được tới version **của chính node đó**: khóa ngoại hai cột `(current_version_id, id) → drive_file_version (id, node_id)`,

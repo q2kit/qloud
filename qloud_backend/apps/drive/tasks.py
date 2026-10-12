@@ -90,3 +90,21 @@ def expire_trash() -> int:
     if expired:
         logger.info("Expired %d trash group(s)", expired)
     return expired
+
+
+@shared_task
+def expire_versions() -> int:
+    from django.utils import timezone
+
+    from . import retention
+
+    now = timezone.now()
+    deleted = 0
+    after = None
+    while nodes := retention.file_batch(after):
+        for node_id, owner_id in nodes:
+            while count := retention.expire_file(node_id, owner_id, now):
+                deleted += count
+        after = nodes[-1][0]
+    enqueue_object_cleanup()
+    return deleted

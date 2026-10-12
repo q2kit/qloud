@@ -123,3 +123,32 @@ export async function downloadVersion(nodeId: string, versionId: string) {
   );
   window.location.assign(link.url);
 }
+
+export function useVersionRetention(nodeId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (version: FileVersion) =>
+      unwrap(
+        await api.PATCH('/api/v1/nodes/{node_id}/versions/{version_id}', {
+          params: { path: { node_id: nodeId, version_id: version.id } },
+          body: { keep_forever: !version.keep_forever },
+        }),
+      ),
+    onSuccess: (updated) => {
+      client.setQueryData<History>(
+        versionKey(nodeId),
+        (data) =>
+          data && {
+            ...data,
+            pages: data.pages.map((page) => ({
+              ...page,
+              results: page.results.map((item) =>
+                item.id === updated.id ? updated : item,
+              ),
+            })),
+          },
+      );
+    },
+    onSettled: () => client.invalidateQueries({ queryKey: versionKey(nodeId) }),
+  });
+}

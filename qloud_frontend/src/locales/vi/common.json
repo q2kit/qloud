@@ -627,6 +627,9 @@
     "currentError": "Đây đã là phiên bản hiện tại. Hãy tải lại lịch sử.",
     "failed": "Không thể thực hiện thao tác. Vui lòng thử lại.",
     "unnamedUploader": "Người dùng chưa đặt tên",
-    "deletedUploader": "Tài khoản đã bị xóa"
+    "deletedUploader": "Tài khoản đã bị xóa",
+    "keep": "Giữ mãi",
+    "unkeep": "Bỏ giữ mãi",
+    "keepLabel": "Giữ mãi phiên bản {{number}}"
   }
 }

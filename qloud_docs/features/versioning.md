@@ -49,9 +49,21 @@ Owner [duyệt kế hoạch ngày 12/10/2026](https://github.com/q2kit/qloud/iss
 - Xóa cập nhật lạc quan và rollback khi lỗi. Restore chỉ cập nhật current sau response thành công. Làm mới lịch sử, chi tiết, lựa chọn, folder ban đầu/hiện tại, recent/shared/search/preview của file; upload hoàn tất làm mới history đang mở. 404/409 có thông báo đã dịch và tải lại dữ liệu/quyền, response file cũ không đổi lựa chọn file mới.
 - Giữ mãi chỉ hiện nhãn; thay đổi flag và chính sách dọn thuộc M7-04. Tab Chia sẻ hiện có vẫn là vị trí chưa triển khai.
 
+## M7-04 — Chính sách giữ lại và Giữ mãi
+
+Owner [duyệt kế hoạch ngày 12/10/2026](https://github.com/q2kit/qloud/issues/159#issuecomment-6127587370).
+- Chỉ owner bật/tắt `keep_forever` bằng PATCH phiên bản, kể cả current; node còn sống và version thuộc node. Current luôn được bảo vệ dù không ghim. Giữ mãi chỉ ngăn dọn tự động; owner vẫn có thể xóa thủ công bản cũ.
+- Bản Giữ mãi không chiếm hạn mức. Giữ tối đa `max_versions_per_file` bản cũ không ghim mới nhất theo `version_number`; đồng thời dọn bản cũ không ghim có `created_at` nhỏ hơn thời điểm chạy trừ `version_retention_days`. Đúng ranh giới thời gian vẫn được giữ. Null bỏ giới hạn tuổi; hạn mức 0 dọn mọi bản cũ không ghim.
+- Beat chạy `expire_versions` mỗi 24 giờ, gồm file trong trash và owner bị khóa. Quét file bằng cursor UUID theo batch 200; mỗi transaction dọn tối đa 200 version của một file, đọc lại plan/current/ghim dưới khóa owner → node → Blob. Upload/restore/delete/ghim dùng cùng khóa owner, nên kết quả dựa trên thao tác đã commit trước.
+- Dọn metadata và quota nguyên tử, Blob dùng chung chỉ trừ một lần khi hết tham chiếu. Ghi ObjectDeletion cho thumbnail và Blob hết tham chiếu, worker xóa S3 sau commit và retry khi lỗi. Chạy lại hoặc nhiều worker không trừ quota lặp; mỗi deployment vẫn chỉ chạy một beat.
+- Tab Phiên bản có nút Giữ mãi/Bỏ giữ mãi cho owner, hỗ trợ bàn phím và `aria-pressed`; viewer/editor chỉ thấy nhãn. Chỉ đổi flag sau API thành công, khóa thao tác lúc gửi, báo lỗi đã dịch và tải lại lịch sử sau thành công/lỗi để xử lý phiên bản bị dọn hoặc quyền thay đổi.
+- Không thêm migration/dependency; schema API và type FE được sinh lại.
+
 ## Tiêu chí chấp nhận
 - [x] Upload trùng tên, chọn *Thay thế*: file có 2 phiên bản; xem trước và tải về đều lấy bản mới.
 - [x] Khôi phục v1: tạo ra v3 có nội dung giống v1; quota không tăng.
 - [x] Tải được bất kỳ phiên bản nào.
 
 - [x] Panel có lịch sử và hành động đúng quyền; UI tải/restore/delete hoạt động ở light/dark, desktop/360px.
+
+- [x] Dọn theo plan, bảo vệ current/Giữ mãi và quota Blob dùng chung; owner bật/tắt Giữ mãi trong tab Phiên bản.

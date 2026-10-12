@@ -265,7 +265,7 @@ export interface paths {
         delete: operations["versions_delete"];
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["versions_update"];
         trace?: never;
     };
     "/api/v1/nodes/{node_id}/versions/{version_id}/download": {
@@ -987,6 +987,9 @@ export interface components {
         };
         PatchedUpdateShareRequest: {
             role?: components["schemas"]["ShareRoleEnum"];
+        };
+        PatchedVersionRetentionRequest: {
+            keep_forever?: boolean;
         };
         /**
          * @description * `image` - image
@@ -2113,6 +2116,50 @@ export interface operations {
             };
             /** @description `current_version`: the selected version is current. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    versions_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                node_id: string;
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedVersionRetentionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FileVersion"];
+                };
+            };
+            /** @description Invalid input or operation. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No such node, or no access to it. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

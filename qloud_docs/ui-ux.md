@@ -133,3 +133,5 @@ Route `/moderation` trong app shell chỉ cho superuser (flag `/me.is_superuser`
 - Header mở bảng lệnh bằng nút tìm kiếm hoặc Ctrl+K/⌘K. Từ khóa trống hiện điều hướng nhanh và hành động tạo/upload theo quyền của folder hiện tại. Khi một dialog khác đang mở, shortcut không mở thêm bảng lệnh.
 - Nhập từ khóa: debounce 150ms, tối đa 8 gợi ý và mục “Xem tất cả kết quả”; dùng ↑/↓ để chọn, Enter để mở, Esc để đóng và trả focus về điểm mở. Dialog có loading, lỗi/thử lại và trạng thái rỗng.
 - S-09 giữ từ khóa, loại, người sở hữu và ngày sửa trong URL; dùng lưới/danh sách chung. API xếp theo độ liên quan, UI giữ nguyên thứ tự đó. File mở viewer, folder mở Drive; mục được chia sẻ hiện owner/quyền, dữ liệu được tải thêm bằng cursor.
+
+M7-04: tab Phiên bản thêm nút Giữ mãi/Bỏ giữ mãi cho owner, cả current và bản cũ; nút có `aria-pressed`, khóa trong lúc gửi và chỉ cập nhật sau thành công. Viewer/editor chỉ thấy nhãn Giữ mãi. Hướng thiết kế và vị trí panel giữ nguyên.
