@@ -21,7 +21,7 @@
 
 ## Phạm vi triển khai M6 — đã duyệt
 
-Owner đã duyệt đặc tả và kế hoạch cho cả M6 trên [#40](https://github.com/q2kit/qloud/issues/40#issuecomment-6111662546). M6-01 và M6-02 đã triển khai, đang chờ review ở hai PR riêng.
+Owner đã duyệt đặc tả và kế hoạch cho cả M6 trên [#40](https://github.com/q2kit/qloud/issues/40#issuecomment-6111662546). M6-01 đã merge ở [PR #156](https://github.com/q2kit/qloud/pull/156); M6-02 đã triển khai, đang chờ review ở [PR #157](https://github.com/q2kit/qloud/pull/157).
 
 ### M6-01 — API và chỉ mục
 - `GET /api/v1/search` yêu cầu đăng nhập, giữ tham số đã mô tả trong `api.md`: `q`, `type`, `modified_after`, `owner`; bổ sung `cursor`, `page_size` theo quy ước danh sách.
