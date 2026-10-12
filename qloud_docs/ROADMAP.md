@@ -123,3 +123,4 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M8-18 | Fix: E2E double click vùng trống cuối lưới Drive không ổn định | [#123](https://github.com/q2kit/qloud/issues/123) | ⬜ |
 | M8-19 | Fix: E2E nhập số trang PDF đôi lúc vẫn ở trang 1 | [#144](https://github.com/q2kit/qloud/issues/144) | ⬜ |
 | M8-20 | Rà soát câu chữ i18n (vi/en, email) cho tự nhiên và nhất quán | [#178](https://github.com/q2kit/qloud/issues/178) | ✅ [PR #179](https://github.com/q2kit/qloud/pull/179) |
+| M8-21 | FE: Select và DatePicker thay cho ô chọn gốc của trình duyệt | [#180](https://github.com/q2kit/qloud/issues/180) | 🟦 |
