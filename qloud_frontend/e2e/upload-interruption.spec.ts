@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 
 import { signUpVerifiedViaApi } from './auth';
-import { openDriveFolder } from './drive';
+import { chooseItemAction, openDriveFolder } from './drive';
 
 test.use({ launchOptions: { slowMo: process.env.M210_LIVE ? 250 : 0 } });
 
@@ -168,10 +168,9 @@ for (const interruption of ['offline', 'reload'] as const) {
         'completed',
       );
 
-      await item.click();
       const [download] = await Promise.all([
         page.waitForEvent('download'),
-        page.getByRole('button', { name: 'Tải xuống', exact: true }).click(),
+        chooseItemAction(page, item, 'Tải xuống'),
       ]);
       expect(download.suggestedFilename()).toBe(filename);
       expect((await readFile(await download.path())).equals(bytes)).toBe(true);

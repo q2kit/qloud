@@ -81,7 +81,6 @@ export function SharedPage() {
         onView={setView}
         ordering={ordering}
         onOrdering={setOrdering}
-        actions={actionsFor()}
         actionsFor={actionsFor}
         onClearSelection={() => {
           select(null);

@@ -21,7 +21,6 @@
     "loading": "Loading folder contents",
     "loadMore": "Load more",
     "loadingMore": "Loading…",
-    "selectionActions": "Actions for the selected item",
     "defaultFolderName": "Untitled folder",
     "view": {
       "label": "View style",
@@ -96,8 +95,7 @@
     },
     "selection": {
       "count_one": "{{count}} item selected",
-      "count_other": "{{count}} items selected",
-      "clear": "Clear selection"
+      "count_other": "{{count}} items selected"
     },
     "move": {
       "description": "Pick the destination folder, then choose \"Move here\".",

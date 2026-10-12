@@ -185,7 +185,6 @@ export function SearchPage() {
         onView={setView}
         ordering="-updated_at"
         orderingLabel={t('search.relevance')}
-        actions={actionsFor()}
         actionsFor={actionsFor}
         onClearSelection={() => {
           select(null);

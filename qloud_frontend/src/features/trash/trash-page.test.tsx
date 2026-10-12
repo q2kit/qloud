@@ -28,6 +28,7 @@ import type { DriveNode } from '@/features/drive/api';
 import type { TrashNode } from './api';
 import { useTrashNotice } from './notice';
 import { TrashToast } from './trash-toast';
+import { chooseSelectionAction } from '@/test/item-menu';
 
 const server = setupServer();
 let drive: FakeDrive;
@@ -146,7 +147,7 @@ it('loads cursor pages, selects multiple, restores and removes selection', async
   await user.click(screen.getByRole('button', { name: 'Load more' }));
   await screen.findByRole('option', { name: 'B' });
   await user.keyboard('{Control>}a{/Control}');
-  await user.click(screen.getByRole('button', { name: 'Restore' }));
+  await chooseSelectionAction(user, 'Restore');
   await screen.findByText('Trash is empty');
   expect(requests[0]).toEqual([a.id, b.id]);
   expect(useDriveStore.getState().selected).toEqual([]);
@@ -223,7 +224,7 @@ it('confirms permanent deletion, cancel does not delete, failures can retry', as
   addTrash(drive.file('report.pdf'));
   renderApp('/trash', testUser);
   await user.click(await screen.findByRole('option', { name: 'report.pdf' }));
-  await user.click(screen.getByRole('button', { name: 'Delete permanently' }));
+  await chooseSelectionAction(user, 'Delete permanently');
   const dialog = screen.getByRole('alertdialog');
   expect(within(dialog).getByRole('button', { name: 'Cancel' })).toHaveFocus();
   await user.click(within(dialog).getByRole('button', { name: 'Cancel' }));
@@ -233,7 +234,7 @@ it('confirms permanent deletion, cancel does not delete, failures can retry', as
       HttpResponse.json({}, { status: 500 }),
     ),
   );
-  await user.click(screen.getByRole('button', { name: 'Delete permanently' }));
+  await chooseSelectionAction(user, 'Delete permanently');
   await user.click(
     within(screen.getByRole('alertdialog')).getByRole('button', {
       name: 'Delete permanently',
@@ -269,7 +270,7 @@ it('optimistically removes Drive items, persists undo across navigation and rest
   const node = drive.folder('A');
   const router = renderApp('/drive', testUser);
   await user.click(await screen.findByRole('option', { name: 'A' }));
-  await user.click(screen.getByRole('button', { name: 'Move to trash' }));
+  await chooseSelectionAction(user, 'Move to trash');
   await screen.findByText('Moved to trash');
   expect(screen.queryByRole('option', { name: 'A' })).not.toBeInTheDocument();
   await act(async () => {
@@ -297,7 +298,7 @@ it('rolls back optimistic trash on error and keeps selection', async () => {
   );
   renderApp('/drive', testUser);
   await user.click(await screen.findByRole('option', { name: 'A' }));
-  await user.click(screen.getByRole('button', { name: 'Move to trash' }));
+  await chooseSelectionAction(user, 'Move to trash');
   expect(screen.queryByRole('option', { name: 'A' })).not.toBeInTheDocument();
   await screen.findByRole('alert');
   expect(await screen.findByRole('option', { name: 'A' })).toHaveAttribute(
@@ -316,7 +317,7 @@ it('shows restore errors without losing items and reports list failures', async 
   );
   renderApp('/trash', testUser);
   await user.click(await screen.findByRole('option', { name: 'A' }));
-  await user.click(screen.getByRole('button', { name: 'Restore' }));
+  await chooseSelectionAction(user, 'Restore');
   await screen.findByRole('alert');
   expect(screen.getByRole('option', { name: 'A' })).toBeVisible();
 });
@@ -354,7 +355,7 @@ it('keeps undo available after a restore failure and can dismiss the toast', asy
   );
   renderApp('/drive', testUser);
   await user.click(await screen.findByRole('option', { name: 'A' }));
-  await user.click(screen.getByRole('button', { name: 'Move to trash' }));
+  await chooseSelectionAction(user, 'Move to trash');
   await user.click(await screen.findByRole('button', { name: 'Undo' }));
   await screen.findByText('Could not undo. Try again or restore from Trash.');
   expect(screen.getByRole('button', { name: 'Undo' })).toBeEnabled();

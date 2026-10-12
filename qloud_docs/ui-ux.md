@@ -44,7 +44,8 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
 - Header luôn nằm trên cùng, gồm tiêu đề, tìm kiếm hoặc command palette, menu "Tạo mới" (Thư mục mới, Tải tệp lên), nút bật panel chi tiết và menu tài khoản (đăng xuất).
   Tiêu đề header lấy theo route đang mở (`handle.titleKey` của route, ví dụ Drive, Gần đây, Thùng rác, 404).
 - Trang Drive (S-05): breadcrumb nằm đầu nội dung trang và là tiêu đề trang, mục cuối (folder hiện tại) là `<h1>`. Trên màn hình hẹp, các folder ở giữa thu thành "…".
-  Vùng nội dung folder giãn hết chiều cao còn lại dưới header (trừ padding trang); vùng trống tới đáy nhận drop upload và kéo chọn. Double click chỉ bật trên desktop có chuột/hover (`(hover: hover) and (pointer: fine)`): vùng trống bên dưới thanh công cụ mở modal tạo thư mục con trong folder đang xem, item thì mở item. Trên thiết bị cảm ứng, chọn item rồi dùng nút/menu Mở/Tải xuống; tạo folder bằng menu/nút hiện có. Bàn phím giữ Enter và các thao tác hiện có.
+  Vùng nội dung folder giãn hết chiều cao còn lại dưới header (trừ padding trang); vùng trống tới đáy nhận drop upload và kéo chọn. Double click chỉ bật trên desktop có chuột/hover (`(hover: hover) and (pointer: fine)`): vùng trống bên dưới thanh công cụ mở modal tạo thư mục con trong folder đang xem, item thì mở item. Trên thiết bị cảm ứng, dùng Mở/Tải xuống trong menu “⋯” của item; tạo folder bằng menu/nút hiện có. Bàn phím giữ Enter và các thao tác hiện có.
+  Thao tác với mục (Mở, Tải xuống, Đổi tên, Di chuyển, Chia sẻ, Chuyển vào thùng rác, Khôi phục, Xóa vĩnh viễn…) chỉ nằm trong menu của item: chuột phải, nút “⋯”, Shift+F10, cùng phím tắt và panel chi tiết. Thanh công cụ phía trên danh sách chỉ có sắp xếp và chế độ xem; không hiện nút thao tác hay số mục đã chọn, số mục đã chọn chỉ được đọc cho trình đọc màn hình (`aria-live`). Hàng tiêu đề Drive chỉ có breadcrumb.
   Nội dung các trang trong app shell giãn theo chiều rộng khả dụng, giữ giới hạn chiều rộng riêng của từng trang; trang Cài đặt không tràn ngang ở 360px khi main dùng flex để giãn chiều cao Drive.
   `/` chuyển sang `/drive`. Id trong URL là UUID bỏ dấu gạch (`/drive/folders/01a1261573fd7134b1948c39b526fe9e`).
 - Panel chi tiết rộng 320px ở desktop lớn (`xl`); trên màn hình nhỏ hơn hiển thị dạng bottom sheet.
@@ -110,7 +111,7 @@ phân trang cursor, chọn nhiều, menu chuột phải/nút ⋯. Các action l�
 header có Dọn sạch thùng rác. Xóa vĩnh viễn/dọn sạch mở hộp thoại xác nhận, focus ở Hủy;
 lỗi API giữ hộp thoại và dữ liệu để thử lại. File có thumbnail ảnh/PDF/MP4 trong grid/list; thiếu/lỗi dùng icon. Không mở preview nội dung/download trong Trash.
 
-Drive có action Chuyển vào thùng rác cho một/nhiều mục trong toolbar và menu. Mục rời danh sách
+Drive có action Chuyển vào thùng rác cho một/nhiều mục trong menu của item. Mục rời danh sách
 ngay khi gửi request; thất bại thì rollback cache và giữ lại selection. Toast ở layout chung
 hiển thị Đã chuyển vào thùng rác + Hoàn tác trong khoảng 8 giây, tồn tại qua chuyển trang.
 Hoàn tác dùng root nhóm server trả về; lỗi hiển thị thông báo cho phép thử lại/khôi phục từ trang trash.
@@ -119,7 +120,7 @@ Mỗi request chọn tối đa 1.000 mục, theo giới hạn API. Đủ i18n vi
 ### S-07, S-11, S-12 — Chia sẻ (M5-05)
 
 - Được chia sẻ dùng lưới/danh sách và cursor chung Drive, thêm tên owner và quyền thực tế. Mở file qua route riêng, folder qua Drive; không nhận drop upload ở danh sách này.
-- Hộp thoại Chia sẻ mở từ một mục có quyền trong hàng tiêu đề Drive/menu hoặc panel chi tiết. Hai phần Người có quyền truy cập và Link công khai; email/role, danh sách grant, hạn dùng tùy chọn, copy và thu hồi. Action Chia sẻ nằm ở hàng tiêu đề Drive giữ nguyên chiều cao khi chọn mục, tránh dịch item trong lúc double click. Hộp thoại cuộn trong 90dvh, co tới 360px; Esc/Đóng trả focus về nơi mở.
+- Hộp thoại Chia sẻ mở từ menu của một mục có quyền hoặc từ panel chi tiết. Hai phần Người có quyền truy cập và Link công khai; email/role, danh sách grant, hạn dùng tùy chọn, copy và thu hồi. Hộp thoại cuộn trong 90dvh, co tới 360px; Esc/Đóng trả focus về nơi mở.
 - Trang public dùng PublicLayout với ngôn ngữ/theme, chỉ xem/download. File root mở viewer toàn màn hình, đóng về trang link; folder dùng breadcrumb giới hạn trong cây và FileBrowser. Menu thao tác hoạt động ngay cả khi chưa chọn mục. Link không còn hợp lệ hiện “Nội dung không còn khả dụng”. Báo cáo vi phạm triển khai cùng M5-07.
 
 

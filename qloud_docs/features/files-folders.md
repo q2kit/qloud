@@ -43,7 +43,7 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
   - click để chọn một mục (chọn nhiều ở M2-07b); phím mũi tên để di chuyển, Enter để mở, F2 để đổi tên;
   - phím mũi tên dùng được ngay khi vào trang, không cần click trước: chưa chọn gì thì bắt đầu từ mục đầu tiên, đã chọn thì đi tiếp từ mục đang chọn. Trong ô nhập, hộp thoại và menu, mũi tên vẫn thuộc về chúng;
   - ở dạng danh sách, các dòng đang chọn đứng cạnh nhau dùng chung một viền thành một khối; dạng lưới thì mỗi card có viền riêng;
-  - mục đang chọn hiện trong panel chi tiết (loại, kích thước, ngày sửa, ngày tạo) và có nút Đổi tên/Tải xuống trên thanh công cụ.
+  - mục đang chọn hiện trong panel chi tiết (loại, kích thước, ngày sửa, ngày tạo) và có Đổi tên/Tải xuống trong menu của item.
 - **Mở:** bấm đúp trên desktop có chuột/hover, hoặc Enter/nút Mở/menu trên mọi thiết bị; folder thì vào trong, file thì tải về cho tới khi M3 có trình xem.
 - **Tạo folder:** menu "Tạo mới" ở header hoặc nút ở trạng thái rỗng; tên trùng thì báo ngay trong hộp thoại.
 - **Đổi tên:**
@@ -56,7 +56,7 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
 - **Chọn:**
   - click (một mục), Ctrl/⌘+click (thêm/bớt), Shift+click hoặc Shift+mũi tên (cả dải từ mục làm mốc);
   - Ctrl/⌘+A (tất cả mục đã tải) và Esc (bỏ chọn) dùng được ở mọi chỗ trên trang Drive, trừ khi đang gõ hoặc đang mở hộp thoại/menu;
-  - thanh công cụ ghi số mục đã chọn; panel chi tiết tóm tắt số folder, số file và tổng dung lượng;
+  - số mục đã chọn được đọc cho trình đọc màn hình (`aria-live`), thanh công cụ không hiện nút thao tác (mọi thao tác nằm trong menu của item); panel chi tiết tóm tắt số folder, số file và tổng dung lượng;
   - **vùng chọn** như trình quản lý file trên desktop:
     - nhấn chuột trên chỗ trống rồi kéo thì hiện khung, mục nào chạm khung thì được chọn;
     - giữ Ctrl/⌘ thì cộng thêm vào vùng chọn sẵn có; kéo gần mép trên/dưới cửa sổ thì trang tự cuộn;
@@ -86,7 +86,7 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
 ## M2-09 — Gần đây ([#25](https://github.com/q2kit/qloud/issues/25))
 - `/recent` lấy file từ tất cả thư mục của mình qua `GET /recent`; thứ tự mới nhất cố định, không thay đổi lựa chọn sắp xếp của Drive.
 - Drive và Gần đây dùng chung core `FileBrowser` (toolbar, loading/rỗng/lỗi, kéo vùng chọn, bàn phím) và `NodeCollection` (lưới/danh sách, item/menu, phân trang/virtualization). Được chia sẻ và Thùng rác sẽ dùng cùng core khi triển khai M5/M4; mỗi trang truyền dữ liệu và các action phù hợp, không sao chép giao diện file.
-- Gần đây dùng chung lựa chọn lưới/danh sách, chọn một/nhiều, Shift/Ctrl/⌘ và Ctrl/⌘+A/Esc. Một file có action Tải xuống, Mở thư mục chứa tệp, Thông tin. Enter và double click desktop tải file cho tới M3; thiết bị cảm ứng dùng nút/menu. Không đổi tên/di chuyển trực tiếp ở Gần đây; mở thư mục chứa file để dùng các thao tác Drive.
+- Gần đây dùng chung lựa chọn lưới/danh sách, chọn một/nhiều, Shift/Ctrl/⌘ và Ctrl/⌘+A/Esc. Một file có action Tải xuống, Mở thư mục chứa tệp, Thông tin. Enter và double click desktop tải file cho tới M3; thiết bị cảm ứng dùng menu “⋯”. Không đổi tên/di chuyển trực tiếp ở Gần đây; mở thư mục chứa file để dùng các thao tác Drive.
 - Double click vùng trống không tạo folder; item không kéo để di chuyển và nội dung trang không nhận upload. Menu Tạo mới toàn cục vẫn tạo/upload vào Drive gốc như các route ngoài Drive trước đây.
 - Có skeleton, trạng thái rỗng, lỗi kèm Thử lại; hỗ trợ vi/en, light/dark và 360px. Chuyển vào/ra Gần đây xóa vùng chọn cũ.
 - Upload hoàn tất, đổi tên và di chuyển làm mới cache Gần đây. Danh sách không ghi lịch sử truy cập; mở/download không thay đổi `updated_at`.
@@ -95,7 +95,7 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
 
 ## Tiêu chí chấp nhận
 ### M2-11, M2-12 và M2-13 — vùng trống và double click của Drive ([#109](https://github.com/q2kit/qloud/issues/109), [#111](https://github.com/q2kit/qloud/issues/111), [#112](https://github.com/q2kit/qloud/issues/112))
-- Double click **chỉ trên desktop**: thiết bị có con trỏ chính chính xác và hỗ trợ hover (`(hover: hover) and (pointer: fine)`), không dựa vào chiều rộng viewport. Theo quyết định của owner ở #112, thiết bị cảm ứng không dùng double click để mở item hay tạo folder; chọn item rồi dùng nút/menu Mở/Tải xuống, tạo folder qua menu/nút hiện có. Bàn phím giữ Enter và các thao tác hiện có.
+- Double click **chỉ trên desktop**: thiết bị có con trỏ chính chính xác và hỗ trợ hover (`(hover: hover) and (pointer: fine)`), không dựa vào chiều rộng viewport. Theo quyết định của owner ở #112, thiết bị cảm ứng không dùng double click để mở item hay tạo folder; dùng Mở/Tải xuống trong menu “⋯” của item, tạo folder qua menu/nút hiện có. Bàn phím giữ Enter và các thao tác hiện có.
 - Trên desktop, double click vào vùng trống của folder đang mở sẽ mở modal tạo thư mục con hiện có, với parent là folder đang xem; áp dụng cho folder gốc và folder lồng nhau, dạng lưới/danh sách, rỗng/có nội dung.
 - Trên desktop, double click lên item vẫn mở folder/file; click đơn trên vùng trống vẫn bỏ chọn. Kéo vùng chọn, kéo thả di chuyển/upload và các cách tạo folder hiện có vẫn hoạt động.
 - Không kích hoạt từ breadcrumb, toolbar, nút, menu hoặc modal; không mở khi đang có menu/modal hoặc folder đang tải, lỗi, không tồn tại hay không có quyền.

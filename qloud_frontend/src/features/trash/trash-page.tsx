@@ -107,7 +107,6 @@ export function TrashPage(): React.JSX.Element {
         onView={preferences.setView}
         ordering={preferences.ordering}
         onOrdering={preferences.setOrdering}
-        actions={actionsFor()}
         actionsFor={actionsFor}
         onClearSelection={() => {
           select(null);

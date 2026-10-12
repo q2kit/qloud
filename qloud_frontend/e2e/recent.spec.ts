@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { signUpVerifiedViaApi } from './auth';
+import { chooseItemAction, openItemMenu } from './drive';
 
 // API-seeded real stack. RECENT_LIVE keeps Chromium visible and records review images.
 test.use({ launchOptions: { slowMo: process.env.RECENT_LIVE ? 250 : 0 } });
@@ -127,17 +128,16 @@ test('Recent shares the browser, downloads files and opens their folders without
   const before = await page.request.get(`/api/v1/nodes/${report.id}`);
   const timestamp = ((await before.json()) as { updated_at: string })
     .updated_at;
-  await item(page, 'báo-cáo.txt').click();
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.getByRole('button', { name: 'Tải xuống', exact: true }).click(),
+    chooseItemAction(page, 'báo-cáo.txt', 'Tải xuống'),
   ]);
   expect(download.suggestedFilename()).toBe('báo-cáo.txt');
   const after = await page.request.get(`/api/v1/nodes/${report.id}`);
   expect(((await after.json()) as { updated_at: string }).updated_at).toBe(
     timestamp,
   );
-  await page.getByRole('button', { name: 'Mở thư mục chứa tệp' }).click();
+  await chooseItemAction(page, 'báo-cáo.txt', 'Mở thư mục chứa tệp');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Dự án');
   await expect(item(page, 'báo-cáo.txt')).toHaveAttribute(
     'aria-selected',
@@ -150,8 +150,7 @@ test('Recent shares the browser, downloads files and opens their folders without
     'true',
   );
   await navigateRecent(page, isMobile);
-  await item(page, 'ghi-chú.txt').click();
-  await page.getByRole('button', { name: 'Mở thư mục chứa tệp' }).click();
+  await chooseItemAction(page, 'ghi-chú.txt', 'Mở thư mục chứa tệp');
   await expect(page).toHaveURL(/\/drive\?select=[0-9a-f]{32}$/);
   await expect(item(page, 'ghi-chú.txt')).toHaveAttribute(
     'aria-selected',
@@ -179,13 +178,11 @@ test('Recent refreshes after upload, rename and move; empty state and view prefe
     .getByRole('button', { name: 'Đóng khay tải lên' })
     .click();
   await page.getByRole('button', { name: 'Dạng danh sách' }).click();
-  await item(page, 'note.txt').click();
-  await page.getByRole('button', { name: 'Mở thư mục chứa tệp' }).click();
+  await chooseItemAction(page, 'note.txt', 'Mở thư mục chứa tệp');
   await expect(
     page.getByRole('button', { name: 'Dạng danh sách' }),
   ).toHaveAttribute('aria-pressed', 'true');
-  await item(page, 'note.txt').click();
-  await page.getByRole('button', { name: 'Đổi tên', exact: true }).click();
+  await chooseItemAction(page, 'note.txt', 'Đổi tên');
   const rename = page.getByRole('dialog', { name: 'Đổi tên' });
   await rename.getByLabel('Tên').fill('renamed.txt');
   await rename.getByRole('button', { name: 'Lưu' }).click();
@@ -195,10 +192,8 @@ test('Recent refreshes after upload, rename and move; empty state and view prefe
   await expect(item(page, 'note.txt')).toHaveCount(0);
   const response = await page.request.get('/api/v1/recent');
   const body = (await response.json()) as { results: { id: string }[] };
-  await item(page, 'renamed.txt').click();
-  await page.getByRole('button', { name: 'Mở thư mục chứa tệp' }).click();
-  await item(page, 'renamed.txt').click();
-  await page.getByRole('button', { name: 'Di chuyển…', exact: true }).click();
+  await chooseItemAction(page, 'renamed.txt', 'Mở thư mục chứa tệp');
+  await chooseItemAction(page, 'renamed.txt', 'Di chuyển…');
   const move = page.getByRole('dialog', { name: 'Di chuyển 1 mục' });
   await move.getByRole('button', { name: 'Đích', exact: true }).click();
   const moved = page.waitForResponse(
@@ -218,8 +213,7 @@ test('Recent refreshes after upload, rename and move; empty state and view prefe
   expect(((await node.json()) as { parent_id: string }).parent_id).toBe(
     destination.id,
   );
-  await item(page, 'renamed.txt').click();
-  await page.getByRole('button', { name: 'Mở thư mục chứa tệp' }).click();
+  await chooseItemAction(page, 'renamed.txt', 'Mở thư mục chứa tệp');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Đích');
 });
 
@@ -328,9 +322,12 @@ test('item menu opens after pointer release without accidentally opening a folde
   for (const view of ['Dạng lưới', 'Dạng danh sách']) {
     await page.getByRole('button', { name: view }).click();
     await item(page, 'ghi-chú.txt').click();
+    const menu = await openItemMenu(page, 'ghi-chú.txt');
+    await expect(menu.getByText('Tải xuống', { exact: true })).toBeVisible();
     await expect(
-      page.getByRole('button', { name: 'Mở thư mục chứa tệp' }),
+      menu.getByText('Mở thư mục chứa tệp', { exact: true }),
     ).toHaveCount(0);
+    await page.keyboard.press('Escape');
     const trigger = item(page, 'Dự án').getByRole('button');
     const box = await trigger.boundingBox();
     if (!box) throw new Error('Folder menu trigger is missing');

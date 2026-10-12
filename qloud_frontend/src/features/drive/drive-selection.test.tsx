@@ -22,6 +22,7 @@ import { DESKTOP_INPUT_QUERY } from './desktop-input';
 
 import { DRAG_TYPE } from './actions';
 import { compactId } from './paths';
+import { chooseSelectionAction } from '@/test/item-menu';
 
 const server = setupServer();
 let drive: FakeDrive;
@@ -429,7 +430,7 @@ describe('moving', () => {
     await user.keyboard('{Control>}');
     await user.click(option('a.pdf'));
     await user.keyboard('{/Control}');
-    await user.click(screen.getByRole('button', { name: 'Move 2 items…' }));
+    await chooseSelectionAction(user, 'Move 2 items…');
 
     const dialog = within(screen.getByRole('dialog', { name: 'Move 2 items' }));
     // Where they already are: nothing to do yet.
@@ -468,7 +469,7 @@ describe('moving', () => {
     );
     renderApp('/drive', testUser);
     await user.click(await screen.findByRole('option', { name: 'Mine' }));
-    await user.click(screen.getByRole('button', { name: 'Move…' }));
+    await chooseSelectionAction(user, 'Move…');
     const dialog = within(screen.getByRole('dialog', { name: 'Move 1 item' }));
     // The folder being moved cannot be entered.
     expect(dialog.getByRole('button', { name: 'Mine' })).toBeDisabled();
@@ -563,7 +564,7 @@ describe('moving', () => {
     await user.keyboard('{Control>}');
     await user.click(option('0 Target'));
     await user.keyboard('{/Control}');
-    await user.click(screen.getByRole('button', { name: 'Move 50 items…' }));
+    await chooseSelectionAction(user, 'Move 50 items…');
     const dialog = within(
       screen.getByRole('dialog', { name: 'Move 50 items' }),
     );

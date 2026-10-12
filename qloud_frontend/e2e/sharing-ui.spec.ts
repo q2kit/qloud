@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import { signUpVerifiedViaApi } from './auth';
+import { chooseItemAction, openItemMenu } from './drive';
 async function csrf(page: Page) {
   return {
     'X-CSRFToken':
@@ -94,8 +95,7 @@ async function captures(page: Page, kind: string, mobile: boolean) {
   }
 }
 async function openItem(page: Page, name: string) {
-  await page.getByRole('option', { name, exact: true }).click();
-  await page.getByRole('button', { name: 'Mở', exact: true }).click();
+  await chooseItemAction(page, name, 'Mở');
 }
 test('owner shares, changes roles, creates links and revokes access through UI', async ({
   page,
@@ -129,10 +129,7 @@ test('owner shares, changes roles, creates links and revokes access through UI',
     const recipient = await context.newPage();
     const email = await signUpVerifiedViaApi(recipient);
     await page.goto('/drive');
-    await page
-      .getByRole('option', { name: 'Shared project', exact: true })
-      .click();
-    await page.getByRole('button', { name: 'Chia sẻ', exact: true }).click();
+    await chooseItemAction(page, 'Shared project', 'Chia sẻ');
     const dialog = page.getByRole('dialog', { name: 'Chia sẻ Shared project' });
     await dialog.getByLabel('Email người nhận').fill(email);
     await dialog.getByRole('button', { name: 'Chia sẻ', exact: true }).click();
@@ -151,15 +148,17 @@ test('owner shares, changes roles, creates links and revokes access through UI',
     await expect(recipient.getByText(/Chủ sở hữu · Người xem/)).toBeVisible();
     await captures(recipient, 'shared', isMobile);
     await openItem(recipient, 'Shared project');
-    await recipient
-      .getByRole('option', { name: 'Readme.txt', exact: true })
-      .click();
+    const viewerMenu = await openItemMenu(recipient, 'Readme.txt');
     await expect(
-      recipient.getByRole('button', { name: 'Đổi tên', exact: true }),
-    ).toHaveCount(0);
-    await expect(
-      recipient.getByRole('button', { name: 'Chia sẻ', exact: true }),
-    ).toHaveCount(0);
+      viewerMenu.getByText('Tải xuống', { exact: true }),
+    ).toBeVisible();
+    await expect(viewerMenu.getByText('Đổi tên', { exact: true })).toHaveCount(
+      0,
+    );
+    await expect(viewerMenu.getByText('Chia sẻ', { exact: true })).toHaveCount(
+      0,
+    );
+    await recipient.keyboard.press('Escape');
     await dialog
       .getByRole('combobox', { name: `Quyền của ${email}` })
       .selectOption('editor');
@@ -167,15 +166,11 @@ test('owner shares, changes roles, creates links and revokes access through UI',
       dialog.getByRole('combobox', { name: `Quyền của ${email}` }),
     ).toHaveValue('editor');
     await recipient.reload();
-    await recipient
-      .getByRole('option', { name: 'Readme.txt', exact: true })
-      .click();
+    const editorMenu = await openItemMenu(recipient, 'Readme.txt');
     await expect(
-      recipient.getByRole('button', { name: 'Đổi tên', exact: true }),
+      editorMenu.getByText('Đổi tên', { exact: true }),
     ).toBeVisible();
-    await recipient
-      .getByRole('button', { name: 'Chia sẻ', exact: true })
-      .click();
+    await editorMenu.getByText('Chia sẻ', { exact: true }).click();
     await expect(
       recipient.getByText('Chỉ chủ sở hữu quản lý link công khai.'),
     ).toBeVisible();

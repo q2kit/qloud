@@ -410,8 +410,6 @@ export function DrivePage(): React.JSX.Element {
       },
     );
 
-  const shareAction = actionsFor().find((action) => action.key === 'share');
-
   const onSelect = (
     node: DriveNode,
     { toggle, range }: SelectModifiers,
@@ -460,17 +458,6 @@ export function DrivePage(): React.JSX.Element {
             aria-hidden="true"
           />
         )}
-        {shareAction && (
-          <Button
-            className="ml-auto h-7 shrink-0"
-            variant="ghost"
-            size="sm"
-            onClick={shareAction.run}
-          >
-            <shareAction.icon />
-            {shareAction.label}
-          </Button>
-        )}
       </div>
       <ResumeUploads />
       <FileBrowser
@@ -484,7 +471,6 @@ export function DrivePage(): React.JSX.Element {
         ordering={ordering}
         onView={setView}
         onOrdering={setOrdering}
-        actions={actionsFor()}
         onClearSelection={() => {
           select(null);
         }}

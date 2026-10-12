@@ -12,6 +12,7 @@ import { join } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 
 import { signUpVerifiedViaApi } from './auth';
+import { chooseItemAction } from './drive';
 
 test.use({ launchOptions: { slowMo: process.env.M208B_LIVE ? 250 : 0 } });
 
@@ -20,8 +21,7 @@ const item = (page: Page, name: string) =>
   page.getByRole('option', { name, exact: true });
 
 async function openFolder(page: Page, name: string) {
-  await item(page, name).click();
-  await page.getByRole('button', { name: 'Mở', exact: true }).click();
+  await chooseItemAction(page, name, 'Mở');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(name);
 }
 
