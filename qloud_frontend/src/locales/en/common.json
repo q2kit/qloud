@@ -613,7 +613,7 @@
   "versions": {
     "number": "Version {{number}}",
     "current": "Current",
-    "kept": "Keep forever",
+    "kept": "Locked",
     "loading": "Loading versions…",
     "empty": "No versions yet.",
     "retry": "Try again",
@@ -634,6 +634,11 @@
     "currentError": "This is already the current version. Refresh the history.",
     "failed": "The operation failed. Please try again.",
     "unnamedUploader": "Unnamed user",
-    "deletedUploader": "Deleted account"
+    "deletedUploader": "Deleted account",
+    "keep": "Lock",
+    "unkeep": "Unlock",
+    "keepLabel": "Lock version {{number}}",
+    "keepTitle": "Lock to protect this version from automatic cleanup. It still counts toward storage; old versions can still be deleted manually.",
+    "unkeepTitle": "Unlock to allow automatic cleanup under your plan’s version limits and retention period. The current version is always retained."
   }
 }

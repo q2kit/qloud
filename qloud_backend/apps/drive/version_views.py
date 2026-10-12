@@ -92,7 +92,29 @@ class VersionRestoreView(APIView):
         return Response(NodeSerializer(node).data)
 
 
+class VersionRetentionSerializer(serializers.Serializer[FileVersion]):
+    keep_forever = serializers.BooleanField(required=True)
+
+    def validate_keep_forever(self, value: bool) -> bool:
+        if type(self.initial_data.get("keep_forever")) is not bool:
+            raise serializers.ValidationError("Expected a boolean.")
+        return value
+
+
 class VersionDeleteView(APIView):
+    @extend_schema(
+        operation_id="versions_update",
+        request=VersionRetentionSerializer,
+        responses={200: FileVersionSerializer, 400: BAD_REQUEST, 404: NOT_FOUND},
+    )
+    def patch(self, request: Request, node_id: uuid.UUID, version_id: uuid.UUID) -> Response:
+        serializer = VersionRetentionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        version = services.set_version_retention(
+            _user(request), node_id, version_id, serializer.validated_data["keep_forever"]
+        )
+        return Response(FileVersionSerializer(version).data)
+
     @extend_schema(
         operation_id="versions_delete",
         responses={204: None, 400: BAD_REQUEST, 404: NOT_FOUND, 409: CURRENT},

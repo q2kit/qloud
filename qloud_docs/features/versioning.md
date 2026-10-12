@@ -15,7 +15,7 @@
   Khi đó Blob cần đếm số tham chiếu (reference count), hoặc chỉ được xóa khi không còn version nào trỏ tới.
 - Xóa một phiên bản: chỉ owner, không xóa được phiên bản hiện tại. Dung lượng chỉ được giảm khi Blob không còn ai tham chiếu.
 - Chính sách giữ lại phiên bản theo plan của owner: giữ tối đa `max_versions_per_file` phiên bản cũ, và phiên bản cũ quá `version_retention_days` thì bị dọn
-  (plan mặc định: 100 phiên bản, 30 ngày). Phiên bản được đánh dấu **"Giữ mãi"** (`keep_forever`) không bị dọn tự động. Celery dọn hằng ngày.
+  (plan mặc định: 100 phiên bản, 30 ngày). Phiên bản được đánh dấu **"Khóa"** (`keep_forever`) không bị dọn tự động. Celery dọn hằng ngày.
 - Quota owner tính mỗi Blob được các phiên bản tham chiếu đúng một lần, kể cả file trong thùng rác; khôi phục dùng chung Blob nên không tính thêm.
 
 ## M7-01 — Upload phiên bản mới
@@ -27,7 +27,7 @@
 - Current version, size, MIME và updated_at đổi nguyên tử; reset thumbnail cũ, enqueue thumbnail cho bản mới sau commit. Preview/download/link chia sẻ lấy nội dung mới. Blob/version cũ được giữ nguyên.
 - UI trùng tên có **Thay thế**, **Giữ cả hai**, **Bỏ qua**, cùng áp dụng cho các file còn lại. Upload dở dang resume vào cùng target qua session cũ. Hoàn tất làm mới chi tiết node, folder ban đầu/folder hiện tại, Gần đây và danh sách Được chia sẻ.
 - Migration `uploads.0002` thêm FK nullable và mở rộng on_conflict. Khi rollback, session thay thế đang active bị hủy và trả quota; Blob/version đã hoàn tất vẫn giữ nguyên. Multipart dở dang còn trên S3 được lifecycle 8 ngày dọn.
-- API lịch sử/restore/delete ở M7-02; tab Phiên bản ở M7-03; dọn theo plan/“Giữ mãi” ở [M7-04 #159](https://github.com/q2kit/qloud/issues/159).
+- API lịch sử/restore/delete ở M7-02; tab Phiên bản ở M7-03; dọn theo plan/“Khóa” ở [M7-04 #159](https://github.com/q2kit/qloud/issues/159).
 
 ## M7-02 — API lịch sử phiên bản
 
@@ -47,7 +47,17 @@ Owner [duyệt kế hoạch ngày 12/10/2026](https://github.com/q2kit/qloud/iss
 - Viewer tải mọi phiên bản. Editor/owner khôi phục bản cũ sau xác nhận tạo version mới, không tăng quota. Chỉ owner xóa bản cũ sau xác nhận không hoàn tác. Không hiện restore/delete cho current; giữ focus khi đóng xác nhận, khóa thao tác đang gửi.
 - API chi tiết node bổ sung capability `can_delete_versions` chỉ true cho owner của file còn sống, public/folder/root luôn false; restore dùng `can_edit`. Capability chỉ điều khiển hiển thị, server vẫn quyết định quyền từng request.
 - Xóa cập nhật lạc quan và rollback khi lỗi. Restore chỉ cập nhật current sau response thành công. Làm mới lịch sử, chi tiết, lựa chọn, folder ban đầu/hiện tại, recent/shared/search/preview của file; upload hoàn tất làm mới history đang mở. 404/409 có thông báo đã dịch và tải lại dữ liệu/quyền, response file cũ không đổi lựa chọn file mới.
-- Giữ mãi chỉ hiện nhãn; thay đổi flag và chính sách dọn thuộc M7-04. Tab Chia sẻ hiện có vẫn là vị trí chưa triển khai.
+- Khóa chỉ hiện nhãn; thay đổi flag và chính sách dọn thuộc M7-04. Tab Chia sẻ hiện có vẫn là vị trí chưa triển khai.
+
+## M7-04 — Chính sách giữ lại và Khóa
+
+Owner [duyệt kế hoạch ngày 12/10/2026](https://github.com/q2kit/qloud/issues/159#issuecomment-6127587370).
+- Chỉ owner bật/tắt `keep_forever` bằng PATCH phiên bản, kể cả current; node còn sống và version thuộc node. Current luôn được bảo vệ dù không ghim. Khóa chỉ ngăn dọn tự động; owner vẫn có thể xóa thủ công bản cũ.
+- Phiên bản được khóa không chiếm hạn mức số phiên bản cũ không khóa; vẫn tính vào quota dung lượng. Giữ tối đa `max_versions_per_file` bản cũ không ghim mới nhất theo `version_number`; đồng thời dọn bản cũ không ghim có `created_at` nhỏ hơn thời điểm chạy trừ `version_retention_days`. Đúng ranh giới thời gian vẫn được giữ. Null bỏ giới hạn tuổi; hạn mức 0 dọn mọi bản cũ không ghim.
+- Beat chạy `expire_versions` mỗi 24 giờ, gồm file trong trash và owner bị khóa. Quét file bằng cursor UUID theo batch 200; mỗi transaction dọn tối đa 200 version của một file, đọc lại plan/current/ghim dưới khóa owner → node → Blob. Upload/restore/delete/ghim dùng cùng khóa owner, nên kết quả dựa trên thao tác đã commit trước.
+- Dọn metadata và quota nguyên tử, Blob dùng chung chỉ trừ một lần khi hết tham chiếu. Ghi ObjectDeletion cho thumbnail và Blob hết tham chiếu, worker xóa S3 sau commit và retry khi lỗi. Chạy lại hoặc nhiều worker không trừ quota lặp; mỗi deployment vẫn chỉ chạy một beat.
+- Tab Phiên bản có nút Khóa/Bỏ khóa cho owner, có icon ổ khóa/mở khóa và title giải thích bảo vệ khỏi dọn tự động, vẫn tính dung lượng và cho phép xóa thủ công; hỗ trợ bàn phím và `aria-pressed`; viewer/editor chỉ thấy nhãn. Chỉ đổi flag sau API thành công, khóa thao tác lúc gửi, báo lỗi đã dịch và tải lại lịch sử sau thành công/lỗi để xử lý phiên bản bị dọn hoặc quyền thay đổi.
+- Không thêm migration/dependency; schema API và type FE được sinh lại.
 
 ## Tiêu chí chấp nhận
 - [x] Upload trùng tên, chọn *Thay thế*: file có 2 phiên bản; xem trước và tải về đều lấy bản mới.
@@ -55,3 +65,5 @@ Owner [duyệt kế hoạch ngày 12/10/2026](https://github.com/q2kit/qloud/iss
 - [x] Tải được bất kỳ phiên bản nào.
 
 - [x] Panel có lịch sử và hành động đúng quyền; UI tải/restore/delete hoạt động ở light/dark, desktop/360px.
+
+- [x] Dọn theo plan, bảo vệ current/Khóa và quota Blob dùng chung; owner bật/tắt Khóa trong tab Phiên bản.

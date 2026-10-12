@@ -692,6 +692,49 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: No such node, or no access to it.
   /api/v1/nodes/{node_id}/versions/{version_id}:
+    patch:
+      operationId: versions_update
+      parameters:
+      - in: path
+        name: node_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: version_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVersionRetentionRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileVersion'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input or operation.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such node, or no access to it.
     delete:
       operationId: versions_delete
       parameters:
@@ -2586,6 +2629,11 @@ components:
       properties:
         role:
           $ref: '#/components/schemas/ShareRoleEnum'
+    PatchedVersionRetentionRequest:
+      type: object
+      properties:
+        keep_forever:
+          type: boolean
     PreviewKindEnum:
       enum:
       - image

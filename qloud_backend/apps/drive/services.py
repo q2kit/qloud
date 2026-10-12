@@ -210,13 +210,36 @@ def delete_version(user: User, node_id: uuid.UUID, version_id: uuid.UUID) -> Non
     version = selectors.version_for(node, version_id)
     if version.pk == node.current_version_id:
         raise CurrentVersion
-    blob = Blob.objects.select_for_update().get(pk=version.blob_id)
-    keys = {thumbnail_key(version.pk, size) for size in SIZES}
-    version.delete()
-    if not FileVersion.objects.filter(blob=blob).exists():
-        keys.add(blob.storage_key)
-        User.objects.filter(pk=node.owner_id).update(used_bytes=F("used_bytes") - blob.size)
+    delete_versions_locked(node, [version])
+
+
+def delete_versions_locked(node: Node, versions: list[FileVersion]) -> None:
+    """Caller holds owner and node locks; share cleanup with retention."""
+    blobs = list(
+        Blob.objects.select_for_update()
+        .filter(pk__in={version.blob_id for version in versions})
+        .order_by("pk")
+    )
+    keys = {thumbnail_key(version.pk, size) for version in versions for size in SIZES}
+    FileVersion.objects.filter(pk__in=[version.pk for version in versions]).delete()
+    referenced = set(FileVersion.objects.filter(blob__in=blobs).values_list("blob_id", flat=True))
+    released = [blob for blob in blobs if blob.pk not in referenced]
+    keys.update(blob.storage_key for blob in released)
+    User.objects.filter(pk=node.owner_id).update(
+        used_bytes=F("used_bytes") - sum(blob.size for blob in released)
+    )
     ObjectDeletion.objects.bulk_create(
         [ObjectDeletion(storage_key=key) for key in keys], ignore_conflicts=True
     )
     transaction.on_commit(partial(enqueue_object_cleanup))
+
+
+@transaction.atomic
+def set_version_retention(
+    user: User, node_id: uuid.UUID, version_id: uuid.UUID, keep_forever: bool
+) -> FileVersion:
+    node = _locked_file(user, node_id, Role.OWNER)
+    version = selectors.version_for(node, version_id)
+    version.keep_forever = keep_forever
+    version.save(update_fields=["keep_forever", "updated_at"])
+    return selectors.version_history(node).get(pk=version.pk)

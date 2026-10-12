@@ -2,7 +2,11 @@ import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import { signUpViaApi, signUpVerifiedViaApi } from './auth';
 
-test.use({ launchOptions: { slowMo: process.env.M703_LIVE ? 350 : 0 } });
+test.use({
+  launchOptions: {
+    slowMo: process.env.M703_LIVE || process.env.M704_LIVE ? 350 : 0,
+  },
+});
 
 async function headers(page: Page) {
   return {
@@ -202,6 +206,9 @@ for (const role of ['viewer', 'editor'] as const) {
       await expect(
         actor.getByRole('button', { name: 'Xóa phiên bản 1' }),
       ).toHaveCount(0);
+      await expect(
+        actor.getByRole('button', { name: 'Khóa phiên bản 1' }),
+      ).toHaveCount(0);
       if (role === 'viewer') {
         await expect(
           actor.getByRole('button', { name: 'Khôi phục phiên bản 1' }),
@@ -262,4 +269,67 @@ test('folder and trash details never read version history', async ({
   await page.getByRole('button', { name: 'Mở bảng chi tiết' }).click();
   await expect(page.getByRole('tab', { name: 'Phiên bản' })).toBeDisabled();
   expect(calls).toEqual([]);
+});
+
+test('owner toggles keep forever on old and current versions', async ({
+  page,
+  isMobile,
+}) => {
+  await signUpVerifiedViaApi(page);
+  const { id } = await seed(page);
+  await page.goto('/drive');
+  await openHistory(page);
+  const old = page.getByRole('button', {
+    name: 'Khóa phiên bản 1',
+    exact: true,
+  });
+  await expect(old).toHaveAttribute('aria-pressed', 'false');
+  await old.click();
+  await expect(old).toHaveAttribute('aria-pressed', 'true');
+  const current = page.getByRole('button', {
+    name: 'Khóa phiên bản 2',
+    exact: true,
+  });
+  await current.click();
+  await expect(current).toHaveAttribute('aria-pressed', 'true');
+  if (process.env.M704_CAPTURE) {
+    for (const theme of ['light', 'dark']) {
+      await page.evaluate((value) => {
+        localStorage.setItem('qloud-theme', value);
+        window.dispatchEvent(
+          new StorageEvent('storage', { key: 'qloud-theme' }),
+        );
+      }, theme);
+      await expect(page.locator('html')).toHaveClass(
+        theme === 'dark' ? /dark/ : /^(?!.*dark).*$/,
+      );
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth,
+        ),
+      ).toBe(true);
+      await page.screenshot({
+        path: `../qloud_docs/assets/m7-04-retention-${theme}-${isMobile ? '360' : 'desktop'}.png`,
+        fullPage: true,
+        animations: 'disabled',
+      });
+    }
+  }
+  await page.reload();
+  await openHistory(page);
+  await expect(old).toHaveAttribute('aria-pressed', 'true');
+  await old.click();
+  await expect(old).toHaveAttribute('aria-pressed', 'false');
+  const response = await page.request.get(`/api/v1/nodes/${id}/versions`);
+  const history = (await response.json()) as {
+    results: { version_number: number; keep_forever: boolean }[];
+  };
+  expect(
+    history.results.find((version) => version.version_number === 1)
+      ?.keep_forever,
+  ).toBe(false);
+  expect(
+    history.results.find((version) => version.version_number === 2)
+      ?.keep_forever,
+  ).toBe(true);
 });
