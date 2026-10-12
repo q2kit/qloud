@@ -3,7 +3,7 @@ import { create } from 'zustand';
 /** What the tray shows; the engine (engine.ts) owns files, requests and timers. */
 export type UploadStatus =
   | 'queued'
-  | 'conflict' // the name is taken: waiting for "keep both" or "skip"
+  | 'conflict' // the name is taken: waiting for the conflict choice
   | 'uploading'
   | 'completing'
   | 'paused'

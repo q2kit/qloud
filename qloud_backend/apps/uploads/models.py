@@ -17,6 +17,7 @@ class UploadSession(BaseModel):
 
     class OnConflict(models.TextChoices):
         FAIL = "fail"  # 409 when created, so the client can ask the user
+        REPLACE = "replace"  # append a version to the resolved target UUID
         RENAME = "rename"  # "keep both": a ` (n)` suffix
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -29,11 +30,14 @@ class UploadSession(BaseModel):
     # [{"id", "name"}] from the root folder down to the target, taken at creation, so a
     # folder deleted meanwhile can be recreated on completion (upload.md).
     parent_path = models.JSONField(default=list)
+    target_node = models.ForeignKey(
+        "drive.Node", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
     filename = models.CharField(max_length=255, validators=[validate_name])
     size = models.PositiveBigIntegerField()
     mime_type = models.CharField(max_length=255)
     fingerprint = models.CharField(max_length=128)
-    on_conflict = models.CharField(max_length=6, choices=OnConflict, default=OnConflict.FAIL)
+    on_conflict = models.CharField(max_length=7, choices=OnConflict, default=OnConflict.FAIL)
     storage_key = models.TextField(unique=True)
     s3_upload_id = models.TextField(blank=True)  # empty for 0-byte files
     part_size = models.PositiveIntegerField()
@@ -50,7 +54,8 @@ class UploadSession(BaseModel):
                 name="upload_status",
             ),
             models.CheckConstraint(
-                condition=Q(on_conflict__in=["fail", "rename"]), name="upload_on_conflict"
+                condition=Q(on_conflict__in=["fail", "rename", "replace"]),
+                name="upload_on_conflict",
             ),
         ]
         indexes = [

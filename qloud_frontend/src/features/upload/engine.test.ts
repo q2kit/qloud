@@ -357,6 +357,26 @@ describe('upload engine', () => {
     expect([status(b), status(c)]).toEqual(['done', 'done']);
   });
 
+  it('replaces all conflicts and later conflicts using the same choice', async () => {
+    api.create.mockImplementation(({ file: f, onConflict }) =>
+      onConflict === 'fail'
+        ? Promise.reject(apiError(409, 'name_conflict'))
+        : Promise.resolve(session(`replaced-${f.name}`, f.size)),
+    );
+    const uploader = engine();
+    const ids = uploader.add(
+      [file('a.txt', 0), file('b.txt', 0), file('c.txt', 0)],
+      'f',
+    );
+    await flush();
+    uploader.resolveConflict(ids[0] ?? '', 'replace', true);
+    await flush();
+    expect(ids.map(status)).toEqual(['done', 'done', 'done']);
+    expect(
+      api.create.mock.calls.filter(([input]) => input.onConflict === 'replace'),
+    ).toHaveLength(3);
+  });
+
   it('reports errors the user has to act on, with their code', async () => {
     api.create.mockRejectedValueOnce(apiError(413, 'quota_exceeded'));
     const uploader = engine();

@@ -13,7 +13,7 @@ from functools import partial
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Max
 from django.http import Http404
 from django.utils import timezone
 
@@ -87,21 +87,46 @@ def create_session(
     mime_type: str,
     fingerprint: str,
     on_conflict: str = UploadSession.OnConflict.FAIL,
+    target_node_id: uuid.UUID | None = None,
 ) -> UploadSession:
     """Check access, limits and name, reserve quota, then start the multipart upload."""
-    parent = get_node_or_404(user, parent_id, Role.EDITOR)
-    if parent.kind != Node.Kind.FOLDER:
-        raise InvalidTarget
+    target = None
+    if target_node_id is not None:
+        target = get_node_or_404(user, target_node_id, Role.EDITOR)
+        if target.kind != Node.Kind.FILE or target.parent_id != parent_id:
+            raise InvalidTarget
+        parent = target.parent
+        if parent is None or parent.owner_id != target.owner_id:
+            raise InvalidTarget
+        on_conflict = UploadSession.OnConflict.REPLACE
+    else:
+        parent = get_node_or_404(user, parent_id, Role.EDITOR)
+        if parent.kind != Node.Kind.FOLDER:
+            raise InvalidTarget
     if not has_verified_email(user):
         raise EmailNotVerified
     try:
         part_size = s3.part_size_for(size)
     except ValueError as error:
         raise FileTooLarge from error
-    path = [*drive_selectors.breadcrumb(parent, user), parent]
+    path = [] if target is not None else [*drive_selectors.breadcrumb(parent, user), parent]
 
     with transaction.atomic():
         _lock_owner(parent.owner_id)
+        if target is not None:
+            target = get_node_or_404(user, target.pk, Role.EDITOR)
+            if target.kind != Node.Kind.FILE or target.parent_id != parent_id:
+                raise InvalidTarget
+        else:
+            parent = get_node_or_404(user, parent_id, Role.EDITOR)
+            if on_conflict == UploadSession.OnConflict.REPLACE:
+                target = (
+                    nodes_for(user, Role.EDITOR)
+                    .filter(parent=parent, name__iexact=filename, kind=Node.Kind.FILE)
+                    .first()
+                )
+                if target is None:
+                    raise InvalidTarget
         # The owner's plan applies, even when someone else uploads (data-model.md).
         owner = User.objects.get(pk=parent.owner_id)
         limits = get_limits(owner)
@@ -115,6 +140,7 @@ def create_session(
             user=user,
             owner_id=parent.owner_id,
             parent=parent,
+            target_node=target,
             parent_path=[{"id": str(node.pk), "name": node.name} for node in path],
             filename=filename,
             size=size,
@@ -244,6 +270,8 @@ def complete(user: User, session: UploadSession) -> Node:
     """Assemble the parts, then record Blob, Node and version and move the bytes from
     reserved to used, all in one transaction. A repeated call returns the same node."""
     if session.status == Status.COMPLETED and session.node is not None:
+        if session.on_conflict == UploadSession.OnConflict.REPLACE:
+            return get_node_or_404(user, session.node.pk, Role.EDITOR)
         return session.node
     _open(session)
     try:
@@ -256,31 +284,62 @@ def complete(user: User, session: UploadSession) -> Node:
             _lock_owner(session.owner_id)
             session = UploadSession.objects.select_for_update().get(pk=session.pk)
             if session.status == Status.COMPLETED and session.node is not None:
+                if session.on_conflict == UploadSession.OnConflict.REPLACE:
+                    return get_node_or_404(user, session.node.pk, Role.EDITOR)
                 return session.node  # a concurrent call finished first
             _open(session)
-            folder = _target_folder(user, session)
-            node = Node.objects.create(
-                owner_id=session.owner_id,
-                parent=folder,
-                kind=Node.Kind.FILE,
-                # Taken meanwhile: keep the upload under a ` (n)` name rather than lose it.
-                name=available_name(folder, session.filename, Node.Kind.FILE),
-                mime_type=session.mime_type,
-                size=session.size,
-            )
+            version_number = 1
+            if session.on_conflict == UploadSession.OnConflict.REPLACE:
+                if session.target_node_id is None:
+                    raise TargetUnavailable
+                node = (
+                    nodes_for(user, Role.EDITOR)
+                    .select_for_update()
+                    .filter(
+                        pk=session.target_node_id, owner_id=session.owner_id, kind=Node.Kind.FILE
+                    )
+                    .first()
+                )
+                if node is None:
+                    raise TargetUnavailable
+                version_number = (
+                    node.versions.aggregate(latest=Max("version_number"))["latest"] or 0
+                ) + 1
+                node.size = session.size
+                node.mime_type = session.mime_type
+                node.thumbnail_key = None
+            else:
+                folder = _target_folder(user, session)
+                node = Node.objects.create(
+                    owner_id=session.owner_id,
+                    parent=folder,
+                    kind=Node.Kind.FILE,
+                    # Taken meanwhile: keep the upload under a ` (n)` name rather than lose it.
+                    name=available_name(folder, session.filename, Node.Kind.FILE),
+                    mime_type=session.mime_type,
+                    size=session.size,
+                )
             blob = Blob.objects.create(
                 storage_key=session.storage_key, size=session.size, etag=etag
             )
             node.current_version = FileVersion.objects.create(
                 node=node,
                 blob=blob,
-                version_number=1,
+                version_number=version_number,
                 size=session.size,
                 mime_type=session.mime_type,
                 uploaded_by=user,
                 original_name=session.filename,
             )
-            node.save(update_fields=["current_version", "updated_at"])
+            node.save(
+                update_fields=[
+                    "current_version",
+                    "size",
+                    "mime_type",
+                    "thumbnail_key",
+                    "updated_at",
+                ]
+            )
             User.objects.filter(pk=session.owner_id).update(
                 reserved_bytes=F("reserved_bytes") - session.size,
                 used_bytes=F("used_bytes") + session.size,

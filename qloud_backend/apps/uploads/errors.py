@@ -41,7 +41,7 @@ class UploadClosed(AppError):
 class TargetUnavailable(AppError):
     status_code = status.HTTP_409_CONFLICT
     default_code = "target_unavailable"
-    default_detail = "The destination folder is no longer available."
+    default_detail = "The destination file or folder is no longer available."
 
 
 class StorageUnavailable(AppError):

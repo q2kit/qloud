@@ -1371,7 +1371,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: Invalid input, or the parent is not a folder.
+          description: Invalid input, parent not a folder, or replacement target not
+            a live file in it.
         '403':
           content:
             application/json:
@@ -1383,7 +1384,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: No such folder, or no access to it.
+          description: No such folder/file, or insufficient editor access.
         '409':
           content:
             application/json:
@@ -1654,6 +1655,9 @@ components:
       type: object
       properties:
         parent_id:
+          type: string
+          format: uuid
+        target_node_id:
           type: string
           format: uuid
         filename:
@@ -2091,10 +2095,12 @@ components:
     OnConflictEnum:
       enum:
       - fail
+      - replace
       - rename
       type: string
       description: |-
         * `fail` - Fail
+        * `replace` - Replace
         * `rename` - Rename
     PaginatedNodeList:
       type: object
@@ -3098,6 +3104,11 @@ components:
           format: uuid
           readOnly: true
           nullable: true
+        target_node_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
         filename:
           type: string
           readOnly: true
@@ -3151,6 +3162,7 @@ components:
       - part_size
       - size
       - status
+      - target_node_id
     UploadSessionDetail:
       type: object
       properties:
@@ -3159,6 +3171,11 @@ components:
           format: uuid
           readOnly: true
         parent_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        target_node_id:
           type: string
           format: uuid
           readOnly: true
@@ -3223,6 +3240,7 @@ components:
       - parts
       - size
       - status
+      - target_node_id
     UploadStatusEnum:
       enum:
       - active

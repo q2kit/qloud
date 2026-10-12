@@ -134,10 +134,10 @@ kèm unique `(id, node_id)`, viết bằng SQL trong migration `drive.0004` vì 
 |---|---|---|
 | id | uuid | |
 | user_id | uuid → User | người upload; chỉ người này thấy session |
-| owner_id | uuid → User | bị tính quota: owner của folder đích. Lưu riêng để trả lại phần giữ chỗ cả khi folder đã bị xóa |
+| owner_id | uuid → User | bị tính quota: owner của folder/file đích. Lưu riêng để trả lại phần giữ chỗ cả khi folder đã bị xóa |
 | parent_id | uuid → Node, null | folder đích; `SET_NULL` khi folder bị xóa |
-| parent_path | jsonb | `[{id, name}]` từ folder gốc tới folder đích, chụp lúc tạo, để tạo lại đường dẫn bị mất khi hoàn tất |
-| target_node_id | uuid → Node, null | có giá trị khi upload phiên bản mới cho file đã có (M7-01, chưa có) |
+| parent_path | jsonb | `[{id, name}]` từ folder gốc tới folder đích, chụp lúc tạo, để tạo lại đường dẫn bị mất khi hoàn tất; target tường minh dùng `[]`, không tái tạo folder |
+| target_node_id | uuid → Node, null | M7-01: file nhận phiên bản mới, `SET_NULL` khi purge; `on_conflict=replace` vẫn giữ ý nghĩa thay thế để complete từ chối target mất |
 | filename | varchar(255) | |
 | size | bigint | |
 | mime_type | varchar(255) | |
@@ -147,7 +147,7 @@ kèm unique `(id, node_id)`, viết bằng SQL trong migration `drive.0004` vì 
 | part_size | int | |
 | status | enum(`active`,`completed`,`aborted`,`expired`) | |
 | expires_at | timestamptz | mặc định 7 ngày |
-| on_conflict | enum(`fail`,`rename`) | trùng tên lúc tạo: 409 hay "Giữ cả hai" |
+| on_conflict | enum(`fail`,`rename`,`replace`) | trùng tên lúc tạo: 409, "Giữ cả hai" hoặc thêm phiên bản vào UUID đã chốt |
 | node_id | uuid → Node, null | file đã tạo, để `complete` gọi lại trả đúng node |
 
 `storage_key` unique; `s3_upload_id` trống với file 0 byte. Index `(user_id, status, created_at, id)` cho danh sách, `(status, expires_at)` cho việc dọn ở M2-06.

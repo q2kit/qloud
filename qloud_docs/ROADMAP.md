@@ -15,7 +15,7 @@
 | M4 | Thùng rác | ✅ |
 | M5 | Chia sẻ (cho người dùng và qua link) | ✅ |
 | M6 | Tìm kiếm | ✅ |
-| M7 | Phiên bản file | ⬜ |
+| M7 | Phiên bản file | 🟨 |
 | M8 | Quota UI, hoàn thiện, deploy production | ⬜ |
 
 ## M0 — Nền tảng
@@ -94,9 +94,10 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 ## M7 — Phiên bản ([versioning.md](features/versioning.md))
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
-| M7-01 | Upload phiên bản mới cho file đã có (upload trùng tên thì hỏi người dùng) | [#42](https://github.com/q2kit/qloud/issues/42) | ⬜ |
+| M7-01 | Upload phiên bản mới cho file đã có (upload trùng tên thì hỏi người dùng) | [#42](https://github.com/q2kit/qloud/issues/42) | 🟦 |
 | M7-02 | API danh sách, tải về, khôi phục, xóa phiên bản | [#43](https://github.com/q2kit/qloud/issues/43) | ⬜ |
 | M7-03 | FE: tab Phiên bản trong panel chi tiết | [#44](https://github.com/q2kit/qloud/issues/44) | ⬜ |
+| M7-04 | Dọn phiên bản theo plan và đánh dấu Giữ mãi | [#159](https://github.com/q2kit/qloud/issues/159) | ⬜ |
 
 ## M8 — Hoàn thiện và deploy ([quota.md](features/quota.md))
 | ID | Task | Issue | Trạng thái |

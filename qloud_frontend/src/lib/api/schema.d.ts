@@ -582,6 +582,8 @@ export interface components {
         CreateUploadRequest: {
             /** Format: uuid */
             parent_id: string;
+            /** Format: uuid */
+            target_node_id?: string;
             filename: string;
             size: number;
             /** @default  */
@@ -771,10 +773,11 @@ export interface components {
         NullEnum: null;
         /**
          * @description * `fail` - Fail
+         *     * `replace` - Replace
          *     * `rename` - Rename
          * @enum {string}
          */
-        OnConflictEnum: "fail" | "rename";
+        OnConflictEnum: "fail" | "replace" | "rename";
         PaginatedNodeList: {
             /** Format: uri */
             next: string | null;
@@ -1177,6 +1180,8 @@ export interface components {
             readonly id: string;
             /** Format: uuid */
             readonly parent_id: string | null;
+            /** Format: uuid */
+            readonly target_node_id: string | null;
             readonly filename: string;
             readonly size: number;
             readonly mime_type: string;
@@ -1197,6 +1202,8 @@ export interface components {
             readonly id: string;
             /** Format: uuid */
             readonly parent_id: string | null;
+            /** Format: uuid */
+            readonly target_node_id: string | null;
             readonly filename: string;
             readonly size: number;
             readonly mime_type: string;
@@ -2643,7 +2650,7 @@ export interface operations {
                     "application/json": components["schemas"]["UploadSession"];
                 };
             };
-            /** @description Invalid input, or the parent is not a folder. */
+            /** @description Invalid input, parent not a folder, or replacement target not a live file in it. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2661,7 +2668,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description No such folder, or no access to it. */
+            /** @description No such folder/file, or insufficient editor access. */
             404: {
                 headers: {
                     [name: string]: unknown;

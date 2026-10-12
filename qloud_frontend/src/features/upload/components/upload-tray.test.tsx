@@ -136,4 +136,14 @@ describe('upload tray', () => {
       true,
     );
   });
+  it('replaces a file after an explicit choice', async () => {
+    const user = userEvent.setup();
+    show([item('a.pdf', { status: 'conflict' })]);
+    await user.click(screen.getByRole('button', { name: 'Replace' }));
+    expect(engine.resolveConflict).toHaveBeenCalledWith(
+      'a.pdf',
+      'replace',
+      false,
+    );
+  });
 });

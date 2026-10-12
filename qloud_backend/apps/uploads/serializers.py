@@ -16,6 +16,7 @@ DEFAULT_MIME = "application/octet-stream"
 
 class CreateUploadSerializer(serializers.Serializer[dict[str, Any]]):
     parent_id = serializers.UUIDField()
+    target_node_id = serializers.UUIDField(required=False)
     filename = NameField()
     size = serializers.IntegerField(min_value=0)
     mime_type = serializers.CharField(max_length=255, allow_blank=True, default="")
@@ -36,6 +37,7 @@ class CreateUploadSerializer(serializers.Serializer[dict[str, Any]]):
 class UploadSessionSerializer(serializers.ModelSerializer[UploadSession]):
     parent_id = serializers.UUIDField(read_only=True, allow_null=True)
     node_id = serializers.UUIDField(read_only=True, allow_null=True)
+    target_node_id = serializers.UUIDField(read_only=True, allow_null=True)
     part_count = serializers.SerializerMethodField()
 
     class Meta:
@@ -43,6 +45,7 @@ class UploadSessionSerializer(serializers.ModelSerializer[UploadSession]):
         fields: tuple[str, ...] = (
             "id",
             "parent_id",
+            "target_node_id",
             "filename",
             "size",
             "mime_type",
