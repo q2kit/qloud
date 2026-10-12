@@ -297,6 +297,20 @@ test('public file opens anonymously, denies outside scope and expires', async ({
     await captures(visitor, 'public-file', isMobile);
     await visitor.keyboard.press('Escape');
     await expect(visitor.getByRole('dialog')).toHaveCount(0);
+    // Closing the viewer shows the folder-link layout without sorting.
+    await expect(
+      visitor.getByRole('heading', { name: 'Public.txt' }),
+    ).toBeVisible();
+    await expect(
+      visitor.getByRole('button', { name: 'Báo cáo vi phạm' }),
+    ).toBeVisible();
+    await expect(
+      visitor.getByRole('option', { name: 'Public.txt', exact: true }),
+    ).toBeVisible();
+    await expect(
+      visitor.getByRole('button', { name: /Sắp xếp|Tên \(A/ }),
+    ).toHaveCount(0);
+    await captures(visitor, 'public-file-page', isMobile);
     const outside = await root(page);
     expect(
       (

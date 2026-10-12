@@ -26,7 +26,8 @@ export interface DriveToolbarProps {
   selected: DriveNode[];
   view: DriveView;
   ordering: Ordering;
-  orderingLabel?: string;
+  /** Shown instead of the sort menu without `onOrdering`; null hides both. */
+  orderingLabel?: string | null;
   onView: (view: DriveView) => void;
   onOrdering?: (ordering: Ordering) => void;
 }
@@ -77,7 +78,7 @@ export function DriveToolbar({
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-        ) : (
+        ) : orderingLabel === null ? null : (
           <span className="text-xs text-muted-foreground">
             {orderingLabel ?? t(`drive.sort.${ORDERING_KEYS[ordering]}`)}
           </span>
