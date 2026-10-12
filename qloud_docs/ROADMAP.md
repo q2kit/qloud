@@ -96,7 +96,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 |---|---|---|---|
 | M7-01 | Upload phiên bản mới cho file đã có (upload trùng tên thì hỏi người dùng) | [#42](https://github.com/q2kit/qloud/issues/42) | ✅ [PR #160](https://github.com/q2kit/qloud/pull/160) |
 | M7-02 | API danh sách, tải về, khôi phục, xóa phiên bản | [#43](https://github.com/q2kit/qloud/issues/43) | ✅ [PR #162](https://github.com/q2kit/qloud/pull/162) |
-| M7-03 | FE: tab Phiên bản trong panel chi tiết | [#44](https://github.com/q2kit/qloud/issues/44) | 🟦 |
+| M7-03 | FE: tab Phiên bản trong panel chi tiết | [#44](https://github.com/q2kit/qloud/issues/44) | ✅ [PR #163](https://github.com/q2kit/qloud/pull/163) |
 | M7-04 | Dọn phiên bản theo plan và đánh dấu Giữ mãi | [#159](https://github.com/q2kit/qloud/issues/159) | ⬜ |
 
 ## M8 — Hoàn thiện và deploy ([quota.md](features/quota.md))
@@ -109,3 +109,15 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M8-05 | Backup Postgres hằng ngày, Sentry, log có cấu trúc | [#49](https://github.com/q2kit/qloud/issues/49) | ⬜ |
 | M8-06 | Rate limit chung cho API (600 req/phút/user, tạo upload 60) | [#93](https://github.com/q2kit/qloud/issues/93) | ⬜ |
 | M8-07 | Fix: smoke E2E chờ capability tạo folder trước khi kiểm tra cursor | [#155](https://github.com/q2kit/qloud/issues/155) | ⬜ |
+| M8-08 | FE: phím tắt cho các thao tác chính và bảng phím tắt (`?`) | [#164](https://github.com/q2kit/qloud/issues/164) | ⬜ |
+| M8-09 | Celery đối soát quota hằng đêm, lệnh `reconcile_quota` | [#165](https://github.com/q2kit/qloud/issues/165) | ⬜ |
+| M8-10 | FE: tab Chia sẻ trong panel chi tiết | [#166](https://github.com/q2kit/qloud/issues/166) | ⬜ |
+| M8-11 | Audit log cho file, folder và chia sẻ; tab Hoạt động trong panel chi tiết (cần duyệt kế hoạch) | [#167](https://github.com/q2kit/qloud/issues/167) | ⬜ |
+| M8-12 | FE: nút nổi "+" Tạo mới trên mobile | [#168](https://github.com/q2kit/qloud/issues/168) | ⬜ |
+| M8-13 | E2E đa trình duyệt: Firefox và WebKit (NF-10) | [#169](https://github.com/q2kit/qloud/issues/169) | ⬜ |
+| M8-14 | Đo và đảm bảo hiệu năng danh sách với folder 10.000 node (NF-01) | [#170](https://github.com/q2kit/qloud/issues/170) | ⬜ |
+| M8-15 | Đồng bộ tiêu chí chấp nhận và trạng thái tài liệu feature với tiến độ | [#171](https://github.com/q2kit/qloud/issues/171) | ⬜ |
+| M8-16 | Fix: E2E kéo/di chuyển đôi lúc mở folder đích với danh sách rỗng | [#115](https://github.com/q2kit/qloud/issues/115) | ⬜ |
+| M8-17 | Fix: database pytest dùng lại làm cạn số cột của PostgreSQL | [#122](https://github.com/q2kit/qloud/issues/122) | ⬜ |
+| M8-18 | Fix: E2E double click vùng trống cuối lưới Drive không ổn định | [#123](https://github.com/q2kit/qloud/issues/123) | ⬜ |
+| M8-19 | Fix: E2E nhập số trang PDF đôi lúc vẫn ở trang 1 | [#144](https://github.com/q2kit/qloud/issues/144) | ⬜ |
