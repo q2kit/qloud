@@ -605,5 +605,31 @@
       "other": "Khác"
     },
     "relevance": "Độ liên quan"
+  },
+  "versions": {
+    "number": "Phiên bản {{number}}",
+    "current": "Hiện tại",
+    "kept": "Giữ mãi",
+    "loading": "Đang tải phiên bản…",
+    "empty": "Chưa có phiên bản nào.",
+    "retry": "Thử lại",
+    "more": "Tải thêm",
+    "download": "Tải về",
+    "restore": "Khôi phục",
+    "delete": "Xóa",
+    "downloadLabel": "Tải phiên bản {{number}}",
+    "restoreLabel": "Khôi phục phiên bản {{number}}",
+    "deleteLabel": "Xóa phiên bản {{number}}",
+    "confirmRestore": "Khôi phục phiên bản {{number}}?",
+    "confirmDelete": "Xóa phiên bản {{number}}?",
+    "restoreDescription": "Nội dung này sẽ được khôi phục thành một phiên bản mới. Lịch sử được giữ nguyên và dung lượng đã dùng không tăng.",
+    "deleteDescription": "Phiên bản này sẽ bị xóa vĩnh viễn. Bạn không thể hoàn tác thao tác này.",
+    "cancel": "Hủy",
+    "working": "Đang xử lý…",
+    "unavailable": "File hoặc phiên bản không còn khả dụng, hoặc bạn không còn quyền truy cập.",
+    "currentError": "Đây đã là phiên bản hiện tại. Hãy tải lại lịch sử.",
+    "failed": "Không thể thực hiện thao tác. Vui lòng thử lại.",
+    "unnamedUploader": "Người dùng chưa đặt tên",
+    "deletedUploader": "Tài khoản đã bị xóa"
   }
 }

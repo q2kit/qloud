@@ -612,5 +612,31 @@
       "other": "Other"
     },
     "relevance": "Relevance"
+  },
+  "versions": {
+    "number": "Version {{number}}",
+    "current": "Current",
+    "kept": "Keep forever",
+    "loading": "Loading versions…",
+    "empty": "No versions yet.",
+    "retry": "Try again",
+    "more": "Load more",
+    "download": "Download",
+    "restore": "Restore",
+    "delete": "Delete",
+    "downloadLabel": "Download version {{number}}",
+    "restoreLabel": "Restore version {{number}}",
+    "deleteLabel": "Delete version {{number}}",
+    "confirmRestore": "Restore version {{number}}?",
+    "confirmDelete": "Delete version {{number}}?",
+    "restoreDescription": "This content will be restored as a new version. History is preserved and used storage does not increase.",
+    "deleteDescription": "This version will be permanently deleted. This action cannot be undone.",
+    "cancel": "Cancel",
+    "working": "Working…",
+    "unavailable": "The file or version is unavailable, or you no longer have access.",
+    "currentError": "This is already the current version. Refresh the history.",
+    "failed": "The operation failed. Please try again.",
+    "unnamedUploader": "Unnamed user",
+    "deletedUploader": "Deleted account"
   }
 }

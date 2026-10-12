@@ -1755,7 +1755,10 @@ components:
           type: boolean
         can_share:
           type: boolean
+        can_delete_versions:
+          type: boolean
       required:
+      - can_delete_versions
       - can_edit
       - can_share
       - can_trash

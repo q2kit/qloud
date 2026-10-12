@@ -39,7 +39,19 @@ Kế hoạch và quyết định được owner [duyệt ngày 12/10/2026](https
 - Xóa metadata và giảm quota trong cùng transaction, chỉ giảm khi Blob hết tham chiếu. Thumbnail của phiên bản bị xóa và Blob hết tham chiếu được ghi vào ObjectDeletion; worker dọn S3 sau commit và retry khi lỗi. Purge thùng rác cũng chỉ trừ mỗi Blob hết tham chiếu một lần.
 - Không cần migration hoặc đối soát quota lúc triển khai: các Blob trước M7-02 đều độc lập giữa các phiên bản. Tab UI và chính sách giữ lại vẫn thuộc M7-03/M7-04.
 
+## M7-03 — Tab Phiên bản
+
+Owner [duyệt kế hoạch ngày 12/10/2026](https://github.com/q2kit/qloud/issues/44#issuecomment-6125280981).
+- Panel chi tiết giữ vị trí tab hiện có; Thông tin/Phiên bản là tab ARIA, hỗ trợ mũi tên/Home/End. Chọn một file còn sống mới bật Phiên bản; folder/chọn nhiều/thùng rác không tải lịch sử. Đổi lựa chọn reset về Thông tin và hủy request đọc cũ.
+- Lịch sử tải lười, mới nhất trước, Tải thêm theo cursor. Hiện số phiên bản, current/keep_forever, thời gian/dung lượng theo locale, tên gốc/MIME/uploader (fallback tên trống/tài khoản bị xóa). Có skeleton/rỗng/lỗi/Thử lại; giữ desktop 320px, bottom sheet và light/dark/360px.
+- Viewer tải mọi phiên bản. Editor/owner khôi phục bản cũ sau xác nhận tạo version mới, không tăng quota. Chỉ owner xóa bản cũ sau xác nhận không hoàn tác. Không hiện restore/delete cho current; giữ focus khi đóng xác nhận, khóa thao tác đang gửi.
+- API chi tiết node bổ sung capability `can_delete_versions` chỉ true cho owner của file còn sống, public/folder/root luôn false; restore dùng `can_edit`. Capability chỉ điều khiển hiển thị, server vẫn quyết định quyền từng request.
+- Xóa cập nhật lạc quan và rollback khi lỗi. Restore chỉ cập nhật current sau response thành công. Làm mới lịch sử, chi tiết, lựa chọn, folder ban đầu/hiện tại, recent/shared/search/preview của file; upload hoàn tất làm mới history đang mở. 404/409 có thông báo đã dịch và tải lại dữ liệu/quyền, response file cũ không đổi lựa chọn file mới.
+- Giữ mãi chỉ hiện nhãn; thay đổi flag và chính sách dọn thuộc M7-04. Tab Chia sẻ hiện có vẫn là vị trí chưa triển khai.
+
 ## Tiêu chí chấp nhận
 - [x] Upload trùng tên, chọn *Thay thế*: file có 2 phiên bản; xem trước và tải về đều lấy bản mới.
 - [x] Khôi phục v1: tạo ra v3 có nội dung giống v1; quota không tăng.
 - [x] Tải được bất kỳ phiên bản nào.
+
+- [x] Panel có lịch sử và hành động đúng quyền; UI tải/restore/delete hoạt động ở light/dark, desktop/360px.

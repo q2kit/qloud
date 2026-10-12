@@ -94,7 +94,12 @@ class PublicLinkView(APIView):
         data["breadcrumb"] = [
             {"id": str(n.pk), "name": n.name} for n in link_selectors.public_breadcrumb(link, node)
         ]
-        data["capabilities"] = {"can_edit": False, "can_trash": False, "can_share": False}
+        data["capabilities"] = {
+            "can_edit": False,
+            "can_trash": False,
+            "can_share": False,
+            "can_delete_versions": False,
+        }
         return Response(data)
 
 

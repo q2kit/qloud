@@ -618,6 +618,7 @@ export interface components {
             can_edit: boolean;
             can_trash: boolean;
             can_share: boolean;
+            can_delete_versions: boolean;
         };
         CreateFolderRequest: {
             /** Format: uuid */

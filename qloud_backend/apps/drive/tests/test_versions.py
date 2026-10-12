@@ -364,3 +364,17 @@ def test_restore_rechecks_revoked_grant_after_owner_lock(history, user):
     ):
         services.restore_version(actor, node.pk, first.pk)
     assert node.versions.count() == 2
+
+
+@pytest.mark.parametrize("role", ["owner", "editor", "viewer"])
+def test_delete_capability_is_owner_file_only(client, history, user, role):
+    node, _, _ = history
+    if role != "owner":
+        actor = User.objects.create_user(f"capability-{role}@example.com")
+        Share.objects.create(node=node, grantee=actor, role=role, created_by=user)
+        client.force_authenticate(actor)
+    response = client.get(f"/api/v1/nodes/{node.pk}")
+    assert response.data["capabilities"]["can_delete_versions"] is (role == "owner")
+    link = ShareLink.objects.create(node=node, created_by=user)
+    public = client.get(f"/api/v1/public/links/{link.token}")
+    assert public.data["capabilities"]["can_delete_versions"] is False

@@ -45,6 +45,7 @@ class CapabilitiesSerializer(serializers.Serializer[dict[str, bool]]):
     can_edit = serializers.BooleanField(help_text="Rename, move; create inside a folder.")
     can_trash = serializers.BooleanField()
     can_share = serializers.BooleanField()
+    can_delete_versions = serializers.BooleanField()
 
 
 def capabilities(node: Node, role: Role) -> dict[str, bool]:
@@ -53,6 +54,9 @@ def capabilities(node: Node, role: Role) -> dict[str, bool]:
         "can_edit": role >= Role.EDITOR and not root,
         "can_trash": role >= Role.EDITOR and not root,
         "can_share": role >= Role.EDITOR and not root,
+        "can_delete_versions": role == Role.OWNER
+        and node.kind == Node.Kind.FILE
+        and node.trashed_at is None,
     }
 
 

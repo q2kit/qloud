@@ -100,6 +100,7 @@ export class FakeDrive {
         can_edit: editable,
         can_trash: editable,
         can_share: editable,
+        can_delete_versions: node.kind === 'file',
       },
     };
   }

@@ -220,6 +220,8 @@ Build dùng zlib của hệ thống (giấy phép Zlib, cần header khi compile
 
 `drive.selectors` và `drive.services` kiểm tra quyền qua lớp chung; API list dùng select_related uploader và cursor theo số phiên bản. Restore/delete khóa owner → node → Blob, đồng bộ với upload/purge và kiểm tra quyền lại sau khóa. Restore thêm FileVersion tham chiếu Blob cũ, cập nhật metadata và enqueue thumbnail sau commit. Quota tính mỗi Blob được tham chiếu một lần; delete/purge trừ khi hết tham chiếu và ghi ObjectDeletion trong cùng transaction. Request không xóa object S3; worker hiện có bảo vệ Blob còn tham chiếu và giữ hàng đợi khi S3 lỗi. Không thêm schema/dependency.
 
+M7-03: `features/versions` dùng TanStack Query và client có type cho lịch sử/mutations; không sao chép lịch sử vào store. Panel mount theo lựa chọn để reset tab/hủy read cũ. Restore cập nhật metadata lựa chọn hiện có rồi invalidate node/history/folder/recent/shared/search/preview; delete có snapshot rollback; upload hoàn tất cũng invalidate history. Capability xóa được server tính từ role owner, endpoint public luôn false. Không thêm dependency/migration.
+
 ### Dọn thùng rác (M4-02)
 
 Celery beat gọi `apps.drive.tasks.expire_trash` hằng ngày, xét thời hạn `trash_retention_days`
