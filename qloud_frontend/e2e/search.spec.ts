@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { signUpVerifiedViaApi } from './auth';
-import { openDriveFolder } from './drive';
+import { chooseItemAction, openDriveFolder } from './drive';
 
 async function csrf(page: Page) {
   return {
@@ -128,10 +128,7 @@ test('palette finds unaccented names, opens a folder and preserves search URL fi
   await expect(page.getByLabel('Sửa từ ngày')).toHaveValue('2020-01-01');
   await page.goBack();
   await expect(page.getByLabel('Sửa từ ngày')).toHaveValue('');
-  await page
-    .getByRole('option', { name: 'Báo cáo Q3.txt', exact: true })
-    .click();
-  await page.getByRole('button', { name: 'Xem trước', exact: true }).click();
+  await chooseItemAction(page, 'Báo cáo Q3.txt', 'Xem trước');
   await expect(page).toHaveURL(/\/drive\/files\/[0-9a-f]{32}$/);
   await expect(
     page.getByText('Qloud search preview', { exact: true }),
@@ -178,12 +175,7 @@ test('search includes inherited shares, excludes private nodes and handles revok
     ).toHaveCount(0);
     await openDriveFolder(recipient, 'Báo cáo shared folder');
     await recipient.goto('/search?q=bao+cao&owner=others');
-    await recipient
-      .getByRole('option', { name: 'Báo cáo shared.txt', exact: true })
-      .click();
-    await recipient
-      .getByRole('button', { name: 'Xem trước', exact: true })
-      .click();
+    await chooseItemAction(recipient, 'Báo cáo shared.txt', 'Xem trước');
     await expect(
       recipient.getByText('Qloud search preview', { exact: true }),
     ).toBeVisible();
