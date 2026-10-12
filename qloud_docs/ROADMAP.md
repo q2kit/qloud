@@ -14,7 +14,7 @@
 | M3 | Xem trước và thumbnail | ✅ |
 | M4 | Thùng rác | ✅ |
 | M5 | Chia sẻ (cho người dùng và qua link) | ✅ |
-| M6 | Tìm kiếm | 🟨 |
+| M6 | Tìm kiếm | ✅ |
 | M7 | Phiên bản file | ⬜ |
 | M8 | Quota UI, hoàn thiện, deploy production | ⬜ |
 
@@ -89,7 +89,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
 | M6-01 | pg_trgm, API search có bộ lọc | [#40](https://github.com/q2kit/qloud/issues/40) | ✅ [PR #156](https://github.com/q2kit/qloud/pull/156) |
-| M6-02 | FE: command palette, trang kết quả | [#41](https://github.com/q2kit/qloud/issues/41) | 🟦 |
+| M6-02 | FE: command palette, trang kết quả | [#41](https://github.com/q2kit/qloud/issues/41) | ✅ [PR #157](https://github.com/q2kit/qloud/pull/157) |
 
 ## M7 — Phiên bản ([versioning.md](features/versioning.md))
 | ID | Task | Issue | Trạng thái |

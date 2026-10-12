@@ -1,6 +1,6 @@
 # Tìm kiếm (F-SEARCH)
 
-**Trạng thái:** Đang làm · **Milestone:** M6 · **Màn hình:** S-09 và command palette
+**Trạng thái:** Hoàn thành · **Milestone:** M6 · **Màn hình:** S-09 và command palette
 
 ## User stories
 - Tôi muốn gõ một phần tên để tìm nhanh file hoặc folder, kể cả khi gõ không dấu.
@@ -21,7 +21,7 @@
 
 ## Phạm vi triển khai M6 — đã duyệt
 
-Owner đã duyệt đặc tả và kế hoạch cho cả M6 trên [#40](https://github.com/q2kit/qloud/issues/40#issuecomment-6111662546). M6-01 đã merge ở [PR #156](https://github.com/q2kit/qloud/pull/156); M6-02 đã triển khai, đang chờ review ở [PR #157](https://github.com/q2kit/qloud/pull/157).
+Owner đã duyệt đặc tả và kế hoạch cho cả M6 trên [#40](https://github.com/q2kit/qloud/issues/40#issuecomment-6111662546). M6-01 đã merge ở [PR #156](https://github.com/q2kit/qloud/pull/156); M6-02 đã merge ở [PR #157](https://github.com/q2kit/qloud/pull/157).
 
 ### M6-01 — API và chỉ mục
 - `GET /api/v1/search` yêu cầu đăng nhập, giữ tham số đã mô tả trong `api.md`: `q`, `type`, `modified_after`, `owner`; bổ sung `cursor`, `page_size` theo quy ước danh sách.
