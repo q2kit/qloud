@@ -134,36 +134,16 @@ function PublicBrowser({ token }: { token: string }) {
     );
   if (!root.data || !current.data)
     return <LoadingSkeleton view={view} label={t('sharing.loading')} />;
-  if (root.data.kind === 'file')
-    return (
-      <section>
-        <h1 className="text-xl font-semibold">{root.data.name}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t('sharing.publicDescription')}
-        </p>
-        <Button
-          className="mt-4"
-          onClick={() => {
-            open(root.data);
-          }}
-        >
-          {t('preview.open')}
-        </Button>
-        <FileViewer
-          nodes={[root.data]}
-          hasMore={false}
-          loadingMore={false}
-          loadMore={() => Promise.resolve()}
-        />
-      </section>
-    );
+  // A file link shows the same page as a folder link: name, report, the item.
+  const isFile = root.data.kind === 'file';
+  const items = isFile ? [root.data] : nodes;
   return (
     <section className="flex min-h-[60vh] flex-col gap-4">
       <nav
         aria-label={t('drive.breadcrumb')}
         className="flex flex-wrap items-center gap-2 text-sm"
       >
-        {current.data.breadcrumb.map((crumb) => (
+        {(isFile ? [] : current.data.breadcrumb).map((crumb) => (
           <Link
             className="text-primary underline"
             key={crumb.id}
@@ -174,9 +154,6 @@ function PublicBrowser({ token }: { token: string }) {
         ))}
         <h1 className="text-xl font-semibold">{current.data.name}</h1>
       </nav>
-      <p className="text-sm text-muted-foreground">
-        {t('sharing.publicDescription')}
-      </p>
       <Button
         variant="outline"
         className="self-start"
@@ -196,12 +173,12 @@ function PublicBrowser({ token }: { token: string }) {
         />
       )}
       <FileBrowser
-        nodes={nodes}
+        nodes={items}
         selected={selection}
         view={view}
         onView={setView}
         ordering={ordering}
-        onOrdering={setOrdering}
+        {...(isFile ? { orderingLabel: null } : { onOrdering: setOrdering })}
         actionsFor={actionsFor}
         onClearSelection={() => {
           setSelection([]);
@@ -209,12 +186,12 @@ function PublicBrowser({ token }: { token: string }) {
         onSelectAll={setSelection}
         onSelect={(node, { toggle, range }) => {
           if (range) {
-            const anchor = nodes.findIndex((n) => n.id === selection[0]?.id);
-            const end = nodes.findIndex((n) => n.id === node.id);
+            const anchor = items.findIndex((n) => n.id === selection[0]?.id);
+            const end = items.findIndex((n) => n.id === node.id);
             setSelection(
               anchor < 0
                 ? [node]
-                : nodes.slice(Math.min(anchor, end), Math.max(anchor, end) + 1),
+                : items.slice(Math.min(anchor, end), Math.max(anchor, end) + 1),
             );
           } else if (toggle)
             setSelection((old) =>
@@ -226,11 +203,11 @@ function PublicBrowser({ token }: { token: string }) {
         }}
         onOpen={open}
         draggable={false}
-        enabled={children.isSuccess}
-        pending={children.isPending}
-        failed={children.isError}
+        enabled={isFile || children.isSuccess}
+        pending={!isFile && children.isPending}
+        failed={!isFile && children.isError}
         onRetry={() => void children.refetch()}
-        hasMore={children.hasNextPage}
+        hasMore={!isFile && children.hasNextPage}
         isLoadingMore={children.isFetchingNextPage}
         onLoadMore={() => {
           if (!children.isFetchingNextPage) void children.fetchNextPage();
@@ -245,8 +222,8 @@ function PublicBrowser({ token }: { token: string }) {
         }
       />
       <FileViewer
-        nodes={nodes}
-        hasMore={children.hasNextPage}
+        nodes={items}
+        hasMore={!isFile && children.hasNextPage}
         loadingMore={children.isFetchingNextPage}
         loadMore={() => children.fetchNextPage()}
       />

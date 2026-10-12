@@ -442,7 +442,6 @@
     "unnamedOwner": "Owner",
     "unavailable": "Content is no longer available",
     "unavailableDescription": "The link is invalid, expired or revoked.",
-    "publicDescription": "You can view and download items within this link.",
     "publicEmpty": "This shared folder is empty.",
     "errors": {
       "failed": "Could not update sharing. Please try again.",

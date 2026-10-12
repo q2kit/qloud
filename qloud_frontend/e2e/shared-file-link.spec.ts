@@ -127,10 +127,10 @@ test('file grant email opens without parent access and respects revocation', asy
     ).toBeVisible();
     await expect(
       dialog.getByRole('button', { name: 'Tệp trước', exact: true }),
-    ).toBeDisabled();
+    ).toHaveCount(0);
     await expect(
       dialog.getByRole('button', { name: 'Tệp sau', exact: true }),
-    ).toBeDisabled();
+    ).toHaveCount(0);
     await expect(
       recipient.getByText('Email shared folder', { exact: true }),
     ).toHaveCount(0);
