@@ -312,11 +312,11 @@
       "quota_exceeded": "Không đủ dung lượng cho tệp này.",
       "file_too_large": "Tệp lớn hơn mức gói của bạn cho phép.",
       "email_not_verified": "Hãy xác thực email trước khi tải tệp lên.",
-      "invalid_target": "Chỉ tải lên được vào một thư mục.",
+      "invalid_target": "Không thể thay thế đích này. Chọn một tệp còn tồn tại; không thể thay thế thư mục.",
       "not_found": "Thư mục đích không còn tồn tại hoặc bạn không có quyền.",
       "upload_expired": "Lượt tải lên đã hết hạn. Hãy chọn lại tệp.",
       "upload_closed": "Lượt tải lên đã kết thúc.",
-      "target_unavailable": "Thư mục đích không còn nữa.",
+      "target_unavailable": "Tệp hoặc thư mục đích không còn khả dụng. Hãy hủy và tải lên lại.",
       "storage_unavailable": "Kho lưu trữ đang tạm lỗi. Hãy thử lại sau ít phút.",
       "folder_failed": "Không đọc hoặc tải thư mục lên được. Hãy chọn lại thư mục.",
       "name_conflict": "Tên này đang được một tệp sử dụng. Hãy chọn Giữ cả hai để tải thư mục lên.",
@@ -332,7 +332,8 @@
       "description": "Thư mục này đã có một mục tên \"{{name}}\".",
       "forAll_other": "Áp dụng cho {{count}} tệp còn lại",
       "skip": "Bỏ qua",
-      "keepBoth": "Giữ cả hai"
+      "keepBoth": "Giữ cả hai",
+      "replace": "Thay thế"
     },
     "folder": {
       "preparing": "Đang chuẩn bị thư mục…",

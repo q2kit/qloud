@@ -64,9 +64,11 @@ class UploadListCreateView(generics.ListAPIView[UploadSession]):
         request=CreateUploadSerializer,
         responses={
             201: UploadSessionSerializer,
-            400: _error("Invalid input, or the parent is not a folder."),
+            400: _error(
+                "Invalid input, parent not a folder, or replacement target not a live file in it."
+            ),
             403: _error("`email_not_verified`."),
-            404: _error("No such folder, or no access to it."),
+            404: _error("No such folder/file, or insufficient editor access."),
             409: _error("`name_conflict` (with `on_conflict=fail`)."),
             413: _error("`file_too_large` or `quota_exceeded`."),
             503: _error("`storage_unavailable`."),

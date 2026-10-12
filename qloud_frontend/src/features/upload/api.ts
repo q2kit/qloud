@@ -6,7 +6,7 @@ import type { components } from '@/lib/api/schema';
 export type UploadSession = components['schemas']['UploadSession'];
 export type UploadSessionDetail = components['schemas']['UploadSessionDetail'];
 export type UploadedNode = components['schemas']['Node'];
-export type OnConflict = 'fail' | 'rename';
+export type OnConflict = 'fail' | 'rename' | 'replace';
 
 export interface PartUrl {
   part_number: number;

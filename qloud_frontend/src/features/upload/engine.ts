@@ -81,7 +81,7 @@ interface Runtime {
   generation: number;
 }
 
-export type ConflictChoice = 'rename' | 'skip';
+export type ConflictChoice = 'rename' | 'replace' | 'skip';
 
 export class UploadEngine {
   private readonly runtimes = new Map<string, Runtime>();
@@ -530,7 +530,7 @@ export class UploadEngine {
     this.pump();
   }
 
-  /** "Keep both" (a ` (n)` name) or "skip"; `forAll` answers later conflicts too. */
+  /** Replace, keep both (a ` (n)` name), or skip; `forAll` answers later conflicts too. */
   resolveConflict(id: string, choice: ConflictChoice, forAll = false): void {
     if (forAll) {
       this.conflictPolicy = choice;
@@ -551,7 +551,7 @@ export class UploadEngine {
       this.store.patch(id, { status: 'skipped' });
       this.runtimes.delete(id);
     } else {
-      runtime.onConflict = 'rename';
+      runtime.onConflict = choice;
       this.store.patch(id, { status: 'queued' });
     }
   }

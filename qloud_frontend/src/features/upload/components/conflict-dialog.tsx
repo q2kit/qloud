@@ -7,10 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useUploadStore } from '../store';
 import { useUploader } from '../context';
 
-/**
- * An uploaded name is taken in its folder (files-folders.md): keep both (a ` (n)`
- * suffix) or skip. "Replace" (a new version) arrives with M7-01.
- */
+/** A conflict requires an explicit choice before reserving upload quota. */
 export function ConflictDialog(): React.JSX.Element {
   const { t } = useTranslation();
   const engine = useUploader();
@@ -24,7 +21,7 @@ export function ConflictDialog(): React.JSX.Element {
       (item) => item.status === 'conflict' || item.status === 'queued',
     ).length - 1;
 
-  const answer = (choice: 'rename' | 'skip'): void => {
+  const answer = (choice: 'rename' | 'replace' | 'skip'): void => {
     if (!current) return;
     engine.resolveConflict(current.id, choice, forAll);
     setForAll(false);
@@ -63,7 +60,7 @@ export function ConflictDialog(): React.JSX.Element {
               {t('upload.conflict.forAll', { count: others })}
             </label>
           )}
-          <div className="mt-5 flex justify-end gap-2">
+          <div className="mt-5 flex flex-wrap justify-end gap-2">
             <Button
               variant="ghost"
               onClick={() => {
@@ -71,6 +68,14 @@ export function ConflictDialog(): React.JSX.Element {
               }}
             >
               {t('upload.conflict.skip')}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                answer('replace');
+              }}
+            >
+              {t('upload.conflict.replace')}
             </Button>
             <Button
               onClick={() => {

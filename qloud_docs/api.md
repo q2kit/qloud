@@ -123,7 +123,7 @@ M2-02 (5 endpoint trên):
 | DELETE | `/uploads/{id}` | Hủy upload |
 | GET | `/uploads?status=active` | Các upload dở dang, để resume |
 
-M2-04: `POST /uploads` trả session `{id, part_size, part_count, expires_at, ...}` (201), nhận thêm `on_conflict` (`fail`|`rename`); `target_node_id` chờ M7-01.
+M2-04: `POST /uploads` trả session `{id, part_size, part_count, expires_at, ...}` (201), nhận thêm `on_conflict` (`fail`|`rename`|`replace`). M7-01: `target_node_id` tùy chọn để thêm phiên bản vào file; khi có target, server đặt `on_conflict=replace`. `parent_id` phải khớp cha lúc tạo session. Target phải là file còn sống và có quyền editor; upload qua target tường minh không cần quyền trên folder cha. `replace` theo tên cần editor folder/file và khớp tên không phân biệt hoa thường. Session trả thêm `target_node_id` (nullable). Folder, target sai cha hoặc không có file để replace trả 400 `invalid_target`; thiếu quyền trả 404. Complete kiểm tra lại target, nếu mất quyền/trash/purge thì hủy session và trả 409 `target_unavailable`. Xem [versioning.md](features/versioning.md#m7-01--upload-phiên-bản-mới).
 `POST /uploads/{id}/parts` nhận tối đa 100 số part, trả `{parts: [{part_number, url}], expires_at}` (URL hạn 1 giờ).
 `GET /uploads/{id}` có thêm `parts` (`part_number, size, etag`) đọc từ S3. `?status=active` bỏ qua session đã hết hạn. Quy tắc và mã lỗi: [upload.md](features/upload.md#quyết-định-của-m2-04-20).
 

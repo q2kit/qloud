@@ -22,12 +22,21 @@ export function UploadProvider({
       new UploadEngine({
         api: uploadApi,
         createRequest: () => new XMLHttpRequest() as unknown as PartRequest,
-        onUploaded: (_node, parentId) => {
+        onUploaded: (node, parentId) => {
           void refreshDriveQueries(
             queryClient,
             parentId ? driveKeys.children(parentId) : driveKeys.all,
           );
+          if (node.parent_id && node.parent_id !== parentId)
+            void refreshDriveQueries(
+              queryClient,
+              driveKeys.children(node.parent_id),
+            );
+          void refreshDriveQueries(queryClient, driveKeys.node(node.id));
           void refreshDriveQueries(queryClient, driveKeys.recent);
+          void queryClient.invalidateQueries({
+            queryKey: ['sharing', 'shared'],
+          });
           void queryClient.invalidateQueries({ queryKey: uploadKeys.active });
         },
         isOnline: () => navigator.onLine,
