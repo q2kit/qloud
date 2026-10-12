@@ -577,5 +577,39 @@
     "noChangeResult": "No new changes: the target was already handled or no longer exists. No additional revocation email was sent.",
     "suspendedResult": "Owner suspended and their sessions and public links invalidated.",
     "sameRoot": "The reported node is also the link root node."
+  },
+  "search": {
+    "title": "Search results",
+    "paletteTitle": "Search and commands",
+    "paletteDescription": "Find files and folders or run a command. Use arrow keys to select, Enter to open, Escape to close.",
+    "query": "Search term",
+    "placeholder": "Search files and folders…",
+    "close": "Close search",
+    "viewAll": "View all results",
+    "loading": "Searching…",
+    "failed": "Could not load search results. Check the search term and filters, then try again.",
+    "retry": "Retry",
+    "empty": "No results found",
+    "emptyDescription": "Try another name or change the filters.",
+    "start": "Find a file or folder",
+    "submit": "Search",
+    "suggestions": "Search suggestions and commands",
+    "type": "Type",
+    "allTypes": "All types",
+    "owner": "Owner",
+    "allOwners": "All owners",
+    "mine": "Owned by me",
+    "others": "Shared with me",
+    "modifiedAfter": "Modified since",
+    "types": {
+      "folder": "Folder",
+      "document": "Document",
+      "image": "Image",
+      "video": "Video",
+      "audio": "Audio",
+      "archive": "Archive",
+      "other": "Other"
+    },
+    "relevance": "Relevance"
   }
 }

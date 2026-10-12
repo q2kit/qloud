@@ -1,15 +1,8 @@
-import {
-  FileUp,
-  FolderUp,
-  FolderPlus,
-  Info,
-  Menu,
-  Plus,
-  Search,
-} from 'lucide-react';
+import { FileUp, FolderUp, FolderPlus, Info, Menu, Plus } from 'lucide-react';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { CommandPalette } from '@/features/search/command-palette';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -30,10 +23,6 @@ import { cn } from '@/lib/utils';
 import { LanguageSwitcher } from './language-switcher';
 import { useRouteHandle } from './route-handle';
 import { ThemeSwitcher } from './theme-switcher';
-
-// Apple platforms show the Command key symbol; it is not a translatable word.
-const COMMAND_KEY_SYMBOL = '⌘';
-const isApplePlatform = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
 
 interface AppHeaderProps {
   isDetailOpen: boolean;
@@ -69,9 +58,6 @@ export function AppHeader({
   const folderUploader = useFolderUploader();
   const directoryInput = React.useRef<HTMLInputElement>(null);
   const fileInput = React.useRef<HTMLInputElement>(null);
-  const searchShortcut = t('shell.searchShortcut', {
-    modifier: isApplePlatform ? COMMAND_KEY_SYMBOL : t('shell.keys.ctrl'),
-  });
 
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6 lg:px-8">
@@ -97,30 +83,18 @@ export function AppHeader({
         )}
       </div>
 
-      {/* TODO(M6-02): Connect this trigger to the command palette. */}
-      <Button
-        className="hidden min-w-48 justify-between text-muted-foreground md:flex"
-        variant="outline"
-        disabled
-      >
-        <span className="flex items-center gap-2">
-          <Search />
-          {t('shell.search')}
-        </span>
-        <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-sans text-[11px]">
-          {searchShortcut}
-        </kbd>
-      </Button>
-      {/* TODO(M6-02): Connect this trigger to the command palette. */}
-      <Button
-        className="md:hidden"
-        variant="ghost"
-        size="icon"
-        aria-label={t('shell.search')}
-        disabled
-      >
-        <Search />
-      </Button>
+      <CommandPalette
+        canCreate={canCreate}
+        onCreateFolder={() => {
+          setCreatingFolder(true);
+        }}
+        onUploadFiles={() => {
+          fileInput.current?.click();
+        }}
+        onUploadFolder={() => {
+          directoryInput.current?.click();
+        }}
+      />
       <input
         ref={fileInput}
         type="file"

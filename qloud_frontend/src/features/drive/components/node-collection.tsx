@@ -592,18 +592,20 @@ function NodeItem({
           </span>
           {moreButton}
         </span>
-        {node.owner && node.effective_role && (
-          <span className="block break-words text-xs text-muted-foreground">
-            {t('sharing.ownerRole', {
-              name: node.owner.display_name || t('sharing.unnamedOwner'),
-              role: t(
-                node.effective_role === 'editor'
-                  ? 'sharing.editor'
-                  : 'sharing.viewer',
-              ),
-            })}
-          </span>
-        )}
+        {node.owner &&
+          node.effective_role &&
+          node.effective_role !== 'owner' && (
+            <span className="block break-words text-xs text-muted-foreground">
+              {t('sharing.ownerRole', {
+                name: node.owner.display_name || t('sharing.unnamedOwner'),
+                role: t(
+                  node.effective_role === 'editor'
+                    ? 'sharing.editor'
+                    : 'sharing.viewer',
+                ),
+              })}
+            </span>
+          )}
       </div>
     ) : (
       <div
@@ -622,18 +624,20 @@ function NodeItem({
             <span className="block truncate text-sm font-medium">
               {node.name}
             </span>
-            {node.owner && node.effective_role && (
-              <span className="block truncate text-xs text-muted-foreground">
-                {t('sharing.ownerRole', {
-                  name: node.owner.display_name || t('sharing.unnamedOwner'),
-                  role: t(
-                    node.effective_role === 'editor'
-                      ? 'sharing.editor'
-                      : 'sharing.viewer',
-                  ),
-                })}
-              </span>
-            )}
+            {node.owner &&
+              node.effective_role &&
+              node.effective_role !== 'owner' && (
+                <span className="block truncate text-xs text-muted-foreground">
+                  {t('sharing.ownerRole', {
+                    name: node.owner.display_name || t('sharing.unnamedOwner'),
+                    role: t(
+                      node.effective_role === 'editor'
+                        ? 'sharing.editor'
+                        : 'sharing.viewer',
+                    ),
+                  })}
+                </span>
+              )}
           </span>
         </span>
         <span className="hidden truncate text-sm text-muted-foreground tabular-nums sm:block">

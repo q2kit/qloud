@@ -21,7 +21,7 @@
 
 ## Phạm vi triển khai M6 — đã duyệt
 
-Owner đã duyệt đặc tả và kế hoạch cho cả M6 trên [#40](https://github.com/q2kit/qloud/issues/40#issuecomment-6111662546). M6-01 đang triển khai; M6-02 tiếp nối API.
+Owner đã duyệt đặc tả và kế hoạch cho cả M6 trên [#40](https://github.com/q2kit/qloud/issues/40#issuecomment-6111662546). M6-01 đã merge ở [PR #156](https://github.com/q2kit/qloud/pull/156); M6-02 đã triển khai, đang chờ review ở [PR #157](https://github.com/q2kit/qloud/pull/157).
 
 ### M6-01 — API và chỉ mục
 - `GET /api/v1/search` yêu cầu đăng nhập, giữ tham số đã mô tả trong `api.md`: `q`, `type`, `modified_after`, `owner`; bổ sung `cursor`, `page_size` theo quy ước danh sách.
@@ -63,3 +63,9 @@ Owner đã duyệt đặc tả và kế hoạch cho cả M6 trên [#40](https://
 | r (một ký tự) | 253,74 |
 | missingXYZ | 11,07 |
 | bao cao + owner=others + type=document | 176,73 |
+
+## Kiểm chứng M6-02
+- Command palette ở header, Ctrl+K/⌘K, focus và bàn phím; tối đa 8 gợi ý sau 150ms. Request cũ được hủy bằng AbortSignal. Từ khóa trống dùng các hành động hiện có và không gọi search.
+- Trang `/search` giữ từ khóa, loại, owner và mốc ngày sửa trong URL; mốc ngày lấy 00:00 theo timezone trình duyệt và gửi ISO datetime có timezone. Kết quả giữ thứ tự độ liên quan của API, tải thêm bằng cursor, dùng lưới/danh sách và viewer hiện có. Chỉ mục được chia sẻ hiển thị owner/quyền.
+- Unit test kiểm tra debounce/hủy, focus/phím mũi tên/Enter/Esc, lệnh nhanh/modal, URL/back và lỗi/thử lại/phân trang. Chromium stack thật kiểm tra tìm không dấu, mở file/folder sở hữu và share thừa kế, không lộ mục riêng tư, thu hồi quyền, reload/back và bộ lọc.
+- Live test headless với dữ liệu tạo qua API, light/dark ở desktop và 360px; ảnh palette và trang kết quả lưu trong `qloud_docs/assets/m6-02-*.png`.

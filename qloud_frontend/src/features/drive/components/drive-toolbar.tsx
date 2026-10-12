@@ -27,6 +27,7 @@ export interface DriveToolbarProps {
   selected: DriveNode[];
   view: DriveView;
   ordering: Ordering;
+  orderingLabel?: string;
   onView: (view: DriveView) => void;
   onOrdering?: (ordering: Ordering) => void;
   /** The item menu's actions for the selection, as buttons. */
@@ -38,6 +39,7 @@ export function DriveToolbar({
   selected,
   view,
   ordering,
+  orderingLabel,
   onView,
   onOrdering,
   actions,
@@ -124,7 +126,7 @@ export function DriveToolbar({
           </DropdownMenu>
         ) : (
           <span className="text-xs text-muted-foreground">
-            {t(`drive.sort.${ORDERING_KEYS[ordering]}`)}
+            {orderingLabel ?? t(`drive.sort.${ORDERING_KEYS[ordering]}`)}
           </span>
         )}
         <div
