@@ -294,6 +294,9 @@ test('public file opens anonymously, denies outside scope and expires', async ({
     await expect(
       visitor.getByText('Public file content', { exact: true }),
     ).toBeVisible();
+    await expect(
+      visitor.getByRole('button', { name: /^Tệp (trước|sau)$/ }),
+    ).toHaveCount(0);
     await captures(visitor, 'public-file', isMobile);
     await visitor.keyboard.press('Escape');
     await expect(visitor.getByRole('dialog')).toHaveCount(0);

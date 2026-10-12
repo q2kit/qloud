@@ -113,12 +113,13 @@ it('opens a directly granted file without listing its private parent and closes 
   );
   const router = renderApp(`/drive/files/${compactId(target.id)}`, testUser);
   const dialog = await screen.findByRole('dialog', { name: target.name });
+  // A single file has nowhere to step: no previous/next buttons.
   expect(
-    within(dialog).getByRole('button', { name: 'Previous file' }),
-  ).toBeDisabled();
+    within(dialog).queryByRole('button', { name: 'Previous file' }),
+  ).not.toBeInTheDocument();
   expect(
-    within(dialog).getByRole('button', { name: 'Next file' }),
-  ).toBeDisabled();
+    within(dialog).queryByRole('button', { name: 'Next file' }),
+  ).not.toBeInTheDocument();
   await user.keyboard('{ArrowRight}{ArrowLeft}');
   expect(router.state.location.pathname).toBe(
     `/drive/files/${compactId(target.id)}`,

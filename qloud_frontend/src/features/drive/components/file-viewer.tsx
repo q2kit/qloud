@@ -45,6 +45,8 @@ export function FileViewer({
   const index = files.findIndex((item) => item.id === id);
   const previous = files[index - 1];
   const next = files[index + 1];
+  // Nothing to step to: a single file (file link, standalone viewer).
+  const browsable = files.length > 1 || hasMore;
   const setFile = (nextId: string) => {
     document.querySelector<HTMLElement>('[data-file-viewer]')?.focus();
     const next = new URLSearchParams(params);
@@ -196,28 +198,32 @@ export function FileViewer({
             <Dialog.Description className="sr-only">
               {t('preview.description')}
             </Dialog.Description>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={t('preview.previous')}
-              disabled={index <= 0}
-              onClick={() => {
-                if (previous) setFile(previous.id);
-              }}
-            >
-              <ChevronLeft />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={t('preview.next')}
-              disabled={
-                index < 0 || (!files[index + 1] && !hasMore) || loadingMore
-              }
-              onClick={() => void nextFile()}
-            >
-              <ChevronRight />
-            </Button>
+            {browsable && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={t('preview.previous')}
+                  disabled={index <= 0}
+                  onClick={() => {
+                    if (previous) setFile(previous.id);
+                  }}
+                >
+                  <ChevronLeft />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={t('preview.next')}
+                  disabled={
+                    index < 0 || (!files[index + 1] && !hasMore) || loadingMore
+                  }
+                  onClick={() => void nextFile()}
+                >
+                  <ChevronRight />
+                </Button>
+              </>
+            )}
             <Button
               variant="ghost"
               size="icon"
