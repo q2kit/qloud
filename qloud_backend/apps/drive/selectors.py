@@ -4,12 +4,14 @@ import uuid
 from collections.abc import Iterable
 
 from django.db import connection
-from django.db.models import QuerySet, Subquery
+from django.db.models import BooleanField, Case, QuerySet, Subquery, Value, When
+from django.http import Http404
 
 from apps.accounts.models import User
-from apps.sharing.permissions import nodes_for
+from apps.sharing.permissions import Role, get_node_or_404, nodes_for
 
-from .models import Node
+from .errors import NotAFile
+from .models import FileVersion, Node
 
 # Adjacency list + recursive CTE (data-model.md); one query whatever the depth.
 _BREADCRUMB = """
@@ -68,3 +70,33 @@ def recent_files(user: User) -> QuerySet[Node]:
     files = nodes_for(user).filter(owner=user, kind=Node.Kind.FILE)
     newest = files.order_by("-updated_at", "-id").values("pk")[:RECENT_LIMIT]
     return files.filter(pk__in=Subquery(newest))
+
+
+def file_for(user: User, node_id: uuid.UUID, role: Role = Role.VIEWER) -> Node:
+    node = get_node_or_404(user, node_id, role)
+    if node.kind != Node.Kind.FILE:
+        raise NotAFile
+    return node
+
+
+def version_history(node: Node) -> QuerySet[FileVersion]:
+    """History of a file already loaded through the permission layer."""
+    return (
+        FileVersion.objects.filter(node=node)
+        .select_related("uploaded_by")
+        .annotate(
+            is_current=Case(
+                When(pk=node.current_version_id, then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField(),
+            )
+        )
+    )
+
+
+def version_for(node: Node, version_id: uuid.UUID) -> FileVersion:
+    """Scope the version to a permission-checked file, hiding mismatched IDs."""
+    try:
+        return FileVersion.objects.select_related("blob").get(pk=version_id, node=node)
+    except FileVersion.DoesNotExist as error:
+        raise Http404 from error

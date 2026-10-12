@@ -1,5 +1,11 @@
 from django.urls import path
 
+from .version_views import (
+    VersionDeleteView,
+    VersionDownloadView,
+    VersionListView,
+    VersionRestoreView,
+)
 from .views import (
     FolderCreateView,
     NodeChildrenView,
@@ -16,6 +22,22 @@ from .views import (
 )
 
 urlpatterns = [
+    path("nodes/<uuid:node_id>/versions", VersionListView.as_view(), name="versions-list"),
+    path(
+        "nodes/<uuid:node_id>/versions/<uuid:version_id>/download",
+        VersionDownloadView.as_view(),
+        name="versions-download",
+    ),
+    path(
+        "nodes/<uuid:node_id>/versions/<uuid:version_id>/restore",
+        VersionRestoreView.as_view(),
+        name="versions-restore",
+    ),
+    path(
+        "nodes/<uuid:node_id>/versions/<uuid:version_id>",
+        VersionDeleteView.as_view(),
+        name="versions-delete",
+    ),
     path("nodes/trash", NodeTrashView.as_view(), name="nodes-trash"),
     path("trash", TrashListView.as_view(), name="trash-list"),
     path("trash/restore", TrashRestoreView.as_view(), name="trash-restore"),

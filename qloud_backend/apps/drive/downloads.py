@@ -45,6 +45,13 @@ def download_link(node: Node, *, expires_in: int | None = None) -> DownloadLink:
     if node.current_version_id is None:  # not possible for a completed upload
         raise Http404
     version = FileVersion.objects.select_related("blob").get(pk=node.current_version_id)
+    return version_download_link(node, version, expires_in=expires_in)
+
+
+def version_download_link(
+    node: Node, version: FileVersion, *, expires_in: int | None = None
+) -> DownloadLink:
+    """The caller has checked access and that the version belongs to this file."""
     ttl = expires_in if expires_in is not None else settings.S3_DOWNLOAD_URL_SECONDS
     expires_at = timezone.now() + datetime.timedelta(seconds=ttl)
     url = s3.presign_download(

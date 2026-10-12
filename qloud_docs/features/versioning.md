@@ -16,7 +16,7 @@
 - Xóa một phiên bản: chỉ owner, không xóa được phiên bản hiện tại. Dung lượng chỉ được giảm khi Blob không còn ai tham chiếu.
 - Chính sách giữ lại phiên bản theo plan của owner: giữ tối đa `max_versions_per_file` phiên bản cũ, và phiên bản cũ quá `version_retention_days` thì bị dọn
   (plan mặc định: 100 phiên bản, 30 ngày). Phiên bản được đánh dấu **"Giữ mãi"** (`keep_forever`) không bị dọn tự động. Celery dọn hằng ngày.
-- Mọi phiên bản đều tính vào quota của owner.
+- Quota owner tính mỗi Blob được các phiên bản tham chiếu đúng một lần, kể cả file trong thùng rác; khôi phục dùng chung Blob nên không tính thêm.
 
 ## M7-01 — Upload phiên bản mới
 - `POST /uploads` nhận `target_node_id` hoặc `on_conflict=replace`. `parent_id` vẫn bắt buộc, phải là cha của target lúc tạo session. Target là file còn sống; không thay thế folder hoặc file không còn tồn tại (`invalid_target`, 400).
@@ -29,7 +29,17 @@
 - Migration `uploads.0002` thêm FK nullable và mở rộng on_conflict. Khi rollback, session thay thế đang active bị hủy và trả quota; Blob/version đã hoàn tất vẫn giữ nguyên. Multipart dở dang còn trên S3 được lifecycle 8 ngày dọn.
 - API lịch sử/restore/delete ở M7-02; tab Phiên bản ở M7-03; dọn theo plan/“Giữ mãi” ở [M7-04 #159](https://github.com/q2kit/qloud/issues/159).
 
+## M7-02 — API lịch sử phiên bản
+
+Kế hoạch và quyết định được owner [duyệt ngày 12/10/2026](https://github.com/q2kit/qloud/issues/43#issuecomment-6124495360).
+- Liệt kê và tải phiên bản cần viewer trên file còn sống, gồm quyền trực tiếp hoặc thừa kế. Lịch sử phân trang cursor theo `version_number` giảm dần; trả UUID, số phiên bản, size, MIME, tên gốc, uploader `{id, display_name}` hoặc null, created_at, keep_forever và is_current. Không trả email hoặc key S3.
+- Download trả URL presigned và expires_at theo TTL download hiện có; tên tải là tên node hiện tại, MIME lấy từ phiên bản được chọn và áp dụng bộ lọc MIME an toàn. Token public không được đọc lịch sử.
+- Restore cần editor; khóa owner → node → Blob, kiểm tra lại quyền sau khóa. Tạo FileVersion mới với số lớn nhất + 1 và Blob nguồn, uploader là người thao tác, keep_forever mặc định false. Trả `200 Node`, giữ UUID/tên/vị trí/share/link, cập nhật size/MIME/updated_at/current_version, xóa thumbnail hiện tại và enqueue bản mới sau commit. Quota đầy vẫn khôi phục được.
+- Delete chỉ owner, trả 204. Restore hoặc delete phiên bản hiện tại trả 409 `current_version`; version không thuộc node hoặc node không truy cập được/trong thùng rác trả 404; folder trả 400 `not_a_file`.
+- Xóa metadata và giảm quota trong cùng transaction, chỉ giảm khi Blob hết tham chiếu. Thumbnail của phiên bản bị xóa và Blob hết tham chiếu được ghi vào ObjectDeletion; worker dọn S3 sau commit và retry khi lỗi. Purge thùng rác cũng chỉ trừ mỗi Blob hết tham chiếu một lần.
+- Không cần migration hoặc đối soát quota lúc triển khai: các Blob trước M7-02 đều độc lập giữa các phiên bản. Tab UI và chính sách giữ lại vẫn thuộc M7-03/M7-04.
+
 ## Tiêu chí chấp nhận
 - [x] Upload trùng tên, chọn *Thay thế*: file có 2 phiên bản; xem trước và tải về đều lấy bản mới.
-- [ ] Khôi phục v1: tạo ra v3 có nội dung giống v1; quota không tăng.
-- [ ] Tải được bất kỳ phiên bản nào.
+- [x] Khôi phục v1: tạo ra v3 có nội dung giống v1; quota không tăng.
+- [x] Tải được bất kỳ phiên bản nào.

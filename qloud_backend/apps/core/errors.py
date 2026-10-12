@@ -110,3 +110,9 @@ class ModerationTargetUnavailable(AppError):
     status_code = status.HTTP_409_CONFLICT
     default_code = "moderation_target_unavailable"
     default_detail = "The account no longer exists."
+
+
+class CurrentVersion(AppError):
+    status_code = status.HTTP_409_CONFLICT
+    default_code = "current_version"
+    default_detail = "The current version cannot be restored or deleted."

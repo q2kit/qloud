@@ -221,7 +221,7 @@ def test_delete_shared_blob_keeps_object(user, make_file, monkeypatch):
     second = make_file("second.txt")
     shared = first.current_version.blob
     FileVersion.objects.filter(pk=second.current_version_id).update(blob=shared)
-    User.objects.filter(pk=user.pk).update(used_bytes=6)
+    User.objects.filter(pk=user.pk).update(used_bytes=3)
     trash.trash(user, [first.pk])
     trash.delete(user, [first.pk])
     delete_objects = Mock()
@@ -229,6 +229,9 @@ def test_delete_shared_blob_keeps_object(user, make_file, monkeypatch):
     delete_trash_objects()
     assert Blob.objects.filter(pk=shared.pk).exists()
     assert shared.storage_key not in list(delete_objects.call_args.args[0])
+
+    user.refresh_from_db()
+    assert user.used_bytes == 3
 
 
 def test_cleanup_failure_keeps_intent_and_blob(user, make_file, monkeypatch):
