@@ -25,8 +25,8 @@ def test_admin_lists_plans_and_users(admin_client):
 @pytest.mark.parametrize(
     ("locale", "label"),
     [
-        ("vi", "Dùng gói này cho tài khoản đăng ký mới"),
-        ("en", "Use this plan for new accounts"),
+        ("vi", "Đặt làm gói mặc định cho tài khoản mới"),
+        ("en", "Set as the default plan for new accounts"),
     ],
 )
 def test_admin_action_translation(admin_client, locale, label):
@@ -169,7 +169,7 @@ def test_staff_cannot_suspend_last_superuser(client):
     assert response.status_code == 200
     admin.refresh_from_db()
     assert admin.suspended_at is None
-    assert "Phải còn ít nhất một superuser hoạt động." in response.content.decode()
+    assert "Phải có ít nhất một quản trị viên cấp cao đang hoạt động." in response.content.decode()
 
 
 def test_admin_can_change_user_plan_and_override(admin_client):
@@ -241,7 +241,7 @@ def test_change_form_cannot_remove_last_admin(admin_client, field):
     del data[field]
     response = admin_client.post(reverse("admin:accounts_user_change", args=[admin.pk]), data)
     assert response.status_code == 200
-    assert "Phải còn ít nhất một superuser hoạt động." in response.content.decode()
+    assert "Phải có ít nhất một quản trị viên cấp cao đang hoạt động." in response.content.decode()
     admin.refresh_from_db()
     assert admin.is_active
     assert admin.is_staff
@@ -277,7 +277,7 @@ def test_repeat_suspension_action_reports_kept_suspension(admin_client):
         {"action": "suspend_accounts", "_selected_action": [str(user.pk), str(other.pk)]},
         follow=True,
     )
-    assert "1 tài khoản đã chọn đang bị khóa từ trước" in response.content.decode()
+    assert "1 tài khoản đã bị khóa từ trước" in response.content.decode()
     user.refresh_from_db()
     other.refresh_from_db()
     assert user.suspended_reason == "Original"

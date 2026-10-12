@@ -5,7 +5,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "A new item has been shared with you on Qloud"
-msgstr "A new item has been shared with you on Qloud"
+msgstr "Someone shared an item with you on Qloud"
 
 msgid "Hello,"
 msgstr "Hello,"
@@ -21,7 +21,7 @@ msgid "Type:"
 msgstr "Type:"
 
 msgid "Permission:"
-msgstr "Permission:"
+msgstr "Access:"
 
 msgid "Folder"
 msgstr "Folder"
@@ -42,7 +42,7 @@ msgid "Open the shared item"
 msgstr "Open the shared item"
 
 msgid "Sign in with the account that received this email. Access depends on your current permissions."
-msgstr "Sign in with the account that received this email. Access depends on your current permissions."
+msgstr "Sign in with the account that received this email to open the content. You can only access it if you still have permission."
 
 msgid "The Qloud team"
 msgstr "The Qloud team"
@@ -51,7 +51,7 @@ msgid "New abuse report on Qloud"
 msgstr "New abuse report on Qloud"
 
 msgid "A public item has been reported."
-msgstr "A public item has been reported."
+msgstr "A publicly shared file or folder has been reported."
 
 msgid "Name:"
 msgstr "Name:"
@@ -69,13 +69,13 @@ msgid "Review report"
 msgstr "Review report"
 
 msgid "A public link was removed on Qloud"
-msgstr "A public link was removed on Qloud"
+msgstr "A public link was revoked on Qloud"
 
 msgid "A public link to your item was removed by moderation."
-msgstr "A public link to your item was removed by moderation."
+msgstr "A moderator revoked a public link to your file or folder."
 
 msgid "Note:"
 msgstr "Note:"
 
 msgid "The removed link cannot be reactivated."
-msgstr "The removed link cannot be reactivated."
+msgstr "A revoked link cannot be restored."

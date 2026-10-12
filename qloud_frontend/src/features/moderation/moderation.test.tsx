@@ -147,7 +147,7 @@ it('submits a scoped anonymous report and shows success', async () => {
   await user.click(
     within(modal).getByRole('button', { name: 'Submit report' }),
   );
-  await within(modal).findByText('Your report has been accepted. Thank you.');
+  await within(modal).findByText('Your report has been received. Thank you.');
   expect(body).toEqual({
     node_id: ROOT_ID,
     reason: 'malware',
@@ -331,7 +331,7 @@ it('reports the file in the public viewer and returns focus to the viewer', asyn
   await user.click(
     within(modal).getByRole('button', { name: 'Submit report' }),
   );
-  await within(modal).findByText('Your report has been accepted. Thank you.');
+  await within(modal).findByText('Your report has been received. Thank you.');
   expect(body).toMatchObject({ node_id: file.id });
   await user.click(within(modal).getByRole('button', { name: 'Close' }));
   expect(await screen.findByRole('dialog', { name: file.name })).toBeVisible();
@@ -368,22 +368,22 @@ it('shows target context and filters all related reports across cursor pages', a
   await screen.findByText('Content owner');
   expect(screen.getByText('owner@example.com')).toBeInTheDocument();
   expect(
-    screen.getByRole('region', { name: 'Reports on the same node' }),
-  ).toHaveTextContent('3 reports on this node · 2 open');
+    screen.getByRole('region', { name: 'Reports on the same item' }),
+  ).toHaveTextContent('3 reports on this item · 2 awaiting review');
   expect(
-    screen.getByText('The reported node is also the link root node.'),
+    screen.getByText('The reported item is the item shared through this link.'),
   ).toBeInTheDocument();
   await user.click(
-    screen.getByRole('button', { name: 'View all reports on this node' }),
+    screen.getByRole('button', { name: 'View all reports on this item' }),
   );
-  await screen.findByText('Showing reports on the same node');
+  await screen.findByText('Showing reports on the same item');
   expect(queries.at(-1)?.searchParams.get('node_uuid')).toBe(ROOT_ID);
   expect(queries.at(-1)?.searchParams.has('status')).toBe(false);
   await user.click(await screen.findByRole('button', { name: 'Load more' }));
   await screen.findByText('Another report');
   expect(queries.at(-1)?.searchParams.get('node_uuid')).toBe(ROOT_ID);
   expect(queries.at(-1)?.searchParams.get('cursor')).toBe('next');
-  await user.click(screen.getByRole('button', { name: 'Clear node filter' }));
+  await user.click(screen.getByRole('button', { name: 'Clear item filter' }));
   await waitFor(() => {
     expect(queries.at(-1)?.searchParams.has('node_uuid')).toBe(false);
   });
@@ -426,7 +426,7 @@ it('handles deleted targets and describes an audit with no new changes', async (
   ).toBeGreaterThan(1);
   expect(
     screen.getByRole('region', { name: 'Resolution history' }),
-  ).toHaveTextContent('No new changes:');
+  ).toHaveTextContent('No changes were needed:');
   expect(screen.queryByLabelText('Note (required)')).not.toBeInTheDocument();
   await user.click(screen.getByRole('button', { name: 'Back to queue' }));
   expect(

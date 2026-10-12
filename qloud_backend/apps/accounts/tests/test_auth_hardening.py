@@ -275,8 +275,8 @@ def test_send_email_task_retries_smtp_failures():
 @pytest.mark.parametrize(
     ("language", "subject", "phrase"),
     [
-        ("vi", "Xác thực địa chỉ email cho Qloud", "Vui lòng xác thực địa chỉ email"),
-        ("en", "Confirm your email address for Qloud", "Please confirm the email address"),
+        ("vi", "Xác thực email của bạn trên Qloud", "Mở liên kết sau để xác thực email"),
+        ("en", "Verify your email address on Qloud", "Open this link to verify your email address"),
     ],
 )
 def test_signup_email_is_localized(client, language, subject, phrase):

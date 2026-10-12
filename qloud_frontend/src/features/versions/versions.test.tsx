@@ -208,7 +208,7 @@ describe('version panel', () => {
     items = [];
     setup();
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'không còn khả dụng',
+      'không còn tồn tại',
     );
     await userEvent.click(screen.getByRole('button', { name: 'Thử lại' }));
     expect(await screen.findByText('Chưa có phiên bản nào.')).toBeVisible();
@@ -305,7 +305,7 @@ it('aborts a pending history read when the selected file changes', async () => {
   setup(true);
   await userEvent.click(screen.getByRole('tab', { name: 'Phiên bản' }));
   expect(
-    await screen.findByRole('status', { name: 'Đang tải phiên bản…' }),
+    await screen.findByRole('status', { name: 'Đang tải lịch sử phiên bản…' }),
   ).toBeVisible();
   act(() => {
     useDriveStore.getState().select({ ...node, id: 'other' });
@@ -337,7 +337,7 @@ it('refreshes current markers after a 409 restore conflict', async () => {
     }),
   );
   expect(await screen.findByRole('alert')).toHaveTextContent(
-    'Đây đã là phiên bản hiện tại',
+    'Đây là phiên bản hiện tại',
   );
   await waitFor(() => {
     expect(

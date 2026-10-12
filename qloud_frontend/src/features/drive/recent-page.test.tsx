@@ -74,9 +74,9 @@ it('loads files across folders newest first, supports pagination and keeps Recen
   expect(
     screen.queryByRole('option', { name: 'Nested' }),
   ).not.toBeInTheDocument();
-  expect(screen.getByText('Last modified first')).toBeVisible();
+  expect(screen.getByText('Most recently updated')).toBeVisible();
   expect(
-    screen.queryByRole('button', { name: 'Last modified first' }),
+    screen.queryByRole('button', { name: 'Most recently updated' }),
   ).not.toBeInTheDocument();
   await user.click(screen.getByRole('button', { name: 'List view' }));
   expect(localStorage.getItem('qloud.drive.view')).toBe('list');

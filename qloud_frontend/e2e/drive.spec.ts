@@ -59,7 +59,7 @@ test('rename, and a clashing name is refused', async ({ page }) => {
   await expect(
     page
       .getByRole('dialog', { name: 'Đổi tên' })
-      .getByText('Đã có một mục cùng tên trong thư mục này.'),
+      .getByText('Thư mục này đã có tệp hoặc thư mục cùng tên.'),
   ).toBeVisible();
 
   await page

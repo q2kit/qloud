@@ -168,7 +168,9 @@ it('rejects past expiry, creates, copies and revokes a link', async () => {
     '2020-01-01T00:00',
   );
   await user.click(within(modal).getByRole('button', { name: 'Create link' }));
-  expect(await within(modal).findByRole('alert')).toHaveTextContent('future');
+  expect(await within(modal).findByRole('alert')).toHaveTextContent(
+    'Choose an expiry time later than now.',
+  );
   await user.clear(within(modal).getByLabelText('Expires at (optional)'));
   await user.click(within(modal).getByRole('button', { name: 'Create link' }));
   await user.click(
@@ -315,9 +317,7 @@ it('shows the same friendly state for invalid, expired and revoked links', async
     ),
   );
   renderApp('/s/missing');
-  expect(
-    await screen.findByText('Content is no longer available'),
-  ).toBeVisible();
+  expect(await screen.findByText("Couldn't access this content")).toBeVisible();
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
 it('paginates a public folder and confines breadcrumbs to the link tree', async () => {
@@ -419,7 +419,7 @@ it('denies an outside-tree preview through the public API without falling back t
     http.get('/api/v1/public/links/:token/children', () => page([])),
   );
   renderApp(`/s/token?preview=${compactId(outside.id)}`, testUser);
-  expect(await screen.findByText('Unable to preview this file.')).toBeVisible();
+  expect(await screen.findByText("Couldn't preview this file.")).toBeVisible();
   expect(requests.some((path) => path.startsWith('/api/v1/nodes/'))).toBe(
     false,
   );

@@ -55,8 +55,12 @@ async function upload(page: Page, parent: string, name: string) {
   expect(complete.status()).toBe(200);
 }
 async function palette(page: Page) {
-  await page.getByRole('button', { name: /Tìm kiếm và chạy lệnh/ }).click();
-  const dialog = page.getByRole('dialog', { name: 'Tìm kiếm và câu lệnh' });
+  await page
+    .getByRole('button', { name: /Tìm kiếm và thao tác nhanh/ })
+    .click();
+  const dialog = page.getByRole('dialog', {
+    name: 'Tìm kiếm và thao tác nhanh',
+  });
   await expect(dialog.getByRole('combobox')).toBeFocused();
   return dialog;
 }
@@ -103,7 +107,7 @@ test('palette finds unaccented names, opens a folder and preserves search URL fi
     'Báo cáo nhóm',
   );
   await page.keyboard.press('Control+k');
-  dialog = page.getByRole('dialog', { name: 'Tìm kiếm và câu lệnh' });
+  dialog = page.getByRole('dialog', { name: 'Tìm kiếm và thao tác nhanh' });
   await dialog.getByRole('combobox').fill('bao cao');
   await dialog.getByRole('option', { name: 'Xem tất cả kết quả' }).click();
   await expect(page).toHaveURL(/\/search\?q=bao\+cao$/);
@@ -115,19 +119,19 @@ test('palette finds unaccented names, opens a folder and preserves search URL fi
   await expect(
     page.getByRole('option', { name: 'Báo cáo nhóm', exact: true }),
   ).toHaveCount(0);
-  await page.getByLabel('Người sở hữu', { exact: true }).selectOption('me');
-  await page.getByLabel('Sửa từ ngày').fill('2020-01-01');
+  await page.getByLabel('Chủ sở hữu', { exact: true }).selectOption('me');
+  await page.getByLabel('Cập nhật từ ngày').fill('2020-01-01');
   await expect(page).toHaveURL(/modified_after=/);
   await page.reload();
   await expect(page.getByLabel('Loại', { exact: true })).toHaveValue(
     'document',
   );
-  await expect(page.getByLabel('Người sở hữu', { exact: true })).toHaveValue(
+  await expect(page.getByLabel('Chủ sở hữu', { exact: true })).toHaveValue(
     'me',
   );
-  await expect(page.getByLabel('Sửa từ ngày')).toHaveValue('2020-01-01');
+  await expect(page.getByLabel('Cập nhật từ ngày')).toHaveValue('2020-01-01');
   await page.goBack();
-  await expect(page.getByLabel('Sửa từ ngày')).toHaveValue('');
+  await expect(page.getByLabel('Cập nhật từ ngày')).toHaveValue('');
   await chooseItemAction(page, 'Báo cáo Q3.txt', 'Xem trước');
   await expect(page).toHaveURL(/\/drive\/files\/[0-9a-f]{32}$/);
   await expect(

@@ -5,7 +5,7 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 msgid "No default signup plan is configured."
-msgstr "Chưa cấu hình gói mặc định cho đăng ký."
+msgstr "Chưa thiết lập gói mặc định cho tài khoản mới."
 
 msgid "The selected plan no longer exists."
 msgstr "Gói đã chọn không còn tồn tại."
@@ -14,10 +14,10 @@ msgid "You cannot suspend your own account."
 msgstr "Không thể khóa tài khoản của chính bạn."
 
 msgid "At least one active superuser must remain."
-msgstr "Phải còn ít nhất một superuser hoạt động."
+msgstr "Phải có ít nhất một quản trị viên cấp cao đang hoạt động."
 
 msgid "Use this plan for new accounts"
-msgstr "Dùng gói này cho tài khoản đăng ký mới"
+msgstr "Đặt làm gói mặc định cho tài khoản mới"
 
 msgid "Select exactly one active plan."
 msgstr "Chọn đúng một gói đang hoạt động."
@@ -29,10 +29,10 @@ msgid "Unsuspend selected accounts"
 msgstr "Mở khóa các tài khoản đã chọn"
 
 msgid "The selected plan is inactive."
-msgstr "Gói đã chọn ngừng hoạt động."
+msgstr "Gói đã chọn không còn hoạt động."
 
 msgid "The default signup plan must be active."
-msgstr "Gói mặc định cho đăng ký phải đang hoạt động."
+msgstr "Gói mặc định cho tài khoản mới phải đang hoạt động."
 
 msgid "Code"
 msgstr "Mã gói"
@@ -44,19 +44,19 @@ msgid "Storage quota (bytes)"
 msgstr "Dung lượng tối đa (byte)"
 
 msgid "Maximum file size (bytes)"
-msgstr "Kích thước file tối đa (byte)"
+msgstr "Dung lượng tệp tối đa (byte)"
 
 msgid "Maximum old versions per file"
-msgstr "Số phiên bản cũ tối đa mỗi file"
+msgstr "Số phiên bản cũ tối đa của mỗi tệp"
 
 msgid "Version retention (days)"
-msgstr "Thời gian giữ phiên bản (ngày)"
+msgstr "Thời gian lưu phiên bản cũ (ngày)"
 
 msgid "Trash retention (days)"
-msgstr "Thời gian giữ thùng rác (ngày)"
+msgstr "Thời gian lưu các mục trong thùng rác (ngày)"
 
 msgid "Default for signup"
-msgstr "Mặc định cho đăng ký"
+msgstr "Mặc định cho tài khoản mới"
 
 msgid "Active"
 msgstr "Đang hoạt động"
@@ -86,10 +86,10 @@ msgid "Display name"
 msgstr "Tên hiển thị"
 
 msgid "Staff"
-msgstr "Nhân viên"
+msgstr "Có quyền truy cập trang quản trị"
 
 msgid "Avatar URL"
-msgstr "URL ảnh đại diện"
+msgstr "Đường dẫn ảnh đại diện"
 
 msgid "Language"
 msgstr "Ngôn ngữ"
@@ -98,16 +98,16 @@ msgid "Theme"
 msgstr "Giao diện"
 
 msgid "Quota override (bytes)"
-msgstr "Dung lượng riêng (byte)"
+msgstr "Giới hạn dung lượng riêng (byte)"
 
 msgid "Used storage (bytes)"
-msgstr "Đã dùng (byte)"
+msgstr "Dung lượng đã dùng (byte)"
 
 msgid "Reserved storage (bytes)"
-msgstr "Đang giữ chỗ (byte)"
+msgstr "Dung lượng đang giữ chỗ (byte)"
 
 msgid "Root folder"
-msgstr "Folder gốc"
+msgstr "Thư mục gốc"
 
 msgid "Suspended at"
 msgstr "Thời điểm khóa"
@@ -125,27 +125,25 @@ msgid "Accounts"
 msgstr "Tài khoản"
 
 msgid "Account state changes require explicit update_fields."
-msgstr "Thay đổi trạng thái tài khoản cần chỉ định update_fields rõ ràng."
+msgstr "Không thể cập nhật trạng thái tài khoản bằng thao tác này."
 
 #, python-format
 msgid ""
 "%(count)d selected account(s) were already suspended; their original "
 "suspension was kept."
-msgstr ""
-"%(count)d tài khoản đã chọn đang bị khóa từ trước; giữ nguyên thông tin "
-"khóa ban đầu."
+msgstr "%(count)d tài khoản đã bị khóa từ trước. Thông tin khóa ban đầu được giữ nguyên."
 
 msgid "Bot verification failed. Please try again."
-msgstr "Xác minh chống bot không thành công. Vui lòng thử lại."
+msgstr "Không thể hoàn tất xác minh. Vui lòng thử lại."
 
 msgid "Confirm your email address for Qloud"
-msgstr "Xác thực địa chỉ email cho Qloud"
+msgstr "Xác thực email của bạn trên Qloud"
 
 msgid "Hello,"
 msgstr "Xin chào,"
 
 msgid "Please confirm the email address of your Qloud account by opening this link:"
-msgstr "Vui lòng xác thực địa chỉ email của tài khoản Qloud bằng cách mở liên kết sau:"
+msgstr "Mở liên kết sau để xác thực email của bạn trên Qloud:"
 
 msgid "If you did not create a Qloud account, you can ignore this email."
 msgstr "Nếu bạn không tạo tài khoản Qloud, bạn có thể bỏ qua email này."
@@ -157,37 +155,37 @@ msgid "Reset your Qloud password"
 msgstr "Đặt lại mật khẩu Qloud"
 
 msgid "We received a request to reset the password of your Qloud account. Open this link to choose a new password:"
-msgstr "Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản Qloud của bạn. Mở liên kết sau để chọn mật khẩu mới:"
+msgstr "Chúng tôi nhận được yêu cầu đặt lại mật khẩu Qloud của bạn. Mở liên kết sau để đặt mật khẩu mới:"
 
 msgid "If you did not ask for this, you can ignore this email: your password stays the same."
-msgstr "Nếu bạn không yêu cầu việc này, bạn có thể bỏ qua email này: mật khẩu của bạn vẫn giữ nguyên."
+msgstr "Nếu bạn không gửi yêu cầu này, hãy bỏ qua email. Mật khẩu của bạn sẽ không thay đổi."
 
 msgid "Password reset request for Qloud"
 msgstr "Yêu cầu đặt lại mật khẩu Qloud"
 
 #, python-format
 msgid "Someone asked to reset the Qloud password for %(email)s, but there is no Qloud account with this email address."
-msgstr "Có người yêu cầu đặt lại mật khẩu Qloud cho %(email)s, nhưng không có tài khoản Qloud nào dùng địa chỉ email này."
+msgstr "Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho %(email)s. Tuy nhiên, email này chưa được đăng ký trên Qloud."
 
 msgid "If it was you, you can create an account here:"
-msgstr "Nếu đó là bạn, bạn có thể tạo tài khoản tại đây:"
+msgstr "Nếu bạn đã gửi yêu cầu này, bạn có thể tạo tài khoản tại đây:"
 
 msgid "Otherwise, you can ignore this email."
-msgstr "Nếu không, bạn có thể bỏ qua email này."
+msgstr "Nếu bạn không gửi yêu cầu này, hãy bỏ qua email."
 
 msgid "You already have a Qloud account"
 msgstr "Bạn đã có tài khoản Qloud"
 
 #, python-format
 msgid "Someone tried to sign up for Qloud with %(email)s, but an account with this email address already exists."
-msgstr "Có người đã thử đăng ký Qloud bằng %(email)s, nhưng đã có tài khoản dùng địa chỉ email này."
+msgstr "Chúng tôi nhận được yêu cầu đăng ký Qloud bằng %(email)s. Email này đã có tài khoản."
 
 msgid "If you forgot your password, you can reset it here:"
-msgstr "Nếu bạn quên mật khẩu, bạn có thể đặt lại tại đây:"
+msgstr "Nếu quên mật khẩu, bạn có thể đặt lại tại đây:"
 
 #, python-format
 msgid "%(count)d account(s) suspended; their sessions were signed out."
-msgstr "Đã khóa %(count)d tài khoản; các phiên đăng nhập của họ đã bị đăng xuất."
+msgstr "Đã khóa %(count)d tài khoản và đăng xuất các tài khoản này trên mọi trình duyệt."
 
 #, python-format
 msgid "%(count)d account(s) unsuspended."
@@ -206,7 +204,7 @@ msgid "You cannot remove your primary email address."
 msgstr "Không thể xóa địa chỉ email chính."
 
 msgid "This email address is already associated with this account."
-msgstr "Địa chỉ email này đã gắn với tài khoản này."
+msgstr "Email này đã được thêm vào tài khoản."
 
 msgid "The email address and/or password you specified are not correct."
 msgstr "Email hoặc mật khẩu không đúng."
@@ -215,7 +213,7 @@ msgid "The phone number and/or password you specified are not correct."
 msgstr "Số điện thoại hoặc mật khẩu không đúng."
 
 msgid "A user is already registered with this email address."
-msgstr "Email này đã được dùng cho một tài khoản khác."
+msgstr "Email này đã được đăng ký."
 
 msgid "Please type your current password."
 msgstr "Vui lòng nhập mật khẩu hiện tại."
@@ -236,28 +234,28 @@ msgid "The password reset token was invalid."
 msgstr "Liên kết đặt lại mật khẩu không hợp lệ."
 
 msgid "A user is already registered with this phone number."
-msgstr "Số điện thoại này đã được dùng cho một tài khoản khác."
+msgstr "Số điện thoại này đã được đăng ký."
 
 msgid "Too many failed login attempts. Try again later."
 msgstr "Bạn đã đăng nhập sai quá nhiều lần. Vui lòng thử lại sau."
 
 msgid "The email address is not assigned to any user account."
-msgstr "Email này chưa gắn với tài khoản nào."
+msgstr "Không có tài khoản nào dùng email này."
 
 msgid "The phone number is not assigned to any user account."
-msgstr "Số điện thoại này chưa gắn với tài khoản nào."
+msgstr "Không có tài khoản nào dùng số điện thoại này."
 
 msgid "Your primary email address must be verified."
-msgstr "Địa chỉ email chính phải được xác thực."
+msgstr "Hãy xác thực địa chỉ email chính của bạn."
 
 msgid "Username can not be used. Please use other username."
-msgstr "Không dùng được tên đăng nhập này. Vui lòng chọn tên khác."
+msgstr "Không thể dùng tên đăng nhập này. Hãy chọn tên khác."
 
 msgid "The username and/or password you specified are not correct."
 msgstr "Tên đăng nhập hoặc mật khẩu không đúng."
 
 msgid "A user with that username already exists."
-msgstr "Tên đăng nhập này đã có người dùng."
+msgstr "Tên đăng nhập này đã được sử dụng."
 
 msgid "Please select only one."
 msgstr "Vui lòng chỉ chọn một."
@@ -266,16 +264,16 @@ msgid "The new value must be different from the current one."
 msgstr "Giá trị mới phải khác giá trị hiện tại."
 
 msgid "Be patient, you are sending too many requests."
-msgstr "Bạn gửi quá nhiều yêu cầu. Vui lòng đợi một lát rồi thử lại."
+msgstr "Bạn đã gửi quá nhiều yêu cầu. Vui lòng đợi một chút rồi thử lại."
 
 msgid "Invalid token."
-msgstr "Token không hợp lệ."
+msgstr "Thông tin xác thực không hợp lệ."
 
 msgid "Your account has no password set up."
-msgstr "Tài khoản của bạn chưa có mật khẩu. Hãy đặt mật khẩu trước khi gỡ liên kết này."
+msgstr "Tài khoản của bạn chưa có mật khẩu. Hãy đặt mật khẩu trước khi gỡ liên kết tài khoản."
 
 msgid "Your account has no verified email address."
-msgstr "Tài khoản của bạn chưa có email đã xác thực."
+msgstr "Bạn chưa xác thực địa chỉ email nào cho tài khoản này."
 
 msgid "You cannot disconnect your last remaining third-party account."
 msgstr "Không thể gỡ tài khoản liên kết cuối cùng."
@@ -284,14 +282,14 @@ msgid "The third-party account is already connected to a different account."
 msgstr "Tài khoản này đã được liên kết với một người dùng khác."
 
 msgid "You must type the same password each time."
-msgstr "Hai lần nhập mật khẩu phải giống nhau."
+msgstr "Hai mật khẩu bạn nhập không khớp."
 
 msgid "You must type the same email each time."
-msgstr "Hai lần nhập email phải giống nhau."
+msgstr "Hai địa chỉ email bạn nhập không khớp."
 
 #, python-format
 msgid "An account already exists with this email address. Please sign in to that account first, then connect your %s account."
-msgstr "Email này đã có tài khoản. Hãy đăng nhập vào tài khoản đó trước, rồi liên kết tài khoản %s."
+msgstr "Email này đã có tài khoản Qloud. Hãy đăng nhập vào tài khoản đó rồi liên kết tài khoản %s."
 
 #, python-format
 msgid "You cannot add more than %d email addresses."
@@ -300,5 +298,5 @@ msgstr "Không thể thêm quá %d địa chỉ email."
 #, python-format
 msgid "This password is too short. It must contain at least %d character."
 msgid_plural "This password is too short. It must contain at least %d characters."
-msgstr[0] "Mật khẩu quá ngắn. Mật khẩu phải có ít nhất %d ký tự."
+msgstr[0] "Mật khẩu phải có ít nhất %d ký tự."
 

@@ -82,7 +82,7 @@ def test_email_content_recipient_locale_and_link(
         assert ("Có thể chỉnh sửa" if role == "editor" else "Có thể xem") in message.body
         assert ("Thư mục" if kind == "folder" else "Tệp") in message.body
     else:
-        assert message.subject == "A new item has been shared with you on Qloud"
+        assert message.subject == "Someone shared an item with you on Qloud"
         assert ("Can edit" if role == "editor" else "Can view") in message.body
 
 

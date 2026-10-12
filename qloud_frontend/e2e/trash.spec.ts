@@ -69,7 +69,8 @@ async function trashViaApi(page: Page, ids: string[]): Promise<void> {
   expect(response.status()).toBe(200);
 }
 async function navigateTrash(page: Page, mobile: boolean): Promise<void> {
-  if (mobile) await page.getByRole('button', { name: 'Mở điều hướng' }).click();
+  if (mobile)
+    await page.getByRole('button', { name: 'Mở menu điều hướng' }).click();
   await page.getByRole('link', { name: 'Thùng rác', exact: true }).click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Thùng rác');
 }

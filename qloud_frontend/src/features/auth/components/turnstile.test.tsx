@@ -150,7 +150,7 @@ describe('Turnstile on signup', () => {
     await user.click(screen.getByRole('button', { name: 'Sign up' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Bot verification failed.',
+      "Couldn't complete verification. Please try again.",
     );
     expect(turnstile.reset).toHaveBeenCalledWith('widget-1');
     expect(screen.getByRole('button', { name: 'Sign up' })).toBeDisabled();

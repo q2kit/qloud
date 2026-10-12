@@ -25,7 +25,7 @@ export async function openItemMenu(
     typeof target === 'string'
       ? page.getByRole('option', { name: target, exact: true })
       : target;
-  await item.getByRole('button', { name: /^Thao tác khác với / }).click();
+  await item.getByRole('button', { name: /^Thao tác với / }).click();
   return page.getByRole('menu');
 }
 

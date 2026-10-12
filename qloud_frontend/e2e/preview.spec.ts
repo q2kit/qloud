@@ -171,7 +171,7 @@ test('dragging a thumbnail moves the entire node card without uploading', async 
       target.id,
     );
     await expect(
-      page.getByText('Thả để tải lên', { exact: false }),
+      page.getByText('Thả tệp để tải lên', { exact: false }),
     ).toHaveCount(0);
   }
 });
@@ -274,7 +274,9 @@ test('thumbnails in grid and list, image/PDF viewer, navigation and download', a
   await expect(
     page.getByRole('dialog', { name: 'b-tài-liệu.pdf' }),
   ).toBeVisible();
-  await expect(page.getByRole('img', { name: 'Trang PDF 1' })).toBeVisible();
+  await expect(
+    page.getByRole('img', { name: 'Trang 1 của tệp PDF' }),
+  ).toBeVisible();
   await expect
     .poll(() =>
       page
@@ -420,7 +422,9 @@ test('canonical link follows a moved file; unsafe MIME never renders', async ({
   await page.goto(`/drive/files/${compact(file.id)}`);
   await expect(page.getByRole('dialog', { name: 'page.html' })).toBeVisible();
   await expect(
-    page.getByText('Loại tệp này chưa hỗ trợ xem trước. Bạn có thể tải về.'),
+    page.getByText(
+      'Chưa hỗ trợ xem trước loại tệp này. Bạn có thể tải tệp xuống để mở.',
+    ),
   ).toBeVisible();
   await expect(page.locator('iframe, embed, object')).toHaveCount(0);
   expect(await page.evaluate(() => Object.hasOwn(window, 'PWNED'))).toBe(false);
@@ -589,7 +593,7 @@ test('PDF page input rejects fractional and out-of-range values without losing t
   );
   await page.goto(`/drive/files/${compact(pdf.id)}`);
   const input = page.getByRole('spinbutton', { name: 'Trang', exact: true });
-  const canvas = page.getByRole('img', { name: 'Trang PDF 1' });
+  const canvas = page.getByRole('img', { name: 'Trang 1 của tệp PDF' });
   await expect
     .poll(() =>
       canvas.evaluate((element) => (element as HTMLCanvasElement).width),
@@ -602,7 +606,9 @@ test('PDF page input rejects fractional and out-of-range values without losing t
     await expect(page.getByRole('alert')).toHaveCount(0);
   }
   await input.fill('2');
-  await expect(page.getByRole('img', { name: 'Trang PDF 2' })).toBeVisible();
+  await expect(
+    page.getByRole('img', { name: 'Trang 2 của tệp PDF' }),
+  ).toBeVisible();
   await expect(input).toHaveValue('2');
   if (process.env.PREVIEW_CAPTURE) {
     for (const theme of ['light', 'dark']) {

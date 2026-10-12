@@ -9,7 +9,7 @@ async function openNavigationIfMobile(
   isMobile: boolean,
 ): Promise<void> {
   if (!isMobile) return;
-  await page.getByRole('button', { name: 'Mở điều hướng' }).click();
+  await page.getByRole('button', { name: 'Mở menu điều hướng' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Điều hướng chính' }),
   ).toBeVisible();
@@ -146,7 +146,7 @@ test.describe('mobile layout (360px)', () => {
     await expect(
       drawer.getByRole('group', { name: 'Tùy chọn hiển thị' }),
     ).toBeVisible();
-    await drawer.getByRole('button', { name: 'Đóng điều hướng' }).click();
+    await drawer.getByRole('button', { name: 'Đóng menu điều hướng' }).click();
     await expect(drawer).toBeHidden();
 
     await page.getByRole('button', { name: 'Mở bảng chi tiết' }).click();
@@ -200,6 +200,8 @@ test('clickable things show the hand cursor', async ({ page, isMobile }) => {
   expect(await cursor(page.getByRole('option').first())).toBe('pointer');
   // M6 enables the command palette trigger.
   expect(
-    await cursor(page.getByRole('button', { name: /Tìm kiếm và chạy lệnh/ })),
+    await cursor(
+      page.getByRole('button', { name: /Tìm kiếm và thao tác nhanh/ }),
+    ),
   ).toBe('pointer');
 });

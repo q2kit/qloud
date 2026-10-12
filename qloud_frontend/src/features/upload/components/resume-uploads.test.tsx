@@ -65,7 +65,7 @@ it('asks for the original file and keeps the session available after a mismatch'
   const file = new File(['wrong'], 'a.txt');
   await user.upload(screen.getByLabelText('Reselect a.txt'), file);
   expect(restore).toHaveBeenCalledWith(file, session);
-  expect(await screen.findByRole('alert')).toHaveTextContent('does not match');
+  expect(await screen.findByRole('alert')).toHaveTextContent("doesn't match");
   expect(screen.getByRole('button', { name: 'Select file' })).toBeEnabled();
 });
 

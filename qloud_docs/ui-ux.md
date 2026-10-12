@@ -90,6 +90,7 @@ Mỗi màn hình được mô tả chi tiết (trạng thái rỗng, đang tải
 - Key đặt theo namespace của feature, ví dụ `drive.actions.rename`, `errors.quota_exceeded`.
 - Định dạng ngày, số và dung lượng (KB/MB/GB) theo `Intl` và locale hiện tại.
 - Email do BE gửi cũng phải theo ngôn ngữ của user.
+- Câu chữ UI và email ngắn gọn, dễ hiểu; không hiển thị mã task hoặc thuật ngữ nội bộ như node, session. Tiếng Việt dùng nhất quán “tệp”, “thư mục”, “liên kết”, “tải lên”, “tải xuống”, “chủ sở hữu”; tiếng Anh dùng “Sign in” và “Couldn’t…” trong thông báo lỗi.
 
 ## Dark mode
 - Có 3 lựa chọn: `system` (mặc định), `light`, `dark`. Lưu vào profile, và cache ở localStorage để tránh trang bị nháy màu khi tải.
@@ -120,8 +121,8 @@ Mỗi request chọn tối đa 1.000 mục, theo giới hạn API. Đủ i18n vi
 ### S-07, S-11, S-12 — Chia sẻ (M5-05)
 
 - Được chia sẻ dùng lưới/danh sách và cursor chung Drive, thêm tên owner và quyền thực tế. Mở file qua route riêng, folder qua Drive; không nhận drop upload ở danh sách này.
-- Hộp thoại Chia sẻ mở từ menu của một mục có quyền hoặc từ panel chi tiết. Hai phần Người có quyền truy cập và Link công khai; email/role, danh sách grant, hạn dùng tùy chọn, copy và thu hồi. Hộp thoại cuộn trong 90dvh, co tới 360px; Esc/Đóng trả focus về nơi mở.
-- Trang public dùng PublicLayout với ngôn ngữ/theme, chỉ xem/download. Link file và link folder dùng cùng bố cục: tên (`<h1>`), nút Báo cáo vi phạm, thanh chọn dạng lưới/danh sách và FileBrowser (thumbnail). Link file chỉ có một card là file đó và không có sắp xếp; mở link thì viewer toàn màn hình tự mở, đóng về trang này. Folder có thêm sắp xếp và breadcrumb giới hạn trong cây. Không có dòng mô tả phạm vi link. Menu thao tác hoạt động ngay cả khi chưa chọn mục. Link không còn hợp lệ hiện “Nội dung không còn khả dụng”. Báo cáo vi phạm triển khai cùng M5-07.
+- Hộp thoại Chia sẻ mở từ menu của một mục có quyền hoặc từ panel chi tiết. Hai phần Người có quyền truy cập và Liên kết công khai; email/role, danh sách grant, hạn dùng tùy chọn, copy và thu hồi. Hộp thoại cuộn trong 90dvh, co tới 360px; Esc/Đóng trả focus về nơi mở.
+- Trang public dùng PublicLayout với ngôn ngữ/theme, chỉ xem/download. Link file và link folder dùng cùng bố cục: tên (`<h1>`), nút Báo cáo vi phạm, thanh chọn dạng lưới/danh sách và FileBrowser (thumbnail). Link file chỉ có một card là file đó và không có sắp xếp; mở link thì viewer toàn màn hình tự mở, đóng về trang này. Folder có thêm sắp xếp và breadcrumb giới hạn trong cây. Không có dòng mô tả phạm vi link. Menu thao tác hoạt động ngay cả khi chưa chọn mục. Liên kết không còn hợp lệ hiện “Không thể truy cập nội dung”. Báo cáo vi phạm triển khai cùng M5-07.
 
 
 ### Báo cáo và kiểm duyệt — M5-07

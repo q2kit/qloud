@@ -98,7 +98,7 @@ describe('Drive (S-05)', () => {
     for (let i = 0; i < 105; i++) drive.file(`a${String(i)}.txt`);
     const router = renderApp(folderPath(undefined, target.id), testUser);
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'The file is unavailable',
+      'This file is no longer in this folder',
     );
     expect(drive.requests.some((url) => url.searchParams.has('cursor'))).toBe(
       false,
@@ -107,7 +107,7 @@ describe('Drive (S-05)', () => {
       router.navigate('/drive?select=00000000000000000000000000000000'),
     );
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'The file is unavailable',
+      'This file is no longer in this folder',
     );
     expect(
       (await items()).every(
@@ -485,7 +485,7 @@ describe('Drive (S-05)', () => {
       'true',
     );
     expect(localStorage.getItem('qloud.drive.view')).toBe('list');
-    expect(screen.getByText('Last modified')).toBeInTheDocument();
+    expect(screen.getByText('Last updated')).toBeInTheDocument();
   });
 
   it('loads more pages, then virtualizes long folders', async () => {

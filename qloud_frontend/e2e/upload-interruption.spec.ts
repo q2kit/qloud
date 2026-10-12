@@ -113,7 +113,7 @@ for (const interruption of ['offline', 'reload'] as const) {
 
       await context.setOffline(true);
       await expect(
-        tray.getByText('Mất kết nối — sẽ tự tiếp tục khi có mạng'),
+        tray.getByText('Mất kết nối. Tệp sẽ tự tải tiếp khi có mạng.'),
       ).toBeVisible();
       release();
       if (interruption === 'reload') {
@@ -123,7 +123,7 @@ for (const interruption of ['offline', 'reload'] as const) {
         allowRemaining = true;
         await expect(page).toHaveURL(folderUrl);
         const unfinished = page.getByRole('region', {
-          name: 'Tệp tải lên dở dang',
+          name: 'Tệp chưa tải lên xong',
         });
         await expect(unfinished.getByText(filename)).toBeVisible();
         if (process.env.M210_CAPTURE) {

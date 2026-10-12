@@ -100,9 +100,9 @@ test('a taken name: keep both, or skip', async ({ page }) => {
   await expect(item(page, 'note.txt')).toBeVisible();
 
   await pick(page, [note]);
-  const dialog = page.getByRole('dialog', { name: 'Tên đã được dùng' });
+  const dialog = page.getByRole('dialog', { name: 'Trùng tên' });
   await expect(dialog).toContainText(
-    'Thư mục này đã có một mục tên "note.txt".',
+    'Thư mục này đã có tệp hoặc thư mục tên "note.txt".',
   );
   await dialog.getByRole('button', { name: 'Giữ cả hai' }).click();
   await expect(item(page, 'note (1).txt')).toBeVisible();
@@ -137,7 +137,9 @@ test('files dropped from the computer onto a folder upload into it', async ({
   const folder = item(page, 'Ảnh');
   await folder.dispatchEvent('dragenter', { dataTransfer });
   await folder.dispatchEvent('dragover', { dataTransfer });
-  await expect(page.getByText('Thả để tải lên vào "Ảnh"')).toBeVisible();
+  await expect(
+    page.getByText('Thả tệp để tải lên thư mục "Ảnh"'),
+  ).toBeVisible();
   await folder.dispatchEvent('drop', { dataTransfer });
 
   await expect(tray(page).getByText('Đã tải lên 1 tệp')).toBeVisible();
@@ -160,5 +162,7 @@ test('without a verified email the tray says so and can resend it', async ({
   await tray(page)
     .getByRole('button', { name: 'Gửi lại email xác thực' })
     .click();
-  await expect(tray(page).getByText(/^Đã gửi tới /)).toBeVisible();
+  await expect(
+    tray(page).getByText(/^Đã gửi email xác thực tới /),
+  ).toBeVisible();
 });

@@ -413,9 +413,9 @@ def test_revocation_email_locale_html_escape(data, locale, django_capture_on_com
         assert resolve(data, report, note='<script>alert("x")</script>').status_code == 200
     payload = mail.call_args.kwargs
     assert payload["subject"] == (
-        "Một link công khai đã bị gỡ trên Qloud"
+        "Một liên kết công khai đã bị thu hồi trên Qloud"
         if locale == "vi"
-        else "A public link was removed on Qloud"
+        else "A public link was revoked on Qloud"
     )
     assert payload["to"] == [owner.email]
     assert "<script>" not in payload["html"]

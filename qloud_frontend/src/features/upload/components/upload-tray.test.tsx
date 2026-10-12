@@ -69,7 +69,7 @@ describe('upload tray', () => {
       2 * MB,
     );
     const tray = within(screen.getByRole('region', { name: 'Uploads' }));
-    expect(tray.getByText('Uploading 1/2')).toBeVisible();
+    expect(tray.getByText('Uploading · 1/2 files complete')).toBeVisible();
     expect(tray.getByText('2 MB/s · about 3 seconds left')).toBeVisible();
     expect(tray.getByRole('progressbar', { name: 'a.pdf' })).toHaveAttribute(
       'aria-valuenow',
@@ -95,7 +95,7 @@ describe('upload tray', () => {
     await user.click(screen.getByRole('button', { name: 'Retry bad.pdf' }));
     expect(engine.retry).toHaveBeenCalledWith('bad.pdf');
     await user.click(
-      screen.getByRole('button', { name: 'Retry 1 failed file' }),
+      screen.getByRole('button', { name: 'Retry 1 failed upload' }),
     );
     expect(engine.retryFailed).toHaveBeenCalled();
     await user.click(screen.getByRole('button', { name: 'Cancel up.pdf' }));
@@ -126,7 +126,9 @@ describe('upload tray', () => {
       screen.getByRole('dialog', { name: 'Name already in use' }),
     );
     expect(
-      dialog.getByText('This folder already has an item named "a.pdf".'),
+      dialog.getByText(
+        'This folder already has a file or folder named "a.pdf".',
+      ),
     ).toBeVisible();
     await user.click(dialog.getByLabelText('Do this for the 1 remaining file'));
     await user.click(dialog.getByRole('button', { name: 'Keep both' }));

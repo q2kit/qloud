@@ -184,7 +184,7 @@ test.describe('OAuth', () => {
 
     await expect(page).toHaveURL(/\/login/);
     await expect(
-      page.getByText('Email này đã có tài khoản Qloud.', { exact: false }),
+      page.getByText('Email này đã đăng ký Qloud.', { exact: false }),
     ).toBeVisible();
     // Still signed out.
     await page.goto('/trash');

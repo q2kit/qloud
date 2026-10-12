@@ -136,9 +136,11 @@ test('owner shares, changes roles, creates links and revokes access through UI',
     await expect(
       dialog.getByRole('combobox', { name: `Quyền của ${email}` }),
     ).toHaveValue('viewer');
-    await dialog.getByRole('button', { name: 'Tạo link', exact: true }).click();
+    await dialog
+      .getByRole('button', { name: 'Tạo liên kết', exact: true })
+      .click();
     await expect(
-      dialog.getByRole('button', { name: 'Sao chép link', exact: true }),
+      dialog.getByRole('button', { name: 'Sao chép liên kết', exact: true }),
     ).toBeVisible();
     await captures(page, 'dialog', isMobile);
     await recipient.goto('/shared');
@@ -172,7 +174,7 @@ test('owner shares, changes roles, creates links and revokes access through UI',
     ).toBeVisible();
     await editorMenu.getByText('Chia sẻ', { exact: true }).click();
     await expect(
-      recipient.getByText('Chỉ chủ sở hữu quản lý link công khai.'),
+      recipient.getByText('Chỉ chủ sở hữu có thể quản lý liên kết công khai.'),
     ).toBeVisible();
     await recipient.getByRole('button', { name: 'Đóng', exact: true }).click();
     const links = await page.request.get(`/api/v1/nodes/${folder.id}/links`);
@@ -204,7 +206,7 @@ test('owner shares, changes roles, creates links and revokes access through UI',
       await captures(visitor, 'public-folder', isMobile);
       await visitor
         .getByRole('button', {
-          name: 'Thao tác khác với Readme.txt',
+          name: 'Thao tác với Readme.txt',
           exact: true,
         })
         .click();
@@ -227,14 +229,14 @@ test('owner shares, changes roles, creates links and revokes access through UI',
       expect(await readFile(path)).toEqual(Buffer.from('Project content'));
       expect(privateRequests).toEqual([]);
       await dialog
-        .getByRole('button', { name: 'Thu hồi link', exact: true })
+        .getByRole('button', { name: 'Thu hồi liên kết', exact: true })
         .click();
       await expect(
         dialog.getByText('Đã thu hồi', { exact: true }),
       ).toBeVisible();
       await visitor.goto(`/s/${link.token}`);
       await expect(
-        visitor.getByRole('heading', { name: 'Nội dung không còn khả dụng' }),
+        visitor.getByRole('heading', { name: 'Không thể truy cập nội dung' }),
       ).toBeVisible();
     } finally {
       await visitorContext.close();
@@ -247,7 +249,7 @@ test('owner shares, changes roles, creates links and revokes access through UI',
     ).toHaveCount(0);
     await recipient.goto('/shared');
     await expect(
-      recipient.getByRole('heading', { name: 'Chưa có mục được chia sẻ' }),
+      recipient.getByRole('heading', { name: 'Chưa có nội dung được chia sẻ' }),
     ).toBeVisible();
     await recipient.goto(`/drive/folders/${folder.id.replaceAll('-', '')}`);
     await expect(
@@ -326,7 +328,7 @@ test('public file opens anonymously, denies outside scope and expires', async ({
       `/s/${link.token}?folder=${outside.replaceAll('-', '')}`,
     );
     await expect(
-      visitor.getByRole('heading', { name: 'Nội dung không còn khả dụng' }),
+      visitor.getByRole('heading', { name: 'Không thể truy cập nội dung' }),
     ).toBeVisible();
     const expiredResponse = await page.request.post(
       `/api/v1/nodes/${file.id}/links`,
@@ -346,7 +348,7 @@ test('public file opens anonymously, denies outside scope and expires', async ({
       .toBe(404);
     await visitor.goto(`/s/${expiring.token}`);
     await expect(
-      visitor.getByRole('heading', { name: 'Nội dung không còn khả dụng' }),
+      visitor.getByRole('heading', { name: 'Không thể truy cập nội dung' }),
     ).toBeVisible();
   } finally {
     await context.close();

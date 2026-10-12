@@ -2085,7 +2085,7 @@ components:
           type: string
           readOnly: true
           nullable: true
-          title: URL ảnh đại diện
+          title: Đường dẫn ảnh đại diện
         locale:
           allOf:
           - $ref: '#/components/schemas/LocaleEnum'

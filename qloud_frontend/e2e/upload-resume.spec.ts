@@ -70,7 +70,7 @@ test('folder upload preserves nested files, then merges or keeps both on conflic
     await writeFile(join(folder, 'new.txt'), 'new');
     await page.getByTestId('upload-folder-input').setInputFiles(folder);
     const folderDialog = page.getByRole('dialog', {
-      name: 'Tên thư mục đã được dùng',
+      name: 'Trùng tên thư mục',
     });
     await folderDialog
       .getByRole('button', { name: 'Gộp', exact: true })
@@ -79,7 +79,7 @@ test('folder upload preserves nested files, then merges or keeps both on conflic
       .getByRole('button', { name: 'Gộp', exact: true })
       .click(); // Day1
     const fileDialog = page.getByRole('dialog', {
-      name: 'Tên đã được dùng',
+      name: 'Trùng tên',
       exact: true,
     });
     await fileDialog.getByRole('button', { name: 'Bỏ qua' }).click();
@@ -167,7 +167,7 @@ test('reload resumes an API-created partial upload, rejects a changed file and s
     expect(put.ok()).toBe(true);
     await page.reload();
     const unfinished = page.getByRole('region', {
-      name: 'Tệp tải lên dở dang',
+      name: 'Tệp chưa tải lên xong',
     });
     await expect(unfinished.getByText('resume.bin')).toBeVisible();
     const picker = unfinished.getByLabel('Chọn lại resume.bin');
@@ -176,7 +176,9 @@ test('reload resumes an API-created partial upload, rejects a changed file and s
       mimeType: 'application/octet-stream',
       buffer: Buffer.from('wrong'),
     });
-    await expect(unfinished.getByRole('alert')).toContainText('không khớp');
+    await expect(unfinished.getByRole('alert')).toContainText(
+      'Tệp bạn chọn khác với tệp đang tải dở',
+    );
     const parts: string[] = [];
     const creates: string[] = [];
     page.on('request', (request) => {

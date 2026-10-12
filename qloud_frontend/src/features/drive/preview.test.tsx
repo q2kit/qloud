@@ -147,7 +147,7 @@ it('denies a canonical file link after access is revoked', async () => {
   renderApp(`/drive/files/${compactId(target.id)}`, testUser);
   expect(
     await screen.findByRole('heading', {
-      name: 'Unable to preview this file.',
+      name: "Couldn't preview this file.",
     }),
   ).toBeVisible();
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -167,7 +167,7 @@ it('retries a transient parent error instead of treating it as a private parent'
   renderApp(`/drive/files/${compactId(target.id)}`, testUser);
   expect(
     await screen.findByRole('heading', {
-      name: 'Unable to preview this file.',
+      name: "Couldn't preview this file.",
     }),
   ).toBeVisible();
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -205,7 +205,7 @@ it('shows source text literally, retries errors and restores focus on close', as
   await user.keyboard('{Enter}');
   expect(
     await screen.findByText(
-      'Unable to preview this file.',
+      "Couldn't preview this file.",
       {},
       { timeout: 3000 },
     ),
