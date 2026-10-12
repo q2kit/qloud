@@ -216,6 +216,10 @@ M3-04: FFmpeg/ffprobe **chạy trên host/container Celery worker**, dưới d�
 
 Build dùng zlib của hệ thống (giấy phép Zlib, cần header khi compile) và RPATH tới `<prefix>/lib`. Khi build image nhiều stage, dùng `--prefix` đúng đường dẫn cuối trong worker và copy prefix sang cùng đường dẫn; không di chuyển binary/shared libraries sang prefix khác. Ví dụ build `python3 scripts/build_ffmpeg.py --prefix /opt/qloud-ffmpeg`, rồi cấu hình `THUMBNAIL_FFMPEG=/opt/qloud-ffmpeg/bin/ffmpeg` và `THUMBNAIL_FFPROBE=/opt/qloud-ffmpeg/bin/ffprobe`.
 
+### Lịch sử phiên bản (M7-02)
+
+`drive.selectors` và `drive.services` kiểm tra quyền qua lớp chung; API list dùng select_related uploader và cursor theo số phiên bản. Restore/delete khóa owner → node → Blob, đồng bộ với upload/purge và kiểm tra quyền lại sau khóa. Restore thêm FileVersion tham chiếu Blob cũ, cập nhật metadata và enqueue thumbnail sau commit. Quota tính mỗi Blob được tham chiếu một lần; delete/purge trừ khi hết tham chiếu và ghi ObjectDeletion trong cùng transaction. Request không xóa object S3; worker hiện có bảo vệ Blob còn tham chiếu và giữ hàng đợi khi S3 lỗi. Không thêm schema/dependency.
+
 ### Dọn thùng rác (M4-02)
 
 Celery beat gọi `apps.drive.tasks.expire_trash` hằng ngày, xét thời hạn `trash_retention_days`

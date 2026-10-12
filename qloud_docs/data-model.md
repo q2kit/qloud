@@ -32,7 +32,7 @@ User 1─────* UploadSession ────▶ Node (đích)
 | theme | varchar(10) | `system`, `light` hoặc `dark` |
 | plan_id | uuid → Plan | gói được gán khi đăng ký, là gói đang có `is_default_for_signup = true` tại thời điểm đó |
 | quota_override_bytes | bigint, null | admin đặt riêng cho từng người, ưu tiên hơn giá trị của plan |
-| used_bytes | bigint | tổng dung lượng các version của user, **kể cả trong thùng rác** |
+| used_bytes | bigint | tổng size của các Blob khác nhau được version của user tham chiếu, **kể cả trong thùng rác** |
 | reserved_bytes | bigint | dung lượng đang giữ chỗ cho các upload chưa xong |
 | session_version | bigint, không âm | mặc định 0; tăng khi khóa user, tham gia hash session để session cũ không dùng lại được khi mở khóa; không sửa từ admin |
 | root_folder_id | uuid → Node, unique, null | folder gốc "Drive của tôi", tạo cùng lúc với user trong transaction; null tạm thời lúc tạo để giải quyết tham chiếu vòng User ↔ Node |
@@ -202,7 +202,7 @@ User bị khóa thì không đăng nhập được, mọi session cũ bị vô h
 
 ## Quy tắc về dung lượng
 
-- `used_bytes` = tổng `size` của **mọi version** thuộc các node mà user sở hữu, gồm cả node trong thùng rác.
+- `used_bytes` = tổng `Blob.size` của **các Blob khác nhau** được version thuộc các node mà user sở hữu tham chiếu, gồm cả node trong thùng rác. Restore tạo version mới dùng chung Blob, không tăng quota; xóa version/purge chỉ giảm khi Blob hết tham chiếu.
 - Upload vào folder của người khác (khi có quyền `editor`): dung lượng được tính cho **owner của folder đích**, và file mới thuộc về owner đó.
   Giới hạn kích thước file cũng lấy theo plan của owner đó.
 - Mọi thay đổi `used_bytes` và `reserved_bytes` phải dùng `SELECT ... FOR UPDATE` trên dòng user, hoặc cập nhật nguyên tử bằng `F()` kèm điều kiện kiểm tra.

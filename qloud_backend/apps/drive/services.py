@@ -2,20 +2,24 @@
 
 import uuid
 from collections.abc import Iterator, Sequence
+from functools import partial
 from typing import Literal
 
 from django.db import IntegrityError, transaction
-from django.db.models import Q
+from django.db.models import F, Max, Q
 from django.http import Http404
 from django.utils import timezone
 
 from apps.accounts.models import User
+from apps.core.errors import CurrentVersion
 from apps.sharing.permissions import Role, can_move_within, get_node_or_404, nodes_for
 
 from . import selectors
 from .errors import InvalidMove, InvalidTarget, NameConflict, RootFolder
-from .models import Node
+from .models import Blob, FileVersion, Node, ObjectDeletion
 from .names import MAX_LENGTH
+from .tasks import enqueue_object_cleanup, enqueue_thumbnail
+from .thumbnails import SIZES, thumbnail_key
 
 SIBLING_NAME = "node_sibling_name"
 MOVE_LIMIT = 1000
@@ -161,3 +165,58 @@ def move(user: User, node_ids: Sequence[uuid.UUID], target_id: uuid.UUID) -> lis
                 raise NameConflict from error
             raise
     return nodes
+
+
+def _locked_file(user: User, node_id: uuid.UUID, role: Role) -> Node:
+    node = selectors.file_for(user, node_id, role)
+    User.objects.select_for_update().get(pk=node.owner_id)
+    # Recheck grants and trash after waiting for the owner lock.
+    try:
+        node = nodes_for(user, role).select_for_update().get(pk=node_id)
+    except Node.DoesNotExist as error:
+        raise Http404 from error
+    return node
+
+
+@transaction.atomic
+def restore_version(user: User, node_id: uuid.UUID, version_id: uuid.UUID) -> Node:
+    node = _locked_file(user, node_id, Role.EDITOR)
+    source = selectors.version_for(node, version_id)
+    if source.pk == node.current_version_id:
+        raise CurrentVersion
+    blob = Blob.objects.select_for_update().get(pk=source.blob_id)
+    number = (
+        FileVersion.objects.filter(node=node).aggregate(last=Max("version_number"))["last"] or 0
+    ) + 1
+    version = FileVersion.objects.create(
+        node=node,
+        blob=blob,
+        version_number=number,
+        size=source.size,
+        mime_type=source.mime_type,
+        uploaded_by=user,
+        original_name=source.original_name,
+    )
+    node.current_version = version
+    node.size, node.mime_type, node.thumbnail_key = source.size, source.mime_type, None
+    node.save(update_fields=["current_version", "size", "mime_type", "thumbnail_key", "updated_at"])
+    transaction.on_commit(partial(enqueue_thumbnail, str(version.pk)))
+    return node
+
+
+@transaction.atomic
+def delete_version(user: User, node_id: uuid.UUID, version_id: uuid.UUID) -> None:
+    node = _locked_file(user, node_id, Role.OWNER)
+    version = selectors.version_for(node, version_id)
+    if version.pk == node.current_version_id:
+        raise CurrentVersion
+    blob = Blob.objects.select_for_update().get(pk=version.blob_id)
+    keys = {thumbnail_key(version.pk, size) for size in SIZES}
+    version.delete()
+    if not FileVersion.objects.filter(blob=blob).exists():
+        keys.add(blob.storage_key)
+        User.objects.filter(pk=node.owner_id).update(used_bytes=F("used_bytes") - blob.size)
+    ObjectDeletion.objects.bulk_create(
+        [ObjectDeletion(storage_key=key) for key in keys], ignore_conflicts=True
+    )
+    transaction.on_commit(partial(enqueue_object_cleanup))

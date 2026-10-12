@@ -26,7 +26,7 @@ Test tranh chấp: 10 session đồng thời mà tổng vượt quota thì chỉ
 ## Quy tắc
 - Giới hạn của user lấy từ **plan** được gán lúc đăng ký. Riêng quota có thể bị ghi đè bằng `quota_override_bytes`.
   Mọi chỗ cần giới hạn đều gọi `get_limits(user)`.
-- Dung lượng tính cho owner gồm: mọi phiên bản của file, kể cả trong thùng rác. Thumbnail không tính. Phần đang giữ chỗ cho upload dở dang cũng tính.
+- Dung lượng tính cho owner gồm: các Blob khác nhau được phiên bản file tham chiếu, kể cả trong thùng rác. M7-02: nhiều phiên bản khôi phục dùng chung Blob chỉ tính một lần; xóa/purge chỉ giảm khi hết tham chiếu. Thumbnail không tính. Phần đang giữ chỗ cho upload dở dang cũng tính.
 - Kiểm tra khi tạo upload session: phải thỏa `used + reserved + size <= quota`, nếu không thì trả 413 `quota_exceeded`;
   và `size <= max_file_size`, nếu không thì trả 413 `file_too_large`.
 - Cảnh báo trên UI khi dùng từ 80% (vàng) và từ 95% (đỏ). Khi hết dung lượng thì chặn upload nhưng **vẫn cho xem, tải và xóa**.

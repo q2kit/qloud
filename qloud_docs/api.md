@@ -135,6 +135,13 @@ M2-04: `POST /uploads` trả session `{id, part_size, part_count, expires_at, ..
 | POST | `/nodes/{id}/versions/{vid}/restore` | Đặt phiên bản này làm phiên bản hiện tại (tạo version mới) |
 | DELETE | `/nodes/{id}/versions/{vid}` | Xóa một phiên bản (không xóa được phiên bản hiện tại) |
 
+M7-02 triển khai cả bốn endpoint, chỉ cho file còn sống và phiên đăng nhập:
+- List/download cần viewer; restore cần editor; delete chỉ owner. Quyền trực tiếp và thừa kế dùng lớp chung. Không truy cập được, node trash hoặc version sai node → 404; folder → 400 `not_a_file`.
+- List trả `{results, next, previous}`, `version_number` giảm dần, page_size mặc định 50, tối đa 200. Version gồm `{id, version_number, size, mime_type, original_name, uploaded_by: {id, display_name} | null, created_at, keep_forever, is_current}`; không có email/storage_key.
+- Download trả `200 {url, expires_at}`, tên file theo node hiện tại, MIME an toàn của version đã chọn; TTL giống download current. Byte đi trực tiếp tới S3.
+- Restore không nhận body, trả `200 Node`; tạo version mới dùng chung Blob nguồn, quota không tăng kể cả đã đầy. Reset/enqueue thumbnail cho version mới, giữ tên/vị trí/share/link.
+- Delete trả 204; restore/delete current trả 409 `current_version`. Xóa Blob khỏi quota chỉ khi hết tham chiếu, S3/thumbnail được dọn qua hàng đợi bền vững sau commit.
+
 ### Chia sẻ
 M5-02 triển khai API share người dùng; M5-03 triển khai API link/public (báo cáo thuộc M5-07).
 - GET/POST danh sách share và PATCH/DELETE share yêu cầu editor hoặc owner trên node còn sống, không phải folder gốc. Viewer/người ngoài/trashed trả 404, folder gốc trả 400 `root_folder`. Kiểm tra quyền trước lookup email.

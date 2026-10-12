@@ -152,7 +152,6 @@ def _delete_locked(owner: User, roots: Sequence[Node], *, enqueue: bool = True) 
         subtree = [row[0] for row in cursor.fetchall()]
     nodes = Node.objects.filter(owner=owner, trashed_at__isnull=False, pk__in=subtree)
     versions = FileVersion.objects.filter(node__in=nodes)
-    size = versions.aggregate(total=Sum("size"))["total"] or 0
     blob_keys = set(versions.values_list("blob__storage_key", flat=True))
     keys = {
         thumbnail_key(pk, size) for pk in versions.values_list("pk", flat=True) for size in SIZES
@@ -162,11 +161,9 @@ def _delete_locked(owner: User, roots: Sequence[Node], *, enqueue: bool = True) 
     # A blob may still serve another version; never remove its object in that case.
     from .models import Blob
 
-    keys.update(
-        Blob.objects.filter(storage_key__in=blob_keys, versions__isnull=True).values_list(
-            "storage_key", flat=True
-        )
-    )
+    unreferenced = Blob.objects.filter(storage_key__in=blob_keys, versions__isnull=True)
+    size = unreferenced.aggregate(total=Sum("size"))["total"] or 0
+    keys.update(unreferenced.values_list("storage_key", flat=True))
     ObjectDeletion.objects.bulk_create(
         [ObjectDeletion(storage_key=key) for key in keys], ignore_conflicts=True
     )
