@@ -46,7 +46,7 @@ jobs:
     name: Backend
     needs: changes
     if: needs.changes.outputs.backend == 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     defaults:
       run:
         working-directory: qloud_backend
@@ -100,7 +100,7 @@ jobs:
     name: Frontend
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     defaults:
       run:
         working-directory: qloud_frontend
@@ -129,7 +129,7 @@ jobs:
     name: E2E
     needs: changes
     if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN || 'not-used' }}
     steps:
@@ -185,7 +185,7 @@ jobs:
 
   gitleaks:
     name: Secret scan
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -205,7 +205,7 @@ jobs:
     name: CI OK
     if: always()
     needs: [changes, backend, frontend, e2e, gitleaks]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: All required jobs passed or were skipped
         env:
