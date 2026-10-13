@@ -41,7 +41,7 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
 ### Hành vi responsive của application shell
 
 - Từ breakpoint `lg`, sidebar rộng 256px cố định bên trái; trên màn hình nhỏ hơn, sidebar mở thành drawer có lớp nền che.
-- Header luôn nằm trên cùng, gồm tiêu đề, tìm kiếm hoặc command palette, menu "Tạo mới" (Thư mục mới, Tải tệp lên), nút bật panel chi tiết và menu tài khoản (đăng xuất).
+- Header luôn nằm trên cùng, gồm tiêu đề, tìm kiếm hoặc command palette, menu "Tạo mới" (Thư mục mới, Tải tệp lên), nút bật panel chi tiết và menu tài khoản (Cài đặt, đăng xuất). Nút mở menu tài khoản hiện avatar của hồ sơ (`avatar_url`, lấy từ Google/GitHub); không có avatar hoặc ảnh lỗi thì hiện chữ cái đầu của tên.
   Tiêu đề header lấy theo route đang mở (`handle.titleKey` của route, ví dụ Drive, Gần đây, Thùng rác, 404).
 - Trang Drive (S-05): breadcrumb nằm đầu nội dung trang và là tiêu đề trang, mục cuối (folder hiện tại) là `<h1>`. Trên màn hình hẹp, các folder ở giữa thu thành "…".
   Vùng nội dung folder giãn hết chiều cao còn lại dưới header (trừ padding trang); vùng trống tới đáy nhận drop upload và kéo chọn. Double click chỉ bật trên desktop có chuột/hover (`(hover: hover) and (pointer: fine)`): vùng trống bên dưới thanh công cụ mở modal tạo thư mục con trong folder đang xem, item thì mở item. Trên thiết bị cảm ứng, dùng Mở/Tải xuống trong menu “⋯” của item; tạo folder bằng menu/nút hiện có. Bàn phím giữ Enter và các thao tác hiện có.
