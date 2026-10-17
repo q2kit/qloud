@@ -1,12 +1,29 @@
 /**
- * S-05 routes (ui-ux.md): the root folder lives at /drive, others at /drive/folders/:id.
+ * Where an item opens (M8-22): own items under /drive, items others share under
+ * /shared. /drive never shows someone else's data.
+ */
+export type Space = 'drive' | 'shared';
+
+export function spaceOf(
+  node: { owner: { id: string } },
+  me: { id: string },
+): Space {
+  return node.owner.id === me.id ? 'drive' : 'shared';
+}
+
+/**
+ * S-05 routes (ui-ux.md): the root folder lives at /drive, others at /drive/folders/:id;
+ * shared folders at /shared/folders/:id, with /shared itself as their list.
  * URLs carry the UUID without dashes (32 hex digits); the API keeps the standard form.
  */
 export function folderPath(
   folderId: string | undefined,
   fileId?: string,
+  space: Space = 'drive',
 ): string {
-  const path = folderId ? `/drive/folders/${compactId(folderId)}` : '/drive';
+  const path = folderId
+    ? `/${space}/folders/${compactId(folderId)}`
+    : `/${space}`;
   return fileId
     ? `${path}?select=${encodeURIComponent(compactId(fileId))}`
     : path;
@@ -33,6 +50,11 @@ export function uuidFromUrl(id: string): string {
     hex.slice(16, 20),
     hex.slice(20),
   ].join('-');
+}
+
+/** A file's canonical link; it redirects to its folder with `?preview=`. */
+export function filePath(fileId: string, space: Space = 'drive'): string {
+  return `/${space}/files/${compactId(fileId)}`;
 }
 
 export function nodeUrl(node: { id: string; kind: string }): string {

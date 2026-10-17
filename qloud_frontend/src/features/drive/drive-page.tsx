@@ -46,10 +46,17 @@ import { MoveDialog } from './components/move-dialog';
 import { NameDialog } from './components/name-dialog';
 import type { SelectModifiers } from './components/node-collection';
 import { driveErrorMessage } from './errors';
-import { compactId, folderPath, nodeUrl, uuidFromUrl } from './paths';
+import {
+  compactId,
+  folderPath,
+  nodeUrl,
+  spaceOf,
+  uuidFromUrl,
+  type Space,
+} from './paths';
 import { useDrivePreferences } from './preferences';
 import { useDriveStore } from './store';
-import { useCurrentFolderId } from './use-current-folder';
+import { useCurrentFolderId, useSpace } from './use-current-folder';
 
 interface Renaming {
   node: DriveNode;
@@ -69,6 +76,7 @@ export function DrivePage(): React.JSX.Element {
   const navigate = useNavigate();
   const openPreview = useOpenPreview();
   const folderId = useCurrentFolderId();
+  const space = useSpace();
   const { folderId: rawFolderId } = useParams();
   const folder = useNode(folderId);
   const location = useLocation();
@@ -231,14 +239,21 @@ export function DrivePage(): React.JSX.Element {
     () => new Set(selected.map((node) => node.id)),
     [selected],
   );
-  // Older links carry the dashed UUID: show the compact form (paths.ts).
+  // Older links carry the dashed UUID, and a folder belongs to one space (M8-22):
+  // /drive/folders/<shared folder> moves to /shared, and the reverse (paths.ts).
+  const folderSpace =
+    folder.data && me.data ? spaceOf(folder.data, me.data) : space;
   React.useEffect(() => {
-    if (rawFolderId && rawFolderId !== compactId(rawFolderId)) {
-      void navigate(folderPath(rawFolderId) + location.search, {
-        replace: true,
-      });
+    if (
+      rawFolderId &&
+      (rawFolderId !== compactId(rawFolderId) || folderSpace !== space)
+    ) {
+      void navigate(
+        folderPath(rawFolderId, undefined, folderSpace) + location.search,
+        { replace: true },
+      );
     }
-  }, [rawFolderId, navigate, location.search]);
+  }, [rawFolderId, folderSpace, space, navigate, location.search]);
 
   const crumbs = folder.data?.breadcrumb;
   const parentCrumb = crumbs?.at(-1);
@@ -254,14 +269,18 @@ export function DrivePage(): React.JSX.Element {
   );
 
   // Parent navigation belongs to Drive; selection shortcuts live in FileBrowser.
-  // Like a file manager: back up to the parent folder (nothing at the root).
+  // Like a file manager: back up to the parent folder (nothing at the root). Above
+  // the highest shared folder one can see is the /shared list.
   useShortcut(
     'parentFolder',
     () => {
       if (parent)
-        void navigate(folderPath(parent.isRoot ? undefined : parent.id));
+        void navigate(
+          folderPath(parent.isRoot ? undefined : parent.id, undefined, space),
+        );
+      else if (space === 'shared') void navigate('/shared');
     },
-    { enabled: Boolean(parent) },
+    { enabled: Boolean(parent) || space === 'shared' },
   );
 
   const { fetchNextPage, isFetchingNextPage } = children;
@@ -272,7 +291,7 @@ export function DrivePage(): React.JSX.Element {
   const open = (node: DriveNode): void => {
     setActionError(null);
     if (node.kind === 'folder') {
-      void navigate(folderPath(node.id));
+      void navigate(folderPath(node.id, undefined, space));
       return;
     }
     openPreview(node);
@@ -411,6 +430,7 @@ export function DrivePage(): React.JSX.Element {
   if (folder.isError) {
     return (
       <FolderUnavailable
+        space={space}
         error={folder.error}
         onRetry={() => void folder.refetch()}
       />
@@ -440,7 +460,7 @@ export function DrivePage(): React.JSX.Element {
       )}
       <div className="flex min-h-9 items-center border-b border-border pb-4">
         {folder.data ? (
-          <DriveBreadcrumb folder={folder.data} onDrop={dropOn} />
+          <DriveBreadcrumb folder={folder.data} space={space} onDrop={dropOn} />
         ) : (
           <div
             className="h-7 w-48 animate-pulse rounded-md bg-secondary"
@@ -625,9 +645,11 @@ function EmptyFolder({
 
 function FolderUnavailable({
   error,
+  space,
   onRetry,
 }: {
   error: Error;
+  space: Space;
   onRetry: () => void;
 }): React.JSX.Element {
   const { t } = useTranslation();
@@ -645,7 +667,9 @@ function FolderUnavailable({
         description={t('drive.errors.notFoundDescription')}
       >
         <Button asChild>
-          <Link to={folderPath(undefined)}>{t('navigation.home')}</Link>
+          <Link to={folderPath(undefined, undefined, space)}>
+            {t(space === 'shared' ? 'navigation.shared' : 'navigation.home')}
+          </Link>
         </Button>
       </CenteredState>
     );

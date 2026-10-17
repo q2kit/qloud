@@ -50,9 +50,10 @@ test('share notification email opens the granted folder and respects revocation'
     });
     expect(created.status()).toBe(201);
     const share = ((await created.json()) as { id: string }).id;
-    const link = await linkFromEmail(email, '/drive/folders/');
+    // M8-22: shared items open under /shared, not the recipient's Drive.
+    const link = await linkFromEmail(email, '/shared/folders/');
     expect(new URL(link).pathname).toBe(
-      `/drive/folders/${folder.replaceAll('-', '')}`,
+      `/shared/folders/${folder.replaceAll('-', '')}`,
     );
     await recipient.goto(link);
     await expect(

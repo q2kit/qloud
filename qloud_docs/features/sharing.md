@@ -80,14 +80,14 @@
 ## Tiến độ M5-04
 - Tạo Share trực tiếp thành công gửi email text/HTML qua Celery sau transaction commit. Rollback, request lỗi/không có quyền, grant trùng, PATCH role, DELETE share và ShareLink không gửi email; thu hồi rồi tạo grant mới gửi thông báo mới. Không gửi riêng cho hậu duệ thừa kế.
 - Nội dung dùng locale vi/en của người nhận, gồm người thực hiện chia sẻ (display_name, fallback email), tên/loại mục, role đã dịch và link APP_BASE_URL. HTML escape dữ liệu; subject cố định đã dịch, không có tên người dùng/file tùy ý.
-- Email giữ snapshot khi tạo grant; đổi tên/quyền/email/locale hoặc thu hồi sau đó không sửa thông báo đã xếp hàng. Link folder `/drive/folders/<UUID compact>`, file `/drive/files/<UUID compact>`; truy cập luôn kiểm tra quyền hiện tại và đăng nhập bằng tài khoản nhận email.
+- Email giữ snapshot khi tạo grant; đổi tên/quyền/email/locale hoặc thu hồi sau đó không sửa thông báo đã xếp hàng. Link folder `/shared/folders/<UUID compact>`, file `/shared/files/<UUID compact>` (M8-22; trước đó là `/drive/...`, link cũ tự chuyển sang `/shared`); truy cập luôn kiểm tra quyền hiện tại và đăng nhập bằng tài khoản nhận email.
 - Tái sử dụng `accounts.tasks.send_email` và retry SMTP/OSError hiện có; không thêm outbox hoặc bảo đảm exactly-once. Worker Celery cần chạy như email auth.
 - M5-08: link file chia sẻ riêng mở viewer độc lập nếu folder cha trả 404; không hiển thị folder cha/file cùng cấp, không tải danh sách cha, tắt chuyển file. Đóng viewer về Drive của người nhận. Thu hồi grant khiến mở lại link, preview và download bị từ chối bởi API.
 
 ## Tiến độ M5-05
 - S-11: action Chia sẻ trong menu item của Drive và panel chi tiết cho một mục có `can_share`. Hộp thoại liệt kê grant trực tiếp (cursor), thêm email viewer/editor, đổi role, thu hồi; thông báo quyền thừa kế phải quản lý ở mục nguồn. Không hiển thị email/tên lỗi thô từ server.
 - Owner tạo nhiều link có hạn dùng (nhập giờ local, gửi ISO) hoặc không hết hạn, sao chép URL `/s/:token`, xem trạng thái hết hạn/thu hồi và thu hồi. Editor chỉ quản lý grant người dùng; API links trả 404 thì hiển thị chỉ owner quản lý link. Link thu hồi không bật lại.
-- S-07 `/shared` dùng FileBrowser/NodeCollection với cursor/sắp xếp/grid/list, hiển thị owner và quyền thực tế; chỉ liệt kê grant trực tiếp, không tự bung cây. Folder mở trong Drive; file mở route canonical (kể cả chia sẻ file riêng). Có loading/rỗng/lỗi/thử lại.
+- S-07 `/shared` dùng FileBrowser/NodeCollection với cursor/sắp xếp/grid/list, hiển thị owner và quyền thực tế; chỉ liệt kê grant trực tiếp, không tự bung cây. Folder mở ở `/shared/folders/:id`; file mở trình xem ngay trên `/shared` (`?preview=`), đóng thì ở lại danh sách (M8-22). Có loading/rỗng/lỗi/thử lại.
 - Drive lấy capabilities cho mục đang chọn để hiện action ghi/chia sẻ. Folder viewer không nhận upload/drop hay mở tạo folder; header tạo mới bị vô hiệu. Breadcrumb/back trong cây được chia sẻ dùng UUID của mục, chỉ gọi “Drive của tôi” khi đúng root của người nhận.
 - S-12 `/s/:token` dùng layout công khai, không yêu cầu session. Root file tự mở viewer; đóng thì về trang link có cùng bố cục với link folder (tên, Báo cáo vi phạm, lưới/danh sách với một card file có thumbnail, không có sắp xếp) và mở lại được từ card. Folder có breadcrumb trong cây, grid/list, cursor/sắp xếp, viewer chuyển file và tải trực tiếp S3. Không có action ghi hoặc đường về tổ tiên ngoài phạm vi link.
 - Query/cache node, danh sách và preview/thumbnail public tách theo token; public viewer luôn dùng API token dù visitor đã đăng nhập. Preview dùng cơ chế refresh URL và component ảnh/PDF/media/text hiện có. Link sai/hết hạn/thu hồi hoặc folder ngoài cây có thông báo nội dung không còn khả dụng; các lỗi khác cho thử lại.
@@ -120,6 +120,13 @@ Quyết định đã duyệt trên [#166](https://github.com/q2kit/qloud/issues/
 - Quyền thừa kế lấy qua `GET /nodes/{id}/shares?include_inherited=true`, không thêm endpoint. Owner thấy grant ở mọi tổ tiên; editor chỉ thấy grant ở tổ tiên nằm trong breadcrumb của mình, để không lộ thông tin ở phần cây họ không truy cập được.
 - Chi tiết node có `owner: {id, display_name}`, không trả email của owner.
 - Tab Chia sẻ chỉ đọc, xem [ui-ux.md › Tab Chia sẻ](../ui-ux.md#tab-chia-sẻ-m8-10). Viewer chỉ thấy chủ sở hữu và quyền của mình; editor thấy người có quyền truy cập; chỉ owner thấy liên kết công khai (API links chỉ cho owner). Thay đổi quyền vẫn làm ở hộp thoại S-11.
+
+## Tiến độ M8-22 — mục được chia sẻ mở trong `/shared`
+Quyết định trên [#194](https://github.com/q2kit/qloud/issues/194): `/drive` chỉ chứa dữ liệu của chính mình; mọi mục người khác chia sẻ mở dưới `/shared`.
+- Route: `/shared/folders/:id` (cùng màn hình Drive: lưới/danh sách, menu, tạo mới/upload khi là editor) và `/shared/files/:id`. Không gian xác định bằng `owner` trên chi tiết node.
+- Breadcrumb trong không gian chia sẻ bắt đầu bằng “Được chia sẻ với tôi” (về `/shared`) rồi tới các folder người nhận xem được; Backspace ở folder cao nhất quay về `/shared`.
+- Mở sai không gian thì chuyển hướng `replace`: `/drive/folders/<folder người khác>` sang `/shared/folders/<id>` và ngược lại; `/drive/files/:id` và `/shared/files/:id` mở trình xem ở folder chứa file đúng không gian, hoặc `/shared?preview=` khi folder cha bị ẩn. Link cũ trong email, kết quả tìm kiếm và lịch sử trình duyệt vẫn mở đúng.
+- Email báo chia sẻ dẫn tới `/shared/folders/<id>` hoặc `/shared/files/<id>`.
 
 ## Ngoài phạm vi
 Mật khẩu cho share link, quyền sửa qua share link, mời người chưa có tài khoản (có thể làm sau MVP), chặn thừa kế quyền.

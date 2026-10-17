@@ -5,10 +5,12 @@ import { useNavigate } from 'react-router';
 import { FormAlert } from '@/features/auth/components/form-field';
 import { downloadNode, type DriveNode } from '@/features/drive/api';
 import { FileBrowser } from '@/features/drive/components/file-browser';
+import { FileViewer } from '@/features/drive/components/file-viewer';
 import { CenteredState } from '@/features/drive/components/browser-states';
-import { folderPath, compactId } from '@/features/drive/paths';
+import { folderPath } from '@/features/drive/paths';
 import { useDrivePreferences } from '@/features/drive/preferences';
 import { useDriveStore } from '@/features/drive/store';
+import { useOpenPreview } from '@/features/drive/use-open-preview';
 import type { NodeAction } from '@/features/drive/actions';
 import { useShared } from './api';
 
@@ -30,12 +32,13 @@ export function SharedPage() {
       select(null);
     };
   }, [select]);
+  const openPreview = useOpenPreview();
+  // Shared items stay under /shared (M8-22): files in the viewer over this list,
+  // so closing it comes back here; folders at /shared/folders/:id.
   const open = (node: DriveNode) => {
-    void navigate(
-      node.kind === 'folder'
-        ? folderPath(node.id)
-        : `/drive/files/${compactId(node.id)}`,
-    );
+    if (node.kind === 'folder')
+      void navigate(folderPath(node.id, undefined, 'shared'));
+    else openPreview(node);
   };
   const actionsFor = (): NodeAction[] => {
     const selection = useDriveStore.getState().selected;
@@ -110,6 +113,12 @@ export function SharedPage() {
             description={t('sharing.emptyDescription')}
           />
         }
+      />
+      <FileViewer
+        nodes={nodes}
+        hasMore={query.hasNextPage}
+        loadingMore={query.isFetchingNextPage}
+        loadMore={() => query.fetchNextPage()}
       />
     </section>
   );

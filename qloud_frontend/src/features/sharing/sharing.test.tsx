@@ -211,7 +211,7 @@ it('does not offer public link creation to an editor', async () => {
     screen.queryByRole('button', { name: 'Create link' }),
   ).not.toBeInTheDocument();
 });
-it('lists shared items, owner and effective role and opens the canonical file route', async () => {
+it('lists shared items, owner and effective role and previews files in place', async () => {
   const node = drive.file('Shared.txt');
   server.use(
     http.get('/api/v1/shared-with-me', () =>
@@ -226,13 +226,17 @@ it('lists shared items, owner and effective role and opens the canonical file ro
   );
   const router = renderApp('/shared', testUser);
   expect(await screen.findByText('Owner name · Viewer')).toBeVisible();
-  await userEvent
-    .setup()
-    .dblClick(screen.getByRole('option', { name: node.name }));
-  await waitFor(() => {
-    expect(router.state.location.pathname).not.toBe('/shared');
-  });
+  const user = userEvent.setup();
+  await user.dblClick(screen.getByRole('option', { name: node.name }));
+  // M8-22: the viewer opens over /shared, and Esc comes back to the list.
   expect(await screen.findByRole('dialog', { name: node.name })).toBeVisible();
+  expect(router.state.location.pathname).toBe('/shared');
+  expect(router.state.location.search).toBe(`?preview=${compactId(node.id)}`);
+  await user.keyboard('{Escape}');
+  await waitFor(() => {
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+  expect(router.state.location.pathname).toBe('/shared');
 });
 it('renders shared loading failures with retry and an empty state', async () => {
   let failed = true;
@@ -258,12 +262,13 @@ it('hides writing and sharing actions from a viewer in a shared folder', async (
     http.get('/api/v1/nodes/:id', ({ params }) =>
       HttpResponse.json({
         ...drive.nodes.get(String(params.id)),
+        owner: { id: 'someone-else', display_name: 'Owner' },
         breadcrumb: [],
         capabilities: { can_edit: false, can_trash: false, can_share: false },
       }),
     ),
   );
-  renderApp(`/drive/folders/${compactId(folder.id)}`, testUser);
+  renderApp(`/shared/folders/${compactId(folder.id)}`, testUser);
   await userEvent
     .setup()
     .click(await screen.findByRole('option', { name: node.name }));

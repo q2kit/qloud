@@ -25,13 +25,11 @@ export function FileViewer({
   hasMore,
   loadingMore,
   loadMore,
-  standalone,
 }: {
   nodes: DriveNode[];
   hasMore: boolean;
   loadingMore: boolean;
   loadMore: () => Promise<unknown>;
-  standalone?: { fileId: string; onClose: () => void };
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -39,7 +37,7 @@ export function FileViewer({
   const routeState: unknown = location.state;
   const [params, setParams] = useSearchParams();
   const rawId = params.get('preview');
-  const id = standalone?.fileId ?? (rawId ? uuidFromUrl(rawId) : undefined);
+  const id = rawId ? uuidFromUrl(rawId) : undefined;
   const token = usePublicToken();
   const [reporting, setReporting] = React.useState<DriveNode>();
   const node = useNode(id, token);
@@ -50,7 +48,7 @@ export function FileViewer({
   const index = files.findIndex((item) => item.id === id);
   const previous = files[index - 1];
   const next = files[index + 1];
-  // Nothing to step to: a single file (file link, standalone viewer).
+  // Nothing to step to: a single file in the list.
   const browsable = files.length > 1 || hasMore;
   const setFile = (nextId: string) => {
     document.querySelector<HTMLElement>('[data-file-viewer]')?.focus();
@@ -111,10 +109,6 @@ export function FileViewer({
     }
   };
   const close = () => {
-    if (standalone) {
-      standalone.onClose();
-      return;
-    }
     if (
       typeof routeState === 'object' &&
       routeState !== null &&
