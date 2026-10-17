@@ -9,6 +9,7 @@ import {
   describe,
   expect,
   it,
+  vi,
 } from 'vitest';
 
 import { DESKTOP_INPUT_QUERY } from '@/features/drive/desktop-input';
@@ -67,7 +68,7 @@ describe('keyboard shortcuts (M8-08)', () => {
 
     await user.keyboard('/');
     const palette = await screen.findByRole('dialog', {
-      name: 'Search and commands',
+      name: 'Search and quick actions',
     });
     // Typing in the palette never triggers single-key shortcuts.
     await user.keyboard('s?');
@@ -93,6 +94,51 @@ describe('keyboard shortcuts (M8-08)', () => {
     expect(
       await screen.findByRole('dialog', { name: 'New folder' }),
     ).toBeInTheDocument();
+  });
+
+  it('U opens the file picker in the Drive', async () => {
+    const user = userEvent.setup();
+    const click = vi.spyOn(HTMLInputElement.prototype, 'click');
+    try {
+      renderApp('/drive', testUser);
+      // Wait until the folder and storage are known, as the menu shows.
+      await user.click(await screen.findByRole('button', { name: 'Create' }));
+      await waitFor(() => {
+        expect(
+          screen.getByRole('menuitem', { name: 'Upload files' }),
+        ).not.toHaveAttribute('aria-disabled');
+      });
+      await user.keyboard('{Escape}');
+      await user.keyboard('u');
+      expect(click).toHaveBeenCalledOnce();
+    } finally {
+      click.mockRestore();
+    }
+  });
+
+  it('U and Shift+U do nothing once storage is full', async () => {
+    const user = userEvent.setup();
+    const click = vi.spyOn(HTMLInputElement.prototype, 'click');
+    drive.storage = { ...drive.storage, used_bytes: drive.storage.quota_bytes };
+    try {
+      renderApp('/drive', testUser);
+      await user.click(await screen.findByRole('button', { name: 'Create' }));
+      await waitFor(() => {
+        expect(
+          screen.getByRole('menuitem', { name: 'Upload files' }),
+        ).toHaveAttribute('aria-disabled', 'true');
+      });
+      // The folder is editable: only the full storage stops the upload keys.
+      expect(
+        screen.getByRole('menuitem', { name: 'New folder' }),
+      ).not.toHaveAttribute('aria-disabled');
+      await user.keyboard('{Escape}');
+      await user.keyboard('u');
+      await user.keyboard('{Shift>}U{/Shift}');
+      expect(click).not.toHaveBeenCalled();
+    } finally {
+      click.mockRestore();
+    }
   });
 
   it('G then T opens the trash; V switches the view', async () => {
