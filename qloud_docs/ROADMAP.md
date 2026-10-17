@@ -103,7 +103,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 ## M8 — Hoàn thiện và deploy ([quota.md](features/quota.md))
 | ID | Task | Issue | Trạng thái |
 |---|---|---|---|
-| M8-01 | Trang dung lượng, cảnh báo khi gần đầy | [#45](https://github.com/q2kit/qloud/issues/45) | 🟦 |
+| M8-01 | Trang dung lượng, cảnh báo khi gần đầy | [#45](https://github.com/q2kit/qloud/issues/45) | ✅ [PR #187](https://github.com/q2kit/qloud/pull/187) |
 | M8-02 | Rà soát bảo mật, rà soát trợ năng | [#46](https://github.com/q2kit/qloud/issues/46) | ⬜ |
 | M8-03 | Dockerfile production, Compose production, nginx (Origin Certificate, phục vụ FE tĩnh, proxy `/api`, real IP từ Cloudflare), hướng dẫn cấu hình Cloudflare và ufw | [#47](https://github.com/q2kit/qloud/issues/47) | ⬜ |
 | M8-04 | Deploy tự động qua GitHub Actions lên VPS | [#48](https://github.com/q2kit/qloud/issues/48) | ⬜ |
