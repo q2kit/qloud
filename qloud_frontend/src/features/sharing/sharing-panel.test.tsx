@@ -151,6 +151,16 @@ describe('sharing tab', () => {
     });
   });
 
+  it('names an unnamed owner by their email when it is the viewer', async () => {
+    OWNER.display_name = '';
+    try {
+      setup();
+      expect(await screen.findByText(`${testUser.email} (you)`)).toBeVisible();
+    } finally {
+      OWNER.display_name = 'Bao Tran';
+    }
+  });
+
   it('copies the public link', async () => {
     const user = userEvent.setup();
     setup();

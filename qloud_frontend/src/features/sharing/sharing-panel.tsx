@@ -70,8 +70,10 @@ export function SharingPanel({ node }: { node: DriveNode }): React.JSX.Element {
       </div>
     );
 
-  const owner = detail.data.owner;
-  const ownerName = owner.display_name.trim() || t('sharing.unnamedOwner');
+  // The API gives no owner email; for our own items /me has it.
+  const ownerName =
+    detail.data.owner.display_name.trim() ||
+    (isOwner ? me.data.email : t('sharing.unnamedOwner'));
   // Grants on ancestors carry their node's id; the breadcrumb names it.
   const folders = new Map(
     detail.data.breadcrumb.map((folder) => [folder.id, folder.name]),
@@ -292,7 +294,7 @@ function Person({
   return (
     <div className="flex items-start gap-3">
       <span
-        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-medium uppercase"
+        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-medium text-accent-foreground uppercase"
         aria-hidden="true"
       >
         {name.trim().charAt(0)}
