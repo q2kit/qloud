@@ -55,7 +55,7 @@ test('keyboard shortcuts: ? sheet, Shift+N, G then T, and no shortcuts while typ
     'Điều hướng',
     'Chọn',
     'Thao tác với mục',
-    'Trình xem file',
+    'Trình xem tệp',
   ])
     await expect(sheet.getByRole('heading', { name: group })).toBeVisible();
   await capture(page);

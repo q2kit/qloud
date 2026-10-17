@@ -71,14 +71,14 @@ Nguồn sự thật cho phím tắt (M8-08, [#164](https://github.com/q2kit/qlou
 | Điều hướng | `G` rồi `D` / `R` / `S` / `T` / `,` | Tới Drive / Gần đây / Được chia sẻ / Thùng rác / Cài đặt | Phím thứ hai trong vòng 1 giây |
 | Điều hướng | Backspace | Lên folder cha | Drive, không ở folder gốc |
 | Chọn | ↑ ↓ ← →, Shift+↑/↓ | Di chuyển giữa các mục, mở rộng vùng chọn | Danh sách file |
-| Chọn | Ctrl/⌘+Space | Thêm/bỏ mục đang focus | Danh sách file |
+| Chọn | Ctrl/⌘+Space | Thêm/bỏ mục đang trỏ tới | Danh sách file |
 | Chọn | Ctrl/⌘+A, Esc | Chọn tất cả / bỏ chọn | Danh sách file |
 | Thao tác với mục | Enter, Ctrl/⌘+Enter | Mở / mở trong thẻ mới | Mục đang focus |
 | Thao tác với mục | F2, Delete | Đổi tên / đưa vào thùng rác | Theo quyền như menu |
 | Thao tác với mục | `S`, `D` | Chia sẻ / tải xuống | Chọn đúng 1 mục, chỉ khi menu của mục có thao tác đó |
 | Thao tác với mục | Shift+N, `U`, Shift+U | Thư mục mới / upload file / upload thư mục | Drive, có quyền sửa folder hiện tại; `U`/Shift+U không chạy khi Drive của mình hết dung lượng |
 | Thao tác với mục | `V` | Chuyển lưới ↔ danh sách | Mọi trang có danh sách file |
-| Trình xem file | ← →, `D`, Esc | File trước/sau, tải file đang xem, đóng | Trong trình xem |
+| Trình xem tệp | ← →, `D`, Esc | Tệp trước/sau, tải xuống tệp đang xem, đóng | Trong trình xem |
 
 Quy tắc chung (một dispatcher cho mọi phím tắt):
 - Không chạy khi đang gõ (input, textarea, select, combobox như `Select`, contenteditable), đang soạn chữ IME, phím tự lặp (`repeat`), sự kiện đã được xử lý (`defaultPrevented`), hoặc khi có dialog/menu/listbox đang mở; ngoại lệ là overlay sở hữu phím đó (bottom sheet chi tiết với `i`, bảng lệnh với Ctrl/⌘+K, bảng `?` với `?`, trình xem với `D`). Danh sách file (listbox) không có typeahead nên không chặn phím tắt.

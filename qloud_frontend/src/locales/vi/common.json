@@ -698,7 +698,7 @@
       "navigation": "Điều hướng",
       "selection": "Chọn",
       "items": "Thao tác với mục",
-      "viewer": "Trình xem file"
+      "viewer": "Trình xem tệp"
     },
     "actions": {
       "palette": "Tìm kiếm và thao tác nhanh",
@@ -712,7 +712,7 @@
       "parentFolder": "Lên thư mục cha",
       "moveSelection": "Di chuyển giữa các mục",
       "extendSelection": "Mở rộng vùng chọn",
-      "toggleSelection": "Thêm/bỏ mục đang focus",
+      "toggleSelection": "Thêm/bỏ mục đang trỏ tới",
       "selectAll": "Chọn tất cả",
       "clearSelection": "Bỏ chọn",
       "open": "Mở",
@@ -725,9 +725,9 @@
       "upload": "Tải tệp lên",
       "uploadFolder": "Tải thư mục lên",
       "toggleView": "Chuyển lưới/danh sách",
-      "previousFile": "File trước",
-      "nextFile": "File sau",
-      "viewerDownload": "Tải file đang xem",
+      "previousFile": "Tệp trước",
+      "nextFile": "Tệp sau",
+      "viewerDownload": "Tải xuống tệp đang xem",
       "closeViewer": "Đóng trình xem"
     }
   }
