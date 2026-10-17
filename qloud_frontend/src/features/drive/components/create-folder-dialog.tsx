@@ -39,8 +39,12 @@ export function CreateFolderDialog(): React.JSX.Element {
             onSuccess: (folder) => {
               setOpen(false);
               create.reset();
-              // From another page, show where the folder went.
-              if (!pathname.startsWith('/drive'))
+              // From another page, show where the folder went: it was
+              // created in the own Drive's root (useCurrentFolderId).
+              if (
+                !pathname.startsWith('/drive') &&
+                !pathname.startsWith('/shared/folders/')
+              )
                 void navigate(folderPath(undefined));
               select(folder);
             },

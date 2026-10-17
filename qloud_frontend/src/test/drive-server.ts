@@ -6,6 +6,8 @@ import type { StorageUsage } from '@/features/storage/api';
 import { testUser } from './auth';
 
 export const ROOT_ID = '0190c0de-0000-7000-8000-00000000f000';
+/** The owner of `FakeDrive.shared` items. */
+export const SHARING_OWNER_ID = '0190c0de-0000-7000-8000-00000000f001';
 
 /** An in-memory folder tree behind the drive endpoints (M2-02, M2-05). */
 export class FakeDrive {
@@ -15,6 +17,9 @@ export class FakeDrive {
   /** Milliseconds every write waits, to observe optimistic updates. */
   writeDelay = 0;
   failChildren = false;
+  /** Items someone else owns and shares with the test user (M8-22): their
+   * detail names that owner, and their breadcrumb keeps only shared folders. */
+  shared = new Set<string>();
   /** What `/me/storage` reports; plenty of room unless a test fills it. */
   storage: StorageUsage = {
     quota_bytes: 5_000_000_000,
@@ -111,10 +116,15 @@ export class FakeDrive {
       parent = parent.parent_id ? this.nodes.get(parent.parent_id) : undefined;
     }
     const editable = !node.is_root;
+    const shared = this.shared.has(node.id);
     return {
       ...node,
-      owner: { id: testUser.id, display_name: '' },
-      breadcrumb,
+      owner: shared
+        ? { id: SHARING_OWNER_ID, display_name: 'Owner' }
+        : { id: testUser.id, display_name: '' },
+      breadcrumb: shared
+        ? breadcrumb.filter((crumb) => this.shared.has(crumb.id))
+        : breadcrumb,
       capabilities: {
         can_edit: editable,
         can_trash: editable,

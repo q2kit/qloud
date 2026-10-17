@@ -100,40 +100,61 @@ it('resolves a canonical link using the current parent and reaches later pages',
   expect(screen.getByRole('button', { name: 'Next file' })).toBeDisabled();
 });
 
-it('opens a directly granted file without listing its private parent and closes to Drive', async () => {
+it('opens a file shared on its own over the shared list and closes back to it', async () => {
   const user = userEvent.setup();
   const parent = drive.folder('Private parent');
   const target = drive.file('Granted.txt', parent.id);
   drive.file('Private sibling.txt', parent.id);
+  const owner = { id: 'someone-else', display_name: 'Owner' };
   server.use(
     http.get(
       `/api/v1/nodes/${parent.id}`,
       () => new HttpResponse(null, { status: 404 }),
     ),
+    http.get(`/api/v1/nodes/${target.id}`, () =>
+      HttpResponse.json({
+        ...target,
+        owner,
+        breadcrumb: [],
+        capabilities: {
+          can_edit: false,
+          can_trash: false,
+          can_share: false,
+          can_delete_versions: false,
+        },
+      }),
+    ),
+    http.get('/api/v1/shared-with-me', () =>
+      HttpResponse.json({
+        results: [{ ...target, owner, effective_role: 'viewer' }],
+        next: null,
+        previous: null,
+      }),
+    ),
   );
   const router = renderApp(`/drive/files/${compactId(target.id)}`, testUser);
   const dialog = await screen.findByRole('dialog', { name: target.name });
-  // A single file has nowhere to step: no previous/next buttons.
+  // M8-22: not the Drive, and not a viewer of its own that closes to the Drive.
+  expect(router.state.location.pathname).toBe('/shared');
+  expect(router.state.location.search).toBe(`?preview=${compactId(target.id)}`);
+  // The only shared file has nowhere to step: no previous/next buttons.
   expect(
     within(dialog).queryByRole('button', { name: 'Previous file' }),
   ).not.toBeInTheDocument();
   expect(
     within(dialog).queryByRole('button', { name: 'Next file' }),
   ).not.toBeInTheDocument();
-  await user.keyboard('{ArrowRight}{ArrowLeft}');
-  expect(router.state.location.pathname).toBe(
-    `/drive/files/${compactId(target.id)}`,
-  );
-  expect(screen.queryByText(parent.name)).not.toBeInTheDocument();
   expect(screen.queryByText('Private sibling.txt')).not.toBeInTheDocument();
   expect(drive.requests.some((url) => url.pathname.endsWith('/children'))).toBe(
     false,
   );
   await user.keyboard('{Escape}');
   await waitFor(() => {
-    expect(router.state.location.pathname).toBe('/drive');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
-  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(router.state.location.pathname).toBe('/shared');
+  expect(router.state.location.search).toBe('');
+  expect(screen.getByRole('option', { name: target.name })).toBeVisible();
 });
 
 it('denies a canonical file link after access is revoked', async () => {

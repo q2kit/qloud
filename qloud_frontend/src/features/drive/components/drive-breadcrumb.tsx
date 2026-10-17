@@ -7,14 +7,17 @@ import { useMe } from '@/features/settings/use-me';
 
 import { readDraggedIds } from '../actions';
 import type { DriveNode, DriveNodeDetail } from '../api';
-import { folderPath } from '../paths';
+import { folderPath, type Space } from '../paths';
 
 /** S-05: the breadcrumb is the page title; the current folder is the `<h1>`. */
 export function DriveBreadcrumb({
   folder,
+  space = 'drive',
   onDrop,
 }: {
   folder: DriveNodeDetail;
+  /** In /shared the trail starts at the "Shared with me" list (M8-22). */
+  space?: Space;
   /** Dropping dragged items on an ancestor moves them there (ui-ux.md). */
   onDrop: (
     target: Pick<DriveNode, 'id' | 'name' | 'is_root'>,
@@ -36,6 +39,17 @@ export function DriveBreadcrumb({
   return (
     <nav aria-label={t('drive.breadcrumb')} className="min-w-0">
       <ol className="flex min-w-0 items-center gap-1 text-sm text-muted-foreground">
+        {space === 'shared' && (
+          <li className="flex min-w-0 items-center gap-1">
+            <Link
+              to="/shared"
+              className="truncate rounded-sm hover:text-foreground hover:underline"
+            >
+              {t('navigation.shared')}
+            </Link>
+            <ChevronRight className="size-3.5 shrink-0" aria-hidden="true" />
+          </li>
+        )}
         {ancestors.map((node, index) => (
           <li
             key={node.id}
@@ -54,6 +68,8 @@ export function DriveBreadcrumb({
             <Link
               to={folderPath(
                 node.id === me.data?.root_folder_id ? undefined : node.id,
+                undefined,
+                space,
               )}
               className={
                 over === node.id

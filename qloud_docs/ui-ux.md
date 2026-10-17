@@ -48,6 +48,7 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
   Thao tác với mục (Mở, Tải xuống, Đổi tên, Di chuyển, Chia sẻ, Chuyển vào thùng rác, Khôi phục, Xóa vĩnh viễn…) chỉ nằm trong menu của item: chuột phải, nút “⋯”, Shift+F10, cùng phím tắt và panel chi tiết. Thanh công cụ phía trên danh sách chỉ có sắp xếp và chế độ xem; không hiện nút thao tác hay số mục đã chọn, số mục đã chọn chỉ được đọc cho trình đọc màn hình (`aria-live`). Hàng tiêu đề Drive chỉ có breadcrumb.
   Nội dung các trang trong app shell giãn theo chiều rộng khả dụng, giữ giới hạn chiều rộng riêng của từng trang; trang Cài đặt không tràn ngang ở 360px khi main dùng flex để giãn chiều cao Drive.
   `/` chuyển sang `/drive`. Id trong URL là UUID bỏ dấu gạch (`/drive/folders/01a1261573fd7134b1948c39b526fe9e`).
+  `/drive` chỉ chứa dữ liệu của chính mình; mục người khác chia sẻ (file, folder) mở dưới `/shared` (M8-22). Mở link sai không gian (ví dụ `/drive/folders/<folder người khác>`) thì tự chuyển sang đúng chỗ, nên link cũ vẫn dùng được.
 - Panel chi tiết rộng 320px ở desktop lớn (`xl`); trên màn hình nhỏ hơn hiển thị dạng bottom sheet.
 - Phím `i` bật/tắt panel chi tiết. Phím bị bỏ qua khi focus nằm trong ô nhập liệu, trong menu hoặc listbox (dùng chữ cái để nhảy tới mục), trong một hộp thoại khác (ví dụ drawer điều hướng), khi giữ phím (auto-repeat) hoặc khi sự kiện đã được xử lý. Trong bottom sheet chi tiết, `i` đóng sheet.
 - Màn hình đăng nhập và các trang công khai dùng layout riêng, không hiển thị application shell. Các màn hình auth (S-01 đến S-04) là một card ở giữa, rộng tối đa 384px.
@@ -100,10 +101,10 @@ Quy tắc chung (một dispatcher cho mọi phím tắt):
 | S-04 | Quên / đặt lại mật khẩu | `/password/reset`, `/password/reset/:key` | auth |
 | S-05 | Drive của tôi (nội dung một folder) | `/drive`, `/drive/folders/:id` | files-folders |
 | S-06 | Gần đây | `/recent` | files-folders |
-| S-07 | Được chia sẻ với tôi | `/shared` | sharing |
+| S-07 | Được chia sẻ với tôi: danh sách, và nội dung folder được chia sẻ (breadcrumb bắt đầu bằng “Được chia sẻ với tôi”) | `/shared`, `/shared/folders/:id` | sharing |
 | S-08 | Thùng rác | `/trash` | trash |
 | S-09 | Kết quả tìm kiếm | `/search?q=` | search |
-| S-10 | Trình xem file (overlay toàn màn hình) | `?preview=:id` trên Drive/Gần đây; link riêng `/drive/files/:id` resolve folder hiện tại; nếu không có quyền folder cha thì mở viewer độc lập | download-preview |
+| S-10 | Trình xem file (overlay toàn màn hình) | `?preview=:id` trên Drive/Gần đây/Được chia sẻ; link riêng `/drive/files/:id` hoặc `/shared/files/:id` mở trình xem ở folder chứa file, đúng không gian; nếu không có quyền folder cha thì mở trên `/shared` | download-preview |
 | S-11 | Hộp thoại chia sẻ | modal | sharing |
 | S-12 | Trang link công khai (có nút Báo cáo vi phạm) | `/s/:token` | sharing |
 | S-13 | Cài đặt: hồ sơ, ngôn ngữ, giao diện, tài khoản liên kết | `/settings` | auth |
