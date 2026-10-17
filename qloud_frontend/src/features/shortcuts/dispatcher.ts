@@ -23,8 +23,9 @@ interface Entry {
 /** How long the second key of a sequence ("G then D") may wait. */
 export const SEQUENCE_TIMEOUT = 1000;
 
+/** Comboboxes (Radix Select) take typed letters as typeahead even while closed. */
 const TYPING =
-  'input, textarea, select, [contenteditable]:not([contenteditable="false"])';
+  'input, textarea, select, [role="combobox"], [contenteditable]:not([contenteditable="false"])';
 /** Typeahead belongs to these; the Drive list opts out with `data-shortcut-scope`. */
 const TYPEAHEAD =
   '[role="menu"], [role="menuitem"], [role="listbox"]:not([data-shortcut-scope])';

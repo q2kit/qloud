@@ -66,6 +66,7 @@ describe('ShortcutDispatcher', () => {
     ['input', '<input />'],
     ['textarea', '<textarea></textarea>'],
     ['select', '<select></select>'],
+    ['combobox', '<button role="combobox"></button>'],
     ['contenteditable', '<div contenteditable="true"></div>'],
     ['plaintext-only', '<div contenteditable="plaintext-only"></div>'],
   ])('ignores keys typed in %s', (_name, html) => {

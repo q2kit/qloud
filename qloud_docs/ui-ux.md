@@ -81,7 +81,7 @@ Nguồn sự thật cho phím tắt (M8-08, [#164](https://github.com/q2kit/qlou
 | Trình xem file | ← →, `D`, Esc | File trước/sau, tải file đang xem, đóng | Trong trình xem |
 
 Quy tắc chung (một dispatcher cho mọi phím tắt):
-- Không chạy khi đang gõ (input, textarea, select, contenteditable), đang soạn chữ IME, phím tự lặp (`repeat`), sự kiện đã được xử lý (`defaultPrevented`), hoặc khi có dialog/menu/listbox đang mở; ngoại lệ là overlay sở hữu phím đó (bottom sheet chi tiết với `i`, bảng lệnh với Ctrl/⌘+K, bảng `?` với `?`, trình xem với `D`). Danh sách file (listbox) không có typeahead nên không chặn phím tắt.
+- Không chạy khi đang gõ (input, textarea, select, combobox như `Select`, contenteditable), đang soạn chữ IME, phím tự lặp (`repeat`), sự kiện đã được xử lý (`defaultPrevented`), hoặc khi có dialog/menu/listbox đang mở; ngoại lệ là overlay sở hữu phím đó (bottom sheet chi tiết với `i`, bảng lệnh với Ctrl/⌘+K, bảng `?` với `?`, trình xem với `D`). Danh sách file (listbox) không có typeahead nên không chặn phím tắt.
 - Phím một chữ chỉ chạy khi không giữ Ctrl/⌘/Alt; Shift phải khớp đúng. Nhận phím theo `event.key`, nên bàn phím không phải QWERTY vẫn đúng. Không đè phím tắt của trình duyệt/hệ điều hành.
 - Phím tắt chỉ gọi action có sẵn với cùng kiểm tra quyền như nút/menu; không hợp lệ thì không làm gì. Phím trùng nhau (`D` ở danh sách và trình xem) thuộc về màn hình đăng ký sau cùng đang hoạt động.
 - Mục menu và lệnh trong bảng lệnh hiện phím bên phải (`<kbd>` ẩn với trình đọc màn hình), phần tử có `aria-keyshortcuts`.
