@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""pre-push hook: block pushes to master and enforce branch names.
+"""pre-push hook: block pushes to master/develop and enforce branch names.
 
 Reads `<local ref> <local sha> <remote ref> <remote sha>` lines from stdin.
 """
@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from conventions import branch_problems  # noqa: E402
 
-PROTECTED = {"refs/heads/master"}
+PROTECTED = {"refs/heads/master", "refs/heads/develop"}
 
 
 def main() -> int:
@@ -21,7 +21,10 @@ def main() -> int:
             continue
         local_ref, _, remote_ref, _ = parts
         if remote_ref in PROTECTED:
-            problems.append("pushing to `master` is not allowed; open a pull request instead")
+            problems.append(
+                f"pushing to `{remote_ref.removeprefix('refs/heads/')}` is not allowed; "
+                "open a pull request instead"
+            )
         if local_ref.startswith("refs/heads/"):
             problems += branch_problems(local_ref.removeprefix("refs/heads/"))
 

@@ -28,6 +28,7 @@ File này là **luật làm việc**. Nếu tài liệu khác mâu thuẫn với
 ## 3. Quy trình cho mỗi phiên làm việc
 
 Repo: `q2kit/qloud` trên GitHub, nhánh chính là **`master`**. Mọi thao tác với GitHub dùng **`gh` CLI** (đã đăng nhập sẵn).
+**Tạm thời:** mọi PR (task, Dependabot) vào **`develop`**; CI chỉ chạy với PR vào `master` (để tiết kiệm phút GitHub Actions), nên kiểm tra trên máy ở bước 6 và 8 là chốt chặn duy nhất cho PR vào `develop`.
 Mỗi task trong ROADMAP có một **GitHub Issue** tương ứng (cột *Issue* trong ROADMAP). Mỗi task được giao qua **một Pull Request**.
 
 Các bước lặp lại có lệnh sẵn trong `scripts/workflow.py`, chạy từ gốc repo (`python3 scripts/workflow.py <lệnh> --help`); với Claude Code, skill `qloud-task` bọc các lệnh này.
@@ -38,7 +39,7 @@ Các bước lặp lại có lệnh sẵn trong `scripts/workflow.py`, chạy t�
      Có PR nào đang mở, đang bị yêu cầu sửa (review) hay CI đỏ thì xử lý trước, rồi mới làm task mới.
    - Chọn task tiếp theo: task chưa làm, đứng đầu milestone hiện tại, và không phụ thuộc vào task nào chưa xong.
 2. **Nhận task.** `python3 scripts/workflow.py task-start <issue> --slug <slug>`:
-   tạo branch `<type>/<task-id>-<slug>` từ `master` mới nhất (ví dụ `feat/M2-04-upload-session`), gán issue cho mình và thêm label `status:in-progress`.
+   tạo branch `<type>/<task-id>-<slug>` từ `develop` mới nhất (ví dụ `feat/M2-04-upload-session`), gán issue cho mình và thêm label `status:in-progress`.
    Gọi lại cho branch đã có (làm tiếp task, sửa theo review) thì script chuyển sang branch đó và **chỉ rebase nếu base có commit mới**.
    Script cảnh báo khi file feature còn `Nháp`, khi issue bị chặn bởi issue đang mở, hoặc task đã ✅.
 3. **Đọc ngữ cảnh.** Đọc file feature liên quan trong `qloud_docs/features/`, cùng các phần liên quan
@@ -64,7 +65,7 @@ Các bước lặp lại có lệnh sẵn trong `scripts/workflow.py`, chạy t�
    - **chỉ rebase nếu base có commit mới** (conflict thì dừng để mình giải quyết);
    - đổi task trong ROADMAP sang 🟦 nếu chưa (một commit riêng);
    - chạy lint, type check và test của phần đã đổi, như mục 8 (`--skip-e2e` chỉ khi không chạy được E2E, và ghi rõ trong body);
-   - push (`--force-with-lease` sau khi rebase một branch đã push), tạo PR với `--base master` (PR đã có thì chỉ push), rồi chờ CI.
+   - push (`--force-with-lease` sau khi rebase một branch đã push), tạo PR với `--base develop` (PR đã có thì chỉ push), rồi chờ CI (PR vào `develop` không có CI).
    CI đỏ thì sửa cho tới khi xanh.
 9. **Review và merge.** **Agent không tự merge.** Chỉ merge (`gh pr merge --squash --delete-branch`) khi được yêu cầu rõ ràng cho đúng PR đó.
    Có góp ý review thì đọc bằng `gh pr view <n> --comments`, sửa trên cùng branch, rồi trả lời từng góp ý.
@@ -72,7 +73,7 @@ Các bước lặp lại có lệnh sẵn trong `scripts/workflow.py`, chạy t�
    - **Agent merge** (khi được yêu cầu): `python3 scripts/workflow.py roadmap-sync --pr <n>`, commit và push vào chính PR đó, CI xanh rồi mới merge.
    - **PR được merge từ bên ngoài phiên:** ở đầu phiên tiếp theo, `python3 scripts/workflow.py roadmap-sync` đổi các task đó sang ✅;
      commit vào PR kế tiếp, hoặc mở một PR nhỏ chỉ để làm việc này nếu chưa có PR nào sắp mở.
-   - Không để ROADMAP trên `master` lệch với GitHub quá một phiên làm việc.
+   - Không để ROADMAP trên `develop` lệch với GitHub quá một phiên làm việc.
    - Issue tự đóng nhờ `Closes #<n>`. Sau khi merge, `python3 scripts/workflow.py roadmap-sync --github` gỡ `status:in-progress` khỏi issue đã đóng
      và đóng milestone **không còn issue mở nào** (kể cả bug).
 10. **Báo cáo.** Tóm tắt: link PR, đã làm gì, đã kiểm tra thế nào, còn tồn đọng gì.
@@ -101,13 +102,13 @@ Milestone trên GitHub trùng tên với milestone trong ROADMAP (M0…M8).
 - Bất cứ thay đổi nào về **bảo mật, xác thực, phân quyền**, ngoài việc làm đúng như tài liệu đã mô tả.
 - Thay đổi **phạm vi sản phẩm**: thêm hoặc bớt tính năng so với [overview.md](qloud_docs/overview.md).
 - Thay đổi **hướng thiết kế UI** (design system, màu, bố cục tổng thể).
-- Thao tác khó hoàn tác: xóa dữ liệu, force push lên `master` hoặc branch của người khác, sửa lịch sử git đã merge, thao tác trên môi trường production.
+- Thao tác khó hoàn tác: xóa dữ liệu, force push lên `master`/`develop` hoặc branch của người khác, sửa lịch sử git đã merge, thao tác trên môi trường production.
   (Rebase rồi `--force-with-lease` trên branch làm việc của chính mình thì được phép.)
 - Sửa các file luật: `AGENTS.md` và `qloud_docs/conventions.md`.
 
 Những việc được **tự làm**: code theo task đã có trong ROADMAP, viết test, refactor nội bộ không đổi hành vi,
 sửa bug, cập nhật docs cho khớp với code, tạo branch, commit, push branch, tạo issue và PR, comment trên issue hoặc PR.
-**Không được** push thẳng lên `master`, tự merge PR khi chưa được đồng ý, đóng issue của người khác, hay sửa cấu hình repo (branch protection, secrets).
+**Không được** push thẳng lên `master` hay `develop`, tự merge PR khi chưa được đồng ý, đóng issue của người khác, hay sửa cấu hình repo (branch protection, secrets).
 
 ## 5. Công nghệ (tóm tắt)
 
@@ -240,7 +241,7 @@ cd "$(git rev-parse --show-toplevel)" && docker compose down -v
 ## 9. Git
 
 Quy tắc branch, commit, PR và các kiểm tra tự động: [conventions.md › Git và CI](qloud_docs/conventions.md#git-và-ci). Những điểm không được vi phạm:
-- Không push thẳng lên `master`, không force push lên `master` hay branch của người khác, không merge PR khi chưa được đồng ý.
+- Không push thẳng lên `master` hay `develop`, không force push lên hai branch này hay branch của người khác, không merge PR khi chưa được đồng ý.
 - Chỉ rebase khi base có commit mới; không merge base vào branch làm việc.
 - Không dùng `--no-verify` khi chưa được cho phép; hook sai thì sửa hook.
 - Mỗi commit chứa thay đổi code cùng thay đổi docs tương ứng.

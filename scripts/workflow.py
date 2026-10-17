@@ -28,7 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_pr import title_problems
 from conventions import PR_TITLE, TASK_ID, TYPES, branch_problems
 
-BASE = "master"
+BASE = "develop"
 ROADMAP = Path("qloud_docs/ROADMAP.md")
 DONE, REVIEW, TODO = "✅", "🟦", "⬜"
 # Issue labels → branch/commit type; `--type` overrides.
@@ -202,7 +202,7 @@ def require_clean_tree() -> None:
 
 
 def rebase_if_behind() -> bool:
-    """Rebase on origin/master only when it has new commits. True when it rebased."""
+    """Rebase on origin/develop only when it has new commits. True when it rebased."""
     run("git", "fetch", "origin")
     ancestor = subprocess.run(["git", "merge-base", "--is-ancestor", f"origin/{BASE}", "HEAD"])
     if ancestor.returncode == 0:

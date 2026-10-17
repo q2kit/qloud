@@ -28,7 +28,7 @@ python3 "$(git rev-parse --show-toplevel)/scripts/workflow.py" task-start <issue
 ```
 
 Slug ngắn, tiếng Anh, nói task làm gì (`upload-session`, `auth-e2e`). Type lấy từ label của issue; label không rõ thì thêm `--type`.
-Script tạo branch (hoặc chuyển sang branch đã có và chỉ rebase khi `master` có commit mới), gán issue, thêm `status:in-progress`.
+Script tạo branch (hoặc chuyển sang branch đã có và chỉ rebase khi `develop` có commit mới), gán issue, thêm `status:in-progress`.
 
 Đọc kỹ các cảnh báo `⚠` của script:
 - **File feature còn `Nháp`**: chưa được code. Nếu đây là task đầu của milestone thì nhờ duyệt các file feature của milestone
