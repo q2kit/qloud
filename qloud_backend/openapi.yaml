@@ -618,6 +618,12 @@ paths:
         description: The pagination cursor value.
         schema:
           type: string
+      - in: query
+        name: include_inherited
+        schema:
+          type: boolean
+        description: Also list grants on ancestor folders the caller can see (`node_id`
+          tells them apart).
       - in: path
         name: node_id
         schema:
@@ -2379,6 +2385,10 @@ components:
           type: string
           format: date-time
           readOnly: true
+        owner:
+          allOf:
+          - $ref: '#/components/schemas/NodeOwner'
+          readOnly: true
         breadcrumb:
           type: array
           items:
@@ -2397,9 +2407,26 @@ components:
       - kind
       - mime_type
       - name
+      - owner
       - parent_id
       - size
       - updated_at
+    NodeOwner:
+      type: object
+      description: 'The owner as people with access see them: no email (sharing.md,
+        M8-10).'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        display_name:
+          type: string
+          readOnly: true
+          title: Tên hiển thị
+      required:
+      - display_name
+      - id
     NullEnum:
       enum:
       - null

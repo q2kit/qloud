@@ -433,6 +433,22 @@
     "unavailable": "Không thể truy cập nội dung",
     "unavailableDescription": "Liên kết không hợp lệ, đã hết hạn hoặc đã bị thu hồi.",
     "publicEmpty": "Thư mục được chia sẻ đang trống.",
+    "panel": {
+      "owner": "Chủ sở hữu",
+      "you": "{{name}} (bạn)",
+      "yourRole": {
+        "viewer": "Bạn có quyền xem mục này.",
+        "editor": "Bạn có quyền chỉnh sửa mục này."
+      },
+      "noPeople": "Chưa chia sẻ với ai.",
+      "inheritedFrom": "Quyền từ thư mục {{name}}",
+      "parentFolder": "thư mục cha",
+      "noLinks": "Chưa có liên kết công khai đang hoạt động.",
+      "manage": "Quản lý quyền truy cập",
+      "failed": "Không tải được thông tin chia sẻ.",
+      "unavailable": "Mục này không còn khả dụng.",
+      "retry": "Thử lại"
+    },
     "errors": {
       "failed": "Không thể cập nhật thông tin chia sẻ. Vui lòng thử lại.",
       "denied": "Bạn không có quyền quản lý chia sẻ của mục này.",

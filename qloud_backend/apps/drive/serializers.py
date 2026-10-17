@@ -3,6 +3,7 @@ from typing import Any
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
+from apps.accounts.models import User
 from apps.sharing.permissions import Role
 
 from .models import Node
@@ -60,12 +61,22 @@ def capabilities(node: Node, role: Role) -> dict[str, bool]:
     }
 
 
+class NodeOwnerSerializer(serializers.ModelSerializer[User]):
+    """The owner as people with access see them: no email (sharing.md, M8-10)."""
+
+    class Meta:
+        model = User
+        fields = ("id", "display_name")
+        read_only_fields = fields
+
+
 class NodeDetailSerializer(NodeSerializer):
+    owner = NodeOwnerSerializer(read_only=True)
     breadcrumb = BreadcrumbSerializer(many=True, read_only=True)
     capabilities = CapabilitiesSerializer(read_only=True)
 
     class Meta(NodeSerializer.Meta):
-        fields = (*NodeSerializer.Meta.fields, "breadcrumb", "capabilities")
+        fields = (*NodeSerializer.Meta.fields, "owner", "breadcrumb", "capabilities")
         read_only_fields = fields
 
 

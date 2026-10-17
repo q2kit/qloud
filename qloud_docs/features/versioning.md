@@ -47,7 +47,7 @@ Owner [duyệt kế hoạch ngày 12/10/2026](https://github.com/q2kit/qloud/iss
 - Viewer tải mọi phiên bản. Editor/owner khôi phục bản cũ sau xác nhận tạo version mới, không tăng quota. Chỉ owner xóa bản cũ sau xác nhận không hoàn tác. Không hiện restore/delete cho current; giữ focus khi đóng xác nhận, khóa thao tác đang gửi.
 - API chi tiết node bổ sung capability `can_delete_versions` chỉ true cho owner của file còn sống, public/folder/root luôn false; restore dùng `can_edit`. Capability chỉ điều khiển hiển thị, server vẫn quyết định quyền từng request.
 - Xóa cập nhật lạc quan và rollback khi lỗi. Restore chỉ cập nhật current sau response thành công. Làm mới lịch sử, chi tiết, lựa chọn, folder ban đầu/hiện tại, recent/shared/search/preview của file; upload hoàn tất làm mới history đang mở. 404/409 có thông báo đã dịch và tải lại dữ liệu/quyền, response file cũ không đổi lựa chọn file mới.
-- Khóa chỉ hiện nhãn; thay đổi flag và chính sách dọn thuộc M7-04. Tab Chia sẻ hiện có vẫn là vị trí chưa triển khai.
+- Khóa chỉ hiện nhãn; thay đổi flag và chính sách dọn thuộc M7-04. Tab Chia sẻ triển khai ở M8-10 ([sharing.md](sharing.md#tiến-độ-m8-10--tab-chia-sẻ-trong-panel-chi-tiết)).
 
 ## M7-04 — Chính sách giữ lại và Khóa
 

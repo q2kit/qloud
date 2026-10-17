@@ -2,8 +2,8 @@ import uuid
 from typing import cast
 
 from django.db.models import QuerySet
-from drf_spectacular.utils import OpenApiResponse, extend_schema
-from rest_framework import generics, status
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+from rest_framework import generics, serializers, status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -36,10 +36,24 @@ class NodeSharesView(generics.ListAPIView[Share]):
     pagination_class = SharePagination
 
     def get_queryset(self) -> QuerySet[Share]:
-        return selectors.shares_for(cast(User, self.request.user), self.kwargs["node_id"])
+        user = cast(User, self.request.user)
+        # Access precedes input validation (api.md, Share).
+        node = selectors.editable_node(user, self.kwargs["node_id"])
+        include_inherited = serializers.BooleanField(default=False).run_validation(
+            self.request.query_params.get("include_inherited", serializers.empty)
+        )
+        return selectors.shares_on(user, node, include_inherited=include_inherited)
 
     @extend_schema(
         operation_id="nodes_shares_list",
+        parameters=[
+            OpenApiParameter(
+                "include_inherited",
+                bool,
+                description="Also list grants on ancestor folders the caller can see "
+                "(`node_id` tells them apart).",
+            )
+        ],
         responses={200: ShareSerializer, 400: BAD_REQUEST, 404: NOT_FOUND},
     )
     def get(self, request: Request, *args: object, **kwargs: object) -> Response:

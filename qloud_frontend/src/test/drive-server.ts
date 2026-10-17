@@ -113,6 +113,7 @@ export class FakeDrive {
     const editable = !node.is_root;
     return {
       ...node,
+      owner: { id: testUser.id, display_name: '' },
       breadcrumb,
       capabilities: {
         can_edit: editable,
