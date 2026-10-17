@@ -6,6 +6,33 @@ import { linkFromEmail } from './mailpit';
 
 // M8-22: what others share opens under /shared; /drive only holds one's own data.
 
+test.use({
+  launchOptions: { slowMo: process.env.M822_CAPTURE ? 250 : 0 },
+});
+
+/** M822_CAPTURE=1 saves light and dark screenshots for the PR. */
+async function capture(page: Page, kind: string, mobile: boolean) {
+  if (!process.env.M822_CAPTURE) return;
+  for (const theme of ['light', 'dark']) {
+    await page.evaluate((value) => {
+      localStorage.setItem('qloud-theme', value);
+      window.dispatchEvent(new StorageEvent('storage', { key: 'qloud-theme' }));
+    }, theme);
+    await expect(page.locator('html')).toHaveClass(
+      theme === 'dark' ? /dark/ : /^(?!.*dark).*$/,
+    );
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: `../qloud_docs/assets/m8-22-${kind}-${theme}-${mobile ? '360' : 'desktop'}.png`,
+      animations: 'disabled',
+    });
+  }
+}
+
 async function csrf(page: Page) {
   return {
     'X-CSRFToken':
@@ -136,6 +163,7 @@ test('shared files and folders open and close under /shared', async ({
     await expect(recipient).toHaveURL(
       new RegExp(`/shared\\?preview=${compact(solo.id)}$`),
     );
+    await capture(recipient, 'shared-preview', isMobile);
     await closePreview(recipient, 'solo.txt');
     await expect(recipient).toHaveURL(/\/shared$/);
 
@@ -149,6 +177,10 @@ test('shared files and folders open and close under /shared', async ({
         .getByRole('navigation', { name: 'Đường dẫn thư mục' })
         .getByRole('link', { name: 'Được chia sẻ với tôi' }),
     ).toBeVisible();
+    await expect(
+      recipient.getByRole('option', { name: 'plan.txt', exact: true }),
+    ).toBeVisible();
+    await capture(recipient, 'shared-folder', isMobile);
     await previewFile(recipient, 'plan.txt', isMobile);
     await closePreview(recipient, 'plan.txt');
     await expect(recipient).toHaveURL(
