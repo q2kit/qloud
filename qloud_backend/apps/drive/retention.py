@@ -7,6 +7,7 @@ from django.db import transaction
 from django.db.models import Q, Subquery
 
 from apps.accounts.models import User
+from apps.audit import services as audit
 
 from .models import FileVersion, Node
 from .services import delete_versions_locked
@@ -41,4 +42,11 @@ def expire_file(node_id: uuid.UUID, owner_id: uuid.UUID, now: datetime, batch: i
     versions = list(candidates.order_by("version_number")[:batch])
     if versions:
         delete_versions_locked(node, versions)
+        audit.record(
+            audit.Action.VERSION_EXPIRE,
+            node,
+            actor=None,
+            actor_kind=audit.ActorKind.SYSTEM,
+            versions=[version.version_number for version in versions],
+        )
     return len(versions)

@@ -19,6 +19,7 @@ from django.http import Http404
 from django.utils import timezone
 
 from apps.accounts.models import User
+from apps.audit import services as audit
 from apps.sharing.permissions import Role, nodes_for
 
 from .errors import RootFolder
@@ -94,6 +95,7 @@ def trash(user: User, ids: Sequence[uuid.UUID]) -> list[Node]:
                         now,
                     ],
                 )
+        audit.record_all(audit.event(audit.Action.NODE_TRASH, node, actor=user) for node in nodes)
         # The editor loses read access as soon as trash commits. Return only the
         # selected roots already authorized above, without querying their trash.
         return list(Node.objects.filter(pk__in=[n.pk for n in nodes], trashed_root_id=F("id")))
@@ -127,6 +129,9 @@ def restore(user: User, ids: Sequence[uuid.UUID]) -> list[Node]:
                 node.updated_at = now
                 restored.append(node)
                 del pending[node.pk]
+        audit.record_all(
+            audit.event(audit.Action.NODE_RESTORE, node, actor=user) for node in restored
+        )
         return restored
 
 
@@ -141,6 +146,8 @@ def delete(user: User, ids: Sequence[uuid.UUID] | None = None) -> None:
     with transaction.atomic():
         owner = User.objects.select_for_update().get(pk=user.pk)
         roots = list(roots_for(user)) if ids is None else _selected(user, ids, trashed=True)
+        # Written first: deleting the nodes then clears the events' links to them.
+        audit.record_all(audit.event(audit.Action.NODE_PURGE, node, actor=user) for node in roots)
         _delete_locked(owner, roots)
 
 
@@ -201,5 +208,6 @@ def expire_root(node_id: uuid.UUID, owner_id: uuid.UUID, now: datetime) -> bool:
             return False
         if node.trashed_at + timedelta(days=owner.plan.trash_retention_days) > now:
             return False
+        audit.record(audit.Action.NODE_PURGE, node, actor=None, actor_kind=audit.ActorKind.SYSTEM)
         _delete_locked(owner, [node], enqueue=False)
         return True

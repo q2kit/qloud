@@ -616,3 +616,19 @@ def test_same_node_reports_independent_and_no_repeat_email(
         assert result["resolution"]["targets"]["revoked_link_ids"] == []
         assert result["node_open_report_count"] == 0
         assert mail.call_count == 1
+
+
+def test_moderation_revocation_is_in_the_owner_activity_without_the_moderator(data):
+    from apps.audit.models import AuditEvent
+
+    report = create(data)
+    assert resolve(data, report).status_code == 200
+    event = AuditEvent.objects.get(action=AuditEvent.Action.LINK_REVOKE)
+    owner, moderator, root, _, _, link, _ = data
+    assert (event.owner_id, event.node_id, event.metadata) == (
+        owner.pk,
+        root.pk,
+        {"link_id": str(link.pk)},
+    )
+    assert (event.actor_kind, event.actor_id, event.actor_name) == ("moderator", None, "")
+    assert moderator.email not in str(event.metadata)

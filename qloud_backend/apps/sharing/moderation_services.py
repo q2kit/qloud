@@ -11,6 +11,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from apps.accounts.models import User
 from apps.accounts.services import suspend_user
+from apps.audit import services as audit
 from apps.core.errors import ModerationTargetUnavailable, ReportResolved
 
 from .models import ModerationAction, Report, ShareLink
@@ -133,6 +134,14 @@ def resolve_report(user: User, report_id: uuid.UUID, action: str, note: str) -> 
             link.revoked_at, link.revoked_by = timezone.now(), actor
             link.revoke_reason = ShareLink.RevokeReason.MODERATION
             link.save(update_fields=["revoked_at", "revoked_by", "revoke_reason", "updated_at"])
+            # The owner learns that moderation removed it; who did stays private.
+            audit.record(
+                audit.Action.LINK_REVOKE,
+                link.node,
+                actor=None,
+                actor_kind=audit.ActorKind.MODERATOR,
+                link_id=str(link.pk),
+            )
             changed.append(str(link.pk))
             if owner is not None:
                 schedule_revocation_email(owner, link.node.name, note.strip())

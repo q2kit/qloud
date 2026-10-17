@@ -200,6 +200,9 @@ Báo cáo vi phạm từ trang link công khai (xem [sharing.md](features/sharin
 **Khóa user:** thêm vào `accounts_user` các cột `suspended_at timestamptz null` và `suspended_reason text null`.
 User bị khóa thì không đăng nhập được, mọi session cũ bị vô hiệu hóa qua `session_version`, và mọi share link của user ngừng hoạt động (kiểm tra lúc truy cập, không phải xóa link).
 
+### `audit_event` (M8-11a)
+Chỉ thêm, ghi trong transaction của thao tác ([ADR-0012](adr/0012-audit-log.md)). Cột: `id` UUIDv7, `created_at`, `action` (enum, xem [audit-log.md](features/audit-log.md)), `actor_kind` (`user`/`system`/`moderator`), `actor_id` FK user SET_NULL, `actor_name` (tên hiển thị lúc đó, không phải email), `owner_id` FK user CASCADE, `node_id` FK node SET_NULL, `node_name`, `node_kind`, `parent_id` FK node SET_NULL (folder chứa; folder đích khi di chuyển), `source_parent_id` FK node SET_NULL (folder nguồn khi di chuyển), `metadata` JSON. Index `(node, -created_at, -id)`, `(parent, …)`, `(source_parent, …)`, `(owner, -created_at)`, `(created_at)`. Giữ 365 ngày. Migration `audit.0001` chỉ tạo bảng, đảo ngược được.
+
 ## Quy tắc về dung lượng
 
 - `used_bytes` = tổng `Blob.size` của **các Blob khác nhau** được version thuộc các node mà user sở hữu tham chiếu, gồm cả node trong thùng rác. Restore tạo version mới dùng chung Blob, không tăng quota; xóa version/purge chỉ giảm khi Blob hết tham chiếu.
