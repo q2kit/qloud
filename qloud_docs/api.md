@@ -75,6 +75,15 @@ M8-01 — dung lượng:
 - `breakdown` có `document, image, video, audio, archive, other, old_versions, trash` (byte). Mỗi Blob của owner tính đúng một lần, vào nhóm đầu tiên khớp: loại MIME của file còn sống mà nó là current version; rồi `old_versions` (chỉ version cũ của file còn sống); rồi `trash`. Nhóm MIME giống bộ lọc `type` của search.
 - `/me/storage/largest` chỉ gồm file còn sống do mình sở hữu (không có file được chia sẻ cho mình, không có thùng rác), sắp `size` giảm dần rồi `id`. Phân trang keyset như danh sách folder (page_size mặc định 50, tối đa 200); `ordering` chỉ nhận `-size`.
 
+### Hoạt động (M8-11a)
+| Method | Path | Mô tả |
+|---|---|---|
+| GET | `/nodes/{id}/activity` | Lịch sử hoạt động, mới nhất trước (cursor, page_size mặc định 50, tối đa 200) |
+
+- Quyền viewer trở lên trên node còn sống; không có quyền hoặc node trong thùng rác trả 404. Folder gộp sự kiện của cả cây con (kể cả mục đã vào thùng rác/đã xóa); file chỉ có sự kiện của chính nó.
+- Mỗi dòng: `{id, action, created_at, actor_kind, actor: {id, display_name, email?} | null, node: {id | null, name, kind}, metadata}`. `actor` null với `system`/`moderator` hoặc khi tài khoản đã xóa. `metadata` theo action ([audit-log.md](features/audit-log.md)).
+- `email` (người thực hiện, `metadata.grantee`) chỉ trả cho editor/owner. `metadata.from_folder`/`to_folder` là `{id: null, name: null, is_root: false}` khi người đọc không phải owner và không mở được folder đó. Số query cố định theo trang.
+
 ### Node
 | Method | Path | Mô tả |
 |---|---|---|

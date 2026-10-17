@@ -16,6 +16,7 @@ urlpatterns = [
     path("api/v1/", include("apps.uploads.urls")),
     path("api/v1/", include("apps.sharing.urls")),
     path("api/v1/", include("apps.search.urls")),
+    path("api/v1/", include("apps.audit.urls")),
     # These must precede the allauth include so they replace the stock headless views.
     path(
         "api/auth/browser/v1/auth/login",

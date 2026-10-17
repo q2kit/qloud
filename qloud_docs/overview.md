@@ -17,6 +17,7 @@ Mỗi người dùng có không gian lưu trữ riêng, giới hạn theo gói d
 | F-SEARCH | Tìm kiếm theo tên và bộ lọc | [search.md](features/search.md) |
 | F-QUOTA | Giới hạn và hiển thị dung lượng | [quota.md](features/quota.md) |
 | F-VERSION | Lịch sử phiên bản của file | [versioning.md](features/versioning.md) |
+| F-AUDIT | Lịch sử hoạt động của file, folder và chia sẻ (tab Hoạt động) | [audit-log.md](features/audit-log.md) |
 | F-I18N, F-THEME | Tiếng Việt và tiếng Anh; light, dark, theo hệ thống | [ui-ux.md](ui-ux.md) |
 
 **Ngoài phạm vi MVP:** app native, desktop sync, sửa tài liệu trực tuyến, nhiều người cùng sửa, thanh toán, mã hóa đầu cuối, quét virus.

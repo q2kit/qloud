@@ -399,6 +399,45 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: '`name_conflict`.'
+  /api/v1/nodes/{node_id}/activity:
+    get:
+      operationId: nodes_activity_list
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      - in: path
+        name: node_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditEventList'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: No such node, or no access to it.
   /api/v1/nodes/{node_id}/children:
     get:
       operationId: nodes_children_list
@@ -1832,6 +1871,115 @@ paths:
           description: '`upload_closed` (409) or `upload_expired` (410).'
 components:
   schemas:
+    Actor:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+        email:
+          type: string
+          format: email
+          description: Editors and the owner only.
+      required:
+      - display_name
+      - id
+    ActorKindEnum:
+      enum:
+      - user
+      - system
+      - moderator
+      type: string
+      description: |-
+        * `user` - User
+        * `system` - System
+        * `moderator` - Moderator
+    AuditEvent:
+      type: object
+      description: |-
+        One activity row. Emails appear for editors and the owner only; a folder the
+        reader cannot open appears without id or name.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        action:
+          allOf:
+          - $ref: '#/components/schemas/AuditEventActionEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        actor_kind:
+          allOf:
+          - $ref: '#/components/schemas/ActorKindEnum'
+          readOnly: true
+        actor:
+          allOf:
+          - $ref: '#/components/schemas/Actor'
+          nullable: true
+          readOnly: true
+        node:
+          allOf:
+          - $ref: '#/components/schemas/EventNode'
+          readOnly: true
+        metadata:
+          type: object
+          additionalProperties: {}
+          description: Per action; see api.md.
+          readOnly: true
+      required:
+      - action
+      - actor
+      - actor_kind
+      - created_at
+      - id
+      - metadata
+      - node
+    AuditEventActionEnum:
+      enum:
+      - node.create
+      - node.upload
+      - node.rename
+      - node.move
+      - node.trash
+      - node.restore
+      - node.purge
+      - version.create
+      - version.restore
+      - version.delete
+      - version.expire
+      - version.lock
+      - version.unlock
+      - share.add
+      - share.role_change
+      - share.remove
+      - link.create
+      - link.revoke
+      type: string
+      description: |-
+        * `node.create` - Node Create
+        * `node.upload` - Node Upload
+        * `node.rename` - Node Rename
+        * `node.move` - Node Move
+        * `node.trash` - Node Trash
+        * `node.restore` - Node Restore
+        * `node.purge` - Node Purge
+        * `version.create` - Version Create
+        * `version.restore` - Version Restore
+        * `version.delete` - Version Delete
+        * `version.expire` - Version Expire
+        * `version.lock` - Version Lock
+        * `version.unlock` - Version Unlock
+        * `share.add` - Share Add
+        * `share.role_change` - Share Role Change
+        * `share.remove` - Share Remove
+        * `link.create` - Link Create
+        * `link.revoke` - Link Revoke
     Breadcrumb:
       type: object
       properties:
@@ -1994,6 +2142,22 @@ components:
       - code
       - details
       - message
+    EventNode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Null once the node is deleted.
+        name:
+          type: string
+        kind:
+          type: string
+      required:
+      - id
+      - kind
+      - name
     FileVersion:
       type: object
       properties:
@@ -2440,6 +2604,25 @@ components:
         * `fail` - Fail
         * `replace` - Replace
         * `rename` - Rename
+    PaginatedAuditEventList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditEvent'
     PaginatedFileVersionList:
       type: object
       required:

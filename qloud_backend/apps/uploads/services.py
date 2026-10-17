@@ -19,6 +19,7 @@ from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.accounts.selectors import get_limits, has_verified_email
+from apps.audit import services as audit
 from apps.drive import selectors as drive_selectors
 from apps.drive.errors import InvalidTarget, NameConflict
 from apps.drive.models import Blob, FileVersion, Node
@@ -346,6 +347,10 @@ def complete(user: User, session: UploadSession) -> Node:
             )
             session.status, session.node = Status.COMPLETED, node
             session.save(update_fields=["status", "node", "updated_at"])
+            if version_number > 1:
+                audit.record(audit.Action.VERSION_CREATE, node, actor=user, version=version_number)
+            else:
+                audit.record(audit.Action.NODE_UPLOAD, node, actor=user)
             if thumbnail_supported(session.mime_type):
                 transaction.on_commit(partial(enqueue_thumbnail, str(node.current_version.pk)))
     except TargetUnavailable:

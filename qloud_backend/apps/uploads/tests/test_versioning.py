@@ -159,3 +159,15 @@ def test_completed_replacement_rechecks_permission(client, root, user, api_clien
     assert api_client.post(url(session["id"], "complete")).status_code == 200
     share.delete()
     assert api_client.post(url(session["id"], "complete")).status_code == 404
+
+
+def test_uploads_record_a_new_file_then_a_new_version(client, root, user):
+    from apps.audit.models import AuditEvent
+
+    first = upload(client, root, b"one", name="Log.txt")
+    upload(client, root, b"two", name="Log.txt", on_conflict="replace")
+    events = list(AuditEvent.objects.order_by("created_at", "id"))
+    assert [(e.action, str(e.node_id), e.metadata) for e in events] == [
+        ("node.upload", first["id"], {}),
+        ("version.create", first["id"], {"version": 2}),
+    ]

@@ -67,7 +67,7 @@
 [Conventional Commits](https://www.conventionalcommits.org/), tiếng Anh: `<type>(<scope>): <subject>`, rồi body, rồi footer.
 
 - **type:** `feat`, `fix`, `docs`, `test`, `refactor` (không đổi hành vi), `perf`, `chore` (cấu hình, tooling), `ci`, `build` (Docker, dependency).
-- **scope** (bắt buộc): BE là tên Django app (`accounts`, `drive`, `uploads`, `sharing`, `trash`, `search`, `storage`, `core`);
+- **scope** (bắt buộc): BE là tên Django app (`accounts`, `drive`, `uploads`, `sharing`, `trash`, `search`, `storage`, `core`, `audit`);
   FE là `fe` hoặc `fe-<feature>`; khác: `api`, `dev`, `env`, `ci`, `deploy`, `deps`, `repo`, `docs`, `roadmap`, `adr`.
 - **subject:** mệnh lệnh ("add", không phải "added"), chữ đầu viết thường, không dấu chấm cuối; cả dòng đầu tối đa 72 ký tự.
 - **body:** giải thích *tại sao*, xuống dòng ở 72 ký tự. **footer:** `Refs #<n>` (không dùng `Closes` trong commit);

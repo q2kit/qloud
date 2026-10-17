@@ -6,6 +6,7 @@ from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from apps.accounts.models import User
+from apps.audit import services as audit
 
 from . import link_selectors
 from .models import ShareLink
@@ -20,7 +21,15 @@ def create_link(
     node = link_selectors.owned_node(user, node_id)
     if expires_at is not None and expires_at <= timezone.now():
         raise ValidationError({"expires_at": ["Must be in the future."]})
-    return ShareLink.objects.create(node=node, created_by=user, expires_at=expires_at)
+    link = ShareLink.objects.create(node=node, created_by=user, expires_at=expires_at)
+    audit.record(
+        audit.Action.LINK_CREATE,
+        node,
+        actor=user,
+        link_id=str(link.pk),
+        expires_at=expires_at.isoformat() if expires_at else None,
+    )
+    return link
 
 
 @transaction.atomic
@@ -33,3 +42,4 @@ def revoke_link(user: User, link_id: uuid.UUID) -> None:
         link.revoked_by = user
         link.revoke_reason = ShareLink.RevokeReason.OWNER
         link.save(update_fields=["revoked_at", "revoked_by", "revoke_reason", "updated_at"])
+        audit.record(audit.Action.LINK_REVOKE, link.node, actor=user, link_id=str(link.pk))

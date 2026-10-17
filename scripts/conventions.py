@@ -8,7 +8,7 @@ import re
 TYPES = ("feat", "fix", "docs", "test", "refactor", "perf", "chore", "ci", "build")
 SCOPES = (
     # Backend Django apps
-    "accounts", "drive", "uploads", "sharing", "trash", "search", "storage", "core",
+    "accounts", "drive", "uploads", "sharing", "trash", "search", "storage", "core", "audit",
     # Other areas
     "api", "dev", "env", "ci", "deploy", "deps", "repo", "docs", "roadmap", "adr",
 )  # fmt: skip

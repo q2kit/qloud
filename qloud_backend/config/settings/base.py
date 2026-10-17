@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "apps.storage",
     "apps.uploads",
     "apps.search",
+    "apps.audit",
 ]
 
 MIDDLEWARE = [
@@ -257,6 +258,7 @@ CELERY_BEAT_SCHEDULE = {
     "expire-trash": {"task": "apps.drive.tasks.expire_trash", "schedule": 24 * 60 * 60},
     "delete-trash-objects": {"task": "apps.drive.tasks.delete_trash_objects", "schedule": 60 * 60},
     "expire-uploads": {"task": "apps.uploads.tasks.expire_uploads", "schedule": 60 * 60},
+    "expire-audit-events": {"task": "apps.audit.tasks.expire_events", "schedule": 24 * 60 * 60},
 }
 
 # --- DRF / OpenAPI ---
