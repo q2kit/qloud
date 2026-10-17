@@ -1,11 +1,13 @@
 # Version-bump PRs (AGENTS.md › Luật về phiên bản). Major bumps arrive as separate PRs
 # and need approval before merging; minor and patch bumps are grouped per ecosystem.
+# PRs target develop like task PRs (AGENTS.md mục 3).
 # `chore(deps)` keeps the PR titles valid for scripts/check_pr.py.
 version: 2
 
 updates:
   - package-ecosystem: uv
     directory: /qloud_backend
+    target-branch: develop
     schedule:
       interval: weekly
     # Wait a few days after a release, against compromised or quickly yanked versions.
@@ -19,6 +21,7 @@ updates:
 
   - package-ecosystem: npm
     directory: /qloud_frontend
+    target-branch: develop
     schedule:
       interval: weekly
     ignore:
@@ -35,6 +38,7 @@ updates:
 
   - package-ecosystem: github-actions
     directory: /
+    target-branch: develop
     schedule:
       interval: weekly
     commit-message:
@@ -45,6 +49,7 @@ updates:
 
   - package-ecosystem: docker-compose
     directory: /
+    target-branch: develop
     schedule:
       interval: weekly
     commit-message:

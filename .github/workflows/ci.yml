@@ -2,14 +2,14 @@
 # Required status checks: `CI OK` (this file) and `PR conventions` (pr.yml).
 name: CI
 
+# Paused to save Actions minutes: runs only for PRs into master (task PRs target develop).
 on:
   pull_request:
-  push:
     branches: [master]
 
 concurrency:
   group: ci-${{ github.ref }}
-  # A new push to a PR replaces its old run; runs on master each check their own merge.
+  # A new push to a PR replaces its old run.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
