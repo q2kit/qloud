@@ -137,6 +137,57 @@ paths:
               schema:
                 $ref: '#/components/schemas/Me'
           description: ''
+  /api/v1/me/storage:
+    get:
+      operationId: me_storage_retrieve
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StorageUsage'
+          description: ''
+  /api/v1/me/storage/largest:
+    get:
+      operationId: me_storage_largest_list
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: Opaque value from `next` or `previous`.
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Largest files first; other orderings are not supported.
+        schema:
+          type: string
+          enum:
+          - -size
+          default: -size
+      - name: page_size
+        required: false
+        in: query
+        description: Items per page, at most 200.
+        schema:
+          type: integer
+          default: 50
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNodeList'
+          description: ''
   /api/v1/moderation/reports:
     get:
       operationId: moderation_reports_list
@@ -3271,6 +3322,59 @@ components:
       required:
       - display_name
       - id
+    StorageBreakdown:
+      type: object
+      properties:
+        document:
+          type: integer
+        image:
+          type: integer
+        video:
+          type: integer
+        audio:
+          type: integer
+        archive:
+          type: integer
+        other:
+          type: integer
+        old_versions:
+          type: integer
+          description: Blobs kept only by old versions.
+        trash:
+          type: integer
+          description: Blobs kept only by trashed files.
+      required:
+      - archive
+      - audio
+      - document
+      - image
+      - old_versions
+      - other
+      - trash
+      - video
+    StorageUsage:
+      type: object
+      properties:
+        quota_bytes:
+          type: integer
+          description: Plan quota or the account override.
+        used_bytes:
+          type: integer
+        reserved_bytes:
+          type: integer
+          description: Held for uploads in progress.
+        max_file_size_bytes:
+          type: integer
+        breakdown:
+          allOf:
+          - $ref: '#/components/schemas/StorageBreakdown'
+          description: Each blob counted once; the groups add up to the stored bytes.
+      required:
+      - breakdown
+      - max_file_size_bytes
+      - quota_bytes
+      - reserved_bytes
+      - used_bytes
     ThemeEnum:
       enum:
       - system

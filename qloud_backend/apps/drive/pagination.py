@@ -201,3 +201,9 @@ class RecentPagination(NodeChildrenPagination):
     default_ordering = "-updated_at"
     orderings = ("-updated_at",)
     max_page_size = 100
+
+
+class LargestPagination(NodeChildrenPagination):
+    ordering_description = "Largest files first; other orderings are not supported."
+    default_ordering = "-size"
+    orderings = ("-size",)

@@ -16,6 +16,7 @@ import {
   type DriveNodeDetail,
 } from '@/features/drive/api';
 import { useDriveStore } from '@/features/drive/store';
+import { refreshStorage } from '@/features/storage/api';
 
 export type FileVersion = components['schemas']['FileVersion'];
 type Page = components['schemas']['PaginatedFileVersionList'];
@@ -51,6 +52,7 @@ export async function refreshVersionNode(
     refreshDriveQueries(client, ['drive', 'preview', node.id]),
     refreshDriveQueries(client, ['sharing', 'shared']),
     refreshDriveQueries(client, ['search']),
+    refreshStorage(client),
     ...[...parents]
       .filter((id): id is string => Boolean(id))
       .map((id) => refreshDriveQueries(client, driveKeys.children(id))),

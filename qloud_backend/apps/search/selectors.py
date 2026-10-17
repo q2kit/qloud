@@ -18,50 +18,14 @@ from django.db.models import (
 from django.db.models.functions import Cast
 
 from apps.accounts.models import User
+from apps.drive.mime import group_filters
 from apps.drive.models import Node
 from apps.sharing.permissions import Role, nodes_for
 
-DOCUMENT_MIMES = (
-    "application/pdf",
-    "application/msword",
-    "application/rtf",
-    "application/vnd.ms-excel",
-    "application/vnd.ms-powerpoint",
-)
-ARCHIVE_MIMES = (
-    "application/zip",
-    "application/x-zip-compressed",
-    "application/vnd.rar",
-    "application/x-rar-compressed",
-    "application/x-7z-compressed",
-    "application/x-tar",
-    "application/gzip",
-    "application/x-gzip",
-    "application/x-bzip2",
-    "application/x-xz",
-)
 TYPE_FILTERS = {
     "folder": Q(kind=Node.Kind.FOLDER),
-    "document": Q(kind=Node.Kind.FILE)
-    & (
-        Q(mime_type__startswith="text/")
-        | Q(mime_type__in=DOCUMENT_MIMES)
-        | Q(mime_type__startswith="application/vnd.openxmlformats-officedocument.")
-        | Q(mime_type__startswith="application/vnd.oasis.opendocument.")
-    ),
-    **{
-        kind: Q(kind=Node.Kind.FILE, mime_type__startswith=f"{kind}/")
-        for kind in ("image", "video", "audio")
-    },
-    "archive": Q(kind=Node.Kind.FILE, mime_type__in=ARCHIVE_MIMES),
+    **{group: Q(kind=Node.Kind.FILE) & condition for group, condition in group_filters().items()},
 }
-TYPE_FILTERS["other"] = Q(kind=Node.Kind.FILE) & ~(
-    TYPE_FILTERS["document"]
-    | TYPE_FILTERS["image"]
-    | TYPE_FILTERS["video"]
-    | TYPE_FILTERS["audio"]
-    | TYPE_FILTERS["archive"]
-)
 SEARCH_TYPES = tuple(TYPE_FILTERS)
 
 

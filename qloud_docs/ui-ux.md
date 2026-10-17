@@ -57,6 +57,8 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
 
 Trong panel chi tiết, Thông tin/Phiên bản có thể đổi bằng click hoặc mũi tên/Home/End; đổi lựa chọn luôn về Thông tin. Chỉ một file còn sống mới bật Phiên bản. Danh sách card nhỏ cuộn trong panel/bottom sheet, có số version, nhãn Hiện tại/Khóa, thời gian/dung lượng, tên gốc/MIME và uploader. Tải thêm theo cursor; skeleton/rỗng/lỗi có Thử lại. Hành động tải cho viewer, restore cho editor/owner, delete cho owner; current không có restore/delete. Restore/delete có hộp xác nhận và focus quay lại hành động hoặc danh sách khi phiên bản đã xóa. Nội dung/thao tác co ở 360px, chuỗi vi/en và màu token. Chi tiết: [versioning.md](features/versioning.md#m7-03--tab-phiên-bản).
 
+Dung lượng (M8-01): sidebar có mục "Dung lượng" với thanh tiến độ (`role="progressbar"`) và "Đã dùng x / y" theo `Intl`, đơn vị thập phân (1 GB = 10⁹ byte), dẫn tới S-14. Từ 80% thanh và chữ dùng màu `warning`, từ 95% màu `destructive`. S-14 có tổng quan (đã dùng, giữ chỗ cho upload dở dang, kích thước file tối đa), thanh xếp chồng bằng CSS theo nhóm (khe 2px giữa các phần, phần nhỏ vẫn rộng tối thiểu 4px) cùng chú thích kiêm bảng số liệu có dung lượng và tỉ lệ; hover hoặc focus một nhóm thì làm nổi nhóm đó ở cả thanh lẫn chú thích, làm mờ nhóm khác và hiện tooltip. Màu token `chart-*` theo thứ tự cố định cho từng nhóm, light và dark chọn riêng, đã kiểm tra phân biệt được với người mù màu, danh sách file lớn nhất có *Mở thư mục chứa* / *Đưa vào thùng rác* và Tải thêm, lối tắt sang Thùng rác; trang Cài đặt có mục Dung lượng dẫn tới S-14. Khi đầy, Drive và S-14 hiện banner; trong Drive của mình, upload ở menu Tạo mới (kèm dòng giải thích), command palette, nút của folder rỗng và kéo thả đều bị chặn, còn xem, tải, xóa vẫn dùng được.
+
 ## Danh sách màn hình
 
 | ID | Màn hình | Route | Feature |
@@ -74,7 +76,7 @@ Trong panel chi tiết, Thông tin/Phiên bản có thể đổi bằng click ho
 | S-11 | Hộp thoại chia sẻ | modal | sharing |
 | S-12 | Trang link công khai (có nút Báo cáo vi phạm) | `/s/:token` | sharing |
 | S-13 | Cài đặt: hồ sơ, ngôn ngữ, giao diện, tài khoản liên kết | `/settings` | auth |
-| S-14 | Dung lượng | `/settings/storage` | quota |
+| S-14 | Dung lượng: tổng quan, theo loại file, file lớn nhất | `/settings/storage` | quota |
 | S-15 | Trang 404 / không có quyền | `*` | — |
 
 Mỗi màn hình được mô tả chi tiết (trạng thái rỗng, đang tải, lỗi, hành động) trong file feature tương ứng.

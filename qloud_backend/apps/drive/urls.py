@@ -1,5 +1,6 @@
 from django.urls import path
 
+from .storage_views import LargestFilesView, StorageView
 from .version_views import (
     VersionDeleteView,
     VersionDownloadView,
@@ -22,6 +23,8 @@ from .views import (
 )
 
 urlpatterns = [
+    path("me/storage", StorageView.as_view(), name="me-storage"),
+    path("me/storage/largest", LargestFilesView.as_view(), name="me-storage-largest"),
     path("nodes/<uuid:node_id>/versions", VersionListView.as_view(), name="versions-list"),
     path(
         "nodes/<uuid:node_id>/versions/<uuid:version_id>/download",

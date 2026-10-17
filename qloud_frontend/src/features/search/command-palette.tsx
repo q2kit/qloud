@@ -13,6 +13,8 @@ import { useSearchSuggestions } from './api';
 
 interface Props {
   canCreate: boolean;
+  /** False also while the storage is full (quota.md). */
+  canUpload: boolean;
   onCreateFolder: () => void;
   onUploadFiles: () => void;
   onUploadFolder: () => void;
@@ -94,6 +96,10 @@ export function CommandPalette(props: Props) {
                 run: props.onCreateFolder,
                 node: undefined,
               },
+            ]
+          : []),
+        ...(props.canUpload
+          ? [
               {
                 id: 'files',
                 label: t('drive.actions.upload'),

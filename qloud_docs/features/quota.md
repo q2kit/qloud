@@ -1,6 +1,6 @@
 # Quota dung lượng (F-QUOTA)
 
-**Trạng thái:** Đang làm (phần model M1 đã duyệt; phần M2 đã duyệt ở [#17](https://github.com/q2kit/qloud/issues/17); phần M8 chờ duyệt) · **Milestone:** M1 (model Plan), M2 (kiểm tra quota), M8 (giao diện) · **Màn hình:** S-14, thanh dung lượng ở sidebar
+**Trạng thái:** Đang làm (phần model M1 đã duyệt; phần M2 đã duyệt ở [#17](https://github.com/q2kit/qloud/issues/17); phần M8-01 đã duyệt ở [#45](https://github.com/q2kit/qloud/issues/45#issuecomment-6128689988)) · **Milestone:** M1 (model Plan), M2 (kiểm tra quota), M8 (giao diện) · **Màn hình:** S-14, thanh dung lượng ở sidebar
 Xem thêm [ADR-0005](../adr/0005-storage-plans.md)
 
 Phần User/Plan/quota M1 được [chủ repo duyệt](https://github.com/q2kit/qloud/issues/10#issuecomment-6088713465).
@@ -17,6 +17,13 @@ Không xóa plan mặc định hoặc plan đã được gán cho user; plan ina
 
 M2-04: tạo upload session giữ chỗ quota (`reserved_bytes`) trong transaction có khóa dòng User của owner; hoàn tất chuyển sang `used_bytes`, hủy thì trả lại.
 Test tranh chấp: 10 session đồng thời mà tổng vượt quota thì chỉ những session còn vừa được nhận.
+
+## M8-01 — Trang dung lượng và cảnh báo
+- Mức cảnh báo tính theo `used_bytes / quota_bytes`, khớp với con số "x / y" đang hiện: từ 80% vàng, từ 95% đỏ, `used_bytes >= quota_bytes` là đầy (gồm cả quota bị giảm dưới mức đã dùng hoặc bằng 0). `reserved_bytes` chỉ hiện trên S-14; server vẫn kiểm tra `used + reserved + size`.
+- Chia theo loại: mỗi Blob tính một lần, vào loại MIME của file còn sống mà nó là current version; Blob chỉ còn version cũ tham chiếu vào "Phiên bản cũ"; Blob chỉ còn trong thùng rác vào "Thùng rác". Tổng các nhóm bằng tổng Blob khác nhau, tức `used_bytes` khi không lệch (đối soát: M8-09). Một query aggregate.
+- "File lớn nhất" chỉ gồm file còn sống của mình, theo dung lượng current version.
+- Khi đầy, UI chỉ chặn upload vào Drive của mình (đường dẫn bắt đầu từ `root_folder_id`). Folder người khác chia sẻ dùng quota của owner, nên để server quyết định và hiện lỗi 413 đã dịch.
+- Dữ liệu dung lượng làm mới sau upload, đưa vào/khôi phục/xóa vĩnh viễn trong thùng rác và khôi phục/xóa phiên bản. Biểu đồ là thanh xếp chồng bằng CSS, không thêm dependency.
 
 ## User stories
 - Tôi muốn biết mình đã dùng bao nhiêu dung lượng và phần nào chiếm nhiều nhất.
@@ -37,6 +44,6 @@ Test tranh chấp: 10 session đồng thời mà tổng vượt quota thì chỉ
 ## Tiêu chí chấp nhận
 - [ ] Đổi plan mặc định: user đăng ký sau đó nhận plan mới; user cũ giữ nguyên giới hạn.
 - [ ] Đặt `quota_override_bytes` cho một user thì có hiệu lực ngay.
-- [ ] Sidebar hiển thị đúng "x GB / y GB".
-- [ ] Trang dung lượng chia theo loại file, và liệt kê các file lớn nhất.
+- [x] Sidebar hiển thị đúng "x GB / y GB".
+- [x] Trang dung lượng chia theo loại file, và liệt kê các file lớn nhất.
 - [ ] Gửi 10 upload đồng thời mà tổng vượt quota thì chỉ những upload còn vừa quota được chấp nhận.

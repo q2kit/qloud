@@ -67,7 +67,13 @@ Callback của provider (không gọi trực tiếp): `/api/auth/oauth/<provider
 | Method | Path | Mô tả |
 |---|---|---|
 | GET/PATCH | `/me` | Hồ sơ và tùy chọn: `display_name`, `locale` (`vi`/`en`), `theme` (`system`/`light`/`dark`) sửa được; `id`, `email`, `avatar_url`, `root_folder_id` (folder gốc của Drive, M2-07a) chỉ đọc. PATCH chỉ ghi các trường được gửi |
-| GET | `/me/storage` | Quota, dung lượng đã dùng, chia theo loại file |
+| GET | `/me/storage` | Quota, dung lượng đã dùng, chia theo loại file (M8-01, xem dưới) |
+| GET | `/me/storage/largest` | File còn sống của mình, lớn nhất trước (M8-01) |
+
+M8-01 — dung lượng:
+- `/me/storage` trả `{quota_bytes, used_bytes, reserved_bytes, max_file_size_bytes, breakdown}`. `quota_bytes` lấy từ `get_limits` (có tính `quota_override_bytes`).
+- `breakdown` có `document, image, video, audio, archive, other, old_versions, trash` (byte). Mỗi Blob của owner tính đúng một lần, vào nhóm đầu tiên khớp: loại MIME của file còn sống mà nó là current version; rồi `old_versions` (chỉ version cũ của file còn sống); rồi `trash`. Nhóm MIME giống bộ lọc `type` của search.
+- `/me/storage/largest` chỉ gồm file còn sống do mình sở hữu (không có file được chia sẻ cho mình, không có thùng rác), sắp `size` giảm dần rồi `id`. Phân trang keyset như danh sách folder (page_size mặc định 50, tối đa 200); `ordering` chỉ nhận `-size`.
 
 ### Node
 | Method | Path | Mô tả |

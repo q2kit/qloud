@@ -13,6 +13,7 @@ import {
   type ChildrenPage,
   type Ordering,
 } from '@/features/drive/api';
+import { refreshStorage } from '@/features/storage/api';
 import { useTrashNotice } from './notice';
 
 export type TrashNode = components['schemas']['TrashNode'];
@@ -74,6 +75,7 @@ export function useTrashNodes() {
     onSettled: () => {
       void client.invalidateQueries({ queryKey: driveKeys.all });
       void client.invalidateQueries({ queryKey: trashKey });
+      void refreshStorage(client);
     },
   });
 }
@@ -89,6 +91,7 @@ export function useRestoreTrash() {
       useTrashNotice.getState().forget(ids);
       void client.invalidateQueries({ queryKey: driveKeys.all });
       void client.invalidateQueries({ queryKey: trashKey });
+      void refreshStorage(client);
     },
   });
 }

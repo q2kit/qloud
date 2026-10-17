@@ -15,6 +15,7 @@ import { AccountMenu } from '@/features/auth/components/account-menu';
 import { useDriveStore } from '@/features/drive/store';
 import { useNode } from '@/features/drive/api';
 import { useCurrentFolderId } from '@/features/drive/use-current-folder';
+import { useUploadBlocked } from '@/features/storage/use-upload-blocked';
 import { useUploader } from '@/features/upload/context';
 import { useFolderUploader } from '@/features/upload/folder-context';
 import { treeFromFiles } from '@/features/upload/drop';
@@ -55,6 +56,8 @@ export function AppHeader({
   const canCreate =
     folder.data?.is_root === true ||
     folder.data?.capabilities.can_edit === true;
+  const uploadBlocked = useUploadBlocked(folderId);
+  const canUpload = canCreate && !uploadBlocked;
   const folderUploader = useFolderUploader();
   const directoryInput = React.useRef<HTMLInputElement>(null);
   const fileInput = React.useRef<HTMLInputElement>(null);
@@ -85,6 +88,7 @@ export function AppHeader({
 
       <CommandPalette
         canCreate={canCreate}
+        canUpload={canUpload}
         onCreateFolder={() => {
           setCreatingFolder(true);
         }}
@@ -139,7 +143,8 @@ export function AppHeader({
             {t('drive.actions.newFolder')}
           </DropdownMenuItem>
           <DropdownMenuItem
-            disabled={!canCreate}
+            disabled={!canUpload}
+            title={uploadBlocked ? t('storage.full.uploadBlocked') : undefined}
             onSelect={() => {
               fileInput.current?.click();
             }}
@@ -148,12 +153,21 @@ export function AppHeader({
             {t('drive.actions.upload')}
           </DropdownMenuItem>
           <DropdownMenuItem
-            disabled={!canCreate}
+            disabled={!canUpload}
+            title={uploadBlocked ? t('storage.full.uploadBlocked') : undefined}
             onSelect={() => directoryInput.current?.click()}
           >
             <FolderUp />
             {t('upload.actions.folder')}
           </DropdownMenuItem>
+          {uploadBlocked && (
+            <p
+              role="note"
+              className="max-w-60 px-2 py-1.5 text-xs text-destructive"
+            >
+              {t('storage.full.uploadBlocked')}
+            </p>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
       <Button

@@ -15,6 +15,7 @@ import { NavLink } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useMe } from '@/features/settings/use-me';
+import { StorageMeter } from '@/features/storage/storage-meter';
 
 import { LanguageSwitcher } from './language-switcher';
 import { ThemeSwitcher } from './theme-switcher';
@@ -103,8 +104,10 @@ export function AppSidebar({
       </nav>
 
       <div className="space-y-3 border-t border-border px-4 py-4">
+        <StorageMeter onNavigate={onClose} />
         <NavLink
           to="/settings"
+          end
           onClick={onClose}
           className={navigationLinkClassName}
         >

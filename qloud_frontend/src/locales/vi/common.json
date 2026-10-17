@@ -12,7 +12,8 @@
     "login": "Đăng nhập",
     "home": "Về Drive",
     "preferences": "Tùy chọn hiển thị",
-    "moderation": "Kiểm duyệt"
+    "moderation": "Kiểm duyệt",
+    "storage": "Dung lượng"
   },
   "drive": {
     "title": "Drive",
@@ -633,5 +634,53 @@
     "keepLabel": "Khóa phiên bản {{number}}",
     "keepTitle": "Khóa để phiên bản không bị tự động xóa. Phiên bản vẫn chiếm dung lượng và bạn vẫn có thể xóa bản cũ theo cách thủ công.",
     "unkeepTitle": "Bỏ khóa để cho phép tự động xóa phiên bản theo giới hạn của gói. Phiên bản hiện tại luôn được giữ lại."
+  },
+  "storage": {
+    "summary": "Đã dùng {{used}} / {{quota}}",
+    "used": "Dung lượng đã dùng",
+    "overview": "Tổng quan",
+    "reserved": "Đang giữ chỗ cho upload dở dang",
+    "maxFileSize": "Kích thước file tối đa",
+    "level": {
+      "normal": "Đã dùng {{percent}}%.",
+      "warning": "Đã dùng {{percent}}%. Dung lượng sắp đầy.",
+      "critical": "Đã dùng {{percent}}%. Dung lượng gần hết.",
+      "full": "Đã hết dung lượng. Không upload được cho tới khi bạn giải phóng bớt."
+    },
+    "breakdown": "Theo loại file",
+    "total": "Tổng cộng {{size}}",
+    "groups": {
+      "document": "Tài liệu",
+      "image": "Ảnh",
+      "video": "Video",
+      "audio": "Âm thanh",
+      "archive": "File nén",
+      "other": "File khác",
+      "old_versions": "Phiên bản cũ",
+      "trash": "Thùng rác"
+    },
+    "openTrash": "Mở thùng rác",
+    "largest": "File lớn nhất",
+    "noFiles": "Bạn chưa có file nào.",
+    "openFolder": "Mở thư mục chứa",
+    "openFolderLabel": "Mở thư mục chứa {{name}}",
+    "trash": "Đưa vào thùng rác",
+    "trashLabel": "Đưa {{name}} vào thùng rác",
+    "trashFailed": "Không đưa được file vào thùng rác. Hãy thử lại.",
+    "more": "Tải thêm",
+    "loading": "Đang tải dung lượng",
+    "failed": "Không tải được thông tin dung lượng.",
+    "largestFailed": "Không tải được danh sách file lớn nhất.",
+    "retry": "Thử lại",
+    "full": {
+      "title": "Đã hết dung lượng.",
+      "description": "Bạn vẫn xem, tải về và xóa file được, nhưng không upload thêm được.",
+      "manage": "Quản lý dung lượng",
+      "uploadBlocked": "Đã hết dung lượng. Hãy giải phóng bớt để upload."
+    },
+    "settings": {
+      "title": "Dung lượng",
+      "manage": "Quản lý dung lượng"
+    }
   }
 }
