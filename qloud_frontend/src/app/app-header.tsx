@@ -64,10 +64,13 @@ export function AppHeader({
   const folderUploader = useFolderUploader();
   const directoryInput = React.useRef<HTMLInputElement>(null);
   const fileInput = React.useRef<HTMLInputElement>(null);
-  // Creating by keyboard belongs to the Drive (ui-ux.md › Phím tắt).
+  // Creating by keyboard belongs to a folder view (ui-ux.md › Phím tắt): the
+  // Drive, or a shared folder one may edit (M8-22).
   const { pathname } = useLocation();
   const inDrive =
-    pathname === '/drive' || pathname.startsWith('/drive/folders/');
+    pathname === '/drive' ||
+    pathname.startsWith('/drive/folders/') ||
+    pathname.startsWith('/shared/folders/');
   const createShortcuts = { enabled: inDrive && canCreate };
   // A full quota blocks uploads like the menu items (quota.md › M8-01).
   const uploadShortcuts = { enabled: inDrive && canUpload };

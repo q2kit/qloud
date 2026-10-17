@@ -111,9 +111,10 @@ test('file grant email opens without parent access and respects revocation', asy
     });
     expect(created.status()).toBe(201);
     const share = ((await created.json()) as { id: string }).id;
-    const link = await linkFromEmail(email, '/drive/files/');
+    // M8-22: shared items open under /shared, not the recipient's Drive.
+    const link = await linkFromEmail(email, '/shared/files/');
     expect(new URL(link).pathname).toBe(
-      `/drive/files/${file.id.replaceAll('-', '')}`,
+      `/shared/files/${file.id.replaceAll('-', '')}`,
     );
     const requests: string[] = [];
     recipient.on('request', (request) =>
@@ -168,8 +169,9 @@ test('file grant email opens without parent access and respects revocation', asy
         });
       }
     }
+    // The file opened over the /shared list, so closing it stays there.
     await recipient.keyboard.press('Escape');
-    await expect(recipient).toHaveURL(/\/drive$/);
+    await expect(recipient).toHaveURL(/\/shared$/);
     await expect(dialog).toHaveCount(0);
     expect(
       (

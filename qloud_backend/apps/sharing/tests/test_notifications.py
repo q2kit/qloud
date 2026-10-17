@@ -68,8 +68,10 @@ def test_email_content_recipient_locale_and_link(
     assert user.display_name in message.body
     assert user.display_name not in message.subject
     path = "folders" if kind == "folder" else "files"
-    link = f"https://files.example.com/drive/{path}/{node.pk.hex}"
+    # Shared items open under /shared, not the recipient's own Drive (M8-22).
+    link = f"https://files.example.com/shared/{path}/{node.pk.hex}"
     assert link in message.body
+    assert "/drive/" not in message.body
     html = message.alternatives[0][0]
     assert isinstance(html, str)
     assert link in html

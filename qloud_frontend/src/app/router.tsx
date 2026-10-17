@@ -69,6 +69,17 @@ export const appRoutes: RouteObject[] = [
                 Component: SharedPage,
                 handle: { titleKey: 'navigation.shared' } satisfies RouteHandle,
               },
+              // M8-22: what others share opens here, never under /drive.
+              {
+                path: 'shared/folders/:folderId',
+                Component: DrivePage,
+                handle: { titleKey: 'navigation.shared' } satisfies RouteHandle,
+              },
+              {
+                path: 'shared/files/:fileId',
+                Component: FileLinkPage,
+                handle: { titleKey: 'preview.title' } satisfies RouteHandle,
+              },
               {
                 path: 'trash',
                 Component: TrashPage,

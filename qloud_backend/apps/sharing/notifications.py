@@ -12,7 +12,8 @@ from .models import Share
 def schedule_share_email(share: Share) -> None:
     recipient, actor, node = share.grantee, share.created_by, share.node
     route = "folders" if node.kind == "folder" else "files"
-    url = f"{settings.APP_BASE_URL.rstrip('/')}/drive/{route}/{node.pk.hex}"
+    # The recipient opens it under /shared; /drive only holds their own items (M8-22).
+    url = f"{settings.APP_BASE_URL.rstrip('/')}/shared/{route}/{node.pk.hex}"
     # Render before commit to retain the grant's original name, role and locale.
     with translation.override(recipient.locale):
         context = {
