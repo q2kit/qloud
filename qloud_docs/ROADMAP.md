@@ -113,7 +113,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M8-08 | FE: phím tắt cho các thao tác chính và bảng phím tắt (`?`) | [#164](https://github.com/q2kit/qloud/issues/164) | ✅ [PR #192](https://github.com/q2kit/qloud/pull/192) |
 | M8-09 | Celery đối soát quota hằng đêm, lệnh `reconcile_quota` | [#165](https://github.com/q2kit/qloud/issues/165) | ⬜ |
 | M8-10 | FE: tab Chia sẻ trong panel chi tiết | [#166](https://github.com/q2kit/qloud/issues/166) | ✅ [PR #193](https://github.com/q2kit/qloud/pull/193) |
-| M8-11a | Audit log BE (kế hoạch đã duyệt trên [#167](https://github.com/q2kit/qloud/issues/167)): `AuditEvent`, ghi sự kiện, API hoạt động, admin, dọn sau 365 ngày | [#196](https://github.com/q2kit/qloud/issues/196) | 🟦 |
+| M8-11a | Audit log BE (kế hoạch đã duyệt trên [#167](https://github.com/q2kit/qloud/issues/167)): `AuditEvent`, ghi sự kiện, API hoạt động, admin, dọn sau 365 ngày | [#196](https://github.com/q2kit/qloud/issues/196) | ✅ [PR #198](https://github.com/q2kit/qloud/pull/198) |
 | M8-11b | FE: tab Hoạt động trong panel chi tiết (cần M8-11a) | [#197](https://github.com/q2kit/qloud/issues/197) | ⬜ |
 | M8-12 | FE: nút nổi "+" Tạo mới trên mobile | [#168](https://github.com/q2kit/qloud/issues/168) | ⬜ |
 | M8-13 | E2E đa trình duyệt: Firefox và WebKit (NF-10) | [#169](https://github.com/q2kit/qloud/issues/169) | ⬜ |
