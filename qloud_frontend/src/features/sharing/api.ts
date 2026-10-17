@@ -13,6 +13,7 @@ export const sharingKeys = {
   all: ['sharing'] as const,
   shares: (id: string) => ['sharing', 'shares', id] as const,
   links: (id: string) => ['sharing', 'links', id] as const,
+  access: (id: string) => ['sharing', 'access', id] as const,
 };
 export function useShares(id: string, enabled: boolean) {
   return useInfiniteQuery({
@@ -22,6 +23,26 @@ export function useShares(id: string, enabled: boolean) {
       unwrap(
         await api.GET('/api/v1/nodes/{node_id}/shares', {
           params: { path: { node_id: id }, query: { cursor: pageParam } },
+          signal,
+        }),
+      ),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (page) => cursorOf(page.next),
+    retry: false,
+  });
+}
+/** Grants on the node and on the ancestors the caller can see (M8-10 tab). */
+export function useAccess(id: string, enabled: boolean) {
+  return useInfiniteQuery({
+    queryKey: sharingKeys.access(id),
+    enabled,
+    queryFn: async ({ pageParam, signal }) =>
+      unwrap(
+        await api.GET('/api/v1/nodes/{node_id}/shares', {
+          params: {
+            path: { node_id: id },
+            query: { cursor: pageParam, include_inherited: true },
+          },
           signal,
         }),
       ),

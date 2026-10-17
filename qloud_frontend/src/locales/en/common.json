@@ -440,6 +440,22 @@
     "unavailable": "Couldn't access this content",
     "unavailableDescription": "The link is invalid, expired or revoked.",
     "publicEmpty": "This shared folder is empty.",
+    "panel": {
+      "owner": "Owner",
+      "you": "{{name}} (you)",
+      "yourRole": {
+        "viewer": "You can view this item.",
+        "editor": "You can edit this item."
+      },
+      "noPeople": "Not shared with anyone yet.",
+      "inheritedFrom": "Access from the folder {{name}}",
+      "parentFolder": "a parent folder",
+      "noLinks": "No active public link.",
+      "manage": "Manage access",
+      "failed": "Couldn't load sharing details.",
+      "unavailable": "This item is no longer available.",
+      "retry": "Try again"
+    },
     "errors": {
       "failed": "Couldn't update sharing. Please try again.",
       "denied": "You cannot manage sharing for this item.",

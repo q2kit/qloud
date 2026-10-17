@@ -876,8 +876,16 @@ export interface components {
             readonly created_at: string;
             /** Format: date-time */
             readonly updated_at: string;
+            readonly owner: components["schemas"]["NodeOwner"];
             readonly breadcrumb: components["schemas"]["Breadcrumb"][];
             readonly capabilities: components["schemas"]["Capabilities"];
+        };
+        /** @description The owner as people with access see them: no email (sharing.md, M8-10). */
+        NodeOwner: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Tên hiển thị */
+            readonly display_name: string;
         };
         /** @enum {unknown} */
         NullEnum: null;
@@ -2041,6 +2049,8 @@ export interface operations {
             query?: {
                 /** @description The pagination cursor value. */
                 cursor?: string;
+                /** @description Also list grants on ancestor folders the caller can see (`node_id` tells them apart). */
+                include_inherited?: boolean;
                 /** @description Number of results to return per page. */
                 page_size?: number;
             };

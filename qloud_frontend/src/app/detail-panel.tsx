@@ -8,6 +8,7 @@ import {
   NodeDetails,
   SelectionSummary,
 } from '@/features/drive/components/node-details';
+import { SharingPanel } from '@/features/sharing/sharing-panel';
 import { VersionPanel } from '@/features/versions/version-panel';
 import { useDriveStore } from '@/features/drive/store';
 import { useMediaQuery } from '@/lib/use-media-query';
@@ -65,6 +66,9 @@ export function DetailPanel({
   );
 }
 
+const TABS = ['info', 'versions', 'sharing'] as const;
+type Tab = (typeof TABS)[number];
+
 interface PanelContentProps {
   /** Inside the mobile sheet the heading also labels the Radix dialog. */
   isDialog: boolean;
@@ -78,14 +82,22 @@ function PanelContent({
   const { t } = useTranslation();
   const selected = useDriveStore((state) => state.selected);
   const node = selected.length === 1 ? selected[0] : undefined;
-  const versionsEnabled =
-    node?.kind === 'file' && !('trashed_at' in node && node.trashed_at);
+  const live = node !== undefined && !('trashed_at' in node && node.trashed_at);
+  const enabled: Record<Tab, boolean> = {
+    info: true,
+    versions: live && node.kind === 'file',
+    // The root folder cannot be shared (api.md › Share).
+    sharing: live && !node.is_root,
+  };
   const [tabState, setTabState] = React.useState<{
     id: string | undefined;
-    tab: 'info' | 'versions';
+    tab: Tab;
   }>({ id: undefined, tab: 'info' });
   const tab =
-    versionsEnabled && tabState.id === node.id ? tabState.tab : 'info';
+    node && tabState.id === node.id && enabled[tabState.tab]
+      ? tabState.tab
+      : 'info';
+  const usable = TABS.filter((value) => enabled[value]);
   const panelId = React.useId();
   const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
   const heading = <h2 className="font-semibold">{t('details.title')}</h2>;
@@ -121,6 +133,8 @@ function PanelContent({
       >
         {tab === 'versions' && node ? (
           <VersionPanel key={node.id} node={node} />
+        ) : tab === 'sharing' && node ? (
+          <SharingPanel key={node.id} node={node} />
         ) : selected.length > 1 ? (
           <SelectionSummary nodes={selected} />
         ) : selected[0] ? (
@@ -142,7 +156,7 @@ function PanelContent({
         aria-label={t('details.title')}
         className="grid grid-cols-3 border-t border-border px-3 py-2 text-xs text-muted-foreground"
       >
-        {(['info', 'versions'] as const).map((value, index) => (
+        {TABS.map((value, index) => (
           <button
             key={value}
             ref={(element) => {
@@ -154,7 +168,7 @@ function PanelContent({
             aria-controls={`${panelId}-${value}-panel`}
             aria-selected={tab === value}
             tabIndex={tab === value ? 0 : -1}
-            disabled={value === 'versions' && !versionsEnabled}
+            disabled={!enabled[value]}
             className={`flex flex-col items-center gap-1.5 rounded-md px-2 py-2 outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${tab === value ? 'bg-secondary text-foreground' : ''}`}
             onClick={() => {
               setTabState({ id: node?.id, tab: value });
@@ -165,34 +179,34 @@ function PanelContent({
               )
                 return;
               event.preventDefault();
-              const next =
-                !versionsEnabled || event.key === 'Home'
-                  ? 0
+              // Arrows wrap around the enabled tabs only.
+              const position = usable.indexOf(value);
+              const target =
+                event.key === 'Home'
+                  ? usable[0]
                   : event.key === 'End'
-                    ? 1
-                    : 1 - index;
-              setTabState({
-                id: node?.id,
-                tab: next === 0 ? 'info' : 'versions',
-              });
-              tabRefs.current[next]?.focus();
+                    ? usable[usable.length - 1]
+                    : usable[
+                        (position +
+                          (event.key === 'ArrowRight' ? 1 : -1) +
+                          usable.length) %
+                          usable.length
+                      ];
+              if (!target) return;
+              setTabState({ id: node?.id, tab: target });
+              tabRefs.current[TABS.indexOf(target)]?.focus();
             }}
           >
             {value === 'info' ? (
               <Info className="size-4" aria-hidden="true" />
-            ) : (
+            ) : value === 'versions' ? (
               <FileText className="size-4" aria-hidden="true" />
+            ) : (
+              <Share2 className="size-4" aria-hidden="true" />
             )}
             {t(`details.tabs.${value}`)}
           </button>
         ))}
-        <span
-          className="flex flex-col items-center gap-1.5 rounded-md px-2 py-2"
-          aria-hidden="true"
-        >
-          <Share2 className="size-4" aria-hidden="true" />
-          {t('details.tabs.sharing')}
-        </span>
       </div>
     </div>
   );
