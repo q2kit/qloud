@@ -426,6 +426,7 @@
     "links": "Public links",
     "ownerOnly": "Only the owner can manage public links.",
     "expiry": "Expires at (optional)",
+    "neverExpires": "Never expires",
     "noExpiry": "Leave blank for no expiry. Links only allow viewing and downloading.",
     "createLink": "Create link",
     "revoked": "Revoked",
@@ -689,5 +690,13 @@
       "title": "Storage",
       "manage": "Manage storage"
     }
+  },
+  "datePicker": {
+    "time": "Time",
+    "hour": "Hour",
+    "minute": "Minute",
+    "done": "Done",
+    "clear": "Clear date",
+    "anyDate": "Any date"
   }
 }

@@ -135,7 +135,8 @@ it('submits a scoped anonymous report and shows success', async () => {
     ),
   );
   const { user, modal } = await publicReport();
-  await user.selectOptions(within(modal).getByLabelText('Reason'), 'malware');
+  await user.click(within(modal).getByLabelText('Reason'));
+  await user.click(await screen.findByRole('option', { name: 'Malware' }));
   await user.type(
     within(modal).getByLabelText('Description (optional)'),
     'Unsafe download',

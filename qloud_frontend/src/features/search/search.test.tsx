@@ -135,8 +135,12 @@ it('opens all results and keeps filters in URLs through back navigation', async 
   expect(
     await screen.findByRole('heading', { name: 'Search results' }),
   ).toBeVisible();
-  await user.selectOptions(screen.getByLabelText('Type'), 'document');
-  await user.selectOptions(screen.getByLabelText('Owner'), 'others');
+  await user.click(screen.getByLabelText('Type'));
+  await user.click(await screen.findByRole('option', { name: 'Document' }));
+  await user.click(screen.getByLabelText('Owner'));
+  await user.click(
+    await screen.findByRole('option', { name: 'Shared with me' }),
+  );
   await waitFor(() => {
     expect(router.state.location.search).toContain('owner=others');
   });
@@ -144,8 +148,8 @@ it('opens all results and keeps filters in URLs through back navigation', async 
   await act(async () => {
     await router.navigate(-1);
   });
-  expect(screen.getByLabelText('Owner')).toHaveValue('');
-  expect(screen.getByLabelText('Type')).toHaveValue('document');
+  expect(screen.getByLabelText('Owner')).toHaveTextContent('All owners');
+  expect(screen.getByLabelText('Type')).toHaveTextContent('Document');
 });
 
 it('loads cursor pages and reports errors with a retry', async () => {

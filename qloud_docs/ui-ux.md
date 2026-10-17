@@ -17,7 +17,7 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
   - **Khay upload** nổi ở góc dưới: hiện tiến độ, tạm dừng/tiếp tục, thử lại.
   - **Phím tắt** cho mọi thao tác chính. Bấm `?` để xem danh sách phím tắt.
 - **Biểu tượng:** chữ Q trắng trên ô teal bo góc (`qloud_frontend/public/`: `favicon.svg`, `favicon.ico` 16+32px cho trình duyệt cũ, `apple-touch-icon.png` 180px không bo góc vì iOS tự bo).
-- **Component:** shadcn/ui trên nền Radix, được tùy biến theo token của Qloud.
+- **Component:** shadcn/ui trên nền Radix, được tùy biến theo token của Qloud. Ô chọn dùng `Select`; ngày dùng `DatePicker`, ngày giờ dùng `DateTimePicker` (lịch theo ngôn ngữ đang chọn, giờ và phút bước 5 phút, nút xóa ngày; ô hiển thị `yyyy/mm/dd` và `yyyy/mm/dd hh:mm` 24 giờ ở mọi ngôn ngữ) trong `components/ui`, không dùng `<select>` hay ô ngày giờ gốc của trình duyệt. Danh sách chọn và lịch luôn nổi trên mọi modal.
 - **Responsive:** trên mobile, sidebar thu thành drawer, panel chi tiết thành bottom sheet, hành động chính là nút nổi "+".
 
 ## Bố cục chính (desktop)

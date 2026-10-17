@@ -419,6 +419,7 @@
     "links": "Liên kết công khai",
     "ownerOnly": "Chỉ chủ sở hữu có thể quản lý liên kết công khai.",
     "expiry": "Thời gian hết hạn (không bắt buộc)",
+    "neverExpires": "Không hết hạn",
     "noExpiry": "Để trống nếu không muốn liên kết hết hạn. Người có liên kết chỉ được xem và tải xuống.",
     "createLink": "Tạo liên kết",
     "revoked": "Đã thu hồi",
@@ -682,5 +683,13 @@
       "title": "Dung lượng",
       "manage": "Quản lý dung lượng"
     }
+  },
+  "datePicker": {
+    "time": "Giờ",
+    "hour": "Giờ",
+    "minute": "Phút",
+    "done": "Xong",
+    "clear": "Xóa ngày đã chọn",
+    "anyDate": "Mọi ngày"
   }
 }
