@@ -45,8 +45,20 @@ const link = (id: string, fields: Record<string, unknown> = {}) => ({
 
 let role: 'owner' | 'editor' | 'viewer';
 let sharesFail: boolean;
+let detailGone: boolean;
+/** Splits people and links over two cursor pages. */
+let paged: boolean;
 const ok = <T,>(data: T) => ({ data, response: new Response() });
-const page = <T,>(results: T[]) => ok({ results, next: null, previous: null });
+const page = <T,>(results: T[], next: string | null = null) =>
+  ok({ results, next, previous: null });
+const failure = (status: number, code: string) => ({
+  error: { error: { code, message: code, details: {} } },
+  response: new Response(null, { status }),
+});
+const NEXT = 'http://localhost/api/v1/next?cursor=second';
+const cursorOf = (options: unknown) =>
+  (options as { params?: { query?: { cursor?: string } } } | undefined)?.params
+    ?.query?.cursor;
 const requested = (fragment: string) =>
   vi
     .mocked(api.GET)
@@ -56,7 +68,9 @@ beforeEach(async () => {
   await i18n.changeLanguage('en');
   role = 'owner';
   sharesFail = false;
-  vi.spyOn(api, 'GET').mockImplementation(async (path) => {
+  detailGone = false;
+  paged = false;
+  vi.spyOn(api, 'GET').mockImplementation(async (path, options) => {
     await Promise.resolve();
     switch (path) {
       case '/api/v1/me':
@@ -71,6 +85,7 @@ beforeEach(async () => {
           is_superuser: false,
         });
       case '/api/v1/nodes/{node_id}':
+        if (detailGone) return failure(404, 'not_found');
         return ok({
           ...node,
           owner: OWNER,
@@ -83,16 +98,23 @@ beforeEach(async () => {
           },
         });
       case '/api/v1/nodes/{node_id}/shares':
-        if (sharesFail)
-          return {
-            error: { error: { code: 'error', message: 'boom', details: {} } },
-            response: new Response(null, { status: 500 }),
-          };
+        if (sharesFail) return failure(500, 'error');
+        if (paged)
+          return cursorOf(options) === 'second'
+            ? page([grant('late', node.id, 'em@example.com')])
+            : page([grant('early', node.id, 'an@example.com')], NEXT);
         return page([
           grant('direct', node.id, 'chi@example.com', 'editor'),
           grant('inherited', folder.id, 'dung@example.com'),
         ]);
       case '/api/v1/nodes/{node_id}/links':
+        if (paged)
+          return cursorOf(options) === 'second'
+            ? page([link('later')])
+            : page(
+                [link('gone', { revoked_at: '2026-10-12T13:00:00Z' })],
+                NEXT,
+              );
         return page([
           link('active'),
           link('revoked', { revoked_at: '2026-10-12T13:00:00Z' }),
@@ -169,6 +191,53 @@ describe('sharing tab', () => {
       `${window.location.origin}/s/token-active`,
     );
     expect(screen.getByRole('status')).toHaveTextContent('Link copied');
+  });
+
+  it('says when copying the link fails', async () => {
+    const user = userEvent.setup();
+    setup();
+    const copy = await screen.findByRole('button', { name: 'Copy link' });
+    vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(
+      new Error('denied'),
+    );
+    await user.click(copy);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      "Couldn't copy the link. Please try again.",
+    );
+  });
+
+  it('loads more people and links page by page', async () => {
+    const user = userEvent.setup();
+    paged = true;
+    setup();
+    const people = await screen.findByRole('region', {
+      name: 'People with access',
+    });
+    expect(within(people).getByText('an@example.com')).toBeVisible();
+    await user.click(within(people).getByRole('button', { name: 'Load more' }));
+    expect(await within(people).findByText('em@example.com')).toBeVisible();
+    expect(
+      within(people).queryByRole('button', { name: 'Load more' }),
+    ).not.toBeInTheDocument();
+
+    // The first page holds only a revoked link: nothing to copy yet.
+    const links = screen.getByRole('region', { name: 'Public links' });
+    expect(within(links).getByText('No active public link.')).toBeVisible();
+    await user.click(within(links).getByRole('button', { name: 'Load more' }));
+    expect(
+      await within(links).findByRole('button', { name: 'Copy link' }),
+    ).toBeVisible();
+    const shares = requested('/shares');
+    expect(cursorOf(shares[shares.length - 1]?.[1])).toBe('second');
+  });
+
+  it('says when the item is gone', async () => {
+    detailGone = true;
+    setup();
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'This item is no longer available.',
+    );
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeVisible();
   });
 
   it('shows editors who has access, but leaves public links to the owner', async () => {

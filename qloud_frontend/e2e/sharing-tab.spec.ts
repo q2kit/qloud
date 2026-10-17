@@ -110,3 +110,65 @@ test('sharing tab shows a new recipient and their access in subfolders', async (
   await expect(panel.getByText('Quyền từ thư mục Team')).toBeVisible();
   await capture(page, 'sharing-tab-inherited', isMobile);
 });
+
+test('editors see who has access and viewers only the owner', async ({
+  page,
+  browser,
+  baseURL,
+  isMobile,
+}) => {
+  await signUpVerifiedViaApi(page);
+  const me = (await (await page.request.get('/api/v1/me')).json()) as {
+    root_folder_id: string;
+  };
+  const team = await createFolder(page, me.root_folder_id, 'Team');
+  const csrf =
+    (await page.context().cookies()).find(
+      (cookie) => cookie.name === 'csrftoken',
+    )?.value ?? '';
+
+  const join = async (role: 'editor' | 'viewer') => {
+    const context = await browser.newContext({
+      baseURL,
+      locale: 'vi-VN',
+      viewport: page.viewportSize(),
+      isMobile,
+      hasTouch: isMobile,
+    });
+    const recipient = await context.newPage();
+    const email = await signUpVerifiedViaApi(recipient);
+    const response = await page.request.post(`/api/v1/nodes/${team}/shares`, {
+      headers: { 'X-CSRFToken': csrf },
+      data: { email, role },
+    });
+    expect(response.status()).toBe(201);
+    return { context, page: recipient, email };
+  };
+  const editor = await join('editor');
+  const viewer = await join('viewer');
+  try {
+    await editor.page.goto('/shared');
+    let panel = await openSharingTab(editor.page, 'Team');
+    await expect(
+      panel.getByText('Bạn có quyền chỉnh sửa mục này.'),
+    ).toBeVisible();
+    await expect(panel.getByText(viewer.email)).toBeVisible();
+    await expect(
+      panel.getByText('Chỉ chủ sở hữu có thể quản lý liên kết công khai.'),
+    ).toBeVisible();
+    await expect(
+      panel.getByRole('button', { name: 'Quản lý quyền truy cập' }),
+    ).toBeVisible();
+
+    await viewer.page.goto('/shared');
+    panel = await openSharingTab(viewer.page, 'Team');
+    await expect(panel.getByText('Bạn có quyền xem mục này.')).toBeVisible();
+    await expect(panel.getByText('Người có quyền truy cập')).toHaveCount(0);
+    await expect(
+      panel.getByRole('button', { name: 'Quản lý quyền truy cập' }),
+    ).toHaveCount(0);
+  } finally {
+    await editor.context.close();
+    await viewer.context.close();
+  }
+});
