@@ -3,10 +3,14 @@ import { expect, test, type Page } from '@playwright/test';
 import { signUpVerifiedViaApi } from './auth';
 
 test.use({
-  launchOptions: { slowMo: process.env.M811_CAPTURE ? 250 : 0 },
+  launchOptions: {
+    slowMo: process.env.M811_CAPTURE
+      ? Number(process.env.M811_SLOWMO ?? '250')
+      : 0,
+  },
 });
 
-/** M811_CAPTURE=1 saves light and dark screenshots for the PR. */
+/** M811_CAPTURE=1 saves light and dark screenshots for the PR (M811_SLOWMO: ms). */
 async function capture(page: Page, kind: string, mobile: boolean) {
   if (!process.env.M811_CAPTURE) return;
   for (const theme of ['light', 'dark']) {

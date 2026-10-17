@@ -173,7 +173,7 @@ function PanelContent({
             aria-selected={tab === value}
             tabIndex={tab === value ? 0 : -1}
             disabled={!enabled[value]}
-            className={`flex flex-col items-center gap-1.5 rounded-md px-2 py-2 outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${tab === value ? 'bg-secondary text-foreground' : ''}`}
+            className={`flex flex-col items-center gap-1.5 rounded-md px-1 py-2 whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${tab === value ? 'bg-secondary text-foreground' : ''}`}
             onClick={() => {
               setTabState({ id: node?.id, tab: value });
             }}

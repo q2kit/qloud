@@ -83,6 +83,14 @@ export function ActivityPanel({
     const named = event.actor.display_name.trim();
     return named !== '' ? named : (event.actor.email ?? t('activity.someone'));
   };
+  // The avatar shows the person, not "You": the same letter as the header's.
+  const initial = (event: ActivityEvent): string => {
+    if (me.data && event.actor?.id === me.data.id) {
+      const named = (me.data.display_name ?? '').trim();
+      return (named !== '' ? named : me.data.email).charAt(0);
+    }
+    return actorName(event).trim().charAt(0);
+  };
   const sentence = (event: ActivityEvent): string => {
     const metadata = event.metadata as Record<string, unknown>;
     const grantee = metadata.grantee as Grantee | undefined;
@@ -129,7 +137,7 @@ export function ActivityPanel({
                 ) : event.actor_kind === 'moderator' ? (
                   <Shield className="size-4" />
                 ) : (
-                  actorName(event).trim().charAt(0)
+                  initial(event)
                 )}
               </span>
               <div className="min-w-0 flex-1">
