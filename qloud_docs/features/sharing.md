@@ -115,6 +115,12 @@
 | Cây sâu, không N+1/duplicate, owner boundary/cycle, tài khoản inactive/suspended | `sharing/tests/test_permissions.py` |
 | Editor di chuyển đúng cây, trash nhiều owner, restore owner và grant còn lại | `drive/tests/test_shared_access.py` |
 
+## Tiến độ M8-10 — tab Chia sẻ trong panel chi tiết
+Quyết định đã duyệt trên [#166](https://github.com/q2kit/qloud/issues/166#issuecomment-6238437603):
+- Quyền thừa kế lấy qua `GET /nodes/{id}/shares?include_inherited=true`, không thêm endpoint. Owner thấy grant ở mọi tổ tiên; editor chỉ thấy grant ở tổ tiên nằm trong breadcrumb của mình, để không lộ thông tin ở phần cây họ không truy cập được.
+- Chi tiết node có `owner: {id, display_name}`, không trả email của owner.
+- Tab Chia sẻ chỉ đọc, xem [ui-ux.md › Tab Chia sẻ](../ui-ux.md#tab-chia-sẻ-m8-10). Viewer chỉ thấy chủ sở hữu và quyền của mình; editor thấy người có quyền truy cập; chỉ owner thấy liên kết công khai (API links chỉ cho owner). Thay đổi quyền vẫn làm ở hộp thoại S-11.
+
 ## Ngoài phạm vi
 Mật khẩu cho share link, quyền sửa qua share link, mời người chưa có tài khoản (có thể làm sau MVP), chặn thừa kế quyền.
 
