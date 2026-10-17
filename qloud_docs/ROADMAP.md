@@ -124,4 +124,4 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M8-19 | Fix: E2E nhập số trang PDF đôi lúc vẫn ở trang 1 | [#144](https://github.com/q2kit/qloud/issues/144) | ⬜ |
 | M8-20 | Rà soát câu chữ i18n (vi/en, email) cho tự nhiên và nhất quán | [#178](https://github.com/q2kit/qloud/issues/178) | ✅ [PR #179](https://github.com/q2kit/qloud/pull/179) |
 | M8-21 | FE: Select và DatePicker thay cho ô chọn gốc của trình duyệt | [#180](https://github.com/q2kit/qloud/issues/180) | ✅ [PR #191](https://github.com/q2kit/qloud/pull/191) |
-| M8-22 | Fix: mục được chia sẻ mở trong `/shared` (đóng trình xem, link trong email), `/drive` chỉ chứa dữ liệu của mình | [#194](https://github.com/q2kit/qloud/issues/194) | 🟦 |
+| M8-22 | Fix: mục được chia sẻ mở trong `/shared` (đóng trình xem, link trong email), `/drive` chỉ chứa dữ liệu của mình | [#194](https://github.com/q2kit/qloud/issues/194) | ✅ [PR #195](https://github.com/q2kit/qloud/pull/195) |
