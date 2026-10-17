@@ -111,10 +111,6 @@
     "navigationDescription": "Truy cập các mục chính trong Qloud.",
     "breadcrumbRoot": "Drive của tôi",
     "search": "Tìm kiếm và thao tác nhanh",
-    "searchShortcut": "{{modifier}} K",
-    "keys": {
-      "ctrl": "Ctrl"
-    },
     "create": "Tạo mới"
   },
   "details": {
@@ -397,8 +393,7 @@
     "actionFailed": "Không thể thực hiện thao tác. Vui lòng thử lại.",
     "tooMany": "Vui lòng chọn tối đa 1.000 mục mỗi lần.",
     "emptyState": "Thùng rác trống",
-    "emptyDescription": "Các mục bạn xóa sẽ xuất hiện ở đây.",
-    "deleteShortcut": "Del"
+    "emptyDescription": "Các mục bạn xóa sẽ xuất hiện ở đây."
   },
   "sharing": {
     "action": "Chia sẻ",
@@ -691,5 +686,49 @@
     "done": "Xong",
     "clear": "Xóa ngày đã chọn",
     "anyDate": "Mọi ngày"
+  },
+  "shortcuts": {
+    "title": "Phím tắt",
+    "description": "Bấm ? ở bất cứ đâu để mở danh sách này.",
+    "close": "Đóng bảng phím tắt",
+    "then": "rồi",
+    "or": "hoặc",
+    "groups": {
+      "general": "Chung",
+      "navigation": "Điều hướng",
+      "selection": "Chọn",
+      "items": "Thao tác với mục",
+      "viewer": "Trình xem tệp"
+    },
+    "actions": {
+      "palette": "Tìm kiếm và thao tác nhanh",
+      "help": "Xem phím tắt",
+      "details": "Bật/tắt panel chi tiết",
+      "goDrive": "Tới Drive",
+      "goRecent": "Tới Gần đây",
+      "goShared": "Tới Được chia sẻ",
+      "goTrash": "Tới Thùng rác",
+      "goSettings": "Tới Cài đặt",
+      "parentFolder": "Lên thư mục cha",
+      "moveSelection": "Di chuyển giữa các mục",
+      "extendSelection": "Mở rộng vùng chọn",
+      "toggleSelection": "Thêm/bỏ mục đang trỏ tới",
+      "selectAll": "Chọn tất cả",
+      "clearSelection": "Bỏ chọn",
+      "open": "Mở",
+      "openInNewTab": "Mở trong thẻ mới",
+      "rename": "Đổi tên",
+      "trash": "Đưa vào thùng rác",
+      "share": "Chia sẻ",
+      "download": "Tải xuống",
+      "newFolder": "Thư mục mới",
+      "upload": "Tải tệp lên",
+      "uploadFolder": "Tải thư mục lên",
+      "toggleView": "Chuyển lưới/danh sách",
+      "previousFile": "Tệp trước",
+      "nextFile": "Tệp sau",
+      "viewerDownload": "Tải xuống tệp đang xem",
+      "closeViewer": "Đóng trình xem"
+    }
   }
 }

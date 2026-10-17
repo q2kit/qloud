@@ -13,13 +13,16 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+import type { ShortcutId } from '@/features/shortcuts/definitions';
+
 import type { DriveNode } from './api';
 
 export interface NodeAction {
   key: string;
   label: string;
   icon: LucideIcon;
-  shortcut?: string;
+  /** Shown in menus, from the shortcut definitions. */
+  shortcut?: ShortcutId;
   run: () => void;
 }
 
@@ -64,7 +67,7 @@ export function nodeActions(
           key: 'trash',
           label: t('trash.move'),
           icon: Trash2,
-          shortcut: t('trash.deleteShortcut'),
+          shortcut: 'trash',
           run: () => {
             handlers.trash?.(selection);
           },
@@ -78,7 +81,7 @@ export function nodeActions(
       label:
         node.kind === 'folder' ? t('drive.actions.open') : t('preview.open'),
       icon: node.kind === 'folder' ? FolderOpen : Eye,
-      shortcut: '↵',
+      shortcut: 'open',
       run: () => {
         handlers.open(node);
       },
@@ -107,6 +110,7 @@ export function nodeActions(
             key: 'download',
             label: t('drive.actions.download'),
             icon: Download,
+            shortcut: 'download' as const,
             run: () => {
               handlers.download(node);
             },
@@ -117,7 +121,7 @@ export function nodeActions(
       key: 'rename',
       label: t('drive.actions.rename'),
       icon: Pencil,
-      shortcut: 'F2',
+      shortcut: 'rename',
       run: () => {
         handlers.rename(node);
       },
@@ -130,6 +134,7 @@ export function nodeActions(
             key: 'share',
             label: t('sharing.action'),
             icon: Share2,
+            shortcut: 'share' as const,
             run: () => handlers.share?.(node),
           },
         ]
@@ -138,7 +143,7 @@ export function nodeActions(
       key: 'info',
       label: t('drive.actions.info'),
       icon: Info,
-      shortcut: 'i',
+      shortcut: 'details',
       run: () => {
         handlers.info(node);
       },
