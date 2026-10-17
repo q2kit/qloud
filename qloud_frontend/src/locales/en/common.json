@@ -124,7 +124,8 @@
     "tabs": {
       "info": "Info",
       "versions": "Versions",
-      "sharing": "Sharing"
+      "sharing": "Sharing",
+      "activity": "Activity"
     },
     "fields": {
       "type": "Type",
@@ -752,6 +753,53 @@
       "nextFile": "Next file",
       "viewerDownload": "Download the file",
       "closeViewer": "Close the viewer"
+    }
+  },
+  "activity": {
+    "loading": "Loading activity",
+    "failed": "Couldn't load activity.",
+    "unavailable": "This item is no longer available.",
+    "retry": "Try again",
+    "empty": "No activity yet.",
+    "more": "Load more",
+    "you": "You",
+    "system": "System",
+    "moderator": "An administrator",
+    "deletedUser": "A deleted user",
+    "someone": "Someone",
+    "hiddenFolder": "another folder",
+    "roles": {
+      "viewer": "viewer",
+      "editor": "editor"
+    },
+    "actions": {
+      "node": {
+        "create": "{{actor}} created the folder “{{name}}”",
+        "upload": "{{actor}} uploaded “{{name}}”",
+        "rename": "{{actor}} renamed “{{from}}” to “{{name}}”",
+        "move": "{{actor}} moved “{{name}}” from {{from}} to {{to}}",
+        "trash": "{{actor}} moved “{{name}}” to the trash",
+        "restore": "{{actor}} restored “{{name}}”",
+        "purge": "{{actor}} permanently deleted “{{name}}”"
+      },
+      "version": {
+        "create": "{{actor}} uploaded version {{version}} of “{{name}}”",
+        "restore": "{{actor}} restored version {{from}} of “{{name}}” as version {{version}}",
+        "delete": "{{actor}} deleted version {{version}} of “{{name}}”",
+        "expire_one": "{{actor}} cleaned up {{count}} old version of “{{name}}”",
+        "expire_other": "{{actor}} cleaned up {{count}} old versions of “{{name}}”",
+        "lock": "{{actor}} locked version {{version}} of “{{name}}”",
+        "unlock": "{{actor}} unlocked version {{version}} of “{{name}}”"
+      },
+      "share": {
+        "add": "{{actor}} shared “{{name}}” with {{grantee}} as {{role}}",
+        "role_change": "{{actor}} made {{grantee}} {{role}} of “{{name}}”",
+        "remove": "{{actor}} removed {{grantee}}'s access to “{{name}}”"
+      },
+      "link": {
+        "create": "{{actor}} created a public link to “{{name}}”",
+        "revoke": "{{actor}} revoked a public link to “{{name}}”"
+      }
     }
   }
 }

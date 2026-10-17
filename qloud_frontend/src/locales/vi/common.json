@@ -120,7 +120,8 @@
     "tabs": {
       "info": "Thông tin",
       "versions": "Phiên bản",
-      "sharing": "Chia sẻ"
+      "sharing": "Chia sẻ",
+      "activity": "Hoạt động"
     },
     "fields": {
       "type": "Loại",
@@ -745,6 +746,52 @@
       "nextFile": "Tệp sau",
       "viewerDownload": "Tải xuống tệp đang xem",
       "closeViewer": "Đóng trình xem"
+    }
+  },
+  "activity": {
+    "loading": "Đang tải hoạt động",
+    "failed": "Không tải được hoạt động.",
+    "unavailable": "Mục này không còn khả dụng.",
+    "retry": "Thử lại",
+    "empty": "Chưa có hoạt động nào.",
+    "more": "Tải thêm",
+    "you": "Bạn",
+    "system": "Hệ thống",
+    "moderator": "Quản trị viên",
+    "deletedUser": "Người dùng (đã xóa tài khoản)",
+    "someone": "Một người dùng",
+    "hiddenFolder": "một thư mục khác",
+    "roles": {
+      "viewer": "người xem",
+      "editor": "người chỉnh sửa"
+    },
+    "actions": {
+      "node": {
+        "create": "{{actor}} đã tạo thư mục “{{name}}”",
+        "upload": "{{actor}} đã tải lên “{{name}}”",
+        "rename": "{{actor}} đã đổi tên “{{from}}” thành “{{name}}”",
+        "move": "{{actor}} đã chuyển “{{name}}” từ {{from}} sang {{to}}",
+        "trash": "{{actor}} đã chuyển “{{name}}” vào thùng rác",
+        "restore": "{{actor}} đã khôi phục “{{name}}”",
+        "purge": "{{actor}} đã xóa vĩnh viễn “{{name}}”"
+      },
+      "version": {
+        "create": "{{actor}} đã tải lên phiên bản {{version}} của “{{name}}”",
+        "restore": "{{actor}} đã khôi phục phiên bản {{from}} của “{{name}}” thành phiên bản {{version}}",
+        "delete": "{{actor}} đã xóa phiên bản {{version}} của “{{name}}”",
+        "expire_other": "{{actor}} đã dọn {{count}} phiên bản cũ của “{{name}}”",
+        "lock": "{{actor}} đã khóa phiên bản {{version}} của “{{name}}”",
+        "unlock": "{{actor}} đã bỏ khóa phiên bản {{version}} của “{{name}}”"
+      },
+      "share": {
+        "add": "{{actor}} đã chia sẻ “{{name}}” với {{grantee}} ({{role}})",
+        "role_change": "{{actor}} đã đổi quyền của {{grantee}} với “{{name}}” thành {{role}}",
+        "remove": "{{actor}} đã thu hồi quyền của {{grantee}} với “{{name}}”"
+      },
+      "link": {
+        "create": "{{actor}} đã tạo liên kết công khai cho “{{name}}”",
+        "revoke": "{{actor}} đã thu hồi liên kết công khai của “{{name}}”"
+      }
     }
   }
 }

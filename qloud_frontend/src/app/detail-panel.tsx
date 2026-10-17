@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { FileText, Info, Share2, X } from 'lucide-react';
+import { FileText, History, Info, Share2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import {
   NodeDetails,
   SelectionSummary,
 } from '@/features/drive/components/node-details';
+import { ActivityPanel } from '@/features/activity/activity-panel';
 import { SharingPanel } from '@/features/sharing/sharing-panel';
 import { VersionPanel } from '@/features/versions/version-panel';
 import { useDriveStore } from '@/features/drive/store';
@@ -66,7 +67,7 @@ export function DetailPanel({
   );
 }
 
-const TABS = ['info', 'versions', 'sharing'] as const;
+const TABS = ['info', 'versions', 'sharing', 'activity'] as const;
 type Tab = (typeof TABS)[number];
 
 interface PanelContentProps {
@@ -88,6 +89,7 @@ function PanelContent({
     versions: live && node.kind === 'file',
     // The root folder cannot be shared (api.md › Share).
     sharing: live && !node.is_root,
+    activity: live && !node.is_root,
   };
   const [tabState, setTabState] = React.useState<{
     id: string | undefined;
@@ -135,6 +137,8 @@ function PanelContent({
           <VersionPanel key={node.id} node={node} />
         ) : tab === 'sharing' && node ? (
           <SharingPanel key={node.id} node={node} />
+        ) : tab === 'activity' && node ? (
+          <ActivityPanel key={node.id} node={node} />
         ) : selected.length > 1 ? (
           <SelectionSummary nodes={selected} />
         ) : selected[0] ? (
@@ -154,7 +158,7 @@ function PanelContent({
       <div
         role="tablist"
         aria-label={t('details.title')}
-        className="grid grid-cols-3 border-t border-border px-3 py-2 text-xs text-muted-foreground"
+        className="grid grid-cols-4 border-t border-border px-3 py-2 text-xs text-muted-foreground"
       >
         {TABS.map((value, index) => (
           <button
@@ -201,8 +205,10 @@ function PanelContent({
               <Info className="size-4" aria-hidden="true" />
             ) : value === 'versions' ? (
               <FileText className="size-4" aria-hidden="true" />
-            ) : (
+            ) : value === 'sharing' ? (
               <Share2 className="size-4" aria-hidden="true" />
+            ) : (
+              <History className="size-4" aria-hidden="true" />
             )}
             {t(`details.tabs.${value}`)}
           </button>
