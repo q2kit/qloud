@@ -1,5 +1,7 @@
 """M8-11a: GET /nodes/{id}/activity reads through the permission layer."""
 
+from typing import Any, cast
+
 import pytest
 
 from apps.accounts.models import User
@@ -33,10 +35,10 @@ def team(user, root, make_file):
     return {"private": private, "team": team, "notes": notes, "plan": plan, "draft": draft}
 
 
-def read(client, node: Node, query: str = "") -> list[dict]:
+def read(client, node: Node, query: str = "") -> list[dict[str, Any]]:
     response = client.get(f"/api/v1/nodes/{node.pk}/activity{query}")
     assert response.status_code == 200, response.content
-    return response.json()["results"]
+    return cast(list[dict[str, Any]], response.json()["results"])
 
 
 def guest(email: str, display_name: str = "") -> User:

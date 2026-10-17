@@ -109,7 +109,8 @@ def test_trash_restore_and_purge_record_each_selected_root(user, root, make_file
     purged = AuditEvent.objects.filter(action=Action.NODE_PURGE)
     assert sorted(purged.values_list("node_name", flat=True)) == ["Folder", "loose.txt"]
     # The nodes are gone; the events keep their names and the folder they were in.
-    assert set(purged.values_list("node_id", "parent_id")) == {(None, root.pk)}
+    assert list(purged.values_list("node_id", flat=True)) == [None, None]
+    assert set(purged.values_list("parent_id", flat=True)) == {root.pk}
     assert actions(action=Action.NODE_RESTORE) == [Action.NODE_RESTORE]
 
 
