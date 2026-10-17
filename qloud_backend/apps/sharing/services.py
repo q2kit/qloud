@@ -3,6 +3,7 @@ import uuid
 from django.db import transaction
 
 from apps.accounts.models import User
+from apps.audit import services as audit
 from apps.core.errors import InvalidShareRecipient, InvalidShareTarget, ShareExists
 from apps.drive.models import Node
 
@@ -31,6 +32,9 @@ def create_share(user: User, node_id: uuid.UUID, email: str, role: str) -> Share
     if Share.objects.filter(node=node, grantee=recipient).exists():
         raise ShareExists
     share = Share.objects.create(node=node, grantee=recipient, role=role, created_by=user)
+    audit.record(
+        audit.Action.SHARE_ADD, node, actor=user, grantee=audit.person(recipient), role=role
+    )
     schedule_share_email(share)
     return share
 
@@ -40,6 +44,15 @@ def update_share(user: User, share_id: uuid.UUID, role: str) -> Share:
     share = selectors.share_for(user, share_id)
     _locked_node(user, share.node_id)
     share = selectors.share_for(user, share_id)
+    if share.role != role:
+        audit.record(
+            audit.Action.SHARE_ROLE_CHANGE,
+            share.node,
+            actor=user,
+            grantee=audit.person(share.grantee),
+            from_role=share.role,
+            role=role,
+        )
     share.role = role
     share.save(update_fields=["role", "updated_at"])
     return share
@@ -49,4 +62,12 @@ def update_share(user: User, share_id: uuid.UUID, role: str) -> Share:
 def revoke_share(user: User, share_id: uuid.UUID) -> None:
     share = selectors.share_for(user, share_id)
     _locked_node(user, share.node_id)
-    selectors.share_for(user, share_id).delete()
+    share = selectors.share_for(user, share_id)
+    audit.record(
+        audit.Action.SHARE_REMOVE,
+        share.node,
+        actor=user,
+        grantee=audit.person(share.grantee),
+        role=share.role,
+    )
+    share.delete()

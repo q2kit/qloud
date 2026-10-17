@@ -11,6 +11,7 @@ from django.http import Http404
 from django.utils import timezone
 
 from apps.accounts.models import User
+from apps.audit import services as audit
 from apps.core.errors import CurrentVersion
 from apps.sharing.permissions import Role, can_move_within, get_node_or_404, nodes_for
 
@@ -58,11 +59,13 @@ def create_folder(
             name = available_name(parent, name, Node.Kind.FOLDER)
         try:
             with transaction.atomic():
-                return Node.objects.create(owner_id=parent.owner_id, parent=parent, name=name)
+                folder = Node.objects.create(owner_id=parent.owner_id, parent=parent, name=name)
         except IntegrityError as error:
             if _is_name_conflict(error):
                 raise NameConflict from error
             raise
+        audit.record(audit.Action.NODE_CREATE, folder, actor=user)
+        return folder
 
 
 def rename(user: User, node_id: uuid.UUID, name: str) -> Node:
@@ -71,10 +74,11 @@ def rename(user: User, node_id: uuid.UUID, name: str) -> Node:
         raise RootFolder
     if node.name == name:
         return node
-    node.name = name
+    old_name, node.name = node.name, name
     try:
         with transaction.atomic():
             node.save(update_fields=["name", "updated_at"])
+            audit.record(audit.Action.NODE_RENAME, node, actor=user, from_name=old_name)
     except IntegrityError as error:
         if _is_name_conflict(error):
             raise NameConflict from error
@@ -153,12 +157,27 @@ def move(user: User, node_ids: Sequence[uuid.UUID], target_id: uuid.UUID) -> lis
         if not can_move_within(user, moving, target):
             raise InvalidMove
         names = _free_names(target, moving)
+        sources = Node.objects.in_bulk({node.parent_id for node in moving})
+        events = [
+            audit.event(
+                audit.Action.NODE_MOVE,
+                node,
+                actor=user,
+                source_parent_id=node.parent_id,
+                from_folder=audit.folder(sources.get(node.parent_id)),
+                to_folder=audit.folder(target),
+            )
+            for node in moving
+        ]
         now = timezone.now()
-        for node in moving:
+        for node, item in zip(moving, events, strict=True):
             node.parent, node.name, node.updated_at = target, names[node.pk], now
+            # The event shows where it ended up, under the name it got there.
+            item.parent_id, item.node_name = target.pk, node.name
         try:
             with transaction.atomic():
                 Node.objects.bulk_update(moving, ["parent", "name", "updated_at"])
+                audit.record_all(events)
         except IntegrityError as error:
             # A folder was created or renamed into the target meanwhile; retrying works.
             if _is_name_conflict(error):
@@ -200,6 +219,13 @@ def restore_version(user: User, node_id: uuid.UUID, version_id: uuid.UUID) -> No
     node.current_version = version
     node.size, node.mime_type, node.thumbnail_key = source.size, source.mime_type, None
     node.save(update_fields=["current_version", "size", "mime_type", "thumbnail_key", "updated_at"])
+    audit.record(
+        audit.Action.VERSION_RESTORE,
+        node,
+        actor=user,
+        from_version=source.version_number,
+        version=number,
+    )
     transaction.on_commit(partial(enqueue_thumbnail, str(version.pk)))
     return node
 
@@ -211,6 +237,7 @@ def delete_version(user: User, node_id: uuid.UUID, version_id: uuid.UUID) -> Non
     if version.pk == node.current_version_id:
         raise CurrentVersion
     delete_versions_locked(node, [version])
+    audit.record(audit.Action.VERSION_DELETE, node, actor=user, version=version.version_number)
 
 
 def delete_versions_locked(node: Node, versions: list[FileVersion]) -> None:
@@ -240,6 +267,13 @@ def set_version_retention(
 ) -> FileVersion:
     node = _locked_file(user, node_id, Role.OWNER)
     version = selectors.version_for(node, version_id)
+    if version.keep_forever != keep_forever:
+        audit.record(
+            audit.Action.VERSION_LOCK if keep_forever else audit.Action.VERSION_UNLOCK,
+            node,
+            actor=user,
+            version=version.version_number,
+        )
     version.keep_forever = keep_forever
     version.save(update_fields=["keep_forever", "updated_at"])
     return selectors.version_history(node).get(pk=version.pk)

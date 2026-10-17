@@ -188,6 +188,22 @@ export interface paths {
         patch: operations["nodes_rename"];
         trace?: never;
     };
+    "/api/v1/nodes/{node_id}/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["nodes_activity_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/nodes/{node_id}/children": {
         parameters: {
             query?: never;
@@ -640,6 +656,63 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        Actor: {
+            /** Format: uuid */
+            id: string;
+            display_name: string;
+            /**
+             * Format: email
+             * @description Editors and the owner only.
+             */
+            email?: string;
+        };
+        /**
+         * @description * `user` - User
+         *     * `system` - System
+         *     * `moderator` - Moderator
+         * @enum {string}
+         */
+        ActorKindEnum: "user" | "system" | "moderator";
+        /**
+         * @description One activity row. Emails appear for editors and the owner only; a folder the
+         *     reader cannot open appears without id or name.
+         */
+        AuditEvent: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly action: components["schemas"]["AuditEventActionEnum"];
+            /** Format: date-time */
+            readonly created_at: string;
+            readonly actor_kind: components["schemas"]["ActorKindEnum"];
+            readonly actor: components["schemas"]["Actor"] | null;
+            readonly node: components["schemas"]["EventNode"];
+            /** @description Per action; see api.md. */
+            readonly metadata: {
+                [key: string]: unknown;
+            };
+        };
+        /**
+         * @description * `node.create` - Node Create
+         *     * `node.upload` - Node Upload
+         *     * `node.rename` - Node Rename
+         *     * `node.move` - Node Move
+         *     * `node.trash` - Node Trash
+         *     * `node.restore` - Node Restore
+         *     * `node.purge` - Node Purge
+         *     * `version.create` - Version Create
+         *     * `version.restore` - Version Restore
+         *     * `version.delete` - Version Delete
+         *     * `version.expire` - Version Expire
+         *     * `version.lock` - Version Lock
+         *     * `version.unlock` - Version Unlock
+         *     * `share.add` - Share Add
+         *     * `share.role_change` - Share Role Change
+         *     * `share.remove` - Share Remove
+         *     * `link.create` - Link Create
+         *     * `link.revoke` - Link Revoke
+         * @enum {string}
+         */
+        AuditEventActionEnum: "node.create" | "node.upload" | "node.rename" | "node.move" | "node.trash" | "node.restore" | "node.purge" | "version.create" | "version.restore" | "version.delete" | "version.expire" | "version.lock" | "version.unlock" | "share.add" | "share.role_change" | "share.remove" | "link.create" | "link.revoke";
         Breadcrumb: {
             /** Format: uuid */
             readonly id: string;
@@ -710,6 +783,15 @@ export interface components {
             details: {
                 [key: string]: unknown;
             };
+        };
+        EventNode: {
+            /**
+             * Format: uuid
+             * @description Null once the node is deleted.
+             */
+            id: string | null;
+            name: string;
+            kind: string;
         };
         FileVersion: {
             /** Format: uuid */
@@ -896,6 +978,19 @@ export interface components {
          * @enum {string}
          */
         OnConflictEnum: "fail" | "replace" | "rename";
+        PaginatedAuditEventList: {
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cD00ODY%3D"
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+             */
+            previous?: string | null;
+            results: components["schemas"]["AuditEvent"][];
+        };
         PaginatedFileVersionList: {
             /**
              * Format: uri
@@ -1830,6 +1925,41 @@ export interface operations {
             };
             /** @description `name_conflict`. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    nodes_activity_list: {
+        parameters: {
+            query?: {
+                /** @description The pagination cursor value. */
+                cursor?: string;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+            };
+            header?: never;
+            path: {
+                node_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAuditEventList"];
+                };
+            };
+            /** @description No such node, or no access to it. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

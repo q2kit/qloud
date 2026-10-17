@@ -163,7 +163,8 @@ def test_thousand_descendants_single_request(client, user, root, django_assert_m
     parent = folder(user, root, "Large")
     Node.objects.bulk_create([Node(owner=user, parent=parent, name=f"n-{n}") for n in range(1000)])
     started = time.monotonic()
-    with django_assert_max_num_queries(6):
+    # +1 for the audit event of the root (one INSERT however many descendants).
+    with django_assert_max_num_queries(7):
         response = post(client, "nodes/trash", parent)
     assert response.status_code == 200
     assert time.monotonic() - started < 1
