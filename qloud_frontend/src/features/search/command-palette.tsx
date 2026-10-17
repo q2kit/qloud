@@ -9,7 +9,20 @@ import { nodeUrl } from '@/features/drive/paths';
 import { NodeIcon } from '@/features/drive/components/node-icon';
 import { cn } from '@/lib/utils';
 
+import type { ShortcutId } from '@/features/shortcuts/definitions';
+import { useShortcut, useShortcutHelp } from '@/features/shortcuts/context';
+import { ariaKeyshortcuts, shortcutLabel } from '@/features/shortcuts/keys';
+
 import { useSearchSuggestions } from './api';
+
+const PALETTE_SELECTOR = '[data-command-palette]';
+const GO: Record<string, ShortcutId> = {
+  drive: 'goDrive',
+  recent: 'goRecent',
+  shared: 'goShared',
+  trash: 'goTrash',
+  settings: 'goSettings',
+};
 
 interface Props {
   canCreate: boolean;
@@ -34,32 +47,17 @@ export function CommandPalette(props: Props) {
     setQuery('');
     setActive(0);
   };
-  React.useEffect(() => {
-    const key = (event: KeyboardEvent) => {
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.key.toLowerCase() === 'k' &&
-        !event.altKey &&
-        !event.repeat
-      ) {
-        if (
-          !open &&
-          document.querySelector('[role="dialog"], [role="alertdialog"]')
-        )
-          return;
-        event.preventDefault();
-        if (!open && document.activeElement instanceof HTMLElement)
-          triggerRef.current = document.activeElement;
-        setOpen((current) => !current);
-        setQuery('');
-        setActive(0);
-      }
-    };
-    window.addEventListener('keydown', key);
-    return () => {
-      window.removeEventListener('keydown', key);
-    };
-  }, [open]);
+  const openHelp = useShortcutHelp();
+  // Ctrl/⌘+K works from text fields and closes the palette again; `/` only opens.
+  useShortcut(
+    'palette',
+    () => {
+      if (!open && document.activeElement instanceof HTMLElement)
+        triggerRef.current = document.activeElement;
+      changeOpen(!open);
+    },
+    { allowInInput: true, within: PALETTE_SELECTOR },
+  );
   const closeAndRun = (run: () => void) => {
     changeOpen(false);
     run();
@@ -73,11 +71,18 @@ export function CommandPalette(props: Props) {
           id: node.id,
           label: node.name,
           node,
+          shortcut: undefined,
           run: () => {
             void navigate(new URL(nodeUrl(node)).pathname);
           },
         })),
-        { id: 'all', label: t('search.viewAll'), run: all, node: undefined },
+        {
+          id: 'all',
+          label: t('search.viewAll'),
+          run: all,
+          node: undefined,
+          shortcut: undefined,
+        },
       ]
     : [
         ...['drive', 'recent', 'shared', 'trash', 'settings'].map((path) => ({
@@ -87,7 +92,19 @@ export function CommandPalette(props: Props) {
             void navigate(`/${path}`);
           },
           node: undefined,
+          shortcut: GO[path],
         })),
+        ...(openHelp
+          ? [
+              {
+                id: 'shortcuts',
+                label: t('shortcuts.title'),
+                run: openHelp,
+                node: undefined,
+                shortcut: 'help' as const,
+              },
+            ]
+          : []),
         ...(props.canCreate
           ? [
               {
@@ -95,6 +112,7 @@ export function CommandPalette(props: Props) {
                 label: t('drive.actions.newFolder'),
                 run: props.onCreateFolder,
                 node: undefined,
+                shortcut: 'newFolder' as const,
               },
             ]
           : []),
@@ -105,27 +123,25 @@ export function CommandPalette(props: Props) {
                 label: t('drive.actions.upload'),
                 run: props.onUploadFiles,
                 node: undefined,
+                shortcut: 'upload' as const,
               },
               {
                 id: 'folder',
                 label: t('upload.actions.folder'),
                 run: props.onUploadFolder,
                 node: undefined,
+                shortcut: 'uploadFolder' as const,
               },
             ]
           : []),
       ];
   const index = Math.min(active, Math.max(actions.length - 1, 0));
-  const shortcut = t('shell.searchShortcut', {
-    modifier: /Mac|iPhone|iPad|iPod/.test(navigator.userAgent)
-      ? '⌘'
-      : t('shell.keys.ctrl'),
-  });
   return (
     <Dialog.Root open={open} onOpenChange={changeOpen}>
       <Button
         className="hidden min-w-48 justify-between text-muted-foreground md:flex"
         variant="outline"
+        aria-keyshortcuts={ariaKeyshortcuts('palette')}
         onClick={(event) => {
           triggerRef.current = event.currentTarget;
           changeOpen(true);
@@ -136,7 +152,7 @@ export function CommandPalette(props: Props) {
           {t('shell.search')}
         </span>
         <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-sans text-[11px]">
-          {shortcut}
+          {shortcutLabel('palette')}
         </kbd>
       </Button>
       <Button
@@ -144,6 +160,7 @@ export function CommandPalette(props: Props) {
         variant="ghost"
         size="icon"
         aria-label={t('shell.search')}
+        aria-keyshortcuts={ariaKeyshortcuts('palette')}
         onClick={(event) => {
           triggerRef.current = event.currentTarget;
           changeOpen(true);
@@ -154,6 +171,7 @@ export function CommandPalette(props: Props) {
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-overlay" />
         <Dialog.Content
+          data-command-palette=""
           className="fixed top-16 left-1/2 z-50 flex max-h-[calc(100dvh-6rem)] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 flex-col gap-3 rounded-lg border border-border bg-card p-4 shadow-soft outline-none"
           onOpenAutoFocus={(event) => {
             event.preventDefault();
@@ -268,7 +286,15 @@ export function CommandPalette(props: Props) {
                 {action.node && (
                   <NodeIcon node={action.node} className="size-5 shrink-0" />
                 )}
-                <span className="min-w-0 truncate">{action.label}</span>
+                <span className="min-w-0 flex-1 truncate">{action.label}</span>
+                {action.shortcut && (
+                  <kbd
+                    aria-hidden="true"
+                    className="shrink-0 font-sans text-xs text-muted-foreground"
+                  >
+                    {shortcutLabel(action.shortcut)}
+                  </kbd>
+                )}
               </button>
             ))}
           </div>

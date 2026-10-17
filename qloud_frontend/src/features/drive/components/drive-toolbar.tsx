@@ -1,6 +1,7 @@
 import { ArrowDownUp, LayoutGrid, List } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { ariaKeyshortcuts } from '@/features/shortcuts/keys';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -96,6 +97,7 @@ export function DriveToolbar({
               variant={view === option ? 'secondary' : 'ghost'}
               aria-label={t(`drive.view.${option}`)}
               aria-pressed={view === option}
+              aria-keyshortcuts={ariaKeyshortcuts('toggleView')}
               onClick={() => {
                 onView(option);
               }}

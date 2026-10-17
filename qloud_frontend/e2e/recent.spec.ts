@@ -365,6 +365,6 @@ test('item menu opens after pointer release without accidentally opening a folde
   }
   if (isMobile) await item(page, 'Dự án').getByRole('button').tap();
   else await item(page, 'Dự án').getByRole('button').click();
-  await page.getByRole('menuitem', { name: /^Mở\s*↵$/ }).click();
+  await page.getByRole('menuitem', { name: 'Mở', exact: true }).click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Dự án');
 });

@@ -30,6 +30,7 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). M2-02: API folder/n
 ## Tương tác UI
 - Chọn: click; Ctrl/⌘+click để chọn thêm; Shift+click để chọn một dải; Ctrl/⌘+A để chọn tất cả.
 - Menu chuột phải và menu "⋯": Mở, Xem trước, Tải xuống, Chia sẻ, Đổi tên (F2), Di chuyển, Thông tin (i), Xóa (Delete).
+- Phím tắt đầy đủ (gồm `S`, `D`, `V`, Shift+N, `U`, `G` rồi phím…) và quy tắc bỏ qua phím: [ui-ux.md › Phím tắt](../ui-ux.md#phím-tắt).
 - Kéo thả node vào một folder hoặc một mục trong breadcrumb để di chuyển.
 - Danh sách cuộn vô hạn (dùng cursor) và dùng virtualization khi có trên 200 mục.
 

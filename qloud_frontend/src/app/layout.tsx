@@ -8,43 +8,26 @@ import { FolderUploadFeedback } from '@/features/upload/components/folder-upload
 import { UploadTray } from '@/features/upload/components/upload-tray';
 import { UploadProvider } from '@/features/upload/uploader';
 
+import { ShortcutProvider } from '@/features/shortcuts/shortcut-provider';
+import { useShortcut } from '@/features/shortcuts/context';
 import { TrashToast } from '@/features/trash/trash-toast';
 
 import { AppHeader } from './app-header';
 import { AppSidebar } from './app-sidebar';
 import { DETAIL_SHEET_SELECTOR, DetailPanel } from './detail-panel';
 
-// Targets where `i` already means something: text entry (contenteditable="",
-// "true" and "plaintext-only") and Radix menus/listboxes, which use letter keys
-// for typeahead.
-const KEY_CONSUMING_TARGETS = [
-  'input',
-  'textarea',
-  'select',
-  '[contenteditable]:not([contenteditable="false"])',
-  '[role="menu"]',
-  '[role="menuitem"]',
-  '[role="listbox"]',
-].join(', ');
-
-function isDetailShortcut(event: KeyboardEvent): boolean {
-  if (
-    event.key.toLowerCase() !== 'i' ||
-    event.metaKey ||
-    event.ctrlKey ||
-    event.altKey ||
-    event.repeat ||
-    event.defaultPrevented
-  ) {
-    return false;
-  }
-  if (!(event.target instanceof Element)) return true;
-  if (event.target.closest(KEY_CONSUMING_TARGETS)) return false;
-  // Inside a modal (navigation drawer, future share dialog…) the shortcut must
-  // not stack the details sheet on top. The details sheet itself is the
-  // exception, so `i` closes it the same way it opened it.
-  const dialog = event.target.closest('[role="dialog"], [role="alertdialog"]');
-  return !dialog || dialog.matches(DETAIL_SHEET_SELECTOR);
+function DetailShortcut(): null {
+  const setIsDetailOpen = useDriveStore((state) => state.setDetailOpen);
+  // Not inside other modals (navigation drawer, share dialog…); the details sheet
+  // itself is the exception, so `i` closes it the same way it opened it.
+  useShortcut(
+    'details',
+    () => {
+      setIsDetailOpen((current) => !current);
+    },
+    { within: DETAIL_SHEET_SELECTOR },
+  );
+  return null;
 }
 
 export function AppLayout(): React.JSX.Element {
@@ -55,62 +38,52 @@ export function AppLayout(): React.JSX.Element {
   const navigationTriggerRef = React.useRef<HTMLButtonElement>(null);
   const detailTriggerRef = React.useRef<HTMLButtonElement>(null);
 
-  React.useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent): void => {
-      if (isDetailShortcut(event)) {
-        setIsDetailOpen((current) => !current);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [setIsDetailOpen]);
-
   return (
-    <UploadProvider>
-      <div className="flex min-h-screen bg-background text-foreground">
-        <AppSidebar
-          isOpen={isNavigationOpen}
-          triggerRef={navigationTriggerRef}
-          onClose={() => {
-            setIsNavigationOpen(false);
-          }}
-          onOpenChange={setIsNavigationOpen}
-        />
-        <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
-          <AppHeader
-            isDetailOpen={isDetailOpen}
-            navigationTriggerRef={navigationTriggerRef}
-            detailTriggerRef={detailTriggerRef}
-            onNavigationOpen={() => {
-              setIsNavigationOpen(true);
+    <ShortcutProvider>
+      <UploadProvider>
+        <DetailShortcut />
+        <div className="flex min-h-screen bg-background text-foreground">
+          <AppSidebar
+            isOpen={isNavigationOpen}
+            triggerRef={navigationTriggerRef}
+            onClose={() => {
+              setIsNavigationOpen(false);
             }}
-            onDetailToggle={() => {
-              setIsDetailOpen((current) => !current);
-            }}
+            onOpenChange={setIsNavigationOpen}
           />
-          <div className="flex min-h-0 flex-1">
-            <main className="flex min-w-0 flex-1 flex-col px-4 py-5 *:w-full sm:px-6 sm:py-7 lg:px-8">
-              <Outlet />
-            </main>
-            <DetailPanel
-              isOpen={isDetailOpen}
-              triggerRef={detailTriggerRef}
-              onClose={() => {
-                setIsDetailOpen(false);
+          <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
+            <AppHeader
+              isDetailOpen={isDetailOpen}
+              navigationTriggerRef={navigationTriggerRef}
+              detailTriggerRef={detailTriggerRef}
+              onNavigationOpen={() => {
+                setIsNavigationOpen(true);
               }}
-              onOpenChange={setIsDetailOpen}
+              onDetailToggle={() => {
+                setIsDetailOpen((current) => !current);
+              }}
             />
+            <div className="flex min-h-0 flex-1">
+              <main className="flex min-w-0 flex-1 flex-col px-4 py-5 *:w-full sm:px-6 sm:py-7 lg:px-8">
+                <Outlet />
+              </main>
+              <DetailPanel
+                isOpen={isDetailOpen}
+                triggerRef={detailTriggerRef}
+                onClose={() => {
+                  setIsDetailOpen(false);
+                }}
+                onOpenChange={setIsDetailOpen}
+              />
+            </div>
           </div>
+          <CreateFolderDialog />
+          <UploadTray />
+          <TrashToast />
+          <ConflictDialog />
+          <FolderUploadFeedback />
         </div>
-        <CreateFolderDialog />
-        <UploadTray />
-        <TrashToast />
-        <ConflictDialog />
-        <FolderUploadFeedback />
-      </div>
-    </UploadProvider>
+      </UploadProvider>
+    </ShortcutProvider>
   );
 }

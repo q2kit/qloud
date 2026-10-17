@@ -16,6 +16,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  ariaKeyshortcuts,
+  matchesShortcut,
+  shortcutLabel,
+} from '@/features/shortcuts/keys';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/lib/use-media-query';
 
@@ -139,19 +144,20 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
   const onKeyDown = (event: React.KeyboardEvent, index: number): void => {
     const node = nodes[index];
     if (!node) return;
-    const modifier = event.ctrlKey || event.metaKey;
     const step = stepFor(event.key);
     if (step !== undefined) {
       event.preventDefault();
       moveTo(index + step, event.shiftKey);
-    } else if (event.key === ' ' && modifier) {
+    } else if (matchesShortcut(event.nativeEvent, 'toggleSelection')) {
       event.preventDefault();
       props.onSelect(node, { toggle: true, range: false });
-    } else if (event.key === 'Enter') {
+    } else if (matchesShortcut(event.nativeEvent, 'openInNewTab')) {
       event.preventDefault();
-      if (modifier) props.onOpenInNewTab?.(node);
-      else props.onOpen(node);
-    } else if (event.key === 'F2') {
+      props.onOpenInNewTab?.(node);
+    } else if (matchesShortcut(event.nativeEvent, 'open')) {
+      event.preventDefault();
+      props.onOpen(node);
+    } else if (matchesShortcut(event.nativeEvent, 'rename')) {
       event.preventDefault();
       props.onRename?.(node);
     }
@@ -222,6 +228,8 @@ export function NodeCollection(props: NodeCollectionProps): React.JSX.Element {
       )}
       <div
         role="listbox"
+        // No typeahead here, so item shortcuts (S, D, i…) stay available.
+        data-shortcut-scope=""
         aria-label={t('drive.items')}
         aria-multiselectable="true"
       >
@@ -347,12 +355,21 @@ function MenuItems({
   return (
     <>
       {actions.map((action) => (
-        <Item key={action.key} onSelect={action.run}>
+        <Item
+          key={action.key}
+          onSelect={action.run}
+          aria-keyshortcuts={
+            action.shortcut ? ariaKeyshortcuts(action.shortcut) : undefined
+          }
+        >
           <action.icon />
           <span className="flex-1">{action.label}</span>
           {action.shortcut && (
-            <kbd className="font-sans text-xs text-muted-foreground">
-              {action.shortcut}
+            <kbd
+              aria-hidden="true"
+              className="font-sans text-xs text-muted-foreground"
+            >
+              {shortcutLabel(action.shortcut)}
             </kbd>
           )}
         </Item>

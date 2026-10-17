@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { FormAlert } from '@/features/auth/components/form-field';
 import { StorageFullBanner } from '@/features/storage/storage-banner';
 import { useUploadBlocked } from '@/features/storage/use-upload-blocked';
+import { useShortcut } from '@/features/shortcuts/context';
 import { ResumeUploads } from '@/features/upload/components/resume-uploads';
 import { useUploader } from '@/features/upload/context';
 import { treeFromDrop } from '@/features/upload/drop';
@@ -253,34 +254,15 @@ export function DrivePage(): React.JSX.Element {
   );
 
   // Parent navigation belongs to Drive; selection shortcuts live in FileBrowser.
-  React.useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent): void => {
-      const target = event.target instanceof Element ? event.target : null;
-      if (
-        event.defaultPrevented ||
-        target?.closest(
-          'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="dialog"], [role="menu"]',
-        )
-      ) {
-        return;
-      }
-      if (
-        event.key === 'Backspace' &&
-        !event.ctrlKey &&
-        !event.metaKey &&
-        !event.altKey &&
-        parent
-      ) {
-        // Like a file manager: back up to the parent folder (nothing at the root).
-        event.preventDefault();
+  // Like a file manager: back up to the parent folder (nothing at the root).
+  useShortcut(
+    'parentFolder',
+    () => {
+      if (parent)
         void navigate(folderPath(parent.isRoot ? undefined : parent.id));
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => {
-      window.removeEventListener('keydown', onKeyDown);
-    };
-  }, [parent, navigate]);
+    },
+    { enabled: Boolean(parent) },
+  );
 
   const { fetchNextPage, isFetchingNextPage } = children;
   const loadMore = React.useCallback(() => {

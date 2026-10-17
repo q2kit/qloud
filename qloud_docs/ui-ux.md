@@ -15,7 +15,7 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
   - **Breadcrumb là tiêu đề trang**: kéo thả file vào một mục của breadcrumb là di chuyển file tới đó.
   - **Panel chi tiết bên phải** (bật/tắt bằng phím `i`): thông tin, phiên bản, chia sẻ, hoạt động, tất cả trong một chỗ.
   - **Khay upload** nổi ở góc dưới: hiện tiến độ, tạm dừng/tiếp tục, thử lại.
-  - **Phím tắt** cho mọi thao tác chính. Bấm `?` để xem danh sách phím tắt.
+  - **Phím tắt** cho mọi thao tác chính. Bấm `?` để xem danh sách phím tắt ([bảng đầy đủ](#phím-tắt)).
 - **Biểu tượng:** chữ Q trắng trên ô teal bo góc (`qloud_frontend/public/`: `favicon.svg`, `favicon.ico` 16+32px cho trình duyệt cũ, `apple-touch-icon.png` 180px không bo góc vì iOS tự bo).
 - **Component:** shadcn/ui trên nền Radix, được tùy biến theo token của Qloud. Ô chọn dùng `Select`; ngày dùng `DatePicker`, ngày giờ dùng `DateTimePicker` (lịch theo ngôn ngữ đang chọn, giờ và phút bước 5 phút, nút xóa ngày; ô hiển thị `yyyy/mm/dd` và `yyyy/mm/dd hh:mm` 24 giờ ở mọi ngôn ngữ) trong `components/ui`, không dùng `<select>` hay ô ngày giờ gốc của trình duyệt. Danh sách chọn và lịch luôn nổi trên mọi modal.
 - **Responsive:** trên mobile, sidebar thu thành drawer, panel chi tiết thành bottom sheet, hành động chính là nút nổi "+".
@@ -58,6 +58,33 @@ Mục tiêu: **gọn, yên tĩnh, thao tác nhanh**.
 Trong panel chi tiết, Thông tin/Phiên bản có thể đổi bằng click hoặc mũi tên/Home/End; đổi lựa chọn luôn về Thông tin. Chỉ một file còn sống mới bật Phiên bản. Danh sách card nhỏ cuộn trong panel/bottom sheet, có số version, nhãn Hiện tại/Khóa, thời gian/dung lượng, tên gốc/MIME và uploader. Tải thêm theo cursor; skeleton/rỗng/lỗi có Thử lại. Hành động tải cho viewer, restore cho editor/owner, delete cho owner; current không có restore/delete. Restore/delete có hộp xác nhận và focus quay lại hành động hoặc danh sách khi phiên bản đã xóa. Nội dung/thao tác co ở 360px, chuỗi vi/en và màu token. Chi tiết: [versioning.md](features/versioning.md#m7-03--tab-phiên-bản).
 
 Dung lượng (M8-01): sidebar có mục "Dung lượng" với thanh tiến độ (`role="progressbar"`) và "Đã dùng x / y" theo `Intl`, đơn vị thập phân (1 GB = 10⁹ byte), dẫn tới S-14. Từ 80% thanh và chữ dùng màu `warning`, từ 95% màu `destructive`. S-14 có tổng quan (đã dùng, giữ chỗ cho upload dở dang, kích thước file tối đa), thanh xếp chồng bằng CSS theo nhóm (khe 2px giữa các phần, phần nhỏ vẫn rộng tối thiểu 4px) cùng chú thích kiêm bảng số liệu có dung lượng và tỉ lệ; hover hoặc focus một nhóm thì làm nổi nhóm đó ở cả thanh lẫn chú thích, làm mờ nhóm khác và hiện tooltip. Màu token `chart-*` theo thứ tự cố định cho từng nhóm, light và dark chọn riêng, đã kiểm tra phân biệt được với người mù màu, danh sách file lớn nhất có *Mở thư mục chứa* / *Đưa vào thùng rác* và Tải thêm, lối tắt sang Thùng rác; trang Cài đặt có mục Dung lượng dẫn tới S-14. Khi đầy, Drive và S-14 hiện banner; trong Drive của mình, upload ở menu Tạo mới (kèm dòng giải thích), command palette, nút của folder rỗng và kéo thả đều bị chặn, còn xem, tải, xóa vẫn dùng được.
+
+## Phím tắt
+
+Nguồn sự thật cho phím tắt (M8-08, [#164](https://github.com/q2kit/qloud/issues/164)). Code định nghĩa ở `qloud_frontend/src/features/shortcuts/definitions.ts`; bảng `?`, nhãn trong menu/bảng lệnh và `aria-keyshortcuts` đều sinh từ đó. Mac hiển thị ⌘ ⇧ ⌥, nơi khác Ctrl Shift Alt. Chỉ bật trong khung đã đăng nhập, không có ở trang link công khai (S-12).
+
+| Nhóm | Phím | Thao tác | Ở đâu / điều kiện |
+|---|---|---|---|
+| Chung | Ctrl/⌘+K, `/` | Mở bảng lệnh (Ctrl/⌘+K đóng lại khi đang mở; dùng được cả trong ô nhập) | Mọi trang |
+| Chung | `?` | Mở/đóng bảng phím tắt; bảng lệnh cũng có lệnh "Phím tắt" | Mọi trang |
+| Chung | `i` | Bật/tắt panel chi tiết (cả khi bottom sheet chi tiết đang mở) | Mọi trang |
+| Điều hướng | `G` rồi `D` / `R` / `S` / `T` / `,` | Tới Drive / Gần đây / Được chia sẻ / Thùng rác / Cài đặt | Phím thứ hai trong vòng 1 giây |
+| Điều hướng | Backspace | Lên folder cha | Drive, không ở folder gốc |
+| Chọn | ↑ ↓ ← →, Shift+↑/↓ | Di chuyển giữa các mục, mở rộng vùng chọn | Danh sách file |
+| Chọn | Ctrl/⌘+Space | Thêm/bỏ mục đang trỏ tới | Danh sách file |
+| Chọn | Ctrl/⌘+A, Esc | Chọn tất cả / bỏ chọn | Danh sách file |
+| Thao tác với mục | Enter, Ctrl/⌘+Enter | Mở / mở trong thẻ mới | Mục đang focus |
+| Thao tác với mục | F2, Delete | Đổi tên / đưa vào thùng rác | Theo quyền như menu |
+| Thao tác với mục | `S`, `D` | Chia sẻ / tải xuống | Chọn đúng 1 mục, chỉ khi menu của mục có thao tác đó |
+| Thao tác với mục | Shift+N, `U`, Shift+U | Thư mục mới / upload file / upload thư mục | Drive, có quyền sửa folder hiện tại; `U`/Shift+U không chạy khi Drive của mình hết dung lượng |
+| Thao tác với mục | `V` | Chuyển lưới ↔ danh sách | Mọi trang có danh sách file |
+| Trình xem tệp | ← →, `D`, Esc | Tệp trước/sau, tải xuống tệp đang xem, đóng | Trong trình xem |
+
+Quy tắc chung (một dispatcher cho mọi phím tắt):
+- Không chạy khi đang gõ (input, textarea, select, combobox như `Select`, contenteditable), đang soạn chữ IME, phím tự lặp (`repeat`), sự kiện đã được xử lý (`defaultPrevented`), hoặc khi có dialog/menu/listbox đang mở; ngoại lệ là overlay sở hữu phím đó (bottom sheet chi tiết với `i`, bảng lệnh với Ctrl/⌘+K, bảng `?` với `?`, trình xem với `D`). Danh sách file (listbox) không có typeahead nên không chặn phím tắt.
+- Phím một chữ chỉ chạy khi không giữ Ctrl/⌘/Alt; Shift phải khớp đúng. Nhận phím theo `event.key`, nên bàn phím không phải QWERTY vẫn đúng. Không đè phím tắt của trình duyệt/hệ điều hành.
+- Phím tắt chỉ gọi action có sẵn với cùng kiểm tra quyền như nút/menu; không hợp lệ thì không làm gì. Phím trùng nhau (`D` ở danh sách và trình xem) thuộc về màn hình đăng ký sau cùng đang hoạt động.
+- Mục menu và lệnh trong bảng lệnh hiện phím bên phải (`<kbd>` ẩn với trình đọc màn hình), phần tử có `aria-keyshortcuts`.
 
 ## Danh sách màn hình
 
@@ -133,7 +160,7 @@ S-12 thêm nút “Báo cáo vi phạm” cho folder hiện tại hoặc file c�
 Route `/moderation` trong app shell chỉ cho superuser (flag `/me.is_superuser`), navigation kiểm duyệt chỉ hiện khi có quyền. User thường truy cập URL trực tiếp thấy trang 404 (S-15) và không gọi API báo cáo. Desktop dùng hai cột danh sách–chi tiết; hàng được chọn có viền rõ, badge trạng thái và số report cùng node. Mobile 360px chuyển danh sách → chi tiết với nút quay lại. Danh sách lọc trạng thái/node và tải thêm theo cursor. Chi tiết gồm nội dung, thời gian/mã report, liên hệ, node bị báo cáo, node gốc link, loại/kích thước/MIME, owner tên/email/trạng thái và trạng thái link hiện tại. Đích đã xóa hiện rõ, UUID/tên snapshot vẫn giữ. Mục report cùng node hiện tổng/đang mở và nút xem tất cả (bỏ filter status, giữ phân trang); giải thích mỗi report được xử lý riêng. Audit hiện người/thời gian/ghi chú và kết quả thực tế (link mới bị gỡ, owner mới bị khóa hoặc không có thay đổi mới). Report open có chọn action, giải thích phạm vi, ghi chú bắt buộc và bước xác nhận. Xử lý xong hiện audit, không còn form. Hỗ trợ light/dark, vi/en và 360px; `/admin/` của Django giữ chức năng đọc audit.
 
 ### Tìm kiếm và command palette (M6)
-- Header mở bảng lệnh bằng nút tìm kiếm hoặc Ctrl+K/⌘K. Từ khóa trống hiện điều hướng nhanh và hành động tạo/upload theo quyền của folder hiện tại. Khi một dialog khác đang mở, shortcut không mở thêm bảng lệnh.
+- Header mở bảng lệnh bằng nút tìm kiếm, Ctrl+K/⌘K hoặc `/`; lệnh hiện phím tắt bên phải, có lệnh "Phím tắt" mở bảng `?`. Từ khóa trống hiện điều hướng nhanh và hành động tạo/upload theo quyền của folder hiện tại. Khi một dialog khác đang mở, shortcut không mở thêm bảng lệnh.
 - Nhập từ khóa: debounce 150ms, tối đa 8 gợi ý và mục “Xem tất cả kết quả”; dùng ↑/↓ để chọn, Enter để mở, Esc để đóng và trả focus về điểm mở. Dialog có loading, lỗi/thử lại và trạng thái rỗng.
 - S-09 giữ từ khóa, loại, người sở hữu và ngày sửa trong URL; dùng lưới/danh sách chung. API xếp theo độ liên quan, UI giữ nguyên thứ tự đó. File mở viewer, folder mở Drive; mục được chia sẻ hiện owner/quyền, dữ liệu được tải thêm bằng cursor.
 

@@ -268,7 +268,7 @@ describe('item menus', () => {
     trigger.focus();
     await user.keyboard('{ArrowDown}');
     expect(screen.getByRole('menu')).toBeVisible();
-    await user.click(screen.getByRole('menuitem', { name: 'Open↵' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Open' }));
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Photos' }),
     ).toBeVisible();
@@ -291,12 +291,12 @@ describe('item menus', () => {
       'Preview↵',
       'Open in new tab',
       'Copy link',
-      'Download',
+      'DownloadD',
       'RenameF2',
       'Move…',
       'Move to trashDel',
-      'Share',
-      'Infoi',
+      'ShareS',
+      'InfoI',
     ]);
     expect(selectedNames()).toEqual(['report.pdf']);
     await user.click(menu.getByRole('menuitem', { name: /Info/ }));
@@ -403,8 +403,8 @@ describe('folder links (open in a new tab)', () => {
       'RenameF2',
       'Move…',
       'Move to trashDel',
-      'Share',
-      'Infoi',
+      'ShareS',
+      'InfoI',
     ]);
     await user.click(menu.getByRole('menuitem', { name: 'Copy link' }));
     expect(await navigator.clipboard.readText()).toBe(

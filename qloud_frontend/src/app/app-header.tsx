@@ -1,6 +1,7 @@
 import { FileUp, FolderUp, FolderPlus, Info, Menu, Plus } from 'lucide-react';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router';
 
 import { CommandPalette } from '@/features/search/command-palette';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,8 @@ import { useUploadBlocked } from '@/features/storage/use-upload-blocked';
 import { useUploader } from '@/features/upload/context';
 import { useFolderUploader } from '@/features/upload/folder-context';
 import { treeFromFiles } from '@/features/upload/drop';
+import { useShortcut } from '@/features/shortcuts/context';
+import { ariaKeyshortcuts, shortcutLabel } from '@/features/shortcuts/keys';
 import { cn } from '@/lib/utils';
 
 import { LanguageSwitcher } from './language-switcher';
@@ -61,6 +64,26 @@ export function AppHeader({
   const folderUploader = useFolderUploader();
   const directoryInput = React.useRef<HTMLInputElement>(null);
   const fileInput = React.useRef<HTMLInputElement>(null);
+  // Creating by keyboard belongs to the Drive (ui-ux.md › Phím tắt).
+  const { pathname } = useLocation();
+  const inDrive =
+    pathname === '/drive' || pathname.startsWith('/drive/folders/');
+  const createShortcuts = { enabled: inDrive && canCreate };
+  // A full quota blocks uploads like the menu items (quota.md › M8-01).
+  const uploadShortcuts = { enabled: inDrive && canUpload };
+  useShortcut(
+    'newFolder',
+    () => {
+      setCreatingFolder(true);
+    },
+    createShortcuts,
+  );
+  useShortcut('upload', () => fileInput.current?.click(), uploadShortcuts);
+  useShortcut(
+    'uploadFolder',
+    () => directoryInput.current?.click(),
+    uploadShortcuts,
+  );
 
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6 lg:px-8">
@@ -135,30 +158,51 @@ export function AppHeader({
         <DropdownMenuContent align="end">
           <DropdownMenuItem
             disabled={!canCreate}
+            aria-keyshortcuts={ariaKeyshortcuts('newFolder')}
             onSelect={() => {
               setCreatingFolder(true);
             }}
           >
             <FolderPlus />
-            {t('drive.actions.newFolder')}
+            <span className="flex-1">{t('drive.actions.newFolder')}</span>
+            <kbd
+              aria-hidden="true"
+              className="font-sans text-xs text-muted-foreground"
+            >
+              {shortcutLabel('newFolder')}
+            </kbd>
           </DropdownMenuItem>
           <DropdownMenuItem
             disabled={!canUpload}
             title={uploadBlocked ? t('storage.full.uploadBlocked') : undefined}
+            aria-keyshortcuts={ariaKeyshortcuts('upload')}
             onSelect={() => {
               fileInput.current?.click();
             }}
           >
             <FileUp />
-            {t('drive.actions.upload')}
+            <span className="flex-1">{t('drive.actions.upload')}</span>
+            <kbd
+              aria-hidden="true"
+              className="font-sans text-xs text-muted-foreground"
+            >
+              {shortcutLabel('upload')}
+            </kbd>
           </DropdownMenuItem>
           <DropdownMenuItem
             disabled={!canUpload}
             title={uploadBlocked ? t('storage.full.uploadBlocked') : undefined}
+            aria-keyshortcuts={ariaKeyshortcuts('uploadFolder')}
             onSelect={() => directoryInput.current?.click()}
           >
             <FolderUp />
-            {t('upload.actions.folder')}
+            <span className="flex-1">{t('upload.actions.folder')}</span>
+            <kbd
+              aria-hidden="true"
+              className="font-sans text-xs text-muted-foreground"
+            >
+              {shortcutLabel('uploadFolder')}
+            </kbd>
           </DropdownMenuItem>
           {uploadBlocked && (
             <p
@@ -178,6 +222,7 @@ export function AppHeader({
           isDetailOpen ? t('shell.closeDetails') : t('shell.openDetails')
         }
         aria-pressed={isDetailOpen}
+        aria-keyshortcuts={ariaKeyshortcuts('details')}
         className={cn(isDetailOpen && 'bg-accent text-accent-foreground')}
         onClick={onDetailToggle}
       >

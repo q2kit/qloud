@@ -56,7 +56,7 @@ export function RecentPage(): React.JSX.Element {
         key: 'open',
         label: t('preview.open'),
         icon: Eye,
-        shortcut: '↵',
+        shortcut: 'open',
         run: () => {
           open(node);
         },
