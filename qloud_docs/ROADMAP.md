@@ -110,7 +110,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M8-05 | Backup Postgres hằng ngày, Sentry, log có cấu trúc | [#49](https://github.com/q2kit/qloud/issues/49) | ⬜ |
 | M8-06 | Rate limit chung cho API (600 req/phút/user, tạo upload 60) | [#93](https://github.com/q2kit/qloud/issues/93) | ⬜ |
 | M8-07 | Fix: smoke E2E chờ capability tạo folder trước khi kiểm tra cursor | [#155](https://github.com/q2kit/qloud/issues/155) | ⬜ |
-| M8-08 | FE: phím tắt cho các thao tác chính và bảng phím tắt (`?`) | [#164](https://github.com/q2kit/qloud/issues/164) | 🟦 |
+| M8-08 | FE: phím tắt cho các thao tác chính và bảng phím tắt (`?`) | [#164](https://github.com/q2kit/qloud/issues/164) | ✅ [PR #192](https://github.com/q2kit/qloud/pull/192) |
 | M8-09 | Celery đối soát quota hằng đêm, lệnh `reconcile_quota` | [#165](https://github.com/q2kit/qloud/issues/165) | ⬜ |
 | M8-10 | FE: tab Chia sẻ trong panel chi tiết | [#166](https://github.com/q2kit/qloud/issues/166) | ⬜ |
 | M8-11 | Audit log cho file, folder và chia sẻ; tab Hoạt động trong panel chi tiết (cần duyệt kế hoạch) | [#167](https://github.com/q2kit/qloud/issues/167) | ⬜ |
