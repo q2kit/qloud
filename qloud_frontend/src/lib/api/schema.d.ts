@@ -92,6 +92,38 @@ export interface paths {
         patch: operations["me_partial_update"];
         trace?: never;
     };
+    "/api/v1/me/storage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_storage_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/storage/largest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_storage_largest_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/moderation/reports": {
         parameters: {
             query?: never;
@@ -1229,6 +1261,28 @@ export interface components {
             /** Tên hiển thị */
             readonly display_name: string;
         };
+        StorageBreakdown: {
+            document: number;
+            image: number;
+            video: number;
+            audio: number;
+            archive: number;
+            other: number;
+            /** @description Blobs kept only by old versions. */
+            old_versions: number;
+            /** @description Blobs kept only by trashed files. */
+            trash: number;
+        };
+        StorageUsage: {
+            /** @description Plan quota or the account override. */
+            quota_bytes: number;
+            used_bytes: number;
+            /** @description Held for uploads in progress. */
+            reserved_bytes: number;
+            max_file_size_bytes: number;
+            /** @description Each blob counted once; the groups add up to the stored bytes. */
+            breakdown: components["schemas"]["StorageBreakdown"];
+        };
         /**
          * @description * `system` - Theo hệ thống
          *     * `light` - Sáng
@@ -1501,6 +1555,51 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    me_storage_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StorageUsage"];
+                };
+            };
+        };
+    };
+    me_storage_largest_list: {
+        parameters: {
+            query?: {
+                /** @description Opaque value from `next` or `previous`. */
+                cursor?: string;
+                /** @description Largest files first; other orderings are not supported. */
+                ordering?: "-size";
+                /** @description Items per page, at most 200. */
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedNodeList"];
                 };
             };
         };

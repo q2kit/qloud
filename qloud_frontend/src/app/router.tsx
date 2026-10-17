@@ -11,6 +11,7 @@ import { DrivePage } from '@/features/drive/drive-page';
 import { RecentPage } from '@/features/drive/recent-page';
 import { TrashPage } from '@/features/trash/trash-page';
 import { SettingsPage } from '@/features/settings/settings-page';
+import { StoragePage } from '@/features/storage/storage-page';
 
 import { SearchPage } from '@/features/search/search-page';
 import { SharedPage } from '@/features/sharing/shared-page';
@@ -85,6 +86,13 @@ export const appRoutes: RouteObject[] = [
                 Component: SettingsPage,
                 handle: {
                   titleKey: 'navigation.settings',
+                } satisfies RouteHandle,
+              },
+              {
+                path: 'settings/storage',
+                Component: StoragePage,
+                handle: {
+                  titleKey: 'navigation.storage',
                 } satisfies RouteHandle,
               },
               {
