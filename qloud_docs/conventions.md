@@ -51,15 +51,16 @@
 
 ### Branch
 - `master` được bảo vệ: chỉ nhận thay đổi qua PR, squash merge, khi CI xanh. **Không** commit hay push thẳng.
+- **Tạm thời** PR của task và Dependabot vào `develop` (cũng không commit hay push thẳng); CI chỉ chạy với PR vào `master`, nên PR vào `develop` phải qua kiểm tra trên máy (`scripts/workflow.py pr-open`).
 - **Tên:** `<type>/<task-id>-<slug>`; việc không thuộc task nào thì bỏ `<task-id>`. `slug` tiếng Anh, kebab-case, tối đa 40 ký tự.
   Ví dụ: `feat/M2-04-upload-session`, `docs/commit-pr-rules`.
-- Một branch cho một task và một PR, tạo từ `master` mới nhất. Không dùng lại branch đã merge.
+- Một branch cho một task và một PR, tạo từ `develop` mới nhất. Không dùng lại branch đã merge.
 - **Chỉ rebase khi base có commit mới**, kiểm tra trước khi bắt đầu làm và trước khi push/tạo PR:
   `git fetch origin && git merge-base --is-ancestor origin/<base> HEAD || git rebase origin/<base>`.
   Có rebase thì chạy lại lint và test rồi mới push. **Không** merge base vào branch làm việc. PR báo conflict thì tự rebase và giải quyết.
 - **Force push:** chỉ trên branch của chính mình, sau khi rebase, luôn dùng `--force-with-lease`. Cấm với `master` và branch của người khác.
 - **Branch nối tiếp (stacked)** chỉ khi task mới cần code của PR chưa merge: tạo từ branch kia, `gh pr create --base <branch-kia>`, ghi rõ ở đầu body.
-  PR kia merge xong thì `git rebase --onto origin/master <commit-cuối-của-branch-kia>` và `gh pr edit <n> --base master`.
+  PR kia merge xong thì `git rebase --onto origin/develop <commit-cuối-của-branch-kia>` và `gh pr edit <n> --base develop`.
 - Việc kéo dài nhiều phiên: push sớm, mở PR nháp (`--draft`), xong thì `gh pr ready`. Sau khi merge: xóa branch local và `git fetch --prune`.
 
 ### Commit message
@@ -86,11 +87,11 @@
 - Một PR một task. Quá 600 dòng thay đổi (không tính lockfile và code sinh tự động) thì cân nhắc chia nhỏ.
 
 ### Kiểm tra tự động
-- **Required checks** của `master` (strict): `CI OK` (`.github/workflows/ci.yml`) và `PR conventions` (`pr.yml`).
+- **Required checks** của `master` (strict): `CI OK` (`.github/workflows/ci.yml`) và `PR conventions` (`pr.yml`). Cả hai workflow tạm thời chỉ chạy với PR vào `master`.
   - `ci.yml` chỉ chạy phía có thay đổi: Backend (ruff, mypy, migration còn thiếu, `check --deploy`, pytest, giấy phép, test của `scripts/`),
     Frontend (lint, format, typecheck, test, build, giấy phép, type API khớp `openapi.yaml`), E2E (Playwright trên stack thật), gitleaks.
   - `pr.yml`: tiêu đề, `Closes #n` khi có task ID, tên branch (trừ branch của Dependabot); cảnh báo khi sửa code mà không sửa ROADMAP.
-- **Git hooks** (`lefthook.yml`): pre-commit format/lint file đã stage + gitleaks; commit-msg; pre-push kiểm tra tên branch, chặn push `master`,
+- **Git hooks** (`lefthook.yml`): pre-commit format/lint file đã stage + gitleaks; commit-msg; pre-push kiểm tra tên branch, chặn push `master` và `develop`,
   chạy typecheck và test phía có thay đổi. Không dùng `--no-verify` khi chưa được cho phép.
 - **Dependabot** (`.github/dependabot.yml`) mở PR `chore(deps): Bump ...` hằng tuần (kiểm tra PR bỏ qua chữ hoa và độ dài tiêu đề của bot);
   bản major phải hỏi trước khi merge; `@types/node` giữ cùng major với Node.
