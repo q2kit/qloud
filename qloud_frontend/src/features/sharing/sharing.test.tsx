@@ -103,8 +103,9 @@ it('adds a grant, changes role and revokes it using the sharing dialog', async (
   const select = await within(modal).findByRole('combobox', {
     name: 'Role for friend@example.com',
   });
-  await user.selectOptions(select, 'editor');
-  await waitFor(() => expect(select).toHaveValue('editor'));
+  await user.click(select);
+  await user.click(await screen.findByRole('option', { name: 'Editor' }));
+  await waitFor(() => expect(select).toHaveTextContent('Editor'));
   await user.click(
     within(modal).getByRole('button', {
       name: 'Remove access for friend@example.com',
@@ -163,15 +164,21 @@ it('rejects past expiry, creates, copies and revokes a link', async () => {
       return new HttpResponse(null, { status: 204 });
     }),
   );
-  await user.type(
-    within(modal).getByLabelText('Expires at (optional)'),
-    '2020-01-01T00:00',
+  // Past days are disabled; earlier today is still a past time.
+  await user.click(
+    within(modal).getByRole('button', { name: 'Expires at (optional)' }),
   );
+  await user.click(screen.getByRole('button', { name: /Today/ }));
+  await user.click(screen.getByRole('combobox', { name: 'Hour' }));
+  await user.click(await screen.findByRole('option', { name: '00' }));
+  await user.click(screen.getByRole('combobox', { name: 'Minute' }));
+  await user.click(await screen.findByRole('option', { name: '00' }));
+  await user.click(screen.getByRole('button', { name: 'Done' }));
   await user.click(within(modal).getByRole('button', { name: 'Create link' }));
   expect(await within(modal).findByRole('alert')).toHaveTextContent(
     'Choose an expiry time later than now.',
   );
-  await user.clear(within(modal).getByLabelText('Expires at (optional)'));
+  await user.click(within(modal).getByRole('button', { name: 'Clear date' }));
   await user.click(within(modal).getByRole('button', { name: 'Create link' }));
   await user.click(
     await within(modal).findByRole('button', { name: 'Copy link' }),

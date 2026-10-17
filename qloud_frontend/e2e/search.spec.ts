@@ -115,23 +115,31 @@ test('palette finds unaccented names, opens a folder and preserves search URL fi
     page.getByRole('option', { name: 'Báo cáo Q3.txt', exact: true }),
   ).toBeVisible();
   await capture(page, 'results', isMobile);
-  await page.getByLabel('Loại', { exact: true }).selectOption('document');
+  await page.getByRole('combobox', { name: 'Loại', exact: true }).click();
+  await page.getByRole('option', { name: 'Tài liệu', exact: true }).click();
   await expect(
     page.getByRole('option', { name: 'Báo cáo nhóm', exact: true }),
   ).toHaveCount(0);
-  await page.getByLabel('Chủ sở hữu', { exact: true }).selectOption('me');
-  await page.getByLabel('Cập nhật từ ngày').fill('2020-01-01');
+  await page.getByRole('combobox', { name: 'Chủ sở hữu', exact: true }).click();
+  await page.getByRole('option', { name: 'Của tôi', exact: true }).click();
+  // The calendar opens on today with focus on it; Enter picks it.
+  await page.getByRole('button', { name: 'Cập nhật từ ngày' }).click();
+  await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/modified_after=/);
   await page.reload();
-  await expect(page.getByLabel('Loại', { exact: true })).toHaveValue(
-    'document',
-  );
-  await expect(page.getByLabel('Chủ sở hữu', { exact: true })).toHaveValue(
-    'me',
-  );
-  await expect(page.getByLabel('Cập nhật từ ngày')).toHaveValue('2020-01-01');
+  await expect(
+    page.getByRole('combobox', { name: 'Loại', exact: true }),
+  ).toHaveText('Tài liệu');
+  await expect(
+    page.getByRole('combobox', { name: 'Chủ sở hữu', exact: true }),
+  ).toHaveText('Của tôi');
+  await expect(
+    page.getByRole('button', { name: /^Cập nhật từ ngày: / }),
+  ).toBeVisible();
   await page.goBack();
-  await expect(page.getByLabel('Cập nhật từ ngày')).toHaveValue('');
+  await expect(
+    page.getByRole('button', { name: 'Cập nhật từ ngày', exact: true }),
+  ).toBeVisible();
   await chooseItemAction(page, 'Báo cáo Q3.txt', 'Xem trước');
   await expect(page).toHaveURL(/\/drive\/files\/[0-9a-f]{32}$/);
   await expect(

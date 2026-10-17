@@ -1,6 +1,13 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { formatBytes, formatDate } from '@/features/drive/format';
 import { ApiError } from '@/lib/api/errors';
 import { cn } from '@/lib/utils';
@@ -267,26 +274,30 @@ export function ReportPanel({
             }}
           >
             <h3 className="font-semibold">{t('moderation.resolve')}</h3>
-            <label className="block text-sm">
-              {t('moderation.action')}
-              <select
+            <div className="text-sm">
+              <label htmlFor="moderation-action">
+                {t('moderation.action')}
+              </label>
+              <Select
                 disabled={change.isPending || confirm}
                 value={action}
-                onChange={(event) => {
-                  const value = actions.find(
-                    (item) => item === event.target.value,
-                  );
+                onValueChange={(next) => {
+                  const value = actions.find((item) => item === next);
                   if (value) setAction(value);
                 }}
-                className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3"
               >
-                {actions.map((item) => (
-                  <option key={item} value={item}>
-                    {t(`moderation.actions.${item}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
+                <SelectTrigger id="moderation-action" className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {actions.map((item) => (
+                    <SelectItem key={item} value={item}>
+                      {t(`moderation.actions.${item}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <p className="text-sm text-muted-foreground">
               {t(`moderation.effects.${action}`)}
             </p>

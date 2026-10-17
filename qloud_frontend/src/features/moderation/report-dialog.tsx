@@ -3,6 +3,13 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Turnstile,
   type TurnstileHandle,
 } from '@/features/auth/components/turnstile';
@@ -79,25 +86,28 @@ export function ReportDialog({
               }}
             >
               <fieldset disabled={submit.isPending} className="space-y-4">
-                <label className="block text-sm">
-                  {t('report.reason')}
-                  <select
+                <div className="text-sm">
+                  <label htmlFor="report-reason">{t('report.reason')}</label>
+                  <Select
                     value={reason}
-                    onChange={(event) => {
-                      const value = reasons.find(
-                        (item) => item === event.target.value,
-                      );
+                    disabled={submit.isPending}
+                    onValueChange={(next) => {
+                      const value = reasons.find((item) => item === next);
                       if (value) setReason(value);
                     }}
-                    className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3"
                   >
-                    {reasons.map((item) => (
-                      <option key={item} value={item}>
-                        {t(`report.reasons.${item}`)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                    <SelectTrigger id="report-reason" className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {reasons.map((item) => (
+                        <SelectItem key={item} value={item}>
+                          {t(`report.reasons.${item}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <label className="block text-sm">
                   {t('report.message')}
                   <textarea

@@ -4,6 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router';
 
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 import type { NodeAction } from '@/features/drive/actions';
 import { downloadNode, type DriveNode } from '@/features/drive/api';
 import { CenteredState } from '@/features/drive/components/browser-states';
@@ -14,6 +22,9 @@ import { useDriveStore } from '@/features/drive/store';
 import { FormAlert } from '@/features/auth/components/form-field';
 
 import { SEARCH_TYPES, useSearchResults, type SearchFilters } from './api';
+
+// Radix Select reserves the empty value; this stands for any type or owner.
+const ALL = 'all';
 
 export function SearchPage() {
   const { t } = useTranslation();
@@ -94,11 +105,8 @@ export function SearchPage() {
   };
   const inputClass =
     'h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring';
-  const date = new Date(after);
-  const dateValue =
-    after && !Number.isNaN(date.getTime())
-      ? `${String(date.getFullYear())}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-      : '';
+  const parsed = new Date(after);
+  const afterDate = after && !Number.isNaN(parsed.getTime()) ? parsed : null;
   return (
     <section className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-4">
       <h1 className="text-xl font-semibold">{t('search.title')}</h1>
@@ -127,53 +135,54 @@ export function SearchPage() {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="space-y-1 text-sm">
           <label htmlFor="search-type">{t('search.type')}</label>
-          <select
-            id="search-type"
-            value={type}
-            className={inputClass}
-            onChange={(event) => {
-              update('type', event.target.value);
+          <Select
+            value={type || ALL}
+            onValueChange={(value) => {
+              update('type', value === ALL ? '' : value);
             }}
           >
-            <option value="">{t('search.allTypes')}</option>
-            {SEARCH_TYPES.map((kind) => (
-              <option value={kind} key={kind}>
-                {t(`search.types.${kind}`)}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="search-type">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>{t('search.allTypes')}</SelectItem>
+              {SEARCH_TYPES.map((kind) => (
+                <SelectItem value={kind} key={kind}>
+                  {t(`search.types.${kind}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-1 text-sm">
           <label htmlFor="search-owner">{t('search.owner')}</label>
-          <select
-            id="search-owner"
-            value={owner}
-            className={inputClass}
-            onChange={(event) => {
-              update('owner', event.target.value);
+          <Select
+            value={owner || ALL}
+            onValueChange={(value) => {
+              update('owner', value === ALL ? '' : value);
             }}
           >
-            <option value="">{t('search.allOwners')}</option>
-            <option value="me">{t('search.mine')}</option>
-            <option value="others">{t('search.others')}</option>
-          </select>
+            <SelectTrigger id="search-owner">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>{t('search.allOwners')}</SelectItem>
+              <SelectItem value="me">{t('search.mine')}</SelectItem>
+              <SelectItem value="others">{t('search.others')}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-1 text-sm">
           <label htmlFor="search-modifiedAfter">
             {t('search.modifiedAfter')}
           </label>
-          <input
-            type="date"
+          <DatePicker
             id="search-modifiedAfter"
-            value={dateValue}
-            className={inputClass}
-            onChange={(event) => {
-              update(
-                'modified_after',
-                event.target.value
-                  ? new Date(`${event.target.value}T00:00:00`).toISOString()
-                  : '',
-              );
+            label={t('search.modifiedAfter')}
+            value={afterDate}
+            placeholder={t('datePicker.anyDate')}
+            onChange={(day) => {
+              update('modified_after', day ? day.toISOString() : '');
             }}
           />
         </div>

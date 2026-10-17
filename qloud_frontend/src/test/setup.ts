@@ -32,3 +32,6 @@ window.ResizeObserver = ResizeObserverMock;
 
 // jsdom has no layout/scrolling; browser tests verify that revealed files are visible.
 HTMLElement.prototype.scrollIntoView = vi.fn();
+// Radix Select reads pointer capture, which jsdom does not implement.
+Element.prototype.hasPointerCapture = () => false;
+Element.prototype.releasePointerCapture = vi.fn();

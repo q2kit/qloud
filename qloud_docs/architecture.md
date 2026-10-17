@@ -118,6 +118,7 @@ commit cả `.po` và `.mo` để runtime/CI không phụ thuộc gettext CLI. K
 | Trạng thái client | Zustand (hàng đợi upload, lựa chọn nhiều mục) |
 | Danh sách dài | @tanstack/react-virtual (virtualization khi folder có hơn 200 mục) |
 | Menu chuột phải | @radix-ui/react-context-menu (cùng họ Radix với shadcn/ui) |
+| Chọn, lịch | @radix-ui/react-select, @radix-ui/react-popover (họ Radix, như component Select/Popover của shadcn/ui) và `@daypicker/react` 10 (MIT, nền của Calendar shadcn/ui; tên gói mới của `react-day-picker`). Không dùng `<select>` và ô ngày giờ gốc của trình duyệt trong UI. Các gói `@radix-ui/*` phải nâng cùng lúc: Select 2.4/Popover 1.3 kéo theo `dismissable-layer` mới, không chung ngữ cảnh với Dialog 1.2, nên lịch trong dialog không bấm được; vì vậy giữ Select 2.3.8/Popover 1.2.0 cho tới khi nâng cả họ |
 | UI | Tailwind CSS, shadcn/ui (Radix), lucide-react (icon) |
 | Form | react-hook-form + zod |
 | i18n | i18next + react-i18next |

@@ -135,7 +135,7 @@ test('owner shares, changes roles, creates links and revokes access through UI',
     await dialog.getByRole('button', { name: 'Chia sẻ', exact: true }).click();
     await expect(
       dialog.getByRole('combobox', { name: `Quyền của ${email}` }),
-    ).toHaveValue('viewer');
+    ).toHaveText('Người xem');
     await dialog
       .getByRole('button', { name: 'Tạo liên kết', exact: true })
       .click();
@@ -161,12 +161,11 @@ test('owner shares, changes roles, creates links and revokes access through UI',
       0,
     );
     await recipient.keyboard.press('Escape');
-    await dialog
-      .getByRole('combobox', { name: `Quyền của ${email}` })
-      .selectOption('editor');
+    await dialog.getByRole('combobox', { name: `Quyền của ${email}` }).click();
+    await page.getByRole('option', { name: 'Người chỉnh sửa' }).click();
     await expect(
       dialog.getByRole('combobox', { name: `Quyền của ${email}` }),
-    ).toHaveValue('editor');
+    ).toHaveText('Người chỉnh sửa');
     await recipient.reload();
     const editorMenu = await openItemMenu(recipient, 'Readme.txt');
     await expect(

@@ -3,6 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 import { NotFoundPage } from '@/app/pages';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useMe } from '@/features/settings/use-me';
 import { ArrowLeft, FileWarning } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -52,13 +59,13 @@ function ModerationBrowser() {
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="font-semibold">{t('moderation.queue')}</h2>
-            <label className="flex items-center gap-2 text-sm">
-              {t('moderation.status')}
-              <select
-                className="h-9 rounded-md border border-input bg-background px-2"
-                value={status ?? ''}
-                onChange={(event) => {
-                  const value = event.target.value;
+            <div className="flex items-center gap-2 text-sm">
+              <label htmlFor="moderation-status">
+                {t('moderation.status')}
+              </label>
+              <Select
+                value={status ?? 'all'}
+                onValueChange={(value) => {
                   setStatus(
                     value === 'open' ||
                       value === 'actioned' ||
@@ -68,14 +75,22 @@ function ModerationBrowser() {
                   );
                 }}
               >
-                <option value="">{t('moderation.all')}</option>
-                {(['open', 'actioned', 'dismissed'] as const).map((item) => (
-                  <option key={item} value={item}>
-                    {t(`moderation.statuses.${item}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
+                <SelectTrigger
+                  id="moderation-status"
+                  className="h-9 w-auto min-w-32"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t('moderation.all')}</SelectItem>
+                  {(['open', 'actioned', 'dismissed'] as const).map((item) => (
+                    <SelectItem key={item} value={item}>
+                      {t(`moderation.statuses.${item}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           {nodeId && (
             <div className="space-y-2 rounded-lg bg-muted p-3 text-sm">

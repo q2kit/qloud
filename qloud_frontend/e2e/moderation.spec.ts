@@ -149,7 +149,8 @@ test('anonymous report reaches moderation, superuser removes link and owner rece
     await visitor.goto(`/s/${link.token}`);
     await visitor.getByRole('button', { name: 'Báo cáo vi phạm' }).click();
     const dialog = visitor.getByRole('dialog', { name: `Báo cáo: ${name}` });
-    await dialog.getByLabel('Lý do').selectOption('malware');
+    await dialog.getByRole('combobox', { name: 'Lý do' }).click();
+    await visitor.getByRole('option', { name: 'Phần mềm độc hại' }).click();
     await dialog
       .getByLabel('Mô tả (không bắt buộc)')
       .fill('Nội dung độc hại cần kiểm duyệt.');
@@ -326,9 +327,10 @@ test('moderator suspension invalidates owner sessions and all public links', asy
     );
     expect(report).toBeDefined();
     await moderator.goto(`/moderation?report=${report?.id ?? ''}`);
+    await moderator.getByRole('combobox', { name: /^Thao tác/ }).click();
     await moderator
-      .getByRole('combobox', { name: /^Thao tác/ })
-      .selectOption('suspend_owner');
+      .getByRole('option', { name: 'Khóa tài khoản chủ sở hữu' })
+      .click();
     await moderator
       .getByLabel('Ghi chú (bắt buộc)')
       .fill('Đã xác minh hành vi lạm dụng.');

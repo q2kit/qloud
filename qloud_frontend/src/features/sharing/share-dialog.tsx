@@ -2,6 +2,14 @@ import * as Dialog from '@radix-ui/react-dialog';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import { DateTimePicker } from '@/components/ui/date-picker';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { ApiError } from '@/lib/api/errors';
 import { useNode, type DriveNode } from '@/features/drive/api';
 import { formatDate } from '@/features/drive/format';
@@ -60,7 +68,7 @@ function ShareForm({ node }: { node: DriveNode }) {
   }, []);
   const [email, setEmail] = React.useState('');
   const [role, setRole] = React.useState<ShareRole>('viewer');
-  const [expiry, setExpiry] = React.useState('');
+  const [expiry, setExpiry] = React.useState<Date | null>(null);
   const [feedback, setFeedback] = React.useState('');
   const [localError, setLocalError] = React.useState('');
   const roleSelect = (
@@ -68,18 +76,21 @@ function ShareForm({ node }: { node: DriveNode }) {
     onChange: (role: ShareRole) => void,
     label: string,
   ) => (
-    <select
-      aria-label={label}
+    <Select
       value={value}
       disabled={change.isPending}
-      onChange={(event) => {
-        onChange(event.target.value === 'editor' ? 'editor' : 'viewer');
+      onValueChange={(next) => {
+        onChange(next === 'editor' ? 'editor' : 'viewer');
       }}
-      className="h-10 rounded-md border border-input bg-background px-2 text-sm"
     >
-      <option value="viewer">{t('sharing.viewer')}</option>
-      <option value="editor">{t('sharing.editor')}</option>
-    </select>
+      <SelectTrigger aria-label={label} className="w-auto min-w-36">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="viewer">{t('sharing.viewer')}</SelectItem>
+        <SelectItem value="editor">{t('sharing.editor')}</SelectItem>
+      </SelectContent>
+    </Select>
   );
   const error =
     change.error instanceof ApiError
@@ -232,7 +243,7 @@ function ShareForm({ node }: { node: DriveNode }) {
               className="mt-3 flex flex-wrap items-end gap-2"
               onSubmit={(event) => {
                 event.preventDefault();
-                const date = expiry ? new Date(expiry) : null;
+                const date = expiry;
                 setLocalError('');
                 setFeedback('');
                 if (
@@ -247,23 +258,23 @@ function ShareForm({ node }: { node: DriveNode }) {
                   { kind: 'link', expires_at: date?.toISOString() ?? null },
                   {
                     onSuccess: () => {
-                      setExpiry('');
+                      setExpiry(null);
                     },
                   },
                 );
               }}
             >
-              <label className="min-w-0 basis-full text-sm sm:flex-1 sm:basis-0">
-                {t('sharing.expiry')}
-                <input
-                  type="datetime-local"
-                  value={expiry}
-                  onChange={(e) => {
-                    setExpiry(e.target.value);
-                  }}
-                  className="mt-1 h-10 w-full min-w-0 rounded-md border border-input bg-background px-2"
-                />
-              </label>
+              <div className="min-w-0 basis-full text-sm sm:flex-1 sm:basis-0">
+                <span aria-hidden="true">{t('sharing.expiry')}</span>
+                <div className="mt-1">
+                  <DateTimePicker
+                    label={t('sharing.expiry')}
+                    value={expiry}
+                    onChange={setExpiry}
+                    placeholder={t('sharing.neverExpires')}
+                  />
+                </div>
+              </div>
               <Button disabled={change.isPending}>
                 {t('sharing.createLink')}
               </Button>
