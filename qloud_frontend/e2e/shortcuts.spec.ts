@@ -76,7 +76,9 @@ test('keyboard shortcuts: ? sheet, Shift+N, G then T, and no shortcuts while typ
 
   // "s" typed in the palette search box stays text.
   await page.keyboard.press('Control+k');
-  const palette = page.getByRole('dialog', { name: 'Tìm kiếm và câu lệnh' });
+  const palette = page.getByRole('dialog', {
+    name: 'Tìm kiếm và thao tác nhanh',
+  });
   await expect(palette).toBeVisible();
   await page.keyboard.type('s');
   await expect(palette.getByRole('combobox')).toHaveValue('s');
