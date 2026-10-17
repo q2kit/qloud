@@ -1,4 +1,5 @@
 import { LogOut, Settings } from 'lucide-react';
+import * as React from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 
@@ -11,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useMe } from '@/features/settings/use-me';
 
 import { useLogout, useSession } from '../use-auth';
 
@@ -21,6 +23,10 @@ export function AccountMenu(): React.JSX.Element | null {
   const { data: session } = useSession();
   const logout = useLogout();
   const user = session?.user;
+  // The session has no avatar; the profile does (set from Google/GitHub).
+  const { data: me } = useMe(Boolean(user));
+  const avatarUrl = me?.avatar_url;
+  const [brokenUrl, setBrokenUrl] = React.useState<string | null>(null);
   if (!user) return null;
   const initial = (user.display || user.email).charAt(0).toUpperCase();
 
@@ -28,12 +34,24 @@ export function AccountMenu(): React.JSX.Element | null {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" aria-label={t('account.menu')}>
-          <span
-            className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground"
-            aria-hidden="true"
-          >
-            {initial}
-          </span>
+          {avatarUrl && avatarUrl !== brokenUrl ? (
+            <img
+              src={avatarUrl}
+              alt=""
+              className="size-8 rounded-full border border-border object-cover"
+              referrerPolicy="no-referrer"
+              onError={() => {
+                setBrokenUrl(avatarUrl);
+              }}
+            />
+          ) : (
+            <span
+              className="flex size-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground"
+              aria-hidden="true"
+            >
+              {initial}
+            </span>
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
