@@ -1,6 +1,6 @@
 # Audit log và tab Hoạt động (F-AUDIT)
 
-**Trạng thái:** Đang làm (kế hoạch đã duyệt trên [#167](https://github.com/q2kit/qloud/issues/167#issuecomment-6239778098)) · **Milestone:** M8 (M8-11a BE, M8-11b FE) · **Màn hình:** tab Hoạt động trong panel chi tiết
+**Trạng thái:** Hoàn thành (kế hoạch đã duyệt trên [#167](https://github.com/q2kit/qloud/issues/167#issuecomment-6239778098)) · **Milestone:** M8 (M8-11a BE, M8-11b FE) · **Màn hình:** tab Hoạt động trong panel chi tiết
 Xem thêm [ADR-0012](../adr/0012-audit-log.md)
 
 ## User stories
@@ -39,6 +39,6 @@ Xem thêm [ADR-0012](../adr/0012-audit-log.md)
 ## Tiêu chí chấp nhận
 - [x] Mỗi thao tác trong bảng tạo đúng một sự kiện, cùng transaction; thao tác lỗi không tạo sự kiện. (M8-11a)
 - [x] API đúng quyền, có test không có quyền (404), không N+1, cursor pagination. (M8-11a)
-- [ ] Tab Hoạt động hiển thị đúng, đủ i18n, light/dark, desktop/360px. (M8-11b)
+- [x] Tab Hoạt động hiển thị đúng, đủ i18n, light/dark, desktop/360px. (M8-11b)
 - [x] Django admin đọc và lọc được. (M8-11a)
 - [x] Migration chạy trên DB trống và DB có dữ liệu. (M8-11a)

@@ -290,6 +290,9 @@ describe('sharing tab in the details panel', () => {
     setup(true);
     expect(requested('/shares')).toHaveLength(0);
     await user.click(screen.getByRole('tab', { name: 'Info' }));
+    // Left from the first tab wraps to the last (Activity), then back to Sharing.
+    await user.keyboard('{ArrowLeft}');
+    expect(screen.getByRole('tab', { name: 'Activity' })).toHaveFocus();
     await user.keyboard('{ArrowLeft}');
     const sharing = screen.getByRole('tab', { name: 'Sharing' });
     expect(sharing).toHaveFocus();
