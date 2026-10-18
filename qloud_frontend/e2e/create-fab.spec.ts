@@ -11,12 +11,8 @@ test.use({
   },
 });
 
-test.beforeEach(({ isMobile }) => {
-  test.skip(!isMobile, 'the floating button only exists on small screens');
-});
-
 /** M812_CAPTURE=1 saves light and dark screenshots for the PR (M812_SLOWMO: ms). */
-async function capture(page: Page, kind: string) {
+async function capture(page: Page, kind: string, mobile = true) {
   if (!process.env.M812_CAPTURE) return;
   for (const theme of ['light', 'dark']) {
     await page.evaluate((value) => {
@@ -27,7 +23,7 @@ async function capture(page: Page, kind: string) {
       theme === 'dark' ? /dark/ : /^(?!.*dark).*$/,
     );
     await page.screenshot({
-      path: `../qloud_docs/assets/m8-12-${kind}-${theme}-360.png`,
+      path: `../qloud_docs/assets/m8-12-${kind}-${theme}-${mobile ? '360' : 'desktop'}.png`,
       animations: 'disabled',
     });
   }
@@ -56,7 +52,9 @@ async function headers(page: Page) {
 
 test('the floating button creates a folder and uploads above the tray', async ({
   page,
+  isMobile,
 }) => {
+  test.skip(!isMobile, 'the floating button only exists on small screens');
   await signUpVerifiedViaApi(page);
   await page.goto('/drive');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
@@ -130,7 +128,9 @@ test('a viewer cannot create in a shared folder', async ({
   page,
   browser,
   baseURL,
+  isMobile,
 }) => {
+  test.skip(!isMobile, 'the floating button only exists on small screens');
   await signUpViaApi(page);
   const me = (await (await page.request.get('/api/v1/me')).json()) as {
     root_folder_id: string;
@@ -174,11 +174,32 @@ test('a viewer cannot create in a shared folder', async ({
   }
 });
 
-test('trash and settings keep the header button', async ({ page }) => {
+test('trash and settings keep the header button', async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(!isMobile, 'the floating button only exists on small screens');
   await signUpViaApi(page);
   for (const path of ['/trash', '/settings']) {
     await page.goto(path);
     await expect(page.getByRole('button', { name: 'Tạo mới' })).toBeVisible();
     await expect(fab(page)).toHaveCount(0);
   }
+});
+
+test('from lg up the header keeps the Create button', async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, 'desktop layout');
+  await signUpViaApi(page);
+  await page.goto('/drive');
+  const button = page.getByRole('button', { name: 'Tạo mới' });
+  await expect(button).toBeVisible();
+  await expect(fab(page)).toHaveCount(0);
+  await button.click();
+  await expect(
+    page.getByRole('menuitem', { name: 'Thư mục mới' }),
+  ).toBeVisible();
+  await capture(page, 'menu', false);
 });
