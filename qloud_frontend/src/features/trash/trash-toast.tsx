@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useBottomObstacle } from '@/lib/bottom-obstacles';
 import { useRestoreTrash } from './api';
 import { useTrashNotice } from './notice';
 
@@ -9,6 +10,7 @@ export function TrashToast(): React.JSX.Element | null {
   const { t } = useTranslation();
   const { notice, clear } = useTrashNotice();
   const restore = useRestoreTrash();
+  const obstacleRef = useBottomObstacle('trash-toast');
   const reset = restore.reset;
   React.useEffect(() => {
     reset();
@@ -32,6 +34,7 @@ export function TrashToast(): React.JSX.Element | null {
   if (!notice) return null;
   return (
     <div
+      ref={obstacleRef}
       role="status"
       className="fixed bottom-5 left-4 z-50 flex max-w-[calc(100%-2rem)] flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-3 text-sm text-foreground shadow-soft sm:left-auto sm:right-6"
     >

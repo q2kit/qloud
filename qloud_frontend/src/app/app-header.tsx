@@ -1,4 +1,4 @@
-import { FileUp, FolderUp, FolderPlus, Info, Menu, Plus } from 'lucide-react';
+import { Info, Menu, Plus } from 'lucide-react';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
@@ -7,8 +7,6 @@ import { CommandPalette } from '@/features/search/command-palette';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useMe } from '@/features/settings/use-me';
@@ -21,9 +19,12 @@ import { useUploader } from '@/features/upload/context';
 import { useFolderUploader } from '@/features/upload/folder-context';
 import { treeFromFiles } from '@/features/upload/drop';
 import { useShortcut } from '@/features/shortcuts/context';
-import { ariaKeyshortcuts, shortcutLabel } from '@/features/shortcuts/keys';
+import { ariaKeyshortcuts } from '@/features/shortcuts/keys';
 import { cn } from '@/lib/utils';
 
+import { CreateFab } from './create-fab';
+import { CreateMenuContent } from './create-menu';
+import { useShowCreateFab } from './use-show-create-fab';
 import { LanguageSwitcher } from './language-switcher';
 import { useRouteHandle } from './route-handle';
 import { ThemeSwitcher } from './theme-switcher';
@@ -86,6 +87,23 @@ export function AppHeader({
     'uploadFolder',
     () => directoryInput.current?.click(),
     uploadShortcuts,
+  );
+  // Below `lg` the floating "+" takes over on listing pages (M8-12).
+  const showFab = useShowCreateFab();
+  const createMenu = (side?: 'top'): React.JSX.Element => (
+    <CreateMenuContent
+      side={side}
+      canCreate={canCreate}
+      canUpload={canUpload}
+      uploadBlocked={uploadBlocked}
+      onCreateFolder={() => {
+        setCreatingFolder(true);
+      }}
+      onUploadFiles={() => {
+        fileInput.current?.click();
+      }}
+      onUploadFolder={() => directoryInput.current?.click()}
+    />
   );
 
   return (
@@ -151,72 +169,20 @@ export function AppHeader({
           event.target.value = '';
         }}
       />
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button size="sm" aria-label={t('shell.create')}>
-            <Plus />
-            <span className="hidden sm:inline">{t('shell.create')}</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            disabled={!canCreate}
-            aria-keyshortcuts={ariaKeyshortcuts('newFolder')}
-            onSelect={() => {
-              setCreatingFolder(true);
-            }}
-          >
-            <FolderPlus />
-            <span className="flex-1">{t('drive.actions.newFolder')}</span>
-            <kbd
-              aria-hidden="true"
-              className="font-sans text-xs text-muted-foreground"
-            >
-              {shortcutLabel('newFolder')}
-            </kbd>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            disabled={!canUpload}
-            title={uploadBlocked ? t('storage.full.uploadBlocked') : undefined}
-            aria-keyshortcuts={ariaKeyshortcuts('upload')}
-            onSelect={() => {
-              fileInput.current?.click();
-            }}
-          >
-            <FileUp />
-            <span className="flex-1">{t('drive.actions.upload')}</span>
-            <kbd
-              aria-hidden="true"
-              className="font-sans text-xs text-muted-foreground"
-            >
-              {shortcutLabel('upload')}
-            </kbd>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            disabled={!canUpload}
-            title={uploadBlocked ? t('storage.full.uploadBlocked') : undefined}
-            aria-keyshortcuts={ariaKeyshortcuts('uploadFolder')}
-            onSelect={() => directoryInput.current?.click()}
-          >
-            <FolderUp />
-            <span className="flex-1">{t('upload.actions.folder')}</span>
-            <kbd
-              aria-hidden="true"
-              className="font-sans text-xs text-muted-foreground"
-            >
-              {shortcutLabel('uploadFolder')}
-            </kbd>
-          </DropdownMenuItem>
-          {uploadBlocked && (
-            <p
-              role="note"
-              className="max-w-60 px-2 py-1.5 text-xs text-destructive"
-            >
-              {t('storage.full.uploadBlocked')}
-            </p>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {showFab ? (
+        // The sheet is modal; the "+" waits until it closes.
+        !isDetailOpen && <CreateFab>{createMenu('top')}</CreateFab>
+      ) : (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" aria-label={t('shell.create')}>
+              <Plus />
+              <span className="hidden sm:inline">{t('shell.create')}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          {createMenu()}
+        </DropdownMenu>
+      )}
       <Button
         ref={detailTriggerRef}
         variant="ghost"

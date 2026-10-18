@@ -2,16 +2,19 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { useBottomObstacle } from '@/lib/bottom-obstacles';
 
 import { useFolderUploader } from '../folder-context';
 
 export function FolderUploadFeedback() {
   const { t } = useTranslation();
   const { busy, error, clearError, conflict } = useFolderUploader();
+  const obstacleRef = useBottomObstacle('folder-upload');
   return (
     <>
       {(busy || error) && (
         <div
+          ref={obstacleRef}
           className="fixed inset-x-2 bottom-2 z-40 rounded-lg border border-border bg-card p-4 shadow-soft sm:inset-x-auto sm:right-4 sm:max-w-sm"
           role={error ? 'alert' : 'status'}
         >

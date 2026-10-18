@@ -12,9 +12,12 @@ import { ShortcutProvider } from '@/features/shortcuts/shortcut-provider';
 import { useShortcut } from '@/features/shortcuts/context';
 import { TrashToast } from '@/features/trash/trash-toast';
 
+import { cn } from '@/lib/utils';
+
 import { AppHeader } from './app-header';
 import { AppSidebar } from './app-sidebar';
 import { DETAIL_SHEET_SELECTOR, DetailPanel } from './detail-panel';
+import { useShowCreateFab } from './use-show-create-fab';
 
 function DetailShortcut(): null {
   const setIsDetailOpen = useDriveStore((state) => state.setDetailOpen);
@@ -37,6 +40,7 @@ export function AppLayout(): React.JSX.Element {
   const setIsDetailOpen = useDriveStore((state) => state.setDetailOpen);
   const navigationTriggerRef = React.useRef<HTMLButtonElement>(null);
   const detailTriggerRef = React.useRef<HTMLButtonElement>(null);
+  const showFab = useShowCreateFab();
 
   return (
     <ShortcutProvider>
@@ -64,7 +68,13 @@ export function AppLayout(): React.JSX.Element {
               }}
             />
             <div className="flex min-h-0 flex-1">
-              <main className="flex min-w-0 flex-1 flex-col px-4 py-5 *:w-full sm:px-6 sm:py-7 lg:px-8">
+              <main
+                className={cn(
+                  'flex min-w-0 flex-1 flex-col px-4 py-5 *:w-full sm:px-6 sm:py-7 lg:px-8',
+                  // Room for the floating "+" under the last row.
+                  showFab && 'pb-24 sm:pb-24',
+                )}
+              >
                 <Outlet />
               </main>
               <DetailPanel

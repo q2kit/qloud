@@ -17,6 +17,7 @@ import { resendVerificationEmail } from '@/features/auth/api';
 import { useSession } from '@/features/auth/use-auth';
 import { NodeIcon } from '@/features/drive/components/node-icon';
 import { formatBytes } from '@/features/drive/format';
+import { useBottomObstacle } from '@/lib/bottom-obstacles';
 import { cn } from '@/lib/utils';
 
 import { ACTIVE, useUploadStore, type UploadItem } from '../store';
@@ -53,6 +54,7 @@ export function UploadTray(): React.JSX.Element | null {
   const setCollapsed = useUploadStore((state) => state.setTrayCollapsed);
   const clearFinished = useUploadStore((state) => state.clearFinished);
   const summary = useSummary(items, speed);
+  const obstacleRef = useBottomObstacle('upload-tray');
   if (items.length === 0) return null;
 
   const title =
@@ -73,6 +75,7 @@ export function UploadTray(): React.JSX.Element | null {
 
   return (
     <section
+      ref={obstacleRef}
       aria-label={t('upload.tray.label')}
       className="fixed inset-x-2 bottom-2 z-30 overflow-hidden rounded-lg border border-border bg-card shadow-soft sm:inset-x-auto sm:right-4 sm:bottom-4 sm:w-96"
     >
