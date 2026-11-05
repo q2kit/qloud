@@ -45,7 +45,7 @@ const server = setupServer(
 );
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' });
+  server.listen({ onUnhandledFrame: 'error' });
   // Pretend Cloudflare's script already loaded: appending it fires onload.
   const append = document.head.append.bind(document.head);
   vi.spyOn(document.head, 'append').mockImplementation((...nodes) => {

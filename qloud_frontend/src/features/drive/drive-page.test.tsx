@@ -32,7 +32,7 @@ const server = setupServer();
 let drive: FakeDrive;
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'bypass' });
+  server.listen({ onUnhandledFrame: 'bypass' });
 });
 beforeEach(async () => {
   setMediaQuery(DESKTOP_INPUT_QUERY, true);

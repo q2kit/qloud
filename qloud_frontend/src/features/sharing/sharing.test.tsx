@@ -24,7 +24,7 @@ const server = setupServer();
 let drive: FakeDrive;
 let requests: string[] = [];
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' });
+  server.listen({ onUnhandledFrame: 'error' });
   server.events.on('request:start', ({ request }) =>
     requests.push(new URL(request.url).pathname),
   );

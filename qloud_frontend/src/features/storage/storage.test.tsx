@@ -27,7 +27,7 @@ let storageRequests: number;
 let trashed: string[][];
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'bypass' });
+  server.listen({ onUnhandledFrame: 'bypass' });
 });
 beforeEach(async () => {
   drive = new FakeDrive();
