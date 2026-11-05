@@ -36,7 +36,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 | Celery | 5.6 | |
 | psycopg | 3.3 | |
 | boto3 | 1.43 | Dev: `boto3-stubs[s3]` (MIT) cho mypy, cùng dòng phiên bản |
-| mypy | 2.3 | djangorestframework-stubs 3.18 yêu cầu `mypy<2.4` |
+| mypy | 2.4 | djangorestframework-stubs 3.18.2 yêu cầu `mypy<2.5` |
 | PostgreSQL / Redis | 18 / 8 | |
 | Node.js | 24 | `engines` trong `package.json`; `@types/node` giữ cùng major |
 | React / React Router / TanStack Query | 19 / 8 / 5 | |
@@ -44,7 +44,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 | Vite / Vitest | 8 / 5 | |
 | Tailwind CSS | 4 | |
 | Zustand / TanStack Virtual | 5 / 3 | `@tanstack/react-virtual` (MIT) thêm ở M2-07a cho danh sách folder dài, duyệt ở [#23](https://github.com/q2kit/qloud/issues/23) |
-| MSW | 2 | Vitest 5 chưa khai báo tương thích MSW 3 |
+| MSW | 3 | |
 | openapi-typescript / openapi-fetch | 7 / 0.17 | openapi-typescript khai báo peer `typescript ^5`; đã kiểm tra chạy đúng với TS 6, ngoại lệ ghi trong `pnpm-workspace.yaml` (#56) |
 | Playwright | 1 | |
 
