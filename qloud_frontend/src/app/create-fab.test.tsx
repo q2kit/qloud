@@ -29,7 +29,7 @@ const fab = (): HTMLElement | null =>
   document.querySelector<HTMLElement>('[data-create-fab]');
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'bypass' });
+  server.listen({ onUnhandledFrame: 'bypass' });
 });
 beforeEach(async () => {
   drive = new FakeDrive();

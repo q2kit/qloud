@@ -176,32 +176,25 @@ test('clickable things show the hand cursor', async ({ page, isMobile }) => {
   test.skip(isMobile, 'No mouse cursor on touch screens');
   await signUpViaApi(page);
   await page.goto('/drive');
-  const cursor = (locator: ReturnType<Page['locator']>) =>
-    locator.evaluate((element) => getComputedStyle(element).cursor);
-
-  expect(await cursor(page.getByRole('button', { name: 'Tạo mới' }))).toBe(
-    'pointer',
-  );
-  expect(
-    await cursor(
-      page
-        .getByRole('navigation', { name: 'Điều hướng chính' })
-        .getByRole('link', { name: 'Gần đây' }),
-    ),
-  ).toBe('pointer');
-  await page.getByRole('button', { name: 'Tạo mới' }).click();
-  expect(
-    await cursor(page.getByRole('menuitem', { name: 'Thư mục mới' })),
-  ).toBe('pointer');
-  await page.getByRole('menuitem', { name: 'Thư mục mới' }).click();
+  // toHaveCSS retries: menu items stay disabled (`not-allowed`) for a moment
+  // after the menu opens, so a one-shot read races the UI.
+  const createButton = page.getByRole('button', { name: 'Tạo mới' });
+  await expect(createButton).toHaveCSS('cursor', 'pointer');
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Điều hướng chính' })
+      .getByRole('link', { name: 'Gần đây' }),
+  ).toHaveCSS('cursor', 'pointer');
+  await createButton.click();
+  const newFolder = page.getByRole('menuitem', { name: 'Thư mục mới' });
+  await expect(newFolder).toHaveCSS('cursor', 'pointer');
+  await newFolder.click();
   const dialog = page.getByRole('dialog', { name: 'Thư mục mới' });
-  expect(await cursor(dialog.getByLabel('Tên'))).toBe('text');
+  await expect(dialog.getByLabel('Tên')).toHaveCSS('cursor', 'text');
   await dialog.getByRole('button', { name: 'Tạo' }).click();
-  expect(await cursor(page.getByRole('option').first())).toBe('pointer');
+  await expect(page.getByRole('option').first()).toHaveCSS('cursor', 'pointer');
   // M6 enables the command palette trigger.
-  expect(
-    await cursor(
-      page.getByRole('button', { name: /Tìm kiếm và thao tác nhanh/ }),
-    ),
-  ).toBe('pointer');
+  await expect(
+    page.getByRole('button', { name: /Tìm kiếm và thao tác nhanh/ }),
+  ).toHaveCSS('cursor', 'pointer');
 });

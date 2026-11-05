@@ -31,7 +31,7 @@ const session = {
 const server = setupServer();
 const restore = vi.fn<UploadEngine['restore']>();
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' });
+  server.listen({ onUnhandledFrame: 'error' });
 });
 afterAll(() => {
   server.close();

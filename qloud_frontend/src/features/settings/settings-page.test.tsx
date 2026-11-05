@@ -83,7 +83,7 @@ function authenticated(hasPassword = true): Response {
 }
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' });
+  server.listen({ onUnhandledFrame: 'error' });
 });
 beforeEach(async () => {
   document.cookie = 'csrftoken=token';

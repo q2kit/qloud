@@ -18,7 +18,7 @@ import { chooseSelectionAction } from '@/test/item-menu';
 const server = setupServer();
 let drive: FakeDrive;
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'bypass' });
+  server.listen({ onUnhandledFrame: 'bypass' });
 });
 beforeEach(async () => {
   drive = new FakeDrive();

@@ -19,7 +19,7 @@ import { i18n } from '@/lib/i18n';
 const server = setupServer();
 let drive: FakeDrive;
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' });
+  server.listen({ onUnhandledFrame: 'error' });
 });
 beforeEach(async () => {
   drive = new FakeDrive();

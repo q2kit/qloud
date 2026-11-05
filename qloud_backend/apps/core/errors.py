@@ -61,9 +61,8 @@ def exception_handler(exc: Exception, context: dict[str, Any]) -> Response | Non
     if isinstance(exc, AppError):
         code, message, details = exc.code, str(exc.detail), exc.details
     elif isinstance(exc, exceptions.ValidationError):
-        fields = exc.detail
-        if not isinstance(fields, dict):
-            fields = {api_settings.NON_FIELD_ERRORS_KEY: fields}
+        detail = exc.detail
+        fields = detail if isinstance(detail, dict) else {api_settings.NON_FIELD_ERRORS_KEY: detail}
         code, message, details = "validation_error", "Invalid input.", {"fields": fields}
     else:
         codes = exc.get_codes()
