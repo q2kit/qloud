@@ -37,7 +37,7 @@ let requests: string[][];
 let emptied: number;
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'bypass' });
+  server.listen({ onUnhandledFrame: 'bypass' });
 });
 afterAll(() => {
   server.close();

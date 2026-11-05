@@ -25,7 +25,7 @@ let drive: FakeDrive;
 let add: MockInstance<UploadEngine['add']>;
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'bypass' });
+  server.listen({ onUnhandledFrame: 'bypass' });
 });
 beforeEach(async () => {
   drive = new FakeDrive();

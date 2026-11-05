@@ -30,7 +30,7 @@ import { DESKTOP_INPUT_QUERY } from './desktop-input';
 const server = setupServer();
 let drive: FakeDrive;
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' });
+  server.listen({ onUnhandledFrame: 'error' });
 });
 beforeEach(async () => {
   drive = new FakeDrive();

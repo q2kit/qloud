@@ -14,7 +14,7 @@ let drive: FakeDrive;
 let requests: URL[];
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' });
+  server.listen({ onUnhandledFrame: 'error' });
 });
 beforeEach(async () => {
   drive = new FakeDrive();

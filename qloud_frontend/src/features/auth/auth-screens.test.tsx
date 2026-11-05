@@ -50,7 +50,7 @@ function failure(status: number, errors: object[] = []): Response {
 }
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'error' });
+  server.listen({ onUnhandledFrame: 'error' });
 });
 beforeEach(async () => {
   document.cookie = 'csrftoken=token';
