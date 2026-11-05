@@ -14,6 +14,7 @@ Nếu code và docs mâu thuẫn nhau thì đó là bug: phải sửa một tron
 | [data-model.md](data-model.md) | Bảng, quan hệ, ràng buộc | Khi động vào database |
 | [api.md](api.md) | Quy ước API, danh sách endpoint | Khi làm API hoặc gọi API |
 | [ui-ux.md](ui-ux.md) | Hướng thiết kế, danh sách màn hình, i18n, dark mode | Khi làm frontend |
+| [deploy.md](deploy.md) | Chạy production trên VPS: image, `.env`, Cloudflare, nginx của host, cập nhật | Khi deploy hoặc sửa `infra/` |
 | [conventions.md](conventions.md) | Quy ước code, test, git, CI | Luôn tuân theo |
 | [adr/](adr/) | Các quyết định kiến trúc và lý do | Khi thắc mắc "tại sao lại làm thế này" |
 

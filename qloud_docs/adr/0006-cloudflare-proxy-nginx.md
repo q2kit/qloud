@@ -1,6 +1,6 @@
 # 0006. Cloudflare proxy (Full strict + Origin Certificate) và nginx trên VPS
 
-- Trạng thái: Chấp nhận · 2026-10-09
+- Trạng thái: Bị thay thế bởi [0014](0014-host-nginx-tls.md) · 2026-10-09
 
 ## Quyết định
 - DNS trên Cloudflare bật proxy, SSL mode **Full (strict)**.

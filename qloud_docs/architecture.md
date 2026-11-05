@@ -47,6 +47,7 @@ Byte của file đi thẳng giữa trình duyệt và S3 qua presigned URL.
 | MSW | 3 | |
 | openapi-typescript / openapi-fetch | 7 / 0.17 | openapi-typescript khai báo peer `typescript ^5`; đã kiểm tra chạy đúng với TS 6, ngoại lệ ghi trong `pnpm-workspace.yaml` (#56) |
 | Playwright | 1 | |
+| Image nền production | python 3.14 slim, node 24 slim, nginx 1.30 alpine, uv 0.13 | Ghim chính xác trong `infra/docker/Dockerfile`; nginx dùng dòng stable (minor chẵn) |
 
 ### Backend — `qloud_backend/`
 | Mục đích | Thư viện |
@@ -195,11 +196,16 @@ M5-04: `sharing.notifications.schedule_share_email` render snapshot text/HTML b�
 M2-09: stack E2E tắt persistent DB connections (`CONN_MAX_AGE=0`) để request trong các thread của Django runserver giải phóng kết nối sau khi xong; các bài seed dữ liệu/phân trang chạy song song không tích lũy kết nối vượt giới hạn PostgreSQL. Cấu hình ứng dụng dev/production giữ nguyên. Seed API cho test Gần đây giới hạn 2 request tạo file đồng thời mỗi test để giảm burst kết nối qua proxy vào runserver khi nhiều worker cùng kiểm tra luồng UI.
 
 ### Production
-- Một VPS chạy Docker Compose: nginx, api (gunicorn), worker, beat, postgres, redis; phía trước là Cloudflare proxy
-  ([ADR-0004](adr/0004-hosting-vps.md), [ADR-0006](adr/0006-cloudflare-proxy-nginx.md)). Firewall chỉ mở 443 cho dải IP Cloudflare.
+- Một VPS chạy Docker Compose: nginx, api (gunicorn), worker, beat, postgres, redis; phía trước là Cloudflare proxy rồi nginx của host
+  ([ADR-0004](adr/0004-hosting-vps.md), [ADR-0014](adr/0014-host-nginx-tls.md)). nginx của host giữ 443 với Origin Certificate, chỉ nhận dải IP Cloudflare
+  và proxy HTTP tới container `web` trên `127.0.0.1`; nginx của Qloud chỉ chia request sang FE và BE.
+- **Image:** `qloud-backend` (api, worker, beat, migrate; kèm FFmpeg LGPL) và `qloud-web` (nginx, FE build, `/static/`) từ `infra/docker/Dockerfile`,
+  build trên GitHub Actions và push lên GHCR khi push lên `master` ([ADR-0013](adr/0013-container-images-ghcr.md)). VPS chỉ pull.
+  Cách cài đặt, cập nhật và chạy thử trên máy: [deploy.md](deploy.md).
 - **Cùng origin:** `https://<APP_DOMAIN>/` là SPA (nginx), `/api/` và `/admin/` là Django, `/static/` là file tĩnh của admin (`collectstatic`).
   Không cần CORS cho API; chỉ bucket cần CORS cho origin này. nginx: cache dài cho file có hash, không cache `index.html`, mọi route SPA trả `index.html`.
-- **IP thật của client:** nginx `real_ip_header CF-Connecting-IP` + `set_real_ip_from <dải IP Cloudflare>`; Django tin `X-Forwarded-For`/`X-Forwarded-Proto` từ nginx.
+- **IP thật của client:** Django đọc header `CF-Connecting-IP` (allauth, `TRUSTED_CLIENT_IP_HEADER`), do Cloudflare đặt và hai lớp nginx chuyển nguyên;
+  scheme lấy từ `X-Forwarded-Proto: https` do nginx của Qloud đặt.
   Rate limit và báo cáo vi phạm dựa trên IP này.
 - **Settings Django:** `DJANGO_SETTINGS_MODULE=config.settings.prod` (mặc định của `wsgi`, `asgi`, `celery`; chỉ `manage.py` mặc định dev).
   Settings prod dừng khi `APP_DOMAIN` thiếu hoặc là `localhost`, hay `DJANGO_SECRET_KEY` ngắn hơn 50 ký tự hoặc là giá trị mẫu.

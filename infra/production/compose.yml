@@ -1,0 +1,137 @@
+# Production stack on the VPS (qloud_docs/deploy.md, ADR-0004, ADR-0014).
+# Images come from GHCR (.github/workflows/images.yml); `build:` lets the same file run a local build.
+#   docker compose -f infra/production/compose.yml pull
+#   docker compose -f infra/production/compose.yml up -d --wait
+# Compose reads infra/production/.env (next to this file) for both ${...} and env_file.
+# Only `web` publishes a port, on 127.0.0.1 for the host's nginx (TLS, Cloudflare-only access).
+
+name: ${COMPOSE_PROJECT_NAME:-qloud}
+
+x-backend: &backend
+  image: ${QLOUD_IMAGE_PREFIX:-ghcr.io/q2kit/qloud}-backend:${QLOUD_TAG:-master}
+  build:
+    context: ../..
+    dockerfile: infra/docker/Dockerfile
+    target: backend
+  env_file: .env
+  environment:
+    DATABASE_URL: postgres://${POSTGRES_USER:-qloud}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-qloud}
+    REDIS_URL: redis://redis:6379/0
+    CELERY_BROKER_URL: redis://redis:6379/1
+  restart: unless-stopped
+  # `public` gives the outbound route to S3, SMTP, Turnstile and the OAuth providers.
+  networks: [internal, public]
+
+services:
+  web:
+    image: ${QLOUD_IMAGE_PREFIX:-ghcr.io/q2kit/qloud}-web:${QLOUD_TAG:-master}
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile
+      target: web
+    ports:
+      # Plain HTTP on loopback only: the host's nginx proxies here, nothing else can reach it.
+      - "127.0.0.1:${QLOUD_HTTP_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8081/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+    restart: unless-stopped
+    networks: [internal, public]
+
+  migrate:
+    <<: *backend
+    command: ["python", "manage.py", "migrate", "--noinput"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    <<: *backend
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      # ALLOWED_HOSTS only holds APP_DOMAIN; /api/v1/health skips the HTTPS redirect.
+      test:
+        - CMD-SHELL
+        - >-
+          python -c "import os, urllib.request;
+          urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:8000/api/v1/health',
+          headers={'Host': os.environ['APP_DOMAIN']}), timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+  worker:
+    <<: *backend
+    command: ["celery", "-A", "config", "worker", "-l", "info", "--concurrency", "${CELERY_CONCURRENCY:-2}"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A config inspect ping -d celery@$$HOSTNAME --timeout 5"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 30s
+
+  # Exactly one beat: a second one would enqueue every periodic task twice.
+  beat:
+    <<: *backend
+    command: ["celery", "-A", "config", "beat", "-l", "info", "--schedule", "/tmp/celerybeat-schedule"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-qloud}
+      POSTGRES_USER: ${POSTGRES_USER:-qloud}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    networks: [internal]
+
+  # No password for now: Redis is reachable only on the internal network.
+  redis:
+    image: redis:8.10-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    networks: [internal]
+
+networks:
+  # No route in or out: Postgres and Redis are reachable only from the app containers.
+  internal:
+    internal: true
+  public: {}
+
+volumes:
+  postgres-data:
+  redis-data:

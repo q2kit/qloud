@@ -25,9 +25,10 @@ if not TURNSTILE_SECRET_KEY or TURNSTILE_SECRET_KEY.startswith(("1x0000", "2x000
 if not TURNSTILE_SITE_KEY or TURNSTILE_SITE_KEY.startswith(("1x0000", "2x0000", "3x0000")):
     raise ImproperlyConfigured("TURNSTILE_SITE_KEY must be the real site key in production.")
 
-# Cloudflare → nginx → gunicorn (ADR-0006)
+# Cloudflare → host nginx (TLS) → Qloud nginx → gunicorn (ADR-0014)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-# The firewall only admits Cloudflare, so its client IP header can be trusted (rate limits).
+# The host's nginx only admits Cloudflare and Qloud listens on loopback only,
+# so Cloudflare's client IP header can be trusted (rate limits).
 ALLAUTH_TRUSTED_CLIENT_IP_HEADER = env("TRUSTED_CLIENT_IP_HEADER", default="CF-Connecting-IP")
 SECURE_SSL_REDIRECT = True
 # Lets an internal plain-HTTP health probe reach the app without a redirect.

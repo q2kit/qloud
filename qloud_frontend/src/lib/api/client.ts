@@ -34,7 +34,7 @@ export const csrfMiddleware: Middleware = {
  * Regenerate types with `pnpm api:generate` after backend API changes.
  */
 export const api = createClient<paths>({
-  // FE and API share an origin (ADR-0006); an absolute base keeps Request() valid in tests.
+  // FE and API share an origin (ADR-0014); an absolute base keeps Request() valid in tests.
   baseUrl: window.location.origin,
   credentials: 'include',
   // Look fetch up per call so test interceptors (MSW) installed later still apply.
