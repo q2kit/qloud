@@ -394,6 +394,17 @@ it('owner toggles current and old retention only after success and handles error
     'Không thể thực hiện thao tác',
   );
   expect(old).toHaveAttribute('aria-pressed', 'true');
+  // The next action clears the stale error, whether it locks or restores.
+  await user.click(old);
+  await waitFor(() => expect(old).toHaveAttribute('aria-pressed', 'false'));
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  patch.mockRejectedValueOnce(new Error('offline'));
+  await user.click(old);
+  expect(await screen.findByRole('alert')).toBeInTheDocument();
+  await user.click(
+    screen.getByRole('button', { name: 'Khôi phục phiên bản 1' }),
+  );
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 });
 
 it.each(['viewer', 'editor'] as const)(

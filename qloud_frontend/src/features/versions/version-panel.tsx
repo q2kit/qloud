@@ -44,6 +44,12 @@ export function VersionPanel({ node }: { node: DriveNode }): React.JSX.Element {
     !detail.isError && detail.data?.capabilities.can_delete_versions;
   const pending =
     mutation.isPending || retention.isPending || download !== null;
+  // A new action replaces the message of whichever action failed before it.
+  const clearErrors = () => {
+    mutation.reset();
+    retention.reset();
+    setDownloadError(null);
+  };
 
   if (query.isPending)
     return (
@@ -154,7 +160,7 @@ export function VersionPanel({ node }: { node: DriveNode }): React.JSX.Element {
                   })}
                   onClick={() => {
                     setDownload(version.id);
-                    setDownloadError(null);
+                    clearErrors();
                     void downloadVersion(node.id, version.id)
                       .catch((error: unknown) => {
                         setDownloadError(error);
@@ -183,6 +189,7 @@ export function VersionPanel({ node }: { node: DriveNode }): React.JSX.Element {
                       number: version.version_number,
                     })}
                     onClick={() => {
+                      clearErrors();
                       retention.mutate(version);
                     }}
                   >
@@ -208,7 +215,7 @@ export function VersionPanel({ node }: { node: DriveNode }): React.JSX.Element {
                     })}
                     onClick={(event) => {
                       actionRef.current = event.currentTarget;
-                      mutation.reset();
+                      clearErrors();
                       setConfirmation({ action: 'restore', version });
                     }}
                   >
@@ -225,7 +232,7 @@ export function VersionPanel({ node }: { node: DriveNode }): React.JSX.Element {
                     })}
                     onClick={(event) => {
                       actionRef.current = event.currentTarget;
-                      mutation.reset();
+                      clearErrors();
                       setConfirmation({ action: 'delete', version });
                     }}
                   >
