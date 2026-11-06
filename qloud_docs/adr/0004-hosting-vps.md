@@ -4,7 +4,7 @@
 
 ## Quyết định
 Django, Celery, PostgreSQL, Redis và nginx (phục vụ FE tĩnh, cùng origin với API) chạy trên một VPS bằng Docker Compose,
-phía trước là Cloudflare proxy (ADR-0006). File lưu trên S3 hoặc R2, tùy `.env`.
+phía trước là Cloudflare proxy và nginx của host (ADR-0014). File lưu trên S3 hoặc R2, tùy `.env`.
 
 ## Lý do
 - Cloudflare Workers không chạy được Django, Celery hay psycopg (Python Workers chạy trên Pyodide); D1 là SQLite, không có

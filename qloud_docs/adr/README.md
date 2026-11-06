@@ -23,10 +23,12 @@ nếu quyết định thay đổi thì tạo ADR mới, và đánh dấu ADR cũ
 | [0003](0003-direct-to-s3-multipart-upload.md) | Upload thẳng lên S3 bằng multipart + presigned URL | Chấp nhận |
 | [0004](0004-hosting-vps.md) | Chạy trên VPS bằng Docker Compose | Chấp nhận |
 | [0005](0005-storage-plans.md) | Giới hạn theo plan, gán cố định cho user lúc đăng ký | Chấp nhận |
-| [0006](0006-cloudflare-proxy-nginx.md) | Cloudflare proxy (Full strict + Origin Certificate) và nginx trên VPS | Chấp nhận |
+| [0006](0006-cloudflare-proxy-nginx.md) | Cloudflare proxy (Full strict + Origin Certificate) và nginx trên VPS | Bị thay thế bởi 0014 |
 | [0007](0007-localstack-for-s3-dev.md) | LocalStack để giả lập S3 cho dev và CI | Chấp nhận |
 | [0008](0008-server-upload-fingerprints.md) | Tiếp tục upload bằng fingerprint lưu trên server | Chấp nhận |
 | [0009](0009-mp4-thumbnails.md) | Thumbnail MP4 bằng FFmpeg trên Celery worker | Chấp nhận |
 | [0010](0010-durable-object-deletion.md) | Lưu ý định dọn object S3 trong database | Chấp nhận |
 | [0011](0011-moderation-transactions.md) | Transaction và audit kiểm duyệt | Chấp nhận |
 | [0012](0012-audit-log.md) | Audit log cho file, folder và chia sẻ | Chấp nhận |
+| [0013](0013-container-images-ghcr.md) | Image production build trên GitHub Actions, lưu ở GHCR | Chấp nhận |
+| [0014](0014-host-nginx-tls.md) | TLS và chặn IP ở nginx của host; nginx của Qloud chỉ chạy HTTP | Chấp nhận |

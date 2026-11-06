@@ -53,7 +53,7 @@ Kiểm tra share link của owner bị khóa sẽ triển khai ở M5 khi có mo
 - **Rate limit** (allauth, đếm trong cache Redis nên đúng khi chạy nhiều instance): đăng nhập 10 lần/phút/IP và 5 lần sai/phút/email;
   đăng ký 10/phút/IP; quên mật khẩu 10/phút/IP và 5/phút/email; đặt lại mật khẩu bằng key 10/phút/IP.
   Vượt giới hạn trả **429** (`{"status": 429}`), kể cả khóa theo email khi đăng nhập sai (allauth trả 400 `too_many_login_attempts`, view đăng nhập đổi thành 429).
-- **IP của client:** `TRUSTED_CLIENT_IP_HEADER` (→ `ALLAUTH_TRUSTED_CLIENT_IP_HEADER`). Production mặc định `CF-Connecting-IP`: firewall chỉ cho Cloudflare vào (ADR-0006) nên header này tin được. Dev để trống, dùng `REMOTE_ADDR`.
+- **IP của client:** `TRUSTED_CLIENT_IP_HEADER` (→ `ALLAUTH_TRUSTED_CLIENT_IP_HEADER`). Production mặc định `CF-Connecting-IP`: nginx của host chỉ nhận Cloudflare và Qloud chỉ mở cổng trên loopback (ADR-0014) nên header này tin được. Dev để trống, dùng `REMOTE_ADDR`.
 - **Turnstile:** đăng ký (email, và bước hoàn tất đăng ký OAuth nếu có) và quên mật khẩu nhận thêm `turnstile_token`; server gọi `siteverify` của Cloudflare kèm IP client.
   Token sai, thiếu, hoặc không gọi được Cloudflare thì trả 400 `captcha_invalid` ở trường `turnstile_token`. Đăng nhập không cần Turnstile (đã có rate limit).
   `TURNSTILE_SECRET_KEY` trống thì bỏ qua kiểm tra (test); production từ chối khởi động khi key trống hoặc là test key của Cloudflare. Dev dùng test key trong `.env.example`: luôn qua, cần mạng.
