@@ -92,7 +92,10 @@ def expire_trash() -> int:
     return expired
 
 
-@shared_task
+@shared_task(
+    soft_time_limit=settings.VERSION_EXPIRY_SOFT_TIME_LIMIT,
+    time_limit=settings.VERSION_EXPIRY_TIME_LIMIT,
+)
 def expire_versions() -> int:
     from django.utils import timezone
 
@@ -101,10 +104,14 @@ def expire_versions() -> int:
     now = timezone.now()
     deleted = 0
     after = None
-    while nodes := retention.file_batch(after):
-        for node_id, owner_id in nodes:
-            while count := retention.expire_file(node_id, owner_id, now):
-                deleted += count
-        after = nodes[-1][0]
+    try:
+        while nodes := retention.file_batch(now, after):
+            for node_id, owner_id in nodes:
+                while count := retention.expire_file(node_id, owner_id, now):
+                    deleted += count
+            after = nodes[-1][0]
+    except SoftTimeLimitExceeded:
+        # Each file commits on its own; the next daily run resumes from what is left.
+        logger.warning("Version expiry time limit reached after %d version(s)", deleted)
     enqueue_object_cleanup()
     return deleted

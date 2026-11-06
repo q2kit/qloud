@@ -127,7 +127,8 @@ def test_age_boundary_null_and_current_plan(versions, user):
     user.plan.save()
     FileVersion.objects.filter(node=node).update(created_at=now - timedelta(days=30))
     assert retention.expire_file(node.pk, user.pk, now) == 0
-    FileVersion.objects.filter(pk=first.pk).update(
+    # v1's age counts from when v2 replaced it.
+    FileVersion.objects.filter(node=node, version_number=2).update(
         created_at=now - timedelta(days=30, microseconds=1)
     )
     services.set_version_retention(user, node.pk, first.pk, True)
@@ -139,6 +140,65 @@ def test_age_boundary_null_and_current_plan(versions, user):
     user.plan.save()
     assert retention.expire_file(node.pk, user.pk, now) == 4
     assert node.versions.get().pk == node.current_version_id
+
+
+def test_age_counts_from_replacement(versions, user):
+    node, first = versions
+    now = timezone.now()
+    user.plan.max_versions_per_file = 100
+    user.plan.version_retention_days = 30
+    user.plan.save()
+    # A year-old v1 replaced today must survive the retention window.
+    FileVersion.objects.filter(node=node).update(created_at=now)
+    FileVersion.objects.filter(pk=first.pk).update(created_at=now - timedelta(days=365))
+    assert retention.file_batch(now, None) == []
+    assert retention.expire_file(node.pk, user.pk, now) == 0
+    later = now + timedelta(days=30, seconds=1)
+    assert retention.file_batch(later, None) == [(node.pk, user.pk)]
+    # Every old version was replaced at `now`, so all of them expire together.
+    assert retention.expire_file(node.pk, user.pk, later) == 5
+    assert retention.file_batch(later, None) == []
+
+
+def test_scan_selects_only_files_with_expirable_versions(
+    versions, user, make_file, django_assert_num_queries
+):
+    node, first = versions
+    now = timezone.now()
+    for index in range(3):
+        make_file(f"single-{index}.txt")  # one version: never needs a cleanup transaction
+    pinned = make_file("pinned.txt")
+    FileVersion.objects.create(
+        node=pinned,
+        blob=Blob.objects.create(storage_key=f"blobs/{uuid.uuid4()}", size=3),
+        version_number=2,
+        size=3,
+        mime_type="text/plain",
+        original_name=pinned.name,
+    )
+    FileVersion.objects.filter(node=pinned, version_number=1).update(keep_forever=True)
+    pinned.current_version = pinned.versions.get(version_number=2)
+    pinned.save()
+    user.plan.max_versions_per_file = 0
+    user.plan.save()
+    with django_assert_num_queries(1):
+        assert retention.file_batch(now, None) == [(node.pk, user.pk)]
+    user.plan.max_versions_per_file = 4
+    user.plan.save()
+    assert retention.file_batch(now, None) == [(node.pk, user.pk)]
+    user.plan.max_versions_per_file = 5
+    user.plan.version_retention_days = 1
+    user.plan.save()
+    assert retention.file_batch(now, None) == []
+    FileVersion.objects.filter(node=node, version_number=2).update(
+        created_at=now - timedelta(days=2)
+    )
+    assert retention.file_batch(now, None) == [(node.pk, user.pk)]
+    assert retention.file_batch(now, node.pk) == []
+    with patch("apps.drive.tasks.enqueue_object_cleanup"):
+        assert expire_versions() == 1
+    assert retention.file_batch(now, None) == []
+    assert node.versions.filter(pk=first.pk).exists() is False
 
 
 def test_shared_blob_durable_cleanup_and_rollback(versions, user):
@@ -166,7 +226,7 @@ def test_task_batches_trash_suspension_and_idempotence(versions, user, monkeypat
     trash.trash(user, [node.pk])
     User.objects.filter(pk=user.pk).update(suspended_at=timezone.now())
     scan = retention.file_batch
-    monkeypatch.setattr(retention, "file_batch", lambda after: scan(after, batch=1))
+    monkeypatch.setattr(retention, "file_batch", lambda now, after: scan(now, after, batch=1))
     with patch("apps.drive.tasks.enqueue_object_cleanup"):
         assert expire_versions() == 3
         assert expire_versions() == 0
