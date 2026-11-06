@@ -15,7 +15,7 @@
 | M4 | Thùng rác | ✅ |
 | M5 | Chia sẻ (cho người dùng và qua link) | ✅ |
 | M6 | Tìm kiếm | ✅ |
-| M7 | Phiên bản file | 🟨 |
+| M7 | Phiên bản file | ✅ |
 | M8 | Quota UI, hoàn thiện, deploy production | 🟨 |
 
 ## M0 — Nền tảng
@@ -98,7 +98,7 @@ Xong (15 task: docs, khung BE/FE, Docker, CI, E2E, git hooks). Chi tiết: miles
 | M7-02 | API danh sách, tải về, khôi phục, xóa phiên bản | [#43](https://github.com/q2kit/qloud/issues/43) | ✅ [PR #162](https://github.com/q2kit/qloud/pull/162) |
 | M7-03 | FE: tab Phiên bản trong panel chi tiết | [#44](https://github.com/q2kit/qloud/issues/44) | ✅ [PR #163](https://github.com/q2kit/qloud/pull/163) |
 | M7-04 | Dọn phiên bản theo plan và đánh dấu Khóa | [#159](https://github.com/q2kit/qloud/issues/159) | ✅ [PR #176](https://github.com/q2kit/qloud/pull/176) |
-| M7-05 | Fix sau review M7: tuổi phiên bản tính từ lúc bị thay thế (cần quyết định), job dọn lọc trước file cần dọn, "Thay thế" khi trùng tên folder, reset lỗi Khóa, đổi tên view | [#177](https://github.com/q2kit/qloud/issues/177) | 🟦 |
+| M7-05 | Fix sau review M7: tuổi phiên bản tính từ lúc bị thay thế (cần quyết định), job dọn lọc trước file cần dọn, "Thay thế" khi trùng tên folder, reset lỗi Khóa, đổi tên view | [#177](https://github.com/q2kit/qloud/issues/177) | ✅ [PR #226](https://github.com/q2kit/qloud/pull/226) |
 
 ## M8 — Hoàn thiện và deploy ([quota.md](features/quota.md))
 | ID | Task | Issue | Trạng thái |
