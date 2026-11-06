@@ -59,8 +59,10 @@ python3 "$(git rev-parse --show-toplevel)/scripts/workflow.py" pr-open \
   --co-author "<model> <noreply@anthropic.com>" --watch
 ```
 
-Script kiểm tra tiêu đề và body giống CI, rebase khi cần, đổi task sang 🟦 trong ROADMAP (commit riêng), chạy kiểm tra
-của phần đã đổi (giống AGENTS.md mục 8, cần `docker compose up -d --wait`), push, tạo PR rồi chờ CI.
+Script kiểm tra tiêu đề và body giống CI, rebase khi cần, chạy kiểm tra của phần đã đổi
+(giống AGENTS.md mục 8, cần `docker compose up -d --wait`), push, tạo PR, rồi **đổi task sang ✅ kèm link PR ngay trong PR đó**
+(commit `docs(roadmap): mark <task-id> done [<task-id>]`, push liền sau khi tạo PR; CI hủy lượt trước) và chờ CI.
+Không cần commit ROADMAP riêng khi merge.
 Kiểm tra nào đỏ thì sửa, commit, chạy lại lệnh. CI đỏ thì đọc log (`gh run view <id> --log-failed`), sửa, push lại cho tới khi xanh.
 Chỉ dùng `--skip-e2e` khi không chạy được E2E trên máy, và ghi rõ điều đó trong body PR.
 
@@ -69,14 +71,8 @@ Chỉ dùng `--skip-e2e` khi không chạy được E2E trên máy, và ghi rõ 
 - Góp ý review: `gh pr view <n> --comments`. Sửa trên cùng branch (`task-start <issue> --slug <slug cũ>` để quay lại branch và rebase khi cần),
   chạy lại `pr-open` để kiểm tra và push, rồi trả lời từng góp ý.
 - **Không tự merge.** Chỉ merge khi người dùng yêu cầu rõ ràng cho đúng PR đó; "OK" chung chung hay đồng ý cho PR trước không tính. Không chắc thì hỏi.
-- Khi được yêu cầu merge:
-
-```bash
-python3 "$(git rev-parse --show-toplevel)/scripts/workflow.py" roadmap-sync --pr <n>
-```
-
-  Commit thay đổi ROADMAP (`docs(roadmap): mark <task-id> done [<task-id>]`), push, chờ CI xanh, rồi
-  `gh pr merge <n> --squash --delete-branch`. Sau đó:
+- Khi được yêu cầu merge: task đã ✅ trong PR từ lúc `pr-open`, nên chờ CI xanh rồi `gh pr merge <n> --squash --delete-branch`.
+  Chỉ khi ROADMAP trong PR chưa ✅ (PR mở trước quy tắc này) mới chạy `roadmap-sync --pr <n>`, commit, push rồi merge. Sau khi merge:
 
 ```bash
 python3 "$(git rev-parse --show-toplevel)/scripts/workflow.py" roadmap-sync --github

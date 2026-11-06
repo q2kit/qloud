@@ -52,7 +52,7 @@ Các bước lặp lại có lệnh sẵn trong `scripts/workflow.py`, chạy t�
    - **trước khi chạy, hỏi người đang làm cùng** muốn xem trực tiếp (headed: cửa sổ trình duyệt hiện trên máy, thao tác chậm lại) hay chạy headless;
    - chụp ảnh light và dark, desktop và 360px, lưu ở `qloud_docs/assets/`, đưa vào mục "Ảnh chụp màn hình" của PR.
 7. **Cập nhật tài liệu, bắt buộc, trong cùng PR:**
-   - Đổi trạng thái task trong `ROADMAP.md` thành 🟦 (chờ duyệt).
+   - Đổi trạng thái task trong `ROADMAP.md` thành ✅ kèm link PR, ngay trong PR của task (`pr-open` tự làm, bước 8): merge PR là ROADMAP trên `master` khớp luôn.
    - Nếu hành vi, API, schema hay màn hình thay đổi thì sửa tài liệu tương ứng.
    - Nếu có quyết định kiến trúc mới thì tạo ADR trong `qloud_docs/adr/`.
    - Câu hỏi cần quyết định thì hỏi trong phiên làm việc, hoặc comment trên issue kèm label `needs:owner-decision`.
@@ -62,16 +62,15 @@ Các bước lặp lại có lệnh sẵn trong `scripts/workflow.py`, chạy t�
    (agent thêm `--co-author "<model> <noreply@anthropic.com>"`). Script:
    - kiểm tra tiêu đề, body và tên branch giống CI;
    - **chỉ rebase nếu base có commit mới** (conflict thì dừng để mình giải quyết);
-   - đổi task trong ROADMAP sang 🟦 nếu chưa (một commit riêng);
    - chạy lint, type check và test của phần đã đổi, như mục 8 (`--skip-e2e` chỉ khi không chạy được E2E, và ghi rõ trong body);
-   - push (`--force-with-lease` sau khi rebase một branch đã push), tạo PR với `--base master` (PR đã có thì chỉ push), rồi chờ CI.
+   - push (`--force-with-lease` sau khi rebase một branch đã push), tạo PR với `--base master` (PR đã có thì chỉ push), rồi chờ CI;
+   - đổi task trong ROADMAP sang ✅ kèm link PR nếu chưa (commit riêng `docs(roadmap): mark <task-id> done [<task-id>]`). PR mới thì commit này được push ngay sau khi tạo PR; CI hủy lượt chạy trước nên chỉ tốn một lượt.
    CI đỏ thì sửa cho tới khi xanh.
 9. **Review và merge.** **Agent không tự merge.** Chỉ merge (`gh pr merge --squash --delete-branch`) khi được yêu cầu rõ ràng cho đúng PR đó.
    Có góp ý review thì đọc bằng `gh pr view <n> --comments`, sửa trên cùng branch, rồi trả lời từng góp ý.
-   Đổi trạng thái task trong ROADMAP sang ✅:
-   - **Agent merge** (khi được yêu cầu): `python3 scripts/workflow.py roadmap-sync --pr <n>`, commit và push vào chính PR đó, CI xanh rồi mới merge.
-   - **PR được merge từ bên ngoài phiên:** ở đầu phiên tiếp theo, `python3 scripts/workflow.py roadmap-sync` đổi các task đó sang ✅;
-     commit vào PR kế tiếp, hoặc mở một PR nhỏ chỉ để làm việc này nếu chưa có PR nào sắp mở.
+   ROADMAP đã ✅ từ lúc mở PR (bước 8), nên merge không cần commit thêm. Nếu lệch (PR mở trước quy tắc này, hoặc ROADMAP sửa tay):
+   - PR đang mở: `python3 scripts/workflow.py roadmap-sync --pr <n>`, commit và push vào chính PR đó trước khi merge.
+   - PR đã merge mà task chưa ✅: `python3 scripts/workflow.py roadmap-sync`, commit vào PR kế tiếp, hoặc mở một PR nhỏ nếu chưa có PR nào sắp mở.
    - Không để ROADMAP trên `master` lệch với GitHub quá một phiên làm việc.
    - Issue tự đóng nhờ `Closes #<n>`. Sau khi merge, `python3 scripts/workflow.py roadmap-sync --github` gỡ `status:in-progress` khỏi issue đã đóng
      và đóng milestone **không còn issue mở nào** (kể cả bug).

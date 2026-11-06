@@ -30,7 +30,7 @@ from conventions import PR_TITLE, TASK_ID, TYPES, branch_problems
 
 BASE = "master"
 ROADMAP = Path("qloud_docs/ROADMAP.md")
-DONE, REVIEW, TODO = "✅", "🟦", "⬜"
+DONE, TODO = "✅", "⬜"
 # Issue labels → branch/commit type; `--type` overrides.
 LABEL_TYPES = {"type:feature": "feat", "type:chore": "chore", "type:test": "test", "bug": "fix"}
 
@@ -313,18 +313,6 @@ def pr_open(args: argparse.Namespace) -> None:
     require_clean_tree()
     rebased = rebase_if_behind()
 
-    # Read again: the rebase may have brought a newer ROADMAP.
-    roadmap = read_roadmap(root)
-    task = parse_tasks(roadmap).get(task.id) if task else None
-    if task and not task.status.startswith((REVIEW, DONE)):
-        step(f"marking {task.id} {REVIEW} in {ROADMAP}")
-        write_roadmap(root, set_task_status(roadmap, task.id, REVIEW))
-        message = f"docs(roadmap): mark {task.id} for review"
-        if args.co_author:
-            message += f"\n\nCo-Authored-By: {args.co_author}"
-        run("git", "add", str(ROADMAP), cwd=root)
-        run("git", "commit", "-m", message, cwd=root)
-
     changed = run("git", "diff", "--name-only", f"origin/{BASE}...HEAD").splitlines()
     for name, directory, command in checks_for(changed, e2e=not args.skip_e2e):
         step(name)
@@ -334,13 +322,18 @@ def pr_open(args: argparse.Namespace) -> None:
         warn("E2E skipped (--skip-e2e): say so in the PR body")
 
     pushed = run("git", "ls-remote", "--heads", "origin", branch) != ""
+    existing = gh_json(
+        "pr", "list", "--head", branch, "--state", "open", "--json", "number,url"
+    )  # fmt: skip
+    if existing:
+        # Already open: the ✅ goes into the same push as the fixes.
+        mark_done(root, task.id if task else None, existing[0], args.co_author)
     step("pushing")
     if pushed and rebased:
         run("git", "push", "--force-with-lease", "-u", "origin", "HEAD")
     else:
         run("git", "push", "-u", "origin", "HEAD")
 
-    existing = gh_json("pr", "list", "--head", branch, "--state", "open", "--json", "url")
     if existing:
         url = existing[0]["url"]
         print(f"✔ updated {url} (title and body left as they are)")
@@ -350,8 +343,33 @@ def pr_open(args: argparse.Namespace) -> None:
             "--title", args.title, "--body-file", args.body_file,
         )  # fmt: skip
         print(f"✔ opened {url}")
+        # The link needs the PR number; CI cancels the run of the push before this one.
+        pr = gh_json("pr", "view", url, "--json", "number,url")
+        if mark_done(root, task.id if task else None, pr, args.co_author):
+            step("pushing the ROADMAP update")
+            run("git", "push", "origin", "HEAD")
     if args.watch:
         subprocess.run(["gh", "pr", "checks", url, "--watch"])
+
+
+def mark_done(root: Path, task_id: str | None, pr: dict[str, Any], co_author: str | None) -> bool:
+    """Commit the task as ✅ with its PR link, so merging the PR updates the ROADMAP too."""
+    if task_id is None:
+        return False
+    # Read again: a rebase may have brought a newer ROADMAP.
+    roadmap = read_roadmap(root)
+    task = parse_tasks(roadmap).get(task_id)
+    if task is None or task.done:
+        return False
+    step(f"marking {task_id} {DONE} (PR #{pr['number']}) in {ROADMAP}")
+    text = sync_overview(set_task_status(roadmap, task_id, done_status(pr["number"], pr["url"])))
+    write_roadmap(root, text)
+    message = f"docs(roadmap): mark {task_id} done [{task_id}]"
+    if co_author:
+        message += f"\n\nCo-Authored-By: {co_author}"
+    run("git", "add", str(ROADMAP), cwd=root)
+    run("git", "commit", "-m", message, cwd=root)
+    return True
 
 
 def roadmap_sync(args: argparse.Namespace) -> None:
