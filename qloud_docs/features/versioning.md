@@ -59,6 +59,13 @@ Owner [duyệt kế hoạch ngày 12/10/2026](https://github.com/q2kit/qloud/iss
 - Tab Phiên bản có nút Khóa/Bỏ khóa cho owner, có icon ổ khóa/mở khóa và title giải thích bảo vệ khỏi dọn tự động, vẫn tính dung lượng và cho phép xóa thủ công; hỗ trợ bàn phím và `aria-pressed`; viewer/editor chỉ thấy nhãn. Chỉ đổi flag sau API thành công, khóa thao tác lúc gửi, báo lỗi đã dịch và tải lại lịch sử sau thành công/lỗi để xử lý phiên bản bị dọn hoặc quyền thay đổi.
 - Không thêm migration/dependency; schema API và type FE được sinh lại.
 
+## M7-05 — Sửa sau review M7
+
+- Tuổi phiên bản cũ tính từ lúc bị thay thế, job dọn lọc trước và có time limit: xem [M7-04](#m7-04--chính-sách-giữ-lại-và-khóa).
+- Upload trùng tên: 409 `name_conflict` có `details.kind`. Tên đang thuộc về folder thì hộp thoại không có "Thay thế"; "Thay thế" áp dụng cho các tệp còn lại thành "Giữ cả hai" với tệp trùng folder ([upload.md](upload.md)).
+- Tab Phiên bản: bắt đầu một thao tác mới (Khóa, Khôi phục, Xóa, Tải) thì xóa thông báo lỗi của thao tác trước.
+- View PATCH/DELETE phiên bản đổi tên thành `VersionDetailView` (URL name `versions-detail`); `operation_id` và schema API giữ nguyên.
+
 ## Tiêu chí chấp nhận
 - [x] Upload trùng tên, chọn *Thay thế*: file có 2 phiên bản; xem trước và tải về đều lấy bản mới.
 - [x] Khôi phục v1: tạo ra v3 có nội dung giống v1; quota không tăng.

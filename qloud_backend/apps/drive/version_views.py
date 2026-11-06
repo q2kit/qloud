@@ -101,7 +101,7 @@ class VersionRetentionSerializer(serializers.Serializer[FileVersion]):
         return value
 
 
-class VersionDeleteView(APIView):
+class VersionDetailView(APIView):
     @extend_schema(
         operation_id="versions_update",
         request=VersionRetentionSerializer,

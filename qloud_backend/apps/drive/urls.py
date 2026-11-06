@@ -2,7 +2,7 @@ from django.urls import path
 
 from .storage_views import LargestFilesView, StorageView
 from .version_views import (
-    VersionDeleteView,
+    VersionDetailView,
     VersionDownloadView,
     VersionListView,
     VersionRestoreView,
@@ -38,8 +38,8 @@ urlpatterns = [
     ),
     path(
         "nodes/<uuid:node_id>/versions/<uuid:version_id>",
-        VersionDeleteView.as_view(),
-        name="versions-delete",
+        VersionDetailView.as_view(),
+        name="versions-detail",
     ),
     path("nodes/trash", NodeTrashView.as_view(), name="nodes-trash"),
     path("trash", TrashListView.as_view(), name="trash-list"),
