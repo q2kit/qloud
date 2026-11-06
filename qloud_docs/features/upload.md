@@ -38,7 +38,7 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). Model `Blob`/`FileV
 - **Điều kiện tạo session:** quyền `editor` trên folder đích và **email đã xác thực** (403 `email_not_verified`; FE hiện thông báo kèm nút gửi lại email).
   Giới hạn kích thước file và quota là của **owner folder đích**. Session chỉ người tạo thấy; người khác nhận 404.
 - **Trùng tên:**
-  - Lúc tạo session, `on_conflict=fail` (mặc định) trả 409 `name_conflict` để FE hỏi người dùng; `rename` là "Giữ cả hai".
+  - Lúc tạo session, `on_conflict=fail` (mặc định) trả 409 `name_conflict` để FE hỏi người dùng, kèm `details.kind` (`file` hoặc `folder`) là loại item đang dùng tên đó; `rename` là "Giữ cả hai".
   - Tên bị trùng **trong lúc** upload thì khi hoàn tất luôn thêm hậu tố ` (n)`, không bỏ dữ liệu đã upload.
   - M7-01 thêm "Thay thế" (`on_conflict=replace`) để upload phiên bản mới theo UUID target, xem [versioning.md](versioning.md#m7-01--upload-phiên-bản-mới).
 - **Folder đích bị xóa hoặc vào thùng rác trong lúc upload:**
@@ -71,7 +71,7 @@ Duyệt ở [#17](https://github.com/q2kit/qloud/issues/17). Model `Blob`/`FileV
   - **mất mạng:** cả hàng đợi tạm dừng, có mạng lại (`online`) thì tự tiếp tục;
   - **tạm dừng / tiếp tục / hủy:** tạm dừng hủy các request đang chạy và giữ session; tiếp tục đọc part đã có từ server (`GET /uploads/{id}`) và chỉ gửi phần thiếu; hủy gọi `DELETE /uploads/{id}`;
   - **file 0 byte** hoàn tất ngay, không có part.
-- **Trùng tên:** hộp thoại "Tên đã được dùng" với "Thay thế" (`on_conflict=replace`, M7-01), "Giữ cả hai" (`on_conflict=rename`) hoặc "Bỏ qua"; ô "Áp dụng cho N tệp còn lại" trả lời luôn các file sau trong hàng đợi; Esc nghĩa là "Bỏ qua".
+- **Trùng tên:** hộp thoại "Tên đã được dùng" với "Thay thế" (`on_conflict=replace`, M7-01), "Giữ cả hai" (`on_conflict=rename`) hoặc "Bỏ qua"; ô "Áp dụng cho N tệp còn lại" trả lời luôn các file sau trong hàng đợi; Esc nghĩa là "Bỏ qua". Khi tên đang thuộc về một folder (`details.kind=folder`, M7-05), hộp thoại nói rõ điều đó và không có "Thay thế"; nếu đã chọn "Thay thế" cho các tệp còn lại thì tệp trùng tên với folder được "Giữ cả hai".
 - **Lỗi cần người dùng xử lý** (`quota_exceeded`, `file_too_large`, `email_not_verified`…) không tự thử lại, nhưng vẫn bấm "Thử lại" được (ví dụ sau khi đã giải phóng dung lượng). `email_not_verified` có nút "Gửi lại email xác thực" (allauth `PUT /account/email`).
 - **Khay upload:**
   - tiêu đề "Đang tải lên 2/5" kèm tốc độ và thời gian còn lại; mất mạng thì báo;

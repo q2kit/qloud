@@ -63,8 +63,12 @@ class FakeRequest implements PartRequest {
   }
 }
 
-function apiError(status: number, code: string) {
-  return new ApiError(status, { error: { code, message: code, details: {} } });
+function apiError(
+  status: number,
+  code: string,
+  details: Record<string, unknown> = {},
+) {
+  return new ApiError(status, { error: { code, message: code, details } });
 }
 
 function session(id: string, size: number, partSize = 8 * MiB): UploadSession {
@@ -375,6 +379,33 @@ describe('upload engine', () => {
     expect(
       api.create.mock.calls.filter(([input]) => input.onConflict === 'replace'),
     ).toHaveLength(3);
+  });
+
+  it('keeps both instead of replacing when a folder has the name', async () => {
+    api.create.mockImplementation(({ file: f, onConflict }) =>
+      onConflict === 'fail'
+        ? Promise.reject(
+            apiError(409, 'name_conflict', {
+              kind: f.name === 'docs' ? 'folder' : 'file',
+            }),
+          )
+        : Promise.resolve(session(`${onConflict}-${f.name}`, f.size)),
+    );
+    const uploader = engine();
+    const ids = uploader.add([file('a.txt', 0), file('docs', 0)], 'f');
+    await flush();
+    expect(items().map((item) => item.conflictKind)).toEqual([
+      'file',
+      'folder',
+    ]);
+    uploader.resolveConflict(ids[0] ?? '', 'replace', true);
+    await flush();
+    expect(ids.map(status)).toEqual(['done', 'done']);
+    const chosen = api.create.mock.calls
+      .map(([input]) => input as { file: File; onConflict: string })
+      .filter(({ onConflict }) => onConflict !== 'fail')
+      .map(({ file: f, onConflict }) => `${f.name}:${onConflict}`);
+    expect(chosen.sort()).toEqual(['a.txt:replace', 'docs:rename']);
   });
 
   it('reports errors the user has to act on, with their code', async () => {

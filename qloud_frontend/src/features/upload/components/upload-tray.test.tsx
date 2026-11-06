@@ -126,9 +126,7 @@ describe('upload tray', () => {
       screen.getByRole('dialog', { name: 'Name already in use' }),
     );
     expect(
-      dialog.getByText(
-        'This folder already has a file or folder named "a.pdf".',
-      ),
+      dialog.getByText('This folder already has a file named "a.pdf".'),
     ).toBeVisible();
     await user.click(dialog.getByLabelText('Do this for the 1 remaining file'));
     await user.click(dialog.getByRole('button', { name: 'Keep both' }));
@@ -136,6 +134,21 @@ describe('upload tray', () => {
       'a.pdf',
       'rename',
       true,
+    );
+  });
+  it('offers no replace when a folder has the name', async () => {
+    const user = userEvent.setup();
+    show([item('docs', { status: 'conflict', conflictKind: 'folder' })]);
+    const dialog = within(
+      screen.getByRole('dialog', { name: 'Name already in use' }),
+    );
+    expect(dialog.getByText(/already has a folder named "docs"/)).toBeVisible();
+    expect(dialog.queryByRole('button', { name: 'Replace' })).toBeNull();
+    await user.click(dialog.getByRole('button', { name: 'Keep both' }));
+    expect(engine.resolveConflict).toHaveBeenCalledWith(
+      'docs',
+      'rename',
+      false,
     );
   });
   it('replaces a file after an explicit choice', async () => {

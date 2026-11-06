@@ -251,6 +251,9 @@ CELERY_BROKER_URL = env("CELERY_BROKER_URL")
 CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_TASK_TIME_LIMIT = 15 * 60
+# The daily version sweep stops cleanly and resumes on its next run (M7-05).
+VERSION_EXPIRY_SOFT_TIME_LIMIT = 10 * 60
+VERSION_EXPIRY_TIME_LIMIT = 11 * 60
 CELERY_TIMEZONE = TIME_ZONE
 # `celery -A config beat`: one beat process per deployment (architecture.md).
 CELERY_BEAT_SCHEDULE = {

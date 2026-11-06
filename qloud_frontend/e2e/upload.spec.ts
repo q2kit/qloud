@@ -101,9 +101,7 @@ test('a taken name: keep both, or skip', async ({ page }) => {
 
   await pick(page, [note]);
   const dialog = page.getByRole('dialog', { name: 'Trùng tên' });
-  await expect(dialog).toContainText(
-    'Thư mục này đã có tệp hoặc thư mục tên "note.txt".',
-  );
+  await expect(dialog).toContainText('Thư mục này đã có tệp tên "note.txt".');
   await dialog.getByRole('button', { name: 'Giữ cả hai' }).click();
   await expect(item(page, 'note (1).txt')).toBeVisible();
 

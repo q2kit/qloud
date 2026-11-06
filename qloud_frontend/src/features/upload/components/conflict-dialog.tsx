@@ -45,7 +45,12 @@ export function ConflictDialog(): React.JSX.Element {
             {t('upload.conflict.title')}
           </Dialog.Title>
           <Dialog.Description className="mt-2 text-sm leading-6 text-muted-foreground">
-            {t('upload.conflict.description', { name: current?.name ?? '' })}
+            {t(
+              current?.conflictKind === 'folder'
+                ? 'upload.conflict.folderDescription'
+                : 'upload.conflict.description',
+              { name: current?.name ?? '' },
+            )}
           </Dialog.Description>
           {others > 0 && (
             <label className="mt-4 flex items-center gap-2 text-sm">
@@ -69,14 +74,16 @@ export function ConflictDialog(): React.JSX.Element {
             >
               {t('upload.conflict.skip')}
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                answer('replace');
-              }}
-            >
-              {t('upload.conflict.replace')}
-            </Button>
+            {current?.conflictKind !== 'folder' && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  answer('replace');
+                }}
+              >
+                {t('upload.conflict.replace')}
+              </Button>
+            )}
             <Button
               onClick={() => {
                 answer('rename');
