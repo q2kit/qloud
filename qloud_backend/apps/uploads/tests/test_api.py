@@ -109,8 +109,21 @@ def test_name_conflicts_fail_or_rename(client, root, user, make_file):
     make_file(user, root, "A.txt")
     response = start(client, root, name="a.txt")
     assert (response.status_code, error(response)) == (409, "name_conflict")
+    assert response.json()["error"]["details"] == {"kind": "file"}
     node = upload(client, root, b"hi", filename="a.txt", on_conflict="rename")
     assert node["name"] == "a (1).txt"
+
+
+def test_name_conflict_with_a_folder_reports_its_kind(client, root, user):
+    folder = Node.objects.create(owner=user, parent=root, kind=Node.Kind.FOLDER, name="Docs")
+    response = start(client, root, name="docs")
+    assert (response.status_code, error(response)) == (409, "name_conflict")
+    assert response.json()["error"]["details"] == {"kind": "folder"}
+    # "Replace" has no file to replace, so the client must not offer it.
+    response = start(client, root, name="docs", on_conflict="replace")
+    assert (response.status_code, error(response)) == (400, "invalid_target")
+    trash(folder)
+    assert start(client, root, name="docs").status_code == 201
 
 
 def test_create_validates_input(client, root):

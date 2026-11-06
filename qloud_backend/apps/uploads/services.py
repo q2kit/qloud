@@ -72,8 +72,13 @@ def _release(session: UploadSession, status: str) -> None:
     session.save(update_fields=["status", "updated_at"])
 
 
-def _name_taken(parent: Node, name: str) -> bool:
-    return available_name(parent, name, Node.Kind.FILE) != name
+def _taken_kind(parent: Node, name: str) -> str | None:
+    """Kind of the live child already using `name` (case-insensitive), if any."""
+    return (
+        Node.objects.filter(parent=parent, name__iexact=name, trashed_at__isnull=True)
+        .values_list("kind", flat=True)
+        .first()
+    )
 
 
 # --- create -----------------------------------------------------------------
@@ -135,8 +140,9 @@ def create_session(
             raise FileTooLarge
         if owner.used_bytes + owner.reserved_bytes + size > limits.quota_bytes:
             raise QuotaExceeded
-        if on_conflict == UploadSession.OnConflict.FAIL and _name_taken(parent, filename):
-            raise NameConflict
+        if on_conflict == UploadSession.OnConflict.FAIL and (kind := _taken_kind(parent, filename)):
+            # The client only offers "Replace" when the clash is with a file.
+            raise NameConflict(details={"kind": kind})
         session = UploadSession.objects.create(
             user=user,
             owner_id=parent.owner_id,

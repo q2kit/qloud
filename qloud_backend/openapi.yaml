@@ -1699,7 +1699,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-          description: '`name_conflict` (with `on_conflict=fail`).'
+          description: '`name_conflict` (with `on_conflict=fail`); `details.kind`
+            is `file` or `folder`.'
         '413':
           content:
             application/json:

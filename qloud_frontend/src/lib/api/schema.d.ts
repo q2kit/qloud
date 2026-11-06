@@ -3241,7 +3241,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description `name_conflict` (with `on_conflict=fail`). */
+            /** @description `name_conflict` (with `on_conflict=fail`); `details.kind` is `file` or `folder`. */
             409: {
                 headers: {
                     [name: string]: unknown;

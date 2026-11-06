@@ -325,7 +325,8 @@
     },
     "conflict": {
       "title": "Trùng tên",
-      "description": "Thư mục này đã có tệp hoặc thư mục tên \"{{name}}\".",
+      "description": "Thư mục này đã có tệp tên \"{{name}}\".",
+      "folderDescription": "Thư mục này đã có thư mục con tên \"{{name}}\". Không thể thay thế thư mục bằng tệp, nên chỉ có thể giữ cả hai hoặc bỏ qua.",
       "forAll_other": "Áp dụng cho {{count}} tệp còn lại",
       "skip": "Bỏ qua",
       "keepBoth": "Giữ cả hai",

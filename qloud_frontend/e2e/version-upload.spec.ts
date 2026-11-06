@@ -119,3 +119,44 @@ test('replace a taken name, retain the same file and refresh its preview and dow
     (await (await page.request.get(oldDownload.url)).body()).equals(bytes),
   ).toBe(true);
 });
+
+test('a file named like a folder can only keep both or skip', async ({
+  page,
+}) => {
+  await signUpVerifiedViaApi(page);
+  const headers = {
+    'X-CSRFToken':
+      (await page.context().cookies()).find((c) => c.name === 'csrftoken')
+        ?.value ?? '',
+  };
+  const me = (await (await page.request.get('/api/v1/me')).json()) as {
+    root_folder_id: string;
+  };
+  const folder = await page.request.post('/api/v1/folders', {
+    headers,
+    data: { parent_id: me.root_folder_id, name: 'Tài liệu' },
+  });
+  expect(folder.status()).toBe(201);
+  await page.goto('/drive');
+  await expect(
+    page.getByRole('option', { name: 'Tài liệu', exact: true }),
+  ).toBeVisible();
+
+  await page.getByTestId('upload-input').setInputFiles({
+    name: 'tài liệu',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('M7-05'),
+  });
+  const conflict = page.getByRole('dialog', { name: 'Trùng tên' });
+  await expect(conflict).toContainText('đã có thư mục con tên "tài liệu"');
+  await expect(
+    conflict.getByRole('button', { name: 'Thay thế', exact: true }),
+  ).toHaveCount(0);
+  await conflict.getByRole('button', { name: 'Giữ cả hai' }).click();
+  await expect(
+    page.getByRole('region', { name: 'Tải lên' }).getByText('Đã tải lên 1 tệp'),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('option', { name: 'tài liệu (1)', exact: true }),
+  ).toBeVisible();
+});

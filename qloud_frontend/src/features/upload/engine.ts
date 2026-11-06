@@ -241,6 +241,10 @@ export class UploadEngine {
     } catch (error) {
       if (generation !== runtime.generation) return;
       if (error instanceof ApiError && error.code === 'name_conflict') {
+        // Older servers send no kind: treat the clash as a file, as before.
+        const conflictKind =
+          error.details.kind === 'folder' ? 'folder' : 'file';
+        this.store.patch(id, { conflictKind });
         if (this.conflictPolicy)
           this.applyConflictChoice(id, this.conflictPolicy);
         else this.store.patch(id, { status: 'conflict' });
@@ -551,7 +555,11 @@ export class UploadEngine {
       this.store.patch(id, { status: 'skipped' });
       this.runtimes.delete(id);
     } else {
-      runtime.onConflict = choice;
+      // Only a file can get a new version; a folder with the name means keep both.
+      runtime.onConflict =
+        choice === 'replace' && this.item(id)?.conflictKind === 'folder'
+          ? 'rename'
+          : choice;
       this.store.patch(id, { status: 'queued' });
     }
   }

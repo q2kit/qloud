@@ -331,7 +331,8 @@
     },
     "conflict": {
       "title": "Name already in use",
-      "description": "This folder already has a file or folder named \"{{name}}\".",
+      "description": "This folder already has a file named \"{{name}}\".",
+      "folderDescription": "This folder already has a folder named \"{{name}}\". A file can't replace a folder, so you can keep both or skip.",
       "forAll_one": "Do this for the {{count}} remaining file",
       "forAll_other": "Do this for the {{count}} remaining files",
       "skip": "Skip",

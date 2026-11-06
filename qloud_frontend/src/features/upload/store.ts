@@ -24,6 +24,8 @@ export interface UploadItem {
   loaded: number;
   /** A stable API code (`quota_exceeded`, `upload_failed`…) for an i18n message. */
   error?: string;
+  /** What already uses the name while `conflict`: a folder cannot be replaced. */
+  conflictKind?: 'file' | 'folder';
 }
 
 /** Still something to do: shown as active, and leaving the page warns (upload.md). */
