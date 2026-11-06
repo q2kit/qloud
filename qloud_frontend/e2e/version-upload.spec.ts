@@ -47,7 +47,7 @@ async function seed(page: Page) {
   return { node, bytes, oldDownload };
 }
 
-async function capture(page: Page, mobile: boolean) {
+async function capture(page: Page, mobile: boolean, name = 'm7-01-replace') {
   if (!process.env.M701_CAPTURE) return;
   for (const theme of ['light', 'dark']) {
     await page.evaluate((value) => {
@@ -63,7 +63,7 @@ async function capture(page: Page, mobile: boolean) {
       ),
     ).toBe(true);
     await page.screenshot({
-      path: `../qloud_docs/assets/m7-01-replace-${theme}-${mobile ? '360' : 'desktop'}.png`,
+      path: `../qloud_docs/assets/${name}-${theme}-${mobile ? '360' : 'desktop'}.png`,
       fullPage: true,
       animations: 'disabled',
     });
@@ -122,6 +122,7 @@ test('replace a taken name, retain the same file and refresh its preview and dow
 
 test('a file named like a folder can only keep both or skip', async ({
   page,
+  isMobile,
 }) => {
   await signUpVerifiedViaApi(page);
   const headers = {
@@ -152,6 +153,7 @@ test('a file named like a folder can only keep both or skip', async ({
   await expect(
     conflict.getByRole('button', { name: 'Thay thế', exact: true }),
   ).toHaveCount(0);
+  await capture(page, isMobile, 'm7-05-folder-conflict');
   await conflict.getByRole('button', { name: 'Giữ cả hai' }).click();
   await expect(
     page.getByRole('region', { name: 'Tải lên' }).getByText('Đã tải lên 1 tệp'),
