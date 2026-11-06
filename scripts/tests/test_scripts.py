@@ -1,8 +1,10 @@
 """Tests for the convention scripts. Run: python3 -m unittest discover -s scripts/tests"""
 
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -14,6 +16,7 @@ from workflow import (  # noqa: E402
     checks_for,
     done_status,
     feature_docs,
+    mark_done,
     parse_tasks,
     set_task_status,
     sync_overview,
@@ -73,10 +76,15 @@ class LicenseTests(unittest.TestCase):
         self.assertEqual(len(problems([("psycopg", "GPL-3.0-only")])), 1)
 
     def test_thumbnail_license_exceptions_are_package_specific(self):
-        self.assertEqual(problems([
-            ("pillow", "MIT-CMU"),
-            ("pypdfium2", "BSD-3-Clause, Apache-2.0, dependency licenses"),
-        ]), [])
+        self.assertEqual(
+            problems(
+                [
+                    ("pillow", "MIT-CMU"),
+                    ("pypdfium2", "BSD-3-Clause, Apache-2.0, dependency licenses"),
+                ]
+            ),
+            [],
+        )
         self.assertEqual(len(problems([("unreviewed", "MIT-CMU")])), 1)
         self.assertEqual(len(problems([("pypdfium2", "AGPL-3.0")])), 1)
 
@@ -160,6 +168,37 @@ class RoadmapTests(unittest.TestCase):
         self.assertIsNone(task_from_branch("docs/roadmap-m0-done"))
         self.assertEqual(task_from_pr_title("feat(uploads): add session API [M2-04]"), "M2-04")
         self.assertIsNone(task_from_pr_title("docs(roadmap): mark M0-11 done"))
+
+
+class MarkDoneTests(unittest.TestCase):
+    def setUp(self):
+        self.root = Path(tempfile.mkdtemp())
+        (self.root / "qloud_docs").mkdir()
+        self.path = self.root / "qloud_docs" / "ROADMAP.md"
+        self.path.write_text(ROADMAP, encoding="utf-8")
+        patcher = mock.patch("workflow.run")
+        self.run = patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_marks_the_task_done_with_its_pr_and_commits(self):
+        pr = {"number": 84, "url": "https://x/84"}
+        self.assertTrue(mark_done(self.root, "M1-02", pr, "Bot <bot@x>"))
+        text = self.path.read_text(encoding="utf-8")
+        self.assertIn(
+            "| M1-02 | allauth | [#11](https://x/i/11) | ✅ [PR #84](https://x/84) |", text
+        )
+        self.assertIn("| M1 | Xác thực | ✅ |", text)
+        commit = self.run.call_args_list[-1].args
+        self.assertEqual(commit[:3], ("git", "commit", "-m"))
+        self.assertTrue(commit[3].startswith("docs(roadmap): mark M1-02 done [M1-02]"))
+        self.assertIn("Co-Authored-By: Bot <bot@x>", commit[3])
+
+    def test_done_unknown_or_no_task_changes_nothing(self):
+        pr = {"number": 90, "url": "https://x/90"}
+        for task_id in ("M1-01", "M9-01", None):
+            self.assertFalse(mark_done(self.root, task_id, pr, None))
+        self.assertEqual(self.path.read_text(encoding="utf-8"), ROADMAP)
+        self.run.assert_not_called()
 
 
 class ChecksForTests(unittest.TestCase):

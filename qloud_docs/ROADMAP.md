@@ -2,7 +2,7 @@
 
 > Mỗi task có một GitHub Issue; PR đóng issue bằng `Closes #n`. Quy trình: AGENTS.md mục 3.
 >
-> Trạng thái: ⬜ Chưa làm · 🟨 Đang làm · 🟦 Chờ duyệt · ✅ Xong · ⛔ Bị chặn (ghi lý do)
+> Trạng thái: ⬜ Chưa làm · 🟨 Đang làm · ✅ Xong (đánh dấu ngay trong PR của task, có hiệu lực khi PR được merge) · ⛔ Bị chặn (ghi lý do)
 
 ## Tổng quan milestone
 
